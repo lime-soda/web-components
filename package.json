@@ -11,6 +11,7 @@
     "clean": "turbo clean",
     "storybook": "pnpm --filter storybook dev",
     "build-storybook": "pnpm --filter storybook build",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,yml,yaml}\"",
     "prepare": "husky"
   },
   "keywords": [

@@ -21,6 +21,7 @@ This is a Turborepo monorepo for the Lime Soda Design System web components libr
 ## Architecture
 
 ### Monorepo Structure
+
 ```
 ├── apps/
 │   └── storybook/          # Storybook app for component development
@@ -34,18 +35,21 @@ This is a Turborepo monorepo for the Lime Soda Design System web components libr
 ```
 
 ### Component Development
+
 - Each component is a separate package in `packages/`
 - Components use Lit 3.3.0 with TypeScript decorators
 - Shared design tokens and utilities in `@lime-soda/core`
 - Storybook stories for development and testing
 
 ### Build System
+
 - **Turborepo**: Manages monorepo builds and caching
 - **Vite**: Build tool for individual packages
 - **TypeScript**: Type checking with project references
 - **ESLint + Prettier**: Code quality and formatting
 
 ### Testing
+
 - **Storybook Test Runner**: Interaction tests using Playwright
 - **@storybook/test**: Testing utilities and assertions
 - Stories include play functions for automated testing
@@ -53,6 +57,7 @@ This is a Turborepo monorepo for the Lime Soda Design System web components libr
 ## Package Structure
 
 Each component package follows this structure:
+
 ```
 packages/[component]/
 ├── src/

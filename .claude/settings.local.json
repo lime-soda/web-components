@@ -19,7 +19,8 @@
       "Bash(chmod:*)",
       "Bash(rm:*)",
       "Bash(ls:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(pnpm format)"
     ],
     "deny": []
   }

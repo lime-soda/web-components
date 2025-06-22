@@ -1,14 +1,14 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { colors, spacing } from '@lime-soda/core';
+import { LitElement, html, css, unsafeCSS } from 'lit'
+import { customElement, property } from 'lit/decorators.js'
+import { colors, spacing } from '@lime-soda/core'
 
 @customElement('ls-input')
 export class LsInput extends LitElement {
-  @property({ type: String }) type: 'text' | 'email' | 'password' | 'number' = 'text';
-  @property({ type: String }) placeholder = '';
-  @property({ type: String }) value = '';
-  @property({ type: Boolean }) disabled = false;
-  @property({ type: Boolean }) required = false;
+  @property({ type: String }) type: 'text' | 'email' | 'password' | 'number' = 'text'
+  @property({ type: String }) placeholder = ''
+  @property({ type: String }) value = ''
+  @property({ type: Boolean }) disabled = false
+  @property({ type: Boolean }) required = false
 
   static styles = css`
     :host {
@@ -41,7 +41,7 @@ export class LsInput extends LitElement {
     input::placeholder {
       color: ${unsafeCSS(colors.neutral[400])};
     }
-  `;
+  `
 
   render() {
     return html`
@@ -53,15 +53,17 @@ export class LsInput extends LitElement {
         ?required=${this.required}
         @input=${this._handleInput}
       />
-    `;
+    `
   }
 
   private _handleInput(e: Event) {
-    const target = e.target as HTMLInputElement;
-    this.value = target.value;
-    this.dispatchEvent(new CustomEvent('input', {
-      detail: { value: target.value },
-      bubbles: true
-    }));
+    const target = e.target as HTMLInputElement
+    this.value = target.value
+    this.dispatchEvent(
+      new CustomEvent('input', {
+        detail: { value: target.value },
+        bubbles: true,
+      })
+    )
   }
 }

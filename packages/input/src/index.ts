@@ -1,1 +1,1 @@
-export { LsInput } from './input.js';
+export { LsInput } from './input.js'

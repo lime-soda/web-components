@@ -1,4 +1,4 @@
-import type { StorybookConfig } from '@storybook/web-components-vite';
+import type { StorybookConfig } from '@storybook/web-components-vite'
 
 const config: StorybookConfig = {
   stories: [
@@ -22,6 +22,6 @@ const config: StorybookConfig = {
       propFilter: (prop) => (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true),
     },
   },
-};
+}
 
-export default config;
+export default config

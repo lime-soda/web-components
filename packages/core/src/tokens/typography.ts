@@ -49,4 +49,4 @@ export const typography = {
     extrabold: '800',
     black: '900',
   },
-} as const;
+} as const

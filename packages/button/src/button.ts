@@ -1,12 +1,12 @@
-import { LitElement, html, css, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { colors, spacing } from '@lime-soda/core';
+import { LitElement, html, css, unsafeCSS } from 'lit'
+import { customElement, property } from 'lit/decorators.js'
+import { colors, spacing } from '@lime-soda/core'
 
 @customElement('ls-button')
 export class LsButton extends LitElement {
-  @property({ type: String }) variant: 'primary' | 'secondary' | 'outline' = 'primary';
-  @property({ type: String }) size: 'sm' | 'md' | 'lg' = 'md';
-  @property({ type: Boolean }) disabled = false;
+  @property({ type: String }) variant: 'primary' | 'secondary' | 'outline' = 'primary'
+  @property({ type: String }) size: 'sm' | 'md' | 'lg' = 'md'
+  @property({ type: Boolean }) disabled = false
 
   static styles = css`
     :host {
@@ -74,16 +74,13 @@ export class LsButton extends LitElement {
       padding: ${unsafeCSS(spacing['3'])} ${unsafeCSS(spacing['6'])};
       font-size: 1.125rem;
     }
-  `;
+  `
 
   render() {
     return html`
-      <button
-        class="${this.variant} ${this.size}"
-        ?disabled=${this.disabled}
-      >
+      <button class="${this.variant} ${this.size}" ?disabled=${this.disabled}>
         <slot></slot>
       </button>
-    `;
+    `
   }
 }

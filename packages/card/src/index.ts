@@ -1,1 +1,1 @@
-export { LsCard } from './card.js';
+export { LsCard } from './card.js'

@@ -1,5 +1,5 @@
-import type { Preview } from '@storybook/web-components';
-import '../../../packages/button/src/button.js';
+import type { Preview } from '@storybook/web-components'
+import '../../../packages/button/src/button.js'
 
 const preview: Preview = {
   parameters: {
@@ -10,6 +10,6 @@ const preview: Preview = {
       },
     },
   },
-};
+}
 
-export default preview;
+export default preview

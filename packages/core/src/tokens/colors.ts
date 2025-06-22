@@ -35,4 +35,4 @@ export const colors = {
     800: '#262626',
     900: '#171717',
   },
-} as const;
+} as const

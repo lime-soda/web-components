@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/web-components';
-import { html } from 'lit';
-import { expect, userEvent, within } from '@storybook/test';
-import '../../../packages/button/src/button.js';
+import type { Meta, StoryObj } from '@storybook/web-components'
+import { html } from 'lit'
+import { expect, userEvent, within } from '@storybook/test'
+import '../../../packages/button/src/button.js'
 
 const meta: Meta = {
   title: 'Components/Button',
@@ -23,10 +23,10 @@ const meta: Meta = {
       control: 'boolean',
     },
   },
-};
+}
 
-export default meta;
-type Story = StoryObj;
+export default meta
+type Story = StoryObj
 
 export const Primary: Story = {
   args: {
@@ -35,15 +35,11 @@ export const Primary: Story = {
     disabled: false,
   },
   render: (args) => html`
-    <ls-button
-      variant=${args.variant}
-      size=${args.size}
-      ?disabled=${args.disabled}
-    >
+    <ls-button variant=${args.variant} size=${args.size} ?disabled=${args.disabled}>
       Button
     </ls-button>
   `,
-};
+}
 
 export const Secondary: Story = {
   args: {
@@ -52,15 +48,11 @@ export const Secondary: Story = {
     disabled: false,
   },
   render: (args) => html`
-    <ls-button
-      variant=${args.variant}
-      size=${args.size}
-      ?disabled=${args.disabled}
-    >
+    <ls-button variant=${args.variant} size=${args.size} ?disabled=${args.disabled}>
       Button
     </ls-button>
   `,
-};
+}
 
 export const Outline: Story = {
   args: {
@@ -69,15 +61,11 @@ export const Outline: Story = {
     disabled: false,
   },
   render: (args) => html`
-    <ls-button
-      variant=${args.variant}
-      size=${args.size}
-      ?disabled=${args.disabled}
-    >
+    <ls-button variant=${args.variant} size=${args.size} ?disabled=${args.disabled}>
       Button
     </ls-button>
   `,
-};
+}
 
 export const AllSizes: Story = {
   render: () => html`
@@ -87,7 +75,7 @@ export const AllSizes: Story = {
       <ls-button variant="primary" size="lg">Large</ls-button>
     </div>
   `,
-};
+}
 
 export const Disabled: Story = {
   args: {
@@ -96,15 +84,11 @@ export const Disabled: Story = {
     disabled: true,
   },
   render: (args) => html`
-    <ls-button
-      variant=${args.variant}
-      size=${args.size}
-      ?disabled=${args.disabled}
-    >
+    <ls-button variant=${args.variant} size=${args.size} ?disabled=${args.disabled}>
       Disabled Button
     </ls-button>
   `,
-};
+}
 
 export const WithClickTest: Story = {
   args: {
@@ -123,10 +107,10 @@ export const WithClickTest: Story = {
     </ls-button>
   `,
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const button = canvas.getByRole('button');
-    
-    await expect(button).toBeInTheDocument();
-    await userEvent.click(button);
+    const canvas = within(canvasElement)
+    const button = canvas.getByRole('button')
+
+    await expect(button).toBeInTheDocument()
+    await userEvent.click(button)
   },
-};
+}
