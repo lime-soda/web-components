@@ -8,7 +8,12 @@
       "Bash(pkill:*)",
       "Bash(pnpm lint:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh auth:*)"
     ],
     "deny": []
   }
