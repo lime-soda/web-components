@@ -1,13 +1,30 @@
 {
   "name": "@lime-soda/web-components",
   "version": "0.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Lime Soda Design System Web Components",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "eslint \"packages/**/*.{ts,tsx}\" \"apps/**/*.{ts,tsx}\"",
+    "test": "turbo test",
+    "clean": "turbo clean",
+    "storybook": "pnpm --filter storybook dev",
+    "build-storybook": "pnpm --filter storybook build"
   },
-  "keywords": [],
+  "keywords": ["design-system", "web-components", "lit"],
   "author": "Phil Parsons",
   "license": "MIT",
-  "packageManager": "pnpm@10.12.1"
+  "packageManager": "pnpm@10.12.1",
+  "devDependencies": {
+    "turbo": "^2.2.3",
+    "@changesets/cli": "^2.27.9",
+    "typescript": "^5.6.3",
+    "prettier": "^3.3.3",
+    "eslint": "^9.15.0",
+    "@eslint/js": "^9.15.0",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "globals": "^15.14.0"
+  }
 }

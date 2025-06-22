@@ -1,0 +1,51 @@
+
+> storybook@0.0.0 build /Users/phil/Dev/lime-soda/web-components/apps/storybook
+> storybook build
+
+@storybook/core v8.6.14
+
+info => Cleaning outputDir: storybook-static
+info => Loading presets
+info => Building manager..
+info => Manager built ([38;2;181;126;229m70 ms[39m)
+info => Building preview..
+WARN No story files found for the specified pattern: ../../packages/*/src/**/*.stories.@(js|jsx|mjs|ts|tsx)
+vite v5.4.19 building for production...
+transforming...
+✓ 122 modules transformed.
+../../node_modules/.pnpm/@storybook+core@8.6.14_prettier@3.5.3_storybook@8.6.14_prettier@3.5.3_/node_modules/@storybook/core/dist/preview/runtime.js (3683:15): Use of eval in "../../node_modules/.pnpm/@storybook+core@8.6.14_prettier@3.5.3_storybook@8.6.14_prettier@3.5.3_/node_modules/@storybook/core/dist/preview/runtime.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+../../node_modules/.pnpm/@storybook+core@8.6.14_prettier@3.5.3_storybook@8.6.14_prettier@3.5.3_/node_modules/@storybook/core/dist/preview/runtime.js (3685:16): Use of eval in "../../node_modules/.pnpm/@storybook+core@8.6.14_prettier@3.5.3_storybook@8.6.14_prettier@3.5.3_/node_modules/@storybook/core/dist/preview/runtime.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+computing gzip size...
+storybook-static/iframe.html                                  17.86 kB │ gzip:   5.03 kB
+storybook-static/assets/tiny-invariant-CopsF_GD.js             0.08 kB │ gzip:   0.10 kB
+storybook-static/assets/preview-COt7nlTv.js                    0.16 kB │ gzip:   0.16 kB
+storybook-static/assets/preview-DdR7bt1u.js                    0.17 kB │ gzip:   0.16 kB
+storybook-static/assets/preview-CvbIS5ZJ.js                    0.18 kB │ gzip:   0.16 kB
+storybook-static/assets/index-DbMFQBof.js                      0.52 kB │ gzip:   0.33 kB
+storybook-static/assets/preview-DHQbi4pV.js                    0.61 kB │ gzip:   0.42 kB
+storybook-static/assets/preview-DGUiP6tS.js                    0.71 kB │ gzip:   0.50 kB
+storybook-static/assets/index-DrFu-skq.js                      0.77 kB │ gzip:   0.47 kB
+storybook-static/assets/preview-BNlW0ijD.js                    0.79 kB │ gzip:   0.51 kB
+storybook-static/assets/entry-preview-BBkNZsvR.js              1.52 kB │ gzip:   0.91 kB
+storybook-static/assets/button-DzITIJ_n.js                     3.28 kB │ gzip:   1.40 kB
+storybook-static/assets/preview-DD_OYowb.js                    3.51 kB │ gzip:   1.69 kB
+storybook-static/assets/entry-preview-docs-DkTFoq60.js         3.88 kB │ gzip:   1.87 kB
+storybook-static/assets/Button.stories-DDSkcUPl.js             5.00 kB │ gzip:   1.16 kB
+storybook-static/assets/preview-B8lJiyuQ.js                    5.06 kB │ gzip:   1.88 kB
+storybook-static/assets/preview-BWzBA1C2.js                    7.62 kB │ gzip:   1.56 kB
+storybook-static/assets/preview-CPX9RCe3.js                    8.10 kB │ gzip:   3.09 kB
+storybook-static/assets/lit-element-DHi8qgCa.js               16.51 kB │ gzip:   6.19 kB
+storybook-static/assets/Color-YHDXOIA2-uCE5UQCQ.js            29.21 kB │ gzip:  10.99 kB
+storybook-static/assets/index-DV6OZviy.js                     49.32 kB │ gzip:  14.29 kB
+storybook-static/assets/iframe-BNtV-IBU.js                   207.88 kB │ gzip:  71.64 kB
+storybook-static/assets/index-C99wrFBX.js                    660.55 kB │ gzip: 156.53 kB
+storybook-static/assets/DocsRenderer-CFRXHY34-CKIIT65J.js  1,076.83 kB │ gzip: 335.54 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.81s
+info => Preview built ([38;2;181;126;229m1.93 s[39m)
+info => Output directory: /Users/phil/Dev/lime-soda/web-components/apps/storybook/storybook-static

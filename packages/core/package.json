@@ -1,0 +1,25 @@
+{
+  "name": "@lime-soda/core",
+  "version": "0.0.0",
+  "description": "Core design tokens and utilities for Lime Soda Design System",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10",
+    "typescript": "^5.6.3",
+    "vite-plugin-dts": "^4.2.3"
+  }
+}
