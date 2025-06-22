@@ -17,7 +17,9 @@
       "Bash(unset GITHUB_TOKEN)",
       "Bash(pnpm run:*)",
       "Bash(chmod:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(ls:*)",
+      "Bash(git rm:*)"
     ],
     "deny": []
   }
