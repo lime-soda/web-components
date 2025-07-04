@@ -6,7 +6,7 @@ import "../packages/button/src/button";
 export default {
   title: "Components/Button",
   tags: ["autodocs"],
-  render: () => html`<ls-button>Hola!</ls-button>`,
+  render: (args) => html`<ls-button @click=${args.onClick}>Hola!</ls-button>`,
   argTypes: {
     backgroundColor: { control: "color" },
     size: {
