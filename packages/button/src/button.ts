@@ -1,5 +1,5 @@
-import { LitElement, css, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { LitElement, css, html } from 'lit'
+import { customElement, property } from 'lit/decorators.js'
 
 /**
  * An example element.
@@ -7,13 +7,13 @@ import { customElement, property } from "lit/decorators.js";
  * @slot - This element has a slot
  * @csspart button - The button
  */
-@customElement("ls-button")
+@customElement('ls-button')
 export class Button extends LitElement {
   /**
    * The number of times the button has been clicked.
    */
   @property({ type: Number })
-  count = 0;
+  count = 0
 
   render() {
     return html`
@@ -21,11 +21,11 @@ export class Button extends LitElement {
         <slot></slot>
         ${this.count}
       </button>
-    `;
+    `
   }
 
   private _onClick() {
-    this.count++;
+    this.count++
   }
 
   static styles = css`
@@ -43,11 +43,11 @@ export class Button extends LitElement {
     button:hover {
       border-color: #646cff;
     }
-  `;
+  `
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "ls-button": Button;
+    'ls-button': Button
   }
 }

@@ -1,6 +1,4 @@
 {
   "extends": "@lime-soda/tsconfig",
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
