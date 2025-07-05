@@ -6,18 +6,19 @@ import '../src/button'
 export default {
   title: 'Components/Button',
   tags: ['autodocs'],
-  render: ({ label, onClick }) =>
-    html`<ls-button @click=${onClick}>${label}</ls-button>`,
+  render: ({ label, onClick, size }) =>
+    html`<ls-button size=${size} @click=${onClick}>${label}</ls-button>`,
   argTypes: {
     backgroundColor: { control: 'color' },
     size: {
       control: { type: 'select' },
-      options: ['small', 'medium', 'large'],
+      options: ['sm', 'md', 'lg'],
     },
   },
   args: {
     label: 'Button',
     onClick: fn(),
+    size: 'md',
   },
 }
 

@@ -8,6 +8,5 @@
   "private": true,
   "keywords": [],
   "author": "Phil Parsons",
-  "license": "MIT",
-  "packageManager": "pnpm@10.12.1"
+  "license": "MIT"
 }

@@ -10,38 +10,43 @@ import { customElement, property } from 'lit/decorators.js'
 @customElement('ls-button')
 export class Button extends LitElement {
   /**
-   * The number of times the button has been clicked.
+   * The size of the button.
    */
-  @property({ type: Number })
-  count = 0
+  @property({ type: String })
+  size: 'sm' | 'md' | 'lg' = 'sm'
 
   render() {
     return html`
-      <button @click=${this._onClick} part="button">
+      <button part="button" class="${this.size}">
         <slot></slot>
-        ${this.count}
       </button>
     `
   }
 
-  private _onClick() {
-    this.count++
-  }
-
   static styles = css`
     button {
-      border-radius: 8px;
-      border: 1px solid transparent;
-      padding: 0.6em 1.2em;
-      font-size: 1em;
-      font-weight: 500;
-      font-family: inherit;
+      background: blue;
+      border-radius: 0.5rem;
+      border: none;
+      color: white;
       cursor: pointer;
-      transition: border-color 0.25s;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: background 300ms;
+
+      &.sm {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+      }
+
+      &.lg {
+        font-size: 1.25rem;
+        padding: 0.75rem 1.25rem;
+      }
     }
 
     button:hover {
-      border-color: #646cff;
+      background: red;
     }
   `
 }

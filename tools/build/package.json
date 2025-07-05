@@ -1,0 +1,10 @@
+{
+  "name": "@lime-soda/build",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
