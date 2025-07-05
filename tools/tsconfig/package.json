@@ -1,0 +1,13 @@
+{
+  "name": "@lime-soda/tsconfig",
+  "version": "0.0.0",
+  "description": "",
+  "exports": {
+    ".": "./tsconfig.json"
+  },
+  "private": true,
+  "keywords": [],
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1"
+}

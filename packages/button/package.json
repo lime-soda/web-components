@@ -7,8 +7,5 @@
   },
   "dependencies": {
     "lit": "^3.3.0"
-  },
-  "devDependencies": {
-    "typescript": "~5.8.3"
   }
 }
