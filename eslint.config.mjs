@@ -13,7 +13,11 @@ export default tseslint.config(
   tseslint.configs.recommended,
   css.configs.recommended,
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['./packages/**/*.{js,mjs,cjs,ts,mts,cts}'],
     languageOptions: { globals: globals.browser },
+  },
+  {
+    files: ['./tools/**/*.{js,mjs,cjs,ts,mts,cts}'],
+    languageOptions: { globals: globals.node },
   },
 )

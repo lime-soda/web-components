@@ -20,6 +20,9 @@ importers:
       '@eslint/json':
         specifier: ^0.12.0
         version: 0.12.0
+      '@lime-soda/build':
+        specifier: workspace:*
+        version: link:tools/build
       '@lime-soda/tsconfig':
         specifier: workspace:*
         version: link:tools/tsconfig
