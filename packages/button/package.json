@@ -2,10 +2,20 @@
   "name": "@lime-soda/button",
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "build": "build-package"
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
-  "dependencies": {
+  "scripts": {
+    "build": "build-component && pnpm build:types",
+    "build:types": "tsc --emitDeclarationOnly --declarationDir dist"
+  },
+  "peerDependencies": {
     "lit": "^3.3.0"
   }
 }

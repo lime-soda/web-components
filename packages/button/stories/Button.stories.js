@@ -1,7 +1,7 @@
 import { expect, fn, userEvent } from 'storybook/test'
 import { html } from 'lit'
 
-import '../src/button'
+import '../src'
 
 export default {
   title: 'Components/Button',

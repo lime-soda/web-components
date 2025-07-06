@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 
-import { build as esbuild } from 'esbuild'
+import { build } from 'esbuild'
+import { glob } from 'glob'
 import path from 'node:path'
 
-async function build(options) {
-  return esbuild({
+async function buildComponent(options) {
+  return build({
     bundle: false,
     format: 'esm',
+    packages: 'external',
     ...options,
   })
 }
@@ -14,8 +16,7 @@ async function build(options) {
 // TODO: get from argv
 const args = {}
 
-// TODO: glob from src
-const entryPoints = [path.join(process.cwd(), 'src/index.js')]
+const entryPoints = await glob(path.join(process.cwd(), 'src/**/*.ts'))
 const outdir = path.join(process.cwd(), 'dist')
 
-await build({ entryPoints, outdir, ...args })
+await buildComponent({ entryPoints, outdir, ...args })
