@@ -1,0 +1,34 @@
+{
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "serif": {
+        "$value": "Times New Roman, serif"
+      },
+      "sans": {
+        "$value": "Open Sans, sans-serif"
+      }
+    },
+    "size": {
+      "$type": "fontSize",
+      "heading": {
+        "$value": "{size.7}"
+      },
+      "body": {
+        "$value": "{size.4}"
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "light": {
+        "$value": "thin"
+      },
+      "regular": {
+        "$value": "regular"
+      },
+      "bold": {
+        "$value": "extra-bold"
+      }
+    }
+  }
+}

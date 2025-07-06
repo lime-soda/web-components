@@ -1,0 +1,12 @@
+{
+  "border": {
+    "$type": "border",
+    "default": {
+      "$value": {
+        "color": "{color.black}",
+        "width": "2px",
+        "style": "solid"
+      }
+    }
+  }
+}

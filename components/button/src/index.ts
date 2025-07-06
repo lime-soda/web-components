@@ -25,10 +25,10 @@ export class Button extends LitElement {
 
   static styles = css`
     button {
-      background: blue;
+      background: var(--color-orange-400);
       border-radius: 0.5rem;
       border: none;
-      color: white;
+      color: var(--color-black);
       cursor: pointer;
       font-weight: 500;
       padding: 0.5rem 1rem;

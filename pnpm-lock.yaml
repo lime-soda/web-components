@@ -23,6 +23,9 @@ importers:
       '@lime-soda/build':
         specifier: workspace:*
         version: link:tools/build
+      '@lime-soda/tokens':
+        specifier: workspace:*
+        version: link:support/tokens
       '@lime-soda/tsconfig':
         specifier: workspace:*
         version: link:tools/tsconfig
@@ -72,13 +75,13 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.0.3)(@vitest/browser@3.2.4)(yaml@2.8.0)
 
-  packages/button:
+  components/button:
     dependencies:
       lit:
         specifier: ^3.3.0
         version: 3.3.0
 
-  packages/tokens:
+  support/tokens:
     devDependencies:
       style-dictionary:
         specifier: ^5.0.1

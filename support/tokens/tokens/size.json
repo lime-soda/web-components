@@ -1,5 +1,5 @@
 {
-  "dimensions": {
+  "size": {
     "$type": "dimension",
     "0": {
       "$value": "0px"

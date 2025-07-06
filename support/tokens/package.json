@@ -5,6 +5,9 @@
   "scripts": {
     "build": "style-dictionary build"
   },
+  "exports": {
+    "./*.css": "./dist/css/*.css"
+  },
   "keywords": [],
   "author": "Phil Parsons",
   "license": "MIT",
