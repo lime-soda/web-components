@@ -1,0 +1,14 @@
+{
+  "name": "@lime-soda/tokens",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "build": "style-dictionary build"
+  },
+  "keywords": [],
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "devDependencies": {
+    "style-dictionary": "^5.0.1"
+  }
+}
