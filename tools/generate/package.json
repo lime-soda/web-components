@@ -1,0 +1,19 @@
+{
+  "name": "@lime-soda/generate",
+  "version": "0.0.0",
+  "private": true,
+  "description": "",
+  "type": "module",
+  "bin": {
+    "create-component": "./index.js"
+  },
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "dependencies": {
+    "minimist": "^1.2.8",
+    "plop": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/minimist": "^1.2.5"
+  }
+}
