@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "build-component && pnpm build:types",
+    "build": "build-component",
     "build:types": "tsc --emitDeclarationOnly --declarationDir dist"
   },
   "peerDependencies": {
