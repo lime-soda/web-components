@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "turbo run build",
     "build-storybook": "storybook build",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
