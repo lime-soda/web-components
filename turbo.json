@@ -10,10 +10,6 @@
       "dependsOn": [
         "^build-types"
       ]
-    },
-    "dev": {
-      "persistent": true,
-      "cache": false
     }
   }
 }
