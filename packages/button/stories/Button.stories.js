@@ -1,7 +1,7 @@
 import { expect, fn, userEvent } from 'storybook/test'
 import { html } from 'lit'
 
-import '../src'
+import '@lime-soda/button'
 
 export default {
   title: 'Components/Button',
@@ -9,7 +9,6 @@ export default {
   render: ({ label, onClick, size }) =>
     html`<ls-button size=${size} @click=${onClick}>${label}</ls-button>`,
   argTypes: {
-    backgroundColor: { control: 'color' },
     size: {
       control: { type: 'select' },
       options: ['sm', 'md', 'lg'],
