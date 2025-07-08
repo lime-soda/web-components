@@ -2,7 +2,7 @@
   "extends": "@lime-soda/tsconfig",
   "compilerOptions": {
     "paths": {
-      "@lime-oda/*": [
+      "@lime-soda/*": [
         "./packages/*"
       ]
     }
