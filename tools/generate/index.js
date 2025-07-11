@@ -3,6 +3,7 @@ import minimist from 'minimist'
 import { Plop, run } from 'plop'
 
 const args = process.argv.slice(2)
+/** @type {Record<string, string | string[]>} */
 const argv = minimist(args)
 
 Plop.prepare(
@@ -18,7 +19,7 @@ Plop.prepare(
         ..._env,
         dest: process.cwd(),
       }
-      return run(options, undefined, true)
+      void run(options, undefined, true)
     })
   },
 )

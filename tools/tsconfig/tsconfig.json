@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2021",
     "experimentalDecorators": true,
@@ -9,16 +10,8 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true

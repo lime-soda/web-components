@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "description": "",
   "exports": {
-    ".": "./tsconfig.json"
+    ".": "./tsconfig.json",
+    "./*": "./tsconfig.*.json",
+    "./*.json": "./*.json"
   },
   "private": true,
   "keywords": [],
