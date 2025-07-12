@@ -1,9 +1,11 @@
+import type { Meta, StoryObj } from '@storybook/web-components-vite'
 import { expect, fn, userEvent } from 'storybook/test'
 import { html } from 'lit'
 
-import '@lime-soda/button'
+import '../src'
 
-export default {
+const meta: Meta = {
+  component: 'ls-button',
   title: 'Components/Button',
   tags: ['autodocs'],
   render: ({ label, onClick, size }) =>
@@ -21,11 +23,18 @@ export default {
   },
 }
 
-export const Primary = {
-  play: async ({ args, canvasElement }) => {
+export default meta
+type Story = StoryObj
+
+export const Primary: Story = {
+  play: async ({ canvasElement }) => {
     const el = canvasElement.querySelector('ls-button')
-    const button = el.shadowRoot.querySelector('button')
+    const button = el!.shadowRoot!.querySelector('button')!
+    const handler = fn()
+    button.addEventListener('click', handler, { once: true })
+
     await userEvent.click(button)
-    expect(args.onClick.mock.calls).toHaveLength(1)
+
+    await expect(handler).toHaveBeenCalled()
   },
 }
