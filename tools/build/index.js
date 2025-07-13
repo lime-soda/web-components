@@ -16,7 +16,7 @@ async function buildComponent(options) {
 // TODO: get from argv
 const args = {}
 
-const entryPoints = await glob(path.join(process.cwd(), 'src/**/*.ts'))
+const entryPoints = await glob(path.join(process.cwd(), '**/*.ts'))
 const outdir = path.join(process.cwd(), 'dist')
 
 await buildComponent({ entryPoints, outdir, ...args })

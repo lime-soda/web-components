@@ -8,18 +8,15 @@
     "noEmit": true,
     "target": "esnext",
     "paths": {
-      "@lime-soda/button": [
-        "./packages/button/src/index.ts"
+      "@lime-soda/*": [
+        "./packages/*"
       ]
     }
   },
   "include": [
-    "packages/**/*.ts",
-    "support/**/*.ts",
-    ".storybook/**/*.ts",
-    "tools/**/*.js",
-    "*.ts",
-    "*.js"
+    "**/*.ts",
+    "**/*.js",
+    ".storybook/**/*.ts"
   ],
   "exclude": [
     ".turbo",

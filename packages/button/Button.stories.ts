@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/web-components-vite'
 import { expect, fn, userEvent } from 'storybook/test'
 import { html } from 'lit'
 
-import '../src'
+import '@lime-soda/button'
 
 const meta: Meta = {
   component: 'ls-button',

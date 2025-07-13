@@ -25,14 +25,14 @@ export class Button extends LitElement {
 
   static styles = css`
     button {
-      background: var(--color-orange-400);
+      background: var(--color-orange-300);
       border-radius: 0.5rem;
       border: none;
       color: var(--color-black);
       cursor: pointer;
       font-weight: 500;
       padding: 0.5rem 1rem;
-      transition: background 300ms;
+      transition: background var(--transition-duration-medium, 0.3s);
 
       &.sm {
         font-size: 0.75rem;
@@ -46,7 +46,7 @@ export class Button extends LitElement {
     }
 
     button:hover {
-      background: red;
+      background: var(--color-orange-400);
     }
   `
 }
