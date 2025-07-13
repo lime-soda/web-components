@@ -2,9 +2,9 @@ import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
 /**
- * An example element.
+ * Button element.
  *
- * @slot - This element has a slot
+ * @slot - Default slot for button content
  * @csspart button - The button
  */
 @customElement('ls-button')
