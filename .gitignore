@@ -24,3 +24,4 @@ pnpm-debug.log*
 *storybook.log
 storybook-static
 .turbo
+custom-elements.json

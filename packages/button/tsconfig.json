@@ -1,6 +1,7 @@
 {
   "extends": "@lime-soda/tsconfig",
   "include": [
-    "**/*.ts",
+    "index.ts",
+    "src/**/*.ts"
   ]
 }

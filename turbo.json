@@ -2,13 +2,24 @@
   "$schema": "https://turborepo.com/schema.json",
   "tasks": {
     "build": {
+      "dependsOn": [
+        "^build"
+      ],
       "outputs": [
-        "dist/**"
+        "dist/**/*.js"
       ]
     },
     "build:types": {
       "dependsOn": [
-        "^build-types"
+        "^build:types"
+      ],
+      "outputs": [
+        "dist/**/*.d.ts"
+      ]
+    },
+    "build:manifest": {
+      "outputs": [
+        "custom-elements.json"
       ]
     }
   }
