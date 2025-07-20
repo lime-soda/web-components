@@ -2,6 +2,7 @@
   "extends": "@lime-soda/tsconfig",
   "include": [
     "index.ts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "eslint.config.js"
   ]
 }

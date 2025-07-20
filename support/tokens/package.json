@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "build": "style-dictionary build"
+    "build": "style-dictionary build",
+    "lint": "eslint ."
   },
   "exports": {
     "./*.css": "./dist/css/*.css"

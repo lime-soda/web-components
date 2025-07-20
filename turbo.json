@@ -21,6 +21,17 @@
       "outputs": [
         "custom-elements.json"
       ]
+    },
+    "lint": {
+      "cache": true,
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.js",
+        "*.ts",
+        "*.js",
+        "eslint.config.js",
+        "tsconfig.json"
+      ]
     }
   }
 }

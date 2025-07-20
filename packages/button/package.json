@@ -21,7 +21,8 @@
   "scripts": {
     "build": "build-component",
     "build:types": "tsc --emitDeclarationOnly --declarationDir dist",
-    "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\""
+    "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\"",
+    "lint": "eslint ."
   },
   "peerDependencies": {
     "lit": "^3.3.0"

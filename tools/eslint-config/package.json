@@ -1,0 +1,51 @@
+{
+  "name": "@lime-soda/eslint-config",
+  "version": "0.0.0",
+  "description": "Shared ESLint configuration for Lime Soda monorepo",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.js"
+    },
+    "./storybook": {
+      "types": "./dist/storybook.d.ts",
+      "import": "./dist/storybook.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:types": "tsc --emitDeclarationOnly --declarationDir dist",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "eslint",
+    "config",
+    "typescript",
+    "lint"
+  ],
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "peerDependencies": {
+    "@eslint/css": "^0.9.0",
+    "@eslint/js": "^9.30.1",
+    "@eslint/json": "^0.12.0",
+    "eslint": "^9.30.1",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.35.1"
+  }
+}

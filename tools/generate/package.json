@@ -7,6 +7,9 @@
   "bin": {
     "create-component": "./index.js"
   },
+  "scripts": {
+    "lint": "eslint ."
+  },
   "author": "Phil Parsons",
   "license": "MIT",
   "dependencies": {

@@ -7,6 +7,9 @@
     "./*": "./tsconfig.*.json",
     "./*.json": "./*.json"
   },
+  "scripts": {
+    "lint": "eslint ."
+  },
   "private": true,
   "keywords": [],
   "author": "Phil Parsons",

@@ -7,6 +7,9 @@
   "bin": {
     "build-component": "./index.js"
   },
+  "scripts": {
+    "lint": "eslint ."
+  },
   "keywords": [],
   "author": "Phil Parsons",
   "license": "MIT",

@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm lint:*)"
+      "Bash(pnpm lint:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm turbo run lint:*)",
+      "Bash(node:*)",
+      "Bash(pnpm eslint:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(pnpm -w run lint:root)"
     ],
     "deny": []
   }

@@ -7,7 +7,8 @@
     "build": "turbo run build build:types build:manifest",
     "build-storybook": "storybook build",
     "create-component": "create-component",
-    "lint": "eslint .",
+    "lint": "turbo run lint",
+    "lint:root": "eslint .",
     "storybook": "storybook dev -p 6006",
     "test": "vitest --project=storybook"
   },
@@ -22,6 +23,7 @@
     "@eslint/js": "^9.30.1",
     "@eslint/json": "^0.12.0",
     "@lime-soda/build": "workspace:*",
+    "@lime-soda/eslint-config": "workspace:*",
     "@lime-soda/generate": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
     "@lime-soda/tsconfig": "workspace:*",
