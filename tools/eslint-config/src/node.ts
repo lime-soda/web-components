@@ -1,11 +1,11 @@
 import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import tseslint, { type ConfigArray } from 'typescript-eslint'
 import baseConfig from './index.js'
 
 /**
  * ESLint configuration for Node.js packages (tools, support)
  */
-const config: any = tseslint.config(
+const config: ConfigArray = tseslint.config(
   ...baseConfig,
   {
     files: ['**/*.js', '**/*.ts'],

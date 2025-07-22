@@ -1,12 +1,12 @@
 import css from '@eslint/css'
 import js from '@eslint/js'
 import json from '@eslint/json'
-import tseslint from 'typescript-eslint'
+import tseslint, { type ConfigArray } from 'typescript-eslint'
 
 /**
  * Base ESLint configuration for Lime Soda projects
  */
-const config: any = tseslint.config(
+const config: ConfigArray = tseslint.config(
   {
     ignores: ['**/dist/*', '**/node_modules/*', 'storybook-static'],
   },

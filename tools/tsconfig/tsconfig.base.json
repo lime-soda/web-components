@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "erasableSyntaxOnly": true,
     "moduleDetection": "force",
-    "moduleResolution": "node",
+    "noEmit": true,
     "skipLibCheck": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,

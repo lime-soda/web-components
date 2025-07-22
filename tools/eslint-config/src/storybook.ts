@@ -1,11 +1,11 @@
 import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import tseslint, { type ConfigArray } from 'typescript-eslint'
 import baseConfig from './index.js'
 
 /**
  * ESLint configuration for Storybook files
  */
-const config: any = tseslint.config(
+const config: ConfigArray = tseslint.config(
   ...baseConfig,
   {
     files: ['**/*.stories.ts', '**/*.stories.js'],
