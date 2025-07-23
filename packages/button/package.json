@@ -27,5 +27,10 @@
   "peerDependencies": {
     "lit": "^3.3.0"
   },
+  "devDependencies": {
+    "@lime-soda/build": "workspace:*",
+    "@lime-soda/eslint-config": "workspace:*",
+    "@lime-soda/tsconfig": "workspace:*"
+  },
   "customElements": "custom-elements.json"
 }

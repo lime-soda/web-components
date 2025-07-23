@@ -6,7 +6,7 @@
         "^build"
       ],
       "outputs": [
-        "dist/**/*.js"
+        "dist/**/*.{js,css}"
       ]
     },
     "build:types": {

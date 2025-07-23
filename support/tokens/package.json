@@ -2,6 +2,7 @@
   "name": "@lime-soda/tokens",
   "version": "0.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
     "build": "style-dictionary build",
     "lint": "eslint ."
@@ -12,7 +13,10 @@
   "keywords": [],
   "author": "Phil Parsons",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "style-dictionary": "^5.0.1"
+  },
+  "devDependencies": {
+    "@lime-soda/eslint-config": "workspace:*"
   }
 }

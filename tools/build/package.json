@@ -16,5 +16,8 @@
   "dependencies": {
     "esbuild": "^0.25.5",
     "glob": "^11.0.3"
+  },
+  "devDependencies": {
+    "@lime-soda/eslint-config": "workspace:*"
   }
 }

@@ -7,27 +7,27 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
     },
     "./browser": {
-      "types": "./dist/browser.d.ts",
-      "import": "./dist/browser.js"
+      "types": "./dist/src/browser.d.ts",
+      "import": "./dist/src/browser.js"
     },
     "./node": {
-      "types": "./dist/node.d.ts",
-      "import": "./dist/node.js"
+      "types": "./dist/src/node.d.ts",
+      "import": "./dist/src/node.js"
     },
     "./storybook": {
-      "types": "./dist/storybook.d.ts",
-      "import": "./dist/storybook.js"
+      "types": "./dist/src/storybook.d.ts",
+      "import": "./dist/src/storybook.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --outDir dist",
     "build:types": "tsc --emitDeclarationOnly --declarationDir dist",
     "lint": "eslint ."
   },
@@ -39,13 +39,15 @@
   ],
   "author": "Phil Parsons",
   "license": "MIT",
-  "peerDependencies": {
+  "dependencies": {
     "@eslint/css": "^0.9.0",
     "@eslint/js": "^9.30.1",
     "@eslint/json": "^0.12.0",
+    "globals": "^16.3.0"
+  },
+  "peerDependencies": {
     "eslint": "^9.30.1",
-    "globals": "^16.3.0",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.35.1"
+    "typescript-eslint": "^8.35.1",
+    "typescript": "~5.8.3"
   }
 }

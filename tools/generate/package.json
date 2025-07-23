@@ -17,6 +17,7 @@
     "plop": "^4.0.1"
   },
   "devDependencies": {
-    "@types/minimist": "^1.2.5"
+    "@types/minimist": "^1.2.5",
+    "@lime-soda/eslint-config": "workspace:*"
   }
 }
