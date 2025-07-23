@@ -14,9 +14,10 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.js",
-    ".storybook/**/*.ts"
+    ".storybook/**/*.ts",
+    "packages/**/*.stories.ts",
+    "*.js",
+    "*.ts"
   ],
   "exclude": [
     ".turbo",

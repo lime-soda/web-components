@@ -1,12 +1,13 @@
 {
   "extends": "@lime-soda/tsconfig",
-  "compilerOptions": {
-    "allowJs": true,
-    "noEmit": true
-  },
   "include": [
     "index.ts",
     "src/**/*.ts",
     "eslint.config.js"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.types.json"
+    }
   ]
 }

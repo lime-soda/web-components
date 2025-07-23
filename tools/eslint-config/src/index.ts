@@ -3,9 +3,6 @@ import js from '@eslint/js'
 import json from '@eslint/json'
 import tseslint, { type ConfigArray } from 'typescript-eslint'
 
-/**
- * Base ESLint configuration for Lime Soda projects
- */
 const config: ConfigArray = tseslint.config(
   {
     ignores: ['**/dist/*', '**/node_modules/*', 'storybook-static'],

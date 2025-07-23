@@ -1,7 +1,4 @@
-export default function(
-  /** @type {import('plop').NodePlopAPI} */
-  plop,
-) {
+export default function(plop) {
   plop.setGenerator('package', {
     description: 'Generate a new component package',
     prompts: [

@@ -22,6 +22,7 @@
     "@eslint/js": "^9.31.0",
     "@lime-soda/eslint-config": "workspace:*",
     "@lime-soda/generate": "workspace:*",
+    "@lime-soda/tokens": "workspace:*",
     "@lime-soda/tsconfig": "workspace:*",
     "@storybook/addon-a11y": "^9.0.15",
     "@storybook/addon-docs": "^9.0.15",

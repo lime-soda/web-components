@@ -8,13 +8,7 @@
     "./*": "./tsconfig.*.json",
     "./*.json": "./*.json"
   },
-  "scripts": {
-    "lint": "eslint ."
-  },
   "keywords": [],
   "author": "Phil Parsons",
-  "license": "MIT",
-  "devDependencies": {
-    "@lime-soda/eslint-config": "workspace:*"
-  }
+  "license": "MIT"
 }

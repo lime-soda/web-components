@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "build-component",
-    "build:types": "tsc --emitDeclarationOnly --declarationDir dist",
+    "build:types": "tsc --project tsconfig.types.json",
     "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\"",
     "lint": "eslint ."
   },

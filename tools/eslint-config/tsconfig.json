@@ -1,25 +1,11 @@
 {
+  "extends": "@lime-soda/tsconfig",
   "compilerOptions": {
-    "allowJs": true,
-    "target": "ES2022",
-    "lib": [
-      "ES2022"
-    ],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "noEmit": false,
     "outDir": "./dist",
-    "rootDir": ".",
-    "declaration": true,
-    "declarationDir": "./dist",
-    "declarationMap": true,
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "noImplicitAny": false,
-    "strict": true
+    "rootDir": "./src"
   },
   "include": [
-    "src/**/*"
+    "src"
   ]
 }
