@@ -4,8 +4,8 @@
   "license": "MIT",
   "type": "module",
   "keywords": [
-    "component",
-    "web"
+    "custom-element",
+    "web-component"
   ],
   "files": [
     "CHANGELOG.md",
@@ -20,10 +20,15 @@
   },
   "scripts": {
     "build": "build-component",
-    "build:types": "tsc --emitDeclarationOnly --declarationDir dist"
+    "build:types": "tsc --project tsconfig.types.json",
+    "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\"",
+    "lint": "eslint .",
   },
   "peerDependencies": {
-    "lit": "^3.3.0"
+    "lit": ">= 3.3.0"
+  },
+  "devDependencies": {
+    "@lime-soda/eslint-config": "workspace:*"
   },
   "customElements": "custom-elements.json"
 }

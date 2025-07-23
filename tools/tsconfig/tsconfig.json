@@ -13,8 +13,6 @@
     ],
     "moduleDetection": "force",
     "noUnusedLocals": true,
-    "declaration": true,
-    "declarationMap": true,
     "sourceMap": true
   }
 }

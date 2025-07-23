@@ -4,8 +4,8 @@
   "license": "MIT",
   "type": "module",
   "keywords": [
-    "component",
-    "web"
+    "button",
+    "webcomponent"
   ],
   "files": [
     "CHANGELOG.md",
@@ -25,7 +25,7 @@
     "lint": "eslint ."
   },
   "peerDependencies": {
-    "lit": "^3.3.0"
+    "lit": ">= 3.3.0"
   },
   "devDependencies": {
     "@lime-soda/build": "workspace:*",
