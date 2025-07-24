@@ -9,7 +9,7 @@
     "create-component": "create-component",
     "lint": "turbo run lint",
     "lint:root": "eslint .",
-    "publish": "changeset publish",
+    "release": "changeset publish",
     "storybook": "storybook dev -p 6006",
     "test": "vitest --project=storybook"
   },
