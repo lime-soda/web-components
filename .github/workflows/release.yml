@@ -28,3 +28,10 @@ jobs:
       - run: pnpm run build
       - run: pnpm run lint:root
       - run: pnpm run lint
+      - uses: changesets/action@v1
+        with:
+          publish: pnpm run release
+          commit: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
