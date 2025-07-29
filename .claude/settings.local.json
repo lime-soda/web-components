@@ -12,7 +12,8 @@
       "Bash(find:*)",
       "Bash(grep:*)",
       "Bash(pnpm run lint:*)",
-      "Bash(pnpm -w run lint:root)"
+      "Bash(pnpm -w run lint:root)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }
