@@ -2,25 +2,15 @@
   "$schema": "https://turborepo.com/schema.json",
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**/*.{js,css}"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**/*.{js,css}"]
     },
     "build:types": {
-      "dependsOn": [
-        "^build:types"
-      ],
-      "outputs": [
-        "dist/**/*.d.ts"
-      ]
+      "dependsOn": ["^build:types"],
+      "outputs": ["dist/**/*.d.ts"]
     },
     "build:manifest": {
-      "outputs": [
-        "custom-elements.json"
-      ]
+      "outputs": ["custom-elements.json"]
     },
     "lint": {
       "cache": true,
@@ -32,6 +22,10 @@
         "eslint.config.js",
         "tsconfig.json"
       ]
+    },
+    "@lime-soda/storybook#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
     }
   }
 }

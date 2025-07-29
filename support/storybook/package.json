@@ -1,0 +1,38 @@
+{
+  "name": "@lime-soda/storybook",
+  "version": "0.0.0",
+  "description": "Storybook for Lime Soda web components",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "storybook build",
+    "dev": "storybook dev -p 6006",
+    "lint": "eslint .",
+    "test": "vitest --project=storybook"
+  },
+  "keywords": [
+    "storybook",
+    "web-components",
+    "documentation"
+  ],
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "devDependencies": {
+    "@chromatic-com/storybook": "^4.0.1",
+    "@lime-soda/button": "workspace:*",
+    "@lime-soda/eslint-config": "workspace:*",
+    "@lime-soda/tokens": "workspace:*",
+    "@storybook/addon-a11y": "^9.0.15",
+    "@storybook/addon-docs": "^9.0.15",
+    "@storybook/addon-vitest": "^9.0.15",
+    "@storybook/web-components-vite": "^9.0.15",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "lit": "^3.3.0",
+    "playwright": "^1.53.2",
+    "storybook": "^9.0.15",
+    "typescript": "~5.8.3",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  }
+}

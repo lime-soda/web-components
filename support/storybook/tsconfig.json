@@ -1,0 +1,9 @@
+{
+  "extends": "@lime-soda/tsconfig",
+  "include": [
+    "src/**/*.ts",
+    ".storybook/**/*.ts",
+    "vitest.config.ts",
+    "eslint.config.js"
+  ]
+}

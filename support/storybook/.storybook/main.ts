@@ -3,9 +3,8 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 
 const config: StorybookConfig = {
   stories: [
-    '../stories/**/*.mdx',
-    '../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
-    '../packages/*/stories/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../src/stories/**/*.mdx',
+    '../src/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
   addons: [
     '@chromatic-com/storybook',
