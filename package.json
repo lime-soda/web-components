@@ -7,7 +7,6 @@
     "build": "turbo run build build:types build:manifest",
     "create-component": "create-component",
     "lint": "turbo run lint",
-    "lint:root": "eslint .",
     "prepare": "husky",
     "release": "changeset publish"
   },

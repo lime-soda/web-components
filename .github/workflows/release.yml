@@ -26,7 +26,6 @@ jobs:
             ${{ runner.os }}-turbo-
       - run: pnpm install
       - run: pnpm run build
-      - run: pnpm run lint:root
       - run: pnpm run lint
       - uses: changesets/action@v1
         with:
