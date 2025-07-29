@@ -1,3 +1,13 @@
-import config from '@lime-soda/eslint-config/storybook'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
+import baseConfig from '@lime-soda/eslint-config'
 
-export default config
+export default tseslint.config(...baseConfig, {
+  files: ['**/*.stories.ts', '**/*.stories.js'],
+  languageOptions: {
+    globals: {
+      ...globals.browser,
+      ...globals.node,
+    },
+  },
+})

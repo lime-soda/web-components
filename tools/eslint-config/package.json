@@ -17,10 +17,6 @@
     "./node": {
       "types": "./dist/node.d.ts",
       "import": "./dist/node.js"
-    },
-    "./storybook": {
-      "types": "./dist/storybook.d.ts",
-      "import": "./dist/storybook.js"
     }
   },
   "files": [
