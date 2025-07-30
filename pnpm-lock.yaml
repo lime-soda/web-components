@@ -74,7 +74,7 @@ importers:
         version: link:../../tools/tsconfig
 
   support/storybook:
-    devDependencies:
+    dependencies:
       '@chromatic-com/storybook':
         specifier: ^4.0.1
         version: 4.0.1(storybook@9.0.18(@testing-library/dom@10.4.0)(prettier@3.6.2))

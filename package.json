@@ -6,6 +6,7 @@
   "scripts": {
     "build": "turbo run build build:types build:manifest",
     "create-component": "create-component",
+    "dev": "turbo watch build --filter=./packages/*",
     "lint": "turbo run lint",
     "prepare": "husky",
     "release": "changeset publish"

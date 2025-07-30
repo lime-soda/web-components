@@ -17,7 +17,7 @@
   ],
   "author": "Phil Parsons",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "@chromatic-com/storybook": "^4.0.1",
     "@lime-soda/button": "workspace:*",
     "@lime-soda/eslint-config": "workspace:*",

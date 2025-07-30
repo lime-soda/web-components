@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint'
 import baseConfig from '@lime-soda/eslint-config'
 
 export default tseslint.config(...baseConfig, {
-  files: ['**/*.stories.ts', '**/*.stories.js'],
+  files: ['**/*.ts'],
   languageOptions: {
     globals: {
       ...globals.browser,

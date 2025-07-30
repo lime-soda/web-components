@@ -1,15 +1,10 @@
 {
   "extends": "@lime-soda/tsconfig",
-  "compilerOptions": {
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "noEmit": true,
-    "target": "esnext"
-  },
   "include": [
-    "src/**/*.ts",
+    "stories/**/*.ts",
     ".storybook/**/*.ts",
     "vitest.config.ts",
-    "eslint.config.js"
+    "eslint.config.js",
+    "global.d.ts"
   ]
 }

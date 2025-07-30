@@ -15,7 +15,9 @@
       "Bash(pnpm -w run lint:root)",
       "Bash(chmod:*)",
       "Bash(mv:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm --filter @lime-soda/eslint-config build)",
+      "Bash(pnpm --filter @lime-soda/storybook lint)"
     ],
     "deny": []
   }
