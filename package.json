@@ -6,7 +6,10 @@
   "scripts": {
     "build": "turbo run build build:types build:manifest",
     "create-component": "create-component",
-    "dev": "turbo watch build --filter=./packages/*",
+    "dev": "pnpm run -w --parallel \"/^dev:.*/\"",
+    "dev:packages": "turbo watch build build:types --filter=./packages/*",
+    "dev:storybook": "pnpm --filter @lime-soda/storybook dev",
+    "dev:support": "turbo watch build --filter=@lime-soda/tokens",
     "lint": "turbo run lint",
     "prepare": "husky",
     "release": "changeset publish"
