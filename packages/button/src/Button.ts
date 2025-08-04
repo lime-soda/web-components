@@ -24,11 +24,16 @@ export class Button extends LitElement {
   }
 
   static styles = css`
+    :host {
+      --bg-color: var(--button-bg, var(--color-primary-300));
+      --text-color: var(--button-text-color, var(--color-black));
+    }
+
     button {
-      background: var(--color-orange-300);
+      background: var(--bg-color);
       border-radius: 0.5rem;
       border: none;
-      color: var(--color-black);
+      color: var(--text-color);
       cursor: pointer;
       font-weight: 500;
       padding: 0.5rem 1rem;

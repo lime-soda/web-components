@@ -1,7 +1,5 @@
 {
-  "source": [
-    "tokens/**/*.json"
-  ],
+  "source": ["primitives/**/*.json", "theme/**/*.json"],
   "platforms": {
     "css": {
       "transformGroup": "css",

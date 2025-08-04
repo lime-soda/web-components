@@ -1,0 +1,34 @@
+{
+  "color": {
+    "$type": "color",
+    "primary": {
+      "100": {
+        "$value": "{color.orange.100}"
+      },
+      "200": {
+        "$value": "{color.orange.200}"
+      },
+      "300": {
+        "$value": "{color.orange.300}"
+      },
+      "400": {
+        "$value": "{color.orange.400}"
+      },
+      "500": {
+        "$value": "{color.orange.500}"
+      },
+      "600": {
+        "$value": "{color.orange.600}"
+      },
+      "700": {
+        "$value": "{color.orange.700}"
+      },
+      "800": {
+        "$value": "{color.orange.800}"
+      },
+      "900": {
+        "$value": "{color.orange.900}"
+      }
+    }
+  }
+}
