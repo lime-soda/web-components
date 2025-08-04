@@ -8,7 +8,7 @@
     "create-component": "create-component",
     "dev": "pnpm run -w --parallel \"/^dev:.*/\"",
     "dev:packages": "turbo watch build build:types --filter=./packages/*",
-    "dev:storybook": "pnpm --filter @lime-soda/storybook dev",
+    "dev:storybook": "pnpm run --filter=@lime-soda/storybook dev",
     "dev:support": "turbo watch build --filter=@lime-soda/tokens",
     "lint": "turbo run lint",
     "prepare": "husky",
