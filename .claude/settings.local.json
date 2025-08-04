@@ -17,7 +17,8 @@
       "Bash(mv:*)",
       "Bash(pnpm dev:*)",
       "Bash(pnpm --filter @lime-soda/eslint-config build)",
-      "Bash(pnpm --filter @lime-soda/storybook lint)"
+      "Bash(pnpm --filter @lime-soda/storybook lint)",
+      "WebFetch(domain:www.npmjs.com)"
     ],
     "deny": []
   }

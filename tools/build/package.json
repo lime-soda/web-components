@@ -14,7 +14,7 @@
   "author": "Phil Parsons",
   "license": "MIT",
   "dependencies": {
-    "esbuild": "^0.25.5",
+    "esbuild": "^0.25.8",
     "glob": "^11.0.3"
   },
   "devDependencies": {
