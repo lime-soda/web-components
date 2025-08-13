@@ -2,6 +2,7 @@ import css from '@eslint/css'
 import js from '@eslint/js'
 import json from '@eslint/json'
 import tseslint, { type ConfigArray } from 'typescript-eslint'
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 const config: ConfigArray = tseslint.config(
   {
@@ -18,6 +19,7 @@ const config: ConfigArray = tseslint.config(
       },
     },
   },
+  eslintPluginPrettierRecommended,
 )
 
 export default config

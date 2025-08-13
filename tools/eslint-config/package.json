@@ -41,7 +41,9 @@
     "globals": "^16.3.0"
   },
   "devDependencies": {
-    "@lime-soda/tsconfig": "workspace:*"
+    "@lime-soda/tsconfig": "workspace:*",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4"
   },
   "peerDependencies": {
     "eslint": "^9.30.1",
