@@ -1,0 +1,13 @@
+{
+  "extends": "@lime-soda/tsconfig",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "skipLibCheck": true
+  },
+  "include": ["index.ts", "src/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
+}

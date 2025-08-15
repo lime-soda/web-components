@@ -20,7 +20,12 @@
       "Bash(pnpm --filter @lime-soda/storybook lint)",
       "WebFetch(domain:www.npmjs.com)",
       "WebSearch",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(timeout:*)",
+      "Bash(nvm:*)",
+      "Bash(source:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm run:*)"
     ],
     "deny": []
   }

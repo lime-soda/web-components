@@ -1,0 +1,38 @@
+{
+  "name": "@lime-soda/mcp-server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "MCP server for Lime Soda web components and design tokens",
+  "type": "module",
+  "bin": {
+    "mcp-server": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "web-components",
+    "design-tokens"
+  ],
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "glob": "^11.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@lime-soda/eslint-config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.4",
+    "typescript": "~5.9.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
