@@ -2,8 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { glob } from 'glob'
 import { dirname, resolve } from 'node:path'
 
-const __dirname = import.meta.dirname
-const workspaceRoot = resolve(__dirname, '../../../..')
+const workspaceRoot = resolve(process.cwd(), '../../')
 
 export async function findPackageDirectories(): Promise<string[]> {
   const packagePaths = await glob('packages/*/', { cwd: workspaceRoot })
