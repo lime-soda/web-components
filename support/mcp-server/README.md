@@ -46,8 +46,12 @@ pnpm run start
 ### Component Tools
 
 - `list-components` - List all available web components
-- `get-component-details` - Get detailed component information
-- `search-components` - Search components by name/description
+- `get-component-details` - Get detailed component information including
+  attributes, slots, CSS parts, CSS custom properties, and properties
+- `get-component-css-properties` - Get CSS custom properties for a specific
+  component
+- `search-components` - Search components by name, description, properties,
+  slots, CSS parts, or CSS custom properties
 
 ### Token Tools
 
