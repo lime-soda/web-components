@@ -6,6 +6,8 @@ import { customElement, property } from 'lit/decorators.js'
  *
  * @slot - Default slot for button content
  * @csspart button - The button
+ * @cssproperty --button-bg - Background color of the button
+ * @cssproperty --button-text-color - Text color of the button
  */
 @customElement('ls-button')
 export class Button extends LitElement {

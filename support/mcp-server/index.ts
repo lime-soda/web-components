@@ -10,7 +10,7 @@ async function main() {
   // Log configuration
   console.error('Lime Soda MCP Server starting...')
   console.error('Configuration:')
-  console.error(`  Workspace root: ${process.env.WORKSPACE_ROOT || '../../'}`)
+  console.error(`  Workspace root: ${process.env.WORKSPACE_ROOT || '../..'}`)
   console.error(
     `  Manifest glob: ${process.env.CUSTOM_ELEMENTS_MANIFEST_GLOB || 'packages/*/custom-elements.json'}`,
   )

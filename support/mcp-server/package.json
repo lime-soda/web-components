@@ -23,11 +23,13 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.3",
+    "custom-elements-manifest": "^2.1.0",
     "dotenv": "^17.2.1",
     "glob": "^11.0.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.10.4",
     "@lime-soda/eslint-config": "workspace:*",
     "@types/node": "^22.0.0",
     "tsx": "^4.20.4",

@@ -25,7 +25,10 @@
       "Bash(nvm:*)",
       "Bash(source:*)",
       "Bash(pnpm add:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "Bash(npm info:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

@@ -1,53 +1,6 @@
-export interface CustomElementsManifest {
-  schemaVersion: string
-  readme?: string
-  modules: Array<{
-    kind: string
-    path: string
-    declarations: Array<{
-      kind: string
-      name: string
-      description?: string
-      tagName?: string
-      customElement?: boolean
-      members?: Array<{
-        kind: string
-        name: string
-        type?: { text: string }
-        default?: string
-        description?: string
-        attribute?: string
-      }>
-      attributes?: Array<{
-        name: string
-        type?: { text: string }
-        default?: string
-        description?: string
-        fieldName?: string
-      }>
-      slots?: Array<{
-        name: string
-        description?: string
-      }>
-      cssParts?: Array<{
-        name: string
-        description?: string
-      }>
-      superclass?: {
-        name: string
-        package?: string
-      }
-    }>
-    exports?: Array<{
-      kind: string
-      name: string
-      declaration: {
-        name: string
-        module: string
-      }
-    }>
-  }>
-}
+import type { Package, ClassField } from 'custom-elements-manifest/schema.js'
+
+export type CustomElementsManifest = Package
 
 export interface ComponentInfo {
   name: string
@@ -84,11 +37,20 @@ export function extractComponentInfo(
 ): ComponentInfo[] {
   const components: ComponentInfo[] = []
 
+  if (!manifest.modules) {
+    return components
+  }
+
   for (const module of manifest.modules) {
+    if (!module.declarations) continue
+
     for (const declaration of module.declarations) {
+      // Check if this is a custom element class declaration
       if (
         declaration.kind === 'class' &&
+        'customElement' in declaration &&
         declaration.customElement &&
+        'tagName' in declaration &&
         declaration.tagName
       ) {
         const component: ComponentInfo = {
@@ -106,7 +68,7 @@ export function extractComponentInfo(
             })) || [],
           slots:
             declaration.slots?.map((slot) => ({
-              name: slot.name,
+              name: slot.name || '',
               description: slot.description,
             })) || [],
           cssParts:
@@ -116,7 +78,9 @@ export function extractComponentInfo(
             })) || [],
           properties:
             declaration.members
-              ?.filter((member) => member.kind === 'field')
+              ?.filter(
+                (member): member is ClassField => member.kind === 'field',
+              )
               .map((prop) => ({
                 name: prop.name,
                 type: prop.type?.text,

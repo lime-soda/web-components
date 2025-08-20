@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path'
 // Get configuration from environment variables with defaults
 const workspaceRoot = resolve(
   process.cwd(),
-  process.env.WORKSPACE_ROOT || '../../',
+  process.env.WORKSPACE_ROOT || '../..',
 )
 const customElementsManifestGlob =
   process.env.CUSTOM_ELEMENTS_MANIFEST_GLOB || 'packages/*/custom-elements.json'
