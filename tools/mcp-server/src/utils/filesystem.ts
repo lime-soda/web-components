@@ -2,7 +2,13 @@ import { readFile } from 'node:fs/promises'
 import { glob } from 'glob'
 import { dirname, resolve } from 'node:path'
 
-const workspaceRoot = resolve(process.cwd(), '../../')
+// Get configuration from environment variables with defaults
+const workspaceRoot = resolve(
+  process.cwd(),
+  process.env.WORKSPACE_ROOT || '../../',
+)
+const customElementsManifestGlob =
+  process.env.CUSTOM_ELEMENTS_MANIFEST_GLOB || 'packages/*/custom-elements.json'
 
 export async function findPackageDirectories(): Promise<string[]> {
   const packagePaths = await glob('packages/*/', { cwd: workspaceRoot })
@@ -14,7 +20,7 @@ export async function findCustomElementsManifests(): Promise<
 > {
   const results: Array<{ packagePath: string; manifestPath: string }> = []
 
-  const manifestPaths = await glob('packages/*/custom-elements.json', {
+  const manifestPaths = await glob(customElementsManifestGlob, {
     cwd: workspaceRoot,
   })
 
@@ -47,7 +53,8 @@ export async function readTextFile(filePath: string): Promise<string | null> {
 }
 
 export function getTokensPath(): string {
-  return resolve(workspaceRoot, 'support/tokens')
+  const tokensPath = process.env.TOKENS_PATH || 'support/tokens'
+  return resolve(workspaceRoot, tokensPath)
 }
 
 export function getWorkspaceRoot(): string {
