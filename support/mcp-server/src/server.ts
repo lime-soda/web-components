@@ -68,12 +68,13 @@ export function createServer() {
     'search-components',
     {
       title: 'Search Components',
-      description: 'Search components by name, description, or properties',
+      description:
+        'Search components by name, description, properties, or CSS custom properties',
       inputSchema: {
         query: z
           .string()
           .describe(
-            'Search query to match against component names, descriptions, or properties',
+            'Search query to match against component names, descriptions, properties, or CSS custom properties',
           ),
       },
     },
@@ -84,6 +85,40 @@ export function createServer() {
           {
             type: 'text',
             text: JSON.stringify(matchingComponents, null, 2),
+          },
+        ],
+      }
+    },
+  )
+
+  server.registerTool(
+    'get-component-css-properties',
+    {
+      title: 'Get Component CSS Properties',
+      description: 'Get CSS custom properties for a specific component',
+      inputSchema: {
+        nameOrTag: z.string().describe('Component name or tag name'),
+      },
+    },
+    async ({ nameOrTag }: { nameOrTag: string }) => {
+      const result = await components.getComponentCssProperties(nameOrTag)
+
+      if (!result) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Component "${nameOrTag}" not found`,
+            },
+          ],
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
           },
         ],
       }

@@ -10,17 +10,32 @@ export interface ComponentInfo {
   packagePath: string
   attributes: Array<{
     name: string
+    summary?: string
+    description?: string
     type?: string
     default?: string
-    description?: string
+    fieldName?: string
+    deprecated?: boolean | string
   }>
   slots: Array<{
     name: string
+    summary?: string
     description?: string
+    deprecated?: boolean | string
   }>
   cssParts: Array<{
     name: string
+    summary?: string
     description?: string
+    deprecated?: boolean | string
+  }>
+  cssProperties: Array<{
+    name: string
+    syntax?: string
+    default?: string
+    summary?: string
+    description?: string
+    deprecated?: boolean | string
   }>
   properties: Array<{
     name: string
@@ -62,19 +77,35 @@ export function extractComponentInfo(
           attributes:
             declaration.attributes?.map((attr) => ({
               name: attr.name,
+              summary: attr.summary,
+              description: attr.description,
               type: attr.type?.text,
               default: attr.default,
-              description: attr.description,
+              fieldName: attr.fieldName,
+              deprecated: attr.deprecated,
             })) || [],
           slots:
             declaration.slots?.map((slot) => ({
               name: slot.name || '',
+              summary: slot.summary,
               description: slot.description,
+              deprecated: slot.deprecated,
             })) || [],
           cssParts:
             declaration.cssParts?.map((part) => ({
               name: part.name,
+              summary: part.summary,
               description: part.description,
+              deprecated: part.deprecated,
+            })) || [],
+          cssProperties:
+            declaration.cssProperties?.map((prop) => ({
+              name: prop.name,
+              syntax: prop.syntax,
+              default: prop.default,
+              summary: prop.summary,
+              description: prop.description,
+              deprecated: prop.deprecated,
             })) || [],
           properties:
             declaration.members

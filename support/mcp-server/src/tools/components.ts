@@ -80,14 +80,48 @@ export async function searchComponents(
       comp.attributes.some(
         (attr) =>
           attr.name.toLowerCase().includes(lowerQuery) ||
-          attr.description?.toLowerCase().includes(lowerQuery),
+          attr.description?.toLowerCase().includes(lowerQuery) ||
+          attr.summary?.toLowerCase().includes(lowerQuery),
+      ) ||
+      comp.slots.some(
+        (slot) =>
+          slot.name.toLowerCase().includes(lowerQuery) ||
+          slot.description?.toLowerCase().includes(lowerQuery) ||
+          slot.summary?.toLowerCase().includes(lowerQuery),
+      ) ||
+      comp.cssParts.some(
+        (part) =>
+          part.name.toLowerCase().includes(lowerQuery) ||
+          part.description?.toLowerCase().includes(lowerQuery) ||
+          part.summary?.toLowerCase().includes(lowerQuery),
       ) ||
       comp.properties.some(
         (prop) =>
           prop.name.toLowerCase().includes(lowerQuery) ||
           prop.description?.toLowerCase().includes(lowerQuery),
+      ) ||
+      comp.cssProperties.some(
+        (cssProp) =>
+          cssProp.name.toLowerCase().includes(lowerQuery) ||
+          cssProp.description?.toLowerCase().includes(lowerQuery) ||
+          cssProp.summary?.toLowerCase().includes(lowerQuery),
       ),
   )
+}
+
+export async function getComponentCssProperties(
+  nameOrTag: string,
+): Promise<{
+  name: string
+  cssProperties: ComponentInfo['cssProperties']
+} | null> {
+  const component = await getComponentDetails(nameOrTag)
+  if (!component) return null
+
+  return {
+    name: component.name,
+    cssProperties: component.cssProperties,
+  }
 }
 
 export function clearCache(): void {
