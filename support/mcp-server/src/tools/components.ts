@@ -109,9 +109,7 @@ export async function searchComponents(
   )
 }
 
-export async function getComponentCssProperties(
-  nameOrTag: string,
-): Promise<{
+export async function getComponentCssProperties(nameOrTag: string): Promise<{
   name: string
   cssProperties: ComponentInfo['cssProperties']
 } | null> {
