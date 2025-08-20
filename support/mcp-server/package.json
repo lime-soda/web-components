@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch index.ts",
+    "dev": "mcp-inspector tsx watch index.ts",
     "start": "node dist/index.js",
     "lint": "eslint ."
   },
@@ -31,6 +31,7 @@
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.10.4",
     "@lime-soda/eslint-config": "workspace:*",
+    "@modelcontextprotocol/inspector": "^0.16.5",
     "@types/node": "^22.0.0",
     "tsx": "^4.20.4",
     "typescript": "~5.9.2"

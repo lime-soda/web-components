@@ -31,7 +31,7 @@ TOKENS_PATH=design-system/tokens
 ## Development
 
 ```bash
-# Start development server with hot reload
+# Start development server with MCP inspector (opens web UI)
 pnpm run dev
 
 # Build for production
@@ -40,6 +40,23 @@ pnpm run build
 # Run built server
 pnpm run start
 ```
+
+### MCP Inspector
+
+The development server includes the MCP Inspector, which provides a web-based
+interface for testing and debugging MCP tools. When you run `pnpm run dev`, it
+will:
+
+1. Start the MCP server with hot reload
+2. Launch the MCP Inspector web interface
+3. Automatically connect the inspector to your server
+
+The inspector allows you to:
+
+- Test all available tools interactively
+- View tool schemas and descriptions
+- Debug tool responses and errors
+- Monitor server logs and events
 
 ## Available Tools
 
