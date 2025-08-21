@@ -7,14 +7,13 @@ import { createServer } from './src/server.js'
 config()
 
 async function main() {
-  // Log configuration
-  console.error('Lime Soda MCP Server starting...')
-  console.error('Configuration:')
-  console.error(`  Workspace root: ${process.env.WORKSPACE_ROOT || '../..'}`)
-  console.error(
-    `  Manifest glob: ${process.env.CUSTOM_ELEMENTS_MANIFEST_GLOB || 'packages/*/custom-elements.json'}`,
+  console.log('Lime Soda MCP Server starting...')
+  console.log('Configuration:')
+  console.log(`  Workspace root: ${process.env.WORKSPACE_ROOT ?? '../..'}`)
+  console.log(
+    `  Manifest glob: ${process.env.CUSTOM_ELEMENTS_MANIFEST_GLOB ?? 'packages/*/custom-elements.json'}`,
   )
-  console.error(`  Tokens path: ${process.env.TOKENS_PATH || 'support/tokens'}`)
+  console.log(`  Tokens path: ${process.env.TOKENS_PATH ?? 'support/tokens'}`)
 
   const server = createServer()
   await server.start()

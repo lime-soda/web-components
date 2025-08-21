@@ -1,7 +1,5 @@
 import type { Package, ClassField } from 'custom-elements-manifest/schema.js'
 
-export type CustomElementsManifest = Package
-
 export interface ComponentInfo {
   name: string
   tagName: string
@@ -46,7 +44,7 @@ export interface ComponentInfo {
 }
 
 export function extractComponentInfo(
-  manifest: CustomElementsManifest,
+  manifest: Package,
   packageName: string,
   packagePath: string,
 ): ComponentInfo[] {
