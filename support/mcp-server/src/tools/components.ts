@@ -3,11 +3,8 @@ import {
   findCustomElementsManifests,
   readJsonFile,
 } from '../utils/filesystem.js'
-import {
-  type CustomElementsManifest,
-  type ComponentInfo,
-  extractComponentInfo,
-} from '../utils/manifest.js'
+import { type ComponentInfo, extractComponentInfo } from '../utils/manifest.js'
+import type { Package } from 'custom-elements-manifest'
 
 let componentsCache: ComponentInfo[] | null = null
 
@@ -20,7 +17,7 @@ async function loadAllComponents(): Promise<ComponentInfo[]> {
   const manifests = await findCustomElementsManifests()
 
   for (const { packagePath, manifestPath } of manifests) {
-    const manifest = await readJsonFile<CustomElementsManifest>(manifestPath)
+    const manifest = await readJsonFile<Package>(manifestPath)
     if (!manifest) continue
 
     const packageName = basename(packagePath)
