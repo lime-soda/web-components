@@ -8,6 +8,7 @@
     "mcp-server": "./dist/index.js"
   },
   "scripts": {
+    "prebuild": "tsx scripts/build-manifests.ts",
     "build": "tsc",
     "dev": "tsx watch index.ts",
     "debug": "mcp-inspector node dist/index.js",

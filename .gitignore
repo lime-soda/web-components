@@ -25,3 +25,4 @@ pnpm-debug.log*
 storybook-static
 .turbo
 custom-elements.json
+.claude

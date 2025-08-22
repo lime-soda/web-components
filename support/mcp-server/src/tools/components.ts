@@ -1,36 +1,8 @@
-import { basename } from 'path'
-import {
-  findCustomElementsManifests,
-  readJsonFile,
-} from '../utils/filesystem.js'
-import { type ComponentInfo, extractComponentInfo } from '../utils/manifest.js'
-import type { Package } from 'custom-elements-manifest'
-
-let componentsCache: ComponentInfo[] | null = null
+import { getAllComponents } from '../utils/combined-manifest.js'
+import type { ComponentInfo } from '../utils/manifest.js'
 
 async function loadAllComponents(): Promise<ComponentInfo[]> {
-  if (componentsCache) {
-    return componentsCache
-  }
-
-  const components: ComponentInfo[] = []
-  const manifests = await findCustomElementsManifests()
-
-  for (const { packagePath, manifestPath } of manifests) {
-    const manifest = await readJsonFile<Package>(manifestPath)
-    if (!manifest) continue
-
-    const packageName = basename(packagePath)
-    const componentInfos = extractComponentInfo(
-      manifest,
-      packageName,
-      packagePath,
-    )
-    components.push(...componentInfos)
-  }
-
-  componentsCache = components
-  return components
+  return await getAllComponents()
 }
 
 export async function listComponents(): Promise<
@@ -120,5 +92,5 @@ export async function getComponentCssProperties(nameOrTag: string): Promise<{
 }
 
 export function clearCache(): void {
-  componentsCache = null
+  // Cache clearing is now handled by the combined manifest utility
 }
