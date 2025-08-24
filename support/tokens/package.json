@@ -4,7 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "build": "style-dictionary build",
+    "build": "style-dictionary build --config config.json && style-dictionary build --config config-dark.json",
+    "build:light": "style-dictionary build --config config.json",
+    "build:dark": "style-dictionary build --config config-dark.json",
     "lint": "eslint ."
   },
   "exports": {

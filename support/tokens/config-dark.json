@@ -1,12 +1,12 @@
 {
-  "source": ["primitives/**/*.json", "theme/color-light.json"],
+  "source": ["primitives/**/*.json", "theme/color-dark.json"],
   "platforms": {
     "css": {
       "transformGroup": "css",
       "buildPath": "dist/css/",
       "files": [
         {
-          "destination": "tokens-light.css",
+          "destination": "tokens-dark.css",
           "format": "css/variables",
           "options": {
             "showFileHeader": true

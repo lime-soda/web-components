@@ -2,38 +2,333 @@
   "color": {
     "$type": "color",
     "black": {
-      "$value": "#000000"
+      "$value": "#000000",
+      "$description": "Pure black"
     },
     "white": {
-      "$value": "#ffffff"
+      "$value": "#ffffff",
+      "$description": "Pure white"
     },
-    "orange": {
+    "green": {
+      "50": {
+        "$value": "#f0fdf4",
+        "$description": "Green 50 - Lightest green tint"
+      },
       "100": {
-        "$value": "#fffaf0"
+        "$value": "#dcfce7",
+        "$description": "Green 100"
       },
       "200": {
-        "$value": "#feebc8"
+        "$value": "#bbf7d0",
+        "$description": "Green 200"
       },
       "300": {
-        "$value": "#fbd38d"
+        "$value": "#86efac",
+        "$description": "Green 300"
       },
       "400": {
-        "$value": "#f6ad55"
+        "$value": "#4ade80",
+        "$description": "Green 400"
       },
       "500": {
-        "$value": "#ed8936"
+        "$value": "#22c55e",
+        "$description": "Green 500 - Primary green"
       },
       "600": {
-        "$value": "#dd6b20"
+        "$value": "#16a34a",
+        "$description": "Green 600"
       },
       "700": {
-        "$value": "#c05621"
+        "$value": "#15803d",
+        "$description": "Green 700"
       },
       "800": {
-        "$value": "#9c4221"
+        "$value": "#166534",
+        "$description": "Green 800"
       },
       "900": {
-        "$value": "#7b341e"
+        "$value": "#14532d",
+        "$description": "Green 900"
+      },
+      "950": {
+        "$value": "#052e16",
+        "$description": "Green 950 - Darkest green shade"
+      }
+    },
+    "pink": {
+      "50": {
+        "$value": "#fdf2f8",
+        "$description": "Pink 50 - Lightest pink tint"
+      },
+      "100": {
+        "$value": "#fce7f3",
+        "$description": "Pink 100"
+      },
+      "200": {
+        "$value": "#fbcfe8",
+        "$description": "Pink 200"
+      },
+      "300": {
+        "$value": "#f9a8d4",
+        "$description": "Pink 300"
+      },
+      "400": {
+        "$value": "#f472b6",
+        "$description": "Pink 400"
+      },
+      "500": {
+        "$value": "#ec4899",
+        "$description": "Pink 500 - Primary pink"
+      },
+      "600": {
+        "$value": "#db2777",
+        "$description": "Pink 600"
+      },
+      "700": {
+        "$value": "#be185d",
+        "$description": "Pink 700"
+      },
+      "800": {
+        "$value": "#9d174d",
+        "$description": "Pink 800"
+      },
+      "900": {
+        "$value": "#831843",
+        "$description": "Pink 900"
+      },
+      "950": {
+        "$value": "#500724",
+        "$description": "Pink 950 - Darkest pink shade"
+      }
+    },
+    "gray": {
+      "50": {
+        "$value": "#f9fafb",
+        "$description": "Gray 50 - Lightest gray tint"
+      },
+      "100": {
+        "$value": "#f3f4f6",
+        "$description": "Gray 100"
+      },
+      "200": {
+        "$value": "#e5e7eb",
+        "$description": "Gray 200"
+      },
+      "300": {
+        "$value": "#d1d5db",
+        "$description": "Gray 300"
+      },
+      "400": {
+        "$value": "#9ca3af",
+        "$description": "Gray 400"
+      },
+      "500": {
+        "$value": "#6b7280",
+        "$description": "Gray 500 - Mid gray"
+      },
+      "600": {
+        "$value": "#4b5563",
+        "$description": "Gray 600"
+      },
+      "700": {
+        "$value": "#374151",
+        "$description": "Gray 700"
+      },
+      "800": {
+        "$value": "#1f2937",
+        "$description": "Gray 800"
+      },
+      "900": {
+        "$value": "#111827",
+        "$description": "Gray 900"
+      },
+      "950": {
+        "$value": "#030712",
+        "$description": "Gray 950 - Darkest gray shade"
+      }
+    },
+    "red": {
+      "50": {
+        "$value": "#fef2f2",
+        "$description": "Red 50 - For error states"
+      },
+      "100": {
+        "$value": "#fee2e2",
+        "$description": "Red 100"
+      },
+      "200": {
+        "$value": "#fecaca",
+        "$description": "Red 200"
+      },
+      "300": {
+        "$value": "#fca5a5",
+        "$description": "Red 300"
+      },
+      "400": {
+        "$value": "#f87171",
+        "$description": "Red 400"
+      },
+      "500": {
+        "$value": "#ef4444",
+        "$description": "Red 500 - Primary error red"
+      },
+      "600": {
+        "$value": "#dc2626",
+        "$description": "Red 600"
+      },
+      "700": {
+        "$value": "#b91c1c",
+        "$description": "Red 700"
+      },
+      "800": {
+        "$value": "#991b1b",
+        "$description": "Red 800"
+      },
+      "900": {
+        "$value": "#7f1d1d",
+        "$description": "Red 900"
+      },
+      "950": {
+        "$value": "#450a0a",
+        "$description": "Red 950"
+      }
+    },
+    "amber": {
+      "50": {
+        "$value": "#fffbeb",
+        "$description": "Amber 50 - For warning states"
+      },
+      "100": {
+        "$value": "#fef3c7",
+        "$description": "Amber 100"
+      },
+      "200": {
+        "$value": "#fde68a",
+        "$description": "Amber 200"
+      },
+      "300": {
+        "$value": "#fcd34d",
+        "$description": "Amber 300"
+      },
+      "400": {
+        "$value": "#fbbf24",
+        "$description": "Amber 400"
+      },
+      "500": {
+        "$value": "#f59e0b",
+        "$description": "Amber 500 - Primary warning amber"
+      },
+      "600": {
+        "$value": "#d97706",
+        "$description": "Amber 600"
+      },
+      "700": {
+        "$value": "#b45309",
+        "$description": "Amber 700"
+      },
+      "800": {
+        "$value": "#92400e",
+        "$description": "Amber 800"
+      },
+      "900": {
+        "$value": "#78350f",
+        "$description": "Amber 900"
+      },
+      "950": {
+        "$value": "#451a03",
+        "$description": "Amber 950"
+      }
+    },
+    "emerald": {
+      "50": {
+        "$value": "#ecfdf5",
+        "$description": "Emerald 50 - For success states"
+      },
+      "100": {
+        "$value": "#d1fae5",
+        "$description": "Emerald 100"
+      },
+      "200": {
+        "$value": "#a7f3d0",
+        "$description": "Emerald 200"
+      },
+      "300": {
+        "$value": "#6ee7b7",
+        "$description": "Emerald 300"
+      },
+      "400": {
+        "$value": "#34d399",
+        "$description": "Emerald 400"
+      },
+      "500": {
+        "$value": "#10b981",
+        "$description": "Emerald 500 - Primary success emerald"
+      },
+      "600": {
+        "$value": "#059669",
+        "$description": "Emerald 600"
+      },
+      "700": {
+        "$value": "#047857",
+        "$description": "Emerald 700"
+      },
+      "800": {
+        "$value": "#065f46",
+        "$description": "Emerald 800"
+      },
+      "900": {
+        "$value": "#064e3b",
+        "$description": "Emerald 900"
+      },
+      "950": {
+        "$value": "#022c22",
+        "$description": "Emerald 950"
+      }
+    },
+    "blue": {
+      "50": {
+        "$value": "#eff6ff",
+        "$description": "Blue 50 - For info states"
+      },
+      "100": {
+        "$value": "#dbeafe",
+        "$description": "Blue 100"
+      },
+      "200": {
+        "$value": "#bfdbfe",
+        "$description": "Blue 200"
+      },
+      "300": {
+        "$value": "#93c5fd",
+        "$description": "Blue 300"
+      },
+      "400": {
+        "$value": "#60a5fa",
+        "$description": "Blue 400"
+      },
+      "500": {
+        "$value": "#3b82f6",
+        "$description": "Blue 500 - Primary info blue"
+      },
+      "600": {
+        "$value": "#2563eb",
+        "$description": "Blue 600"
+      },
+      "700": {
+        "$value": "#1d4ed8",
+        "$description": "Blue 700"
+      },
+      "800": {
+        "$value": "#1e40af",
+        "$description": "Blue 800"
+      },
+      "900": {
+        "$value": "#1e3a8a",
+        "$description": "Blue 900"
+      },
+      "950": {
+        "$value": "#172554",
+        "$description": "Blue 950"
       }
     }
   }

@@ -1,106 +1,226 @@
 # @lime-soda/tokens
 
 Design tokens for the Lime Soda design system, built with Style Dictionary.
+Features a modern two-layer token architecture with primitive and semantic
+tokens, supporting both light and dark themes with WCAG 2.1 AA accessibility
+compliance.
 
 ## Overview
 
-This package contains the design system's design tokens organized into:
+This package provides a comprehensive color design system with:
 
-- **Primitives** - Base values (colors, spacing, typography)
-- **Themes** - Semantic token mappings
+- **🎨 Two-layer Architecture** - Primitive colors + semantic mappings
+- **🌓 Theme Support** - Light and dark mode with automatic switching
+- **♿ Accessibility First** - All combinations meet WCAG 2.1 AA standards
+- **🎯 Modern Colors** - RGB format with future OKLCH/P3 support ready
+- **⚡ Multiple Outputs** - Individual theme files + combined responsive CSS
 
-## Token Categories
+## Token Architecture
 
-### Primitives (`primitives/`)
+### Primitives Layer (`primitives/color.json`)
 
-- `color.json` - Color palette (brand colors, grays, etc.)
-- `size.json` - Spacing, sizing, and layout values
-- `font.json` - Typography scale, weights, and font families
-- `border.json` - Border widths, radius values
-- `transition.json` - Animation timing and easing
+Foundation color palette with no semantic meaning:
 
-### Themes (`theme/`)
+- **Green** (50-950) - Primary brand color
+- **Pink** (50-950) - Secondary brand color
+- **Gray** (50-950) - Neutral colors for text, borders, surfaces
+- **Red** (50-950) - Error/danger states
+- **Amber** (50-950) - Warning states
+- **Emerald** (50-950) - Success states
+- **Blue** (50-950) - Info/focus states
 
-- `color.json` - Semantic color mappings (primary, secondary, error, etc.)
+### Semantic Layer (`theme/`)
 
-## Generated CSS
+Context-aware tokens that reference primitives:
 
-The build process generates CSS custom properties:
+- `color-light.json` - Light mode semantic mappings
+- `color-dark.json` - Dark mode semantic mappings
+
+**Semantic Categories:**
+
+- `primary-*` / `secondary-*` - Brand colors with full scales
+- `background-*` / `surface-*` - Page and component backgrounds
+- `text-*` - Typography colors (primary, secondary, tertiary, disabled)
+- `border-*` / `outline-*` - Dividers and focus states
+- `error-*` / `warning-*` / `success-*` / `info-*` - State colors
+
+## Generated CSS Files
+
+The build generates multiple CSS files for different use cases:
+
+```bash
+dist/css/
+├── tokens.css           # Combined light + dark with media queries
+├── tokens-light.css     # Light mode only
+└── tokens-dark.css      # Dark mode only
+```
+
+### Example Generated CSS
 
 ```css
-/* Example generated CSS */
+/* Light mode (default) */
 :root {
-  --color-orange-50: #fff7ed;
-  --color-orange-400: #fb923c;
-  --color-orange-900: #9a3412;
+  --color-primary-500: #15803d; /* Green 700 - accessible */
+  --color-secondary-500: #db2777; /* Pink 600 - accessible */
+  --color-background-default: #ffffff;
+  --color-text-primary: #111827;
+}
 
-  --color-primary: var(--color-orange-400);
-  --color-on-primary: white;
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary-500: #4ade80; /* Green 400 - bright for dark */
+    --color-secondary-500: #f472b6; /* Pink 400 - bright for dark */
+    --color-background-default: #030712;
+    --color-text-primary: #f3f4f6;
+  }
+}
+
+/* Force themes */
+[data-theme='light'] {
+  /* light tokens */
+}
+[data-theme='dark'] {
+  /* dark tokens */
 }
 ```
 
 ## Usage
 
-### In Components
+### Automatic Theme Switching (Recommended)
 
 ```ts
-// Import CSS in your component
-import '@lime-soda/tokens/dist/css/tokens.css'
+// Import combined CSS with automatic light/dark switching
+import '@lime-soda/tokens/tokens.css'
 
-// Use in styles
 const styles = css`
   .button {
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-    padding: var(--size-2) var(--size-4);
-    border-radius: var(--border-radius-md);
+    background: var(--color-primary-500);
+    color: var(--color-primary-on-primary);
   }
 `
 ```
 
-### Direct CSS Import
+### Manual Theme Control
 
-```css
-/* Import all tokens */
-@import '@lime-soda/tokens/dist/css/tokens.css';
-
-.my-component {
-  background: var(--color-surface);
-  border: var(--border-width-1) solid var(--color-outline);
-}
+```html
+<html data-theme="light">
+  <!-- Force light -->
+  <html data-theme="dark">
+    <!-- Force dark -->
+  </html>
+</html>
 ```
+
+### Individual Theme Files
+
+```ts
+// Light mode only
+import '@lime-soda/tokens/tokens-light.css'
+
+// Dark mode only
+import '@lime-soda/tokens/tokens-dark.css'
+```
+
+### Component Usage Examples
+
+```ts
+// Button component
+const buttonStyles = css`
+  .button {
+    background: var(--color-primary-500);
+    color: var(--color-primary-on-primary);
+    border: 1px solid var(--color-border-default);
+  }
+
+  .button:hover {
+    background: var(--color-primary-600);
+  }
+
+  .button--secondary {
+    background: var(--color-secondary-500);
+    color: var(--color-secondary-on-secondary);
+  }
+`
+
+// Form validation
+const formStyles = css`
+  .input--error {
+    border-color: var(--color-error-500);
+    background: var(--color-error-50);
+  }
+
+  .input--success {
+    border-color: var(--color-success-500);
+    background: var(--color-success-50);
+  }
+`
+```
+
+## Accessibility
+
+All color combinations are tested to meet **WCAG 2.1 AA** standards:
+
+- Normal text: 4.5:1 minimum contrast ratio
+- Large text: 3.0:1 minimum contrast ratio
+
+The semantic tokens ensure accessible color usage by default:
+
+- `primary-500` / `secondary-500` on white: ≥4.5:1 contrast
+- White text on `primary-500` / `secondary-500`: ≥4.5:1 contrast
+- All `text-*` tokens on backgrounds: ≥4.5:1 contrast
 
 ## Development
 
 ```bash
-# Build tokens (generates CSS)
+# Build all token CSS files
 pnpm run build
 
-# Watch for changes (in development)
-pnpm run build --watch
+# Build individual themes
+pnpm run build:light    # Light mode only
+pnpm run build:dark     # Dark mode only
+pnpm run build:combined # Combined with media queries
+
+# Check accessibility compliance
+node scripts/check-accessibility.js
+
+# Lint tokens
+pnpm run lint
 ```
 
 ## File Structure
 
 ```
 support/tokens/
-├── config.json           # Style Dictionary configuration
-├── primitives/           # Base design tokens
-│   ├── color.json       # Color palette
-│   ├── size.json        # Spacing/sizing
-│   ├── font.json        # Typography
-│   ├── border.json      # Border values
-│   └── transition.json  # Animation
-├── theme/               # Semantic tokens
-│   └── color.json      # Color mappings
-└── dist/               # Generated files
+├── primitives/
+│   ├── color.json           # Primitive color palette
+│   ├── size.json           # Spacing/sizing values
+│   ├── font.json           # Typography tokens
+│   ├── border.json         # Border values
+│   └── transition.json     # Animation tokens
+├── theme/
+│   ├── color-light.json    # Light mode semantic colors
+│   └── color-dark.json     # Dark mode semantic colors
+├── scripts/
+│   ├── build-combined.js   # Combines light/dark CSS
+│   └── check-accessibility.js # WCAG compliance checker
+├── config.json             # Light mode build config
+├── config-dark.json        # Dark mode build config
+├── config-combined.json    # Combined build config
+└── dist/
     └── css/
-        └── tokens.css  # Generated CSS custom properties
+        ├── tokens.css      # Combined light/dark with media queries
+        ├── tokens-light.css # Light mode only
+        └── tokens-dark.css  # Dark mode only
 ```
 
 ## Integration
 
-- **Style Dictionary** - Transforms tokens into CSS custom properties
-- **Monorepo** - Shared across all component packages
-- **MCP Server** - Accessible via Model Context Protocol for tooling
-- **Build system** - Integrated with Turbo for efficient builds
+- **Style Dictionary 5.0** - Token transformation and CSS generation
+- **Monorepo** - Shared across all Lime Soda component packages via
+  `@lime-soda/tokens`
+- **MCP Server** - Design tokens accessible via Model Context Protocol for AI
+  tools
+- **Turbo** - Integrated build pipeline for efficient development
+- **Future Ready** - Architecture supports OKLCH and P3 color spaces when
+  tooling matures

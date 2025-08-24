@@ -1,0 +1,295 @@
+{
+  "color": {
+    "$type": "color",
+    "primary": {
+      "50": {
+        "$value": "{color.green.50}",
+        "$description": "Primary surface - lightest green for backgrounds"
+      },
+      "100": {
+        "$value": "{color.green.100}",
+        "$description": "Primary surface - very light green"
+      },
+      "200": {
+        "$value": "{color.green.200}",
+        "$description": "Primary surface - light green"
+      },
+      "300": {
+        "$value": "{color.green.300}",
+        "$description": "Primary border - medium light green"
+      },
+      "400": {
+        "$value": "{color.green.400}",
+        "$description": "Primary hover - medium green"
+      },
+      "500": {
+        "$value": "{color.green.700}",
+        "$description": "Primary default - accessible green for text/borders"
+      },
+      "600": {
+        "$value": "{color.green.700}",
+        "$description": "Primary active - darker green"
+      },
+      "700": {
+        "$value": "{color.green.800}",
+        "$description": "Primary emphasis - dark green"
+      },
+      "800": {
+        "$value": "{color.green.800}",
+        "$description": "Primary strong - very dark green"
+      },
+      "900": {
+        "$value": "{color.green.900}",
+        "$description": "Primary strongest - darkest green"
+      },
+      "950": {
+        "$value": "{color.green.950}",
+        "$description": "Primary text on light - very dark green for text"
+      },
+      "on-primary": {
+        "$value": "{color.white}",
+        "$description": "Text/icon color on primary backgrounds"
+      },
+      "on-primary-subtle": {
+        "$value": "{color.green.50}",
+        "$description": "Subtle text/icon color on primary backgrounds"
+      }
+    },
+    "secondary": {
+      "50": {
+        "$value": "{color.pink.50}",
+        "$description": "Secondary surface - lightest pink for backgrounds"
+      },
+      "100": {
+        "$value": "{color.pink.100}",
+        "$description": "Secondary surface - very light pink"
+      },
+      "200": {
+        "$value": "{color.pink.200}",
+        "$description": "Secondary surface - light pink"
+      },
+      "300": {
+        "$value": "{color.pink.300}",
+        "$description": "Secondary border - medium light pink"
+      },
+      "400": {
+        "$value": "{color.pink.400}",
+        "$description": "Secondary hover - medium pink"
+      },
+      "500": {
+        "$value": "{color.pink.600}",
+        "$description": "Secondary default - accessible pink for text/borders"
+      },
+      "600": {
+        "$value": "{color.pink.700}",
+        "$description": "Secondary active - darker pink"
+      },
+      "700": {
+        "$value": "{color.pink.800}",
+        "$description": "Secondary emphasis - dark pink"
+      },
+      "800": {
+        "$value": "{color.pink.800}",
+        "$description": "Secondary strong - very dark pink"
+      },
+      "900": {
+        "$value": "{color.pink.900}",
+        "$description": "Secondary strongest - darkest pink"
+      },
+      "950": {
+        "$value": "{color.pink.950}",
+        "$description": "Secondary text on light - very dark pink for text"
+      },
+      "on-secondary": {
+        "$value": "{color.white}",
+        "$description": "Text/icon color on secondary backgrounds"
+      },
+      "on-secondary-subtle": {
+        "$value": "{color.pink.50}",
+        "$description": "Subtle text/icon color on secondary backgrounds"
+      }
+    },
+    "background": {
+      "default": {
+        "$value": "{color.white}",
+        "$description": "Default page background"
+      },
+      "subtle": {
+        "$value": "{color.gray.50}",
+        "$description": "Subtle background for cards, panels"
+      },
+      "muted": {
+        "$value": "{color.gray.100}",
+        "$description": "Muted background for disabled states"
+      }
+    },
+    "surface": {
+      "default": {
+        "$value": "{color.white}",
+        "$description": "Default surface color for cards"
+      },
+      "raised": {
+        "$value": "{color.white}",
+        "$description": "Elevated surface color"
+      },
+      "overlay": {
+        "$value": "{color.white}",
+        "$description": "Overlay surface color for modals"
+      }
+    },
+    "text": {
+      "primary": {
+        "$value": "{color.gray.900}",
+        "$description": "Primary text color"
+      },
+      "secondary": {
+        "$value": "{color.gray.700}",
+        "$description": "Secondary text color"
+      },
+      "tertiary": {
+        "$value": "{color.gray.500}",
+        "$description": "Tertiary text color"
+      },
+      "disabled": {
+        "$value": "{color.gray.400}",
+        "$description": "Disabled text color"
+      },
+      "inverse": {
+        "$value": "{color.white}",
+        "$description": "Text color on dark backgrounds"
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "{color.gray.200}",
+        "$description": "Default border color"
+      },
+      "subtle": {
+        "$value": "{color.gray.100}",
+        "$description": "Subtle border color"
+      },
+      "strong": {
+        "$value": "{color.gray.300}",
+        "$description": "Strong border color"
+      },
+      "focus": {
+        "$value": "{color.blue.500}",
+        "$description": "Focus ring border color"
+      }
+    },
+    "outline": {
+      "default": {
+        "$value": "{color.gray.300}",
+        "$description": "Default outline color"
+      },
+      "subtle": {
+        "$value": "{color.gray.200}",
+        "$description": "Subtle outline color"
+      }
+    },
+    "error": {
+      "50": {
+        "$value": "{color.red.50}",
+        "$description": "Error background - very light"
+      },
+      "100": {
+        "$value": "{color.red.100}",
+        "$description": "Error background - light"
+      },
+      "500": {
+        "$value": "{color.red.600}",
+        "$description": "Error default color - accessible"
+      },
+      "600": {
+        "$value": "{color.red.700}",
+        "$description": "Error hover/active"
+      },
+      "700": {
+        "$value": "{color.red.700}",
+        "$description": "Error emphasis"
+      },
+      "on-error": {
+        "$value": "{color.white}",
+        "$description": "Text on error backgrounds"
+      }
+    },
+    "warning": {
+      "50": {
+        "$value": "{color.amber.50}",
+        "$description": "Warning background - very light"
+      },
+      "100": {
+        "$value": "{color.amber.100}",
+        "$description": "Warning background - light"
+      },
+      "500": {
+        "$value": "{color.amber.700}",
+        "$description": "Warning default color - accessible"
+      },
+      "600": {
+        "$value": "{color.amber.800}",
+        "$description": "Warning hover/active"
+      },
+      "700": {
+        "$value": "{color.amber.700}",
+        "$description": "Warning emphasis"
+      },
+      "on-warning": {
+        "$value": "{color.white}",
+        "$description": "Text on warning backgrounds"
+      }
+    },
+    "success": {
+      "50": {
+        "$value": "{color.emerald.50}",
+        "$description": "Success background - very light"
+      },
+      "100": {
+        "$value": "{color.emerald.100}",
+        "$description": "Success background - light"
+      },
+      "500": {
+        "$value": "{color.emerald.700}",
+        "$description": "Success default color - accessible"
+      },
+      "600": {
+        "$value": "{color.emerald.700}",
+        "$description": "Success hover/active"
+      },
+      "700": {
+        "$value": "{color.emerald.700}",
+        "$description": "Success emphasis"
+      },
+      "on-success": {
+        "$value": "{color.white}",
+        "$description": "Text on success backgrounds"
+      }
+    },
+    "info": {
+      "50": {
+        "$value": "{color.blue.50}",
+        "$description": "Info background - very light"
+      },
+      "100": {
+        "$value": "{color.blue.100}",
+        "$description": "Info background - light"
+      },
+      "500": {
+        "$value": "{color.blue.600}",
+        "$description": "Info default color - accessible"
+      },
+      "600": {
+        "$value": "{color.blue.700}",
+        "$description": "Info hover/active"
+      },
+      "700": {
+        "$value": "{color.blue.700}",
+        "$description": "Info emphasis"
+      },
+      "on-info": {
+        "$value": "{color.white}",
+        "$description": "Text on info backgrounds"
+      }
+    }
+  }
+}
