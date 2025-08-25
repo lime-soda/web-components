@@ -93,10 +93,10 @@ importers:
         version: link:../../tools/eslint-config
       '@modelcontextprotocol/inspector':
         specifier: ^0.16.5
-        version: 0.16.5(@types/node@22.17.2)(@types/react@19.1.8)(typescript@5.9.2)
+        version: 0.16.5(@types/node@22.18.0)(@types/react@19.1.8)(typescript@5.9.2)
       '@types/node':
         specifier: ^22.0.0
-        version: 22.17.2
+        version: 22.18.0
       tsx:
         specifier: ^4.20.4
         version: 4.20.5
@@ -1369,8 +1369,8 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@22.17.2':
-    resolution: {integrity: sha512-gL6z5N9Jm9mhY+U2KXZpteb+09zyffliRkZyZOHODGATyC5B1Jt/7TzuuiLkFsSUMLbS1OLmlj/E+/3KF4Q/4w==}
+  '@types/node@22.18.0':
+    resolution: {integrity: sha512-m5ObIqwsUp6BZzyiy4RdZpzWGub9bqLJMvZDD0QMXhxjqMHMENlj+SqF5QxoUwaQNFe+8kz8XM8ZQhqkQPTgMQ==}
 
   '@types/node@24.3.0':
     resolution: {integrity: sha512-aPTXCrfwnDLj4VvXrm+UUCQjNEvJgNA8s5F1cvwQU+3KNltTOkBm1j30uNLyqqPNe7gE3KFzImYoZEfLhp4Yow==}
@@ -4822,7 +4822,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@modelcontextprotocol/inspector@0.16.5(@types/node@22.17.2)(@types/react@19.1.8)(typescript@5.9.2)':
+  '@modelcontextprotocol/inspector@0.16.5(@types/node@22.18.0)(@types/react@19.1.8)(typescript@5.9.2)':
     dependencies:
       '@modelcontextprotocol/inspector-cli': 0.16.5
       '@modelcontextprotocol/inspector-client': 0.16.5(@types/react@19.1.8)
@@ -4832,7 +4832,7 @@ snapshots:
       open: 10.2.0
       shell-quote: 1.8.3
       spawn-rx: 5.1.2
-      ts-node: 10.9.2(@types/node@22.17.2)(typescript@5.9.2)
+      ts-node: 10.9.2(@types/node@22.18.0)(typescript@5.9.2)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@swc/core'
@@ -5431,7 +5431,7 @@ snapshots:
   '@types/liftoff@4.0.3':
     dependencies:
       '@types/fined': 1.1.5
-      '@types/node': 22.17.2
+      '@types/node': 24.3.0
 
   '@types/mdx@2.0.13': {}
 
@@ -5439,7 +5439,7 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
-  '@types/node@22.17.2':
+  '@types/node@22.18.0':
     dependencies:
       undici-types: 6.21.0
 
@@ -8029,7 +8029,7 @@ snapshots:
       '@bundled-es-modules/deepmerge': 4.3.1
       '@bundled-es-modules/glob': 10.4.2
       '@bundled-es-modules/memfs': 4.17.0
-      '@types/node': 22.17.2
+      '@types/node': 22.18.0
       '@zip.js/zip.js': 2.7.72
       chalk: 5.6.0
       change-case: 5.4.4
@@ -8118,14 +8118,14 @@ snapshots:
 
   ts-dedent@2.2.0: {}
 
-  ts-node@10.9.2(@types/node@22.17.2)(typescript@5.9.2):
+  ts-node@10.9.2(@types/node@22.18.0)(typescript@5.9.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 22.17.2
+      '@types/node': 22.18.0
       acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
