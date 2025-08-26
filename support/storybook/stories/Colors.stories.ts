@@ -32,7 +32,7 @@ const meta: Meta = {
 }
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<{ theme: 'auto' | 'light' | 'dark' }>
 
 // Helper function to wrap content with theme handling
 const withTheme = (content: TemplateResult, theme = 'auto') => {
@@ -593,22 +593,36 @@ export const ThemeDemo: Story = {
           }
 
           .status-card--error {
-            background: var(--color-error-50);
+            background: light-dark(var(--color-red-50), var(--color-red-950));
+            border: 1px solid
+              light-dark(var(--color-red-200), var(--color-red-800));
             border-left: 4px solid var(--color-error-500);
           }
 
           .status-card--warning {
-            background: var(--color-warning-50);
+            background: light-dark(
+              var(--color-amber-50),
+              var(--color-amber-950)
+            );
+            border: 1px solid
+              light-dark(var(--color-amber-200), var(--color-amber-800));
             border-left: 4px solid var(--color-warning-500);
           }
 
           .status-card--success {
-            background: var(--color-success-50);
+            background: light-dark(
+              var(--color-emerald-50),
+              var(--color-emerald-950)
+            );
+            border: 1px solid
+              light-dark(var(--color-emerald-200), var(--color-emerald-800));
             border-left: 4px solid var(--color-success-500);
           }
 
           .status-card--info {
-            background: var(--color-info-50);
+            background: light-dark(var(--color-blue-50), var(--color-blue-950));
+            border: 1px solid
+              light-dark(var(--color-blue-200), var(--color-blue-800));
             border-left: 4px solid var(--color-info-500);
           }
 
@@ -634,8 +648,23 @@ export const ThemeDemo: Story = {
           }
 
           .status-card__description {
-            color: var(--color-text-secondary);
             font-size: 14px;
+          }
+
+          .status-card--error .status-card__description {
+            color: var(--color-error-700);
+          }
+
+          .status-card--warning .status-card__description {
+            color: var(--color-warning-700);
+          }
+
+          .status-card--success .status-card__description {
+            color: var(--color-success-700);
+          }
+
+          .status-card--info .status-card__description {
+            color: var(--color-info-700);
           }
 
           .text-hierarchy {
