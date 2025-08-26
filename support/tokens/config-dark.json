@@ -9,6 +9,7 @@
           "destination": "tokens-dark.css",
           "format": "css/variables",
           "options": {
+            "outputReferences": true,
             "showFileHeader": true
           }
         }

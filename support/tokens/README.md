@@ -50,12 +50,38 @@ The build generates multiple CSS files for different use cases:
 
 ```bash
 dist/css/
-├── tokens.css           # Combined light + dark with media queries
+├── tokens.css           # Combined light + dark using light-dark() function
 ├── tokens-light.css     # Light mode only
 └── tokens-dark.css      # Dark mode only
 ```
 
 ### Example Generated CSS
+
+**Modern approach with `light-dark()` function (tokens.css):**
+
+```css
+:root {
+  color-scheme: light dark;
+
+  /* Primitive Colors - Foundation palette */
+  --color-green-700: #15803d;
+  --color-green-400: #4ade80;
+  --color-pink-600: #db2777;
+  --color-pink-400: #f472b6;
+
+  /* Semantic tokens - Automatic theme switching */
+  --color-primary-500: light-dark(#15803d, #4ade80);
+  --color-secondary-500: light-dark(#db2777, #f472b6);
+  --color-background-default: light-dark(#ffffff, #030712);
+  --color-text-primary: light-dark(#111827, #f3f4f6);
+}
+```
+
+The semantic tokens use the exact hex values from primitives for optimal
+performance, while maintaining the two-layer architecture conceptually through
+the Style Dictionary token definitions.
+
+**Legacy approach with media queries (for older browsers):**
 
 ```css
 /* Light mode (default) */
@@ -75,31 +101,30 @@ dist/css/
     --color-text-primary: #f3f4f6;
   }
 }
-
-/* Force themes */
-[data-theme='light'] {
-  /* light tokens */
-}
-[data-theme='dark'] {
-  /* dark tokens */
-}
 ```
 
 ## Usage
 
 ### Automatic Theme Switching (Recommended)
 
+**Modern browsers with `light-dark()` support:**
+
 ```ts
-// Import combined CSS with automatic light/dark switching
+// Import combined CSS with light-dark() functions
 import '@lime-soda/tokens/tokens.css'
 
 const styles = css`
   .button {
-    background: var(--color-primary-500);
+    background: var(
+      --color-primary-500
+    ); /* Automatically adapts to light/dark */
     color: var(--color-primary-on-primary);
   }
 `
 ```
+
+The `light-dark()` function automatically switches between light and dark values
+based on the user's system preference or the `color-scheme` property.
 
 ### Manual Theme Control
 
@@ -173,16 +198,13 @@ The semantic tokens ensure accessible color usage by default:
 ## Development
 
 ```bash
-# Build all token CSS files
+# Build all token CSS files (includes light-dark() combined version)
 pnpm run build
 
 # Build individual themes
 pnpm run build:light    # Light mode only
 pnpm run build:dark     # Dark mode only
-pnpm run build:combined # Combined with media queries
-
-# Check accessibility compliance
-node scripts/check-accessibility.js
+pnpm run build:combined # Generate light-dark() combined tokens only
 
 # Lint tokens
 pnpm run lint

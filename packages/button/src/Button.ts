@@ -28,7 +28,7 @@ export class Button extends LitElement {
   static styles = css`
     :host {
       --bg-color: var(--button-bg, var(--color-primary-300));
-      --text-color: var(--button-text-color, var(--color-black));
+      --text-color: var(--button-text-color, var(--color-on-primary));
     }
 
     button {
@@ -53,7 +53,7 @@ export class Button extends LitElement {
     }
 
     button:hover {
-      background: var(--color-orange-400);
+      background: var(--color-primary-200);
     }
   `
 }

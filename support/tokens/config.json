@@ -9,6 +9,7 @@
           "destination": "tokens-light.css",
           "format": "css/variables",
           "options": {
+            "outputReferences": true,
             "showFileHeader": true
           }
         }

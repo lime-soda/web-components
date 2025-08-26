@@ -4,9 +4,10 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "build": "style-dictionary build --config config.json && style-dictionary build --config config-dark.json",
+    "build": "style-dictionary build --config config.json && style-dictionary build --config config-dark.json && node scripts/build-light-dark.js",
     "build:light": "style-dictionary build --config config.json",
     "build:dark": "style-dictionary build --config config-dark.json",
+    "build:combined": "node scripts/build-light-dark.js",
     "lint": "eslint ."
   },
   "exports": {
