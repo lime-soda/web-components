@@ -1,4 +1,4 @@
-import '@lime-soda/tokens/tokens.css'
+import './preview.css'
 
 const preview = {
   parameters: {

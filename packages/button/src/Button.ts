@@ -7,6 +7,7 @@ import { customElement, property } from 'lit/decorators.js'
  * @slot - Default slot for button content
  * @csspart button - The button
  * @cssproperty --button-bg - Background color of the button
+ * @cssproperty --button-bg-hover - Background color of the button on hover
  * @cssproperty --button-text-color - Text color of the button
  */
 @customElement('ls-button')
@@ -28,6 +29,7 @@ export class Button extends LitElement {
   static styles = css`
     :host {
       --bg-color: var(--button-bg, var(--color-primary-300));
+      --bg-color-hover: var(--button-bg-hover, var(--color-primary-400));
       --text-color: var(--button-text-color, var(--color-primary-on-primary));
     }
 
@@ -53,7 +55,7 @@ export class Button extends LitElement {
     }
 
     button:hover {
-      background: var(--color-primary-200);
+      background: var(--bg-color-hover);
     }
   `
 }

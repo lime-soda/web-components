@@ -35,28 +35,31 @@ export default meta
 type Story = StoryObj
 
 // Helper function to wrap content with theme handling
-const withTheme = (content: TemplateResult, theme: string = 'auto') => {
-  const themeStyles =
-    theme === 'light'
-      ? 'color-scheme: light;'
-      : theme === 'dark'
-        ? 'color-scheme: dark;'
-        : 'color-scheme: light dark;'
-
-  const containerStyle = `
-    ${themeStyles}
-    min-height: 100vh;
-    padding: 20px;
-    background: var(--color-background-default);
-    color: var(--color-text-primary);
-    transition: background-color 0.2s ease, color 0.2s ease;
-  `
+const withTheme = (content: TemplateResult, theme = 'auto') => {
+  const themeClass = `theme-wrapper ${theme !== 'auto' ? `theme-${theme}` : ''}`
 
   return html`
-    <div
-      class="theme-wrapper"
-      data-theme="${theme !== 'auto' ? theme : ''}"
-      style="${containerStyle}">
+    <style>
+      .theme-wrapper {
+        min-height: 100vh;
+        padding: 20px;
+        background: var(--color-background-default);
+        color: var(--color-text-primary);
+        transition:
+          background-color 0.2s ease,
+          color 0.2s ease;
+        color-scheme: light dark;
+      }
+
+      .theme-wrapper.theme-light {
+        color-scheme: light;
+      }
+
+      .theme-wrapper.theme-dark {
+        color-scheme: dark;
+      }
+    </style>
+    <div class="${themeClass}" data-theme="${theme !== 'auto' ? theme : ''}">
       ${content}
     </div>
   `
@@ -68,39 +71,55 @@ const renderColorSwatch = (
   cssVariable: string,
   description?: string,
 ) => html`
-  <div
-    style="
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    min-width: 120px;
-  ">
-    <div
-      style="
+  <style>
+    .color-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .color-swatch__color {
       width: 80px;
       height: 80px;
       border-radius: 8px;
-      background: var(${cssVariable});
       border: 1px solid var(--color-border-default);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    "></div>
-    <div
-      style="
+    }
+
+    .color-swatch__info {
       text-align: center;
       font-family: system-ui, sans-serif;
       font-size: 12px;
       color: var(--color-text-primary);
-    ">
-      <div style="font-weight: 600; margin-bottom: 2px;">${name}</div>
-      <div
-        style="font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace; opacity: 0.7;">
-        ${cssVariable}
-      </div>
+    }
+
+    .color-swatch__name {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .color-swatch__variable {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      opacity: 0.7;
+    }
+
+    .color-swatch__description {
+      font-size: 11px;
+      opacity: 0.6;
+      margin-top: 4px;
+    }
+  </style>
+  <div class="color-swatch">
+    <div
+      class="color-swatch__color"
+      style="background: var(${cssVariable});"></div>
+    <div class="color-swatch__info">
+      <div class="color-swatch__name">${name}</div>
+      <div class="color-swatch__variable">${cssVariable}</div>
       ${description
-        ? html`<div style="font-size: 11px; opacity: 0.6; margin-top: 4px;">
-            ${description}
-          </div>`
+        ? html`<div class="color-swatch__description">${description}</div>`
         : ''}
     </div>
   </div>
@@ -111,24 +130,29 @@ const renderColorScale = (
   scales: string[],
   descriptions: Record<string, string> = {},
 ) => html`
-  <div style="margin-bottom: 32px;">
-    <h3
-      style="
+  <style>
+    .color-scale {
+      margin-bottom: 32px;
+    }
+
+    .color-scale__title {
       margin: 0 0 16px 0;
       font-family: system-ui, sans-serif;
       font-size: 18px;
       font-weight: 600;
       color: var(--color-text-primary);
       text-transform: capitalize;
-    ">
-      ${colorName}
-    </h3>
-    <div
-      style="
+    }
+
+    .color-scale__swatches {
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
-    ">
+    }
+  </style>
+  <div class="color-scale">
+    <h3 class="color-scale__title">${colorName}</h3>
+    <div class="color-scale__swatches">
       ${scales.map((scale) =>
         renderColorSwatch(
           `${colorName}-${scale}`,
@@ -144,25 +168,30 @@ export const PrimitiveColors: Story = {
   render: ({ theme }) =>
     withTheme(
       html`
+        <style>
+          .story-header {
+            margin-bottom: 32px;
+          }
+
+          .story-title {
+            margin: 0 0 8px 0;
+            font-family: system-ui, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+          }
+
+          .story-description {
+            margin: 0 0 24px 0;
+            font-family: system-ui, sans-serif;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+          }
+        </style>
         <div>
-          <div style="margin-bottom: 32px;">
-            <h2
-              style="
-          margin: 0 0 8px 0;
-          font-family: system-ui, sans-serif;
-          font-size: 24px;
-          font-weight: 700;
-          color: var(--color-text-primary);
-        ">
-              Primitive Colors
-            </h2>
-            <p
-              style="
-          margin: 0 0 24px 0;
-          font-family: system-ui, sans-serif;
-          color: var(--color-text-secondary);
-          max-width: 600px;
-        ">
+          <div class="story-header">
+            <h2 class="story-title">Primitive Colors</h2>
+            <p class="story-description">
               Foundation color palette with no semantic meaning. These colors
               are mapped to semantic tokens for consistent theming.
             </p>
@@ -285,25 +314,30 @@ export const SemanticTokens: Story = {
   render: ({ theme }) =>
     withTheme(
       html`
+        <style>
+          .story-header {
+            margin-bottom: 32px;
+          }
+
+          .story-title {
+            margin: 0 0 8px 0;
+            font-family: system-ui, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+          }
+
+          .story-description {
+            margin: 0 0 24px 0;
+            font-family: system-ui, sans-serif;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+          }
+        </style>
         <div>
-          <div style="margin-bottom: 32px;">
-            <h2
-              style="
-          margin: 0 0 8px 0;
-          font-family: system-ui, sans-serif;
-          font-size: 24px;
-          font-weight: 700;
-          color: var(--color-text-primary);
-        ">
-              Semantic Tokens
-            </h2>
-            <p
-              style="
-          margin: 0 0 24px 0;
-          font-family: system-ui, sans-serif;
-          color: var(--color-text-secondary);
-          max-width: 600px;
-        ">
+          <div class="story-header">
+            <h2 class="story-title">Semantic Tokens</h2>
+            <p class="story-description">
               Context-aware tokens that reference primitive colors. These
               automatically adapt to light and dark themes using the
               light-dark() CSS function.
@@ -353,18 +387,9 @@ export const SemanticTokens: Story = {
             },
           )}
 
-          <div style="margin-bottom: 32px;">
-            <h3
-              style="
-          margin: 0 0 16px 0;
-          font-family: system-ui, sans-serif;
-          font-size: 18px;
-          font-weight: 600;
-          color: var(--color-text-primary);
-        ">
-              Background & Surface
-            </h3>
-            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <div class="color-scale">
+            <h3 class="color-scale__title">Background & Surface</h3>
+            <div class="color-scale__swatches">
               ${renderColorSwatch(
                 'background-default',
                 '--color-background-default',
@@ -398,18 +423,9 @@ export const SemanticTokens: Story = {
             </div>
           </div>
 
-          <div style="margin-bottom: 32px;">
-            <h3
-              style="
-          margin: 0 0 16px 0;
-          font-family: system-ui, sans-serif;
-          font-size: 18px;
-          font-weight: 600;
-          color: var(--color-text-primary);
-        ">
-              Text Colors
-            </h3>
-            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <div class="color-scale">
+            <h3 class="color-scale__title">Text Colors</h3>
+            <div class="color-scale__swatches">
               ${renderColorSwatch(
                 'text-primary',
                 '--color-text-primary',
@@ -480,235 +496,264 @@ export const ThemeDemo: Story = {
   render: ({ theme }) =>
     withTheme(
       html`
-        <div>
-          <div style="margin-bottom: 32px;">
-            <h2
-              style="
-          margin: 0 0 8px 0;
-          font-family: system-ui, sans-serif;
-          font-size: 24px;
-          font-weight: 700;
-          color: var(--color-text-primary);
-        ">
-              Theme Demo
-            </h2>
-            <p
-              style="
-          margin: 0 0 24px 0;
-          font-family: system-ui, sans-serif;
-          color: var(--color-text-secondary);
-          max-width: 600px;
-        ">
-              This demo shows how tokens automatically adapt between light and
-              dark themes. Use the theme control above to switch between modes.
-            </p>
-          </div>
+        <style>
+          .story-header {
+            margin-bottom: 32px;
+          }
 
-          <!-- Demo Card -->
-          <div
-            style="
-        margin-bottom: 24px;
-        padding: 24px;
-        background: var(--color-surface-default);
-        border: 1px solid var(--color-border-default);
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      ">
-            <h3
-              style="
-          margin: 0 0 16px 0;
-          color: var(--color-text-primary);
-          font-size: 20px;
-          font-weight: 600;
-        ">
-              Sample Component
-            </h3>
-
-            <p
-              style="
-          margin: 0 0 20px 0;
-          color: var(--color-text-secondary);
-          line-height: 1.6;
-        ">
-              This card demonstrates how semantic tokens adapt to different
-              themes. The background, text colors, and borders all update
-              automatically using the light-dark() CSS function.
-            </p>
-
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <button
-                style="
-            background: var(--color-primary-500);
-            color: var(--color-primary-on-primary);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-          ">
-                Primary Button
-              </button>
-
-              <button
-                style="
-            background: var(--color-secondary-500);
-            color: var(--color-secondary-on-secondary);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-          ">
-                Secondary Button
-              </button>
-
-              <button
-                style="
-            background: transparent;
+          .story-title {
+            margin: 0 0 8px 0;
+            font-family: system-ui, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
             color: var(--color-text-primary);
+          }
+
+          .story-description {
+            margin: 0 0 24px 0;
+            font-family: system-ui, sans-serif;
+            color: var(--color-text-secondary);
+            max-width: 600px;
+          }
+
+          .demo-card {
+            margin-bottom: 24px;
+            padding: 24px;
+            background: var(--color-surface-default);
             border: 1px solid var(--color-border-default);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .demo-card__title {
+            margin: 0 0 16px 0;
+            color: var(--color-text-primary);
+            font-size: 20px;
+            font-weight: 600;
+          }
+
+          .demo-card__description {
+            margin: 0 0 20px 0;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+          }
+
+          .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+          }
+
+          .demo-button {
+            border: none;
             padding: 12px 24px;
             border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
-          ">
+          }
+
+          .demo-button--primary {
+            background: var(--color-primary-500);
+            color: var(--color-primary-on-primary);
+          }
+
+          .demo-button--secondary {
+            background: var(--color-secondary-500);
+            color: var(--color-secondary-on-secondary);
+          }
+
+          .demo-button--outline {
+            background: transparent;
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border-default);
+          }
+
+          .status-section {
+            margin-bottom: 24px;
+          }
+
+          .status-title {
+            margin: 0 0 16px 0;
+            color: var(--color-text-primary);
+            font-size: 18px;
+            font-weight: 600;
+          }
+
+          .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+          }
+
+          .status-card {
+            padding: 16px;
+            border-radius: 4px;
+          }
+
+          .status-card--error {
+            background: var(--color-error-50);
+            border-left: 4px solid var(--color-error-500);
+          }
+
+          .status-card--warning {
+            background: var(--color-warning-50);
+            border-left: 4px solid var(--color-warning-500);
+          }
+
+          .status-card--success {
+            background: var(--color-success-50);
+            border-left: 4px solid var(--color-success-500);
+          }
+
+          .status-card--info {
+            background: var(--color-info-50);
+            border-left: 4px solid var(--color-info-500);
+          }
+
+          .status-card__title {
+            font-weight: 600;
+            margin-bottom: 4px;
+          }
+
+          .status-card__title--error {
+            color: var(--color-error-600);
+          }
+
+          .status-card__title--warning {
+            color: var(--color-warning-600);
+          }
+
+          .status-card__title--success {
+            color: var(--color-success-600);
+          }
+
+          .status-card__title--info {
+            color: var(--color-info-600);
+          }
+
+          .status-card__description {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+          }
+
+          .text-hierarchy {
+            padding: 20px;
+            background: var(--color-background-subtle);
+            border-radius: 8px;
+            margin-bottom: 24px;
+          }
+
+          .text-hierarchy__title {
+            margin: 0 0 16px 0;
+            color: var(--color-text-primary);
+            font-size: 18px;
+            font-weight: 600;
+          }
+
+          .text-sample--primary {
+            color: var(--color-text-primary);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+          }
+
+          .text-sample--secondary {
+            color: var(--color-text-secondary);
+            font-size: 16px;
+            margin-bottom: 10px;
+          }
+
+          .text-sample--tertiary {
+            color: var(--color-text-tertiary);
+            font-size: 14px;
+            margin-bottom: 10px;
+          }
+
+          .theme-info {
+            padding: 16px;
+            background: var(--color-background-muted);
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 14px;
+            color: var(--color-text-secondary);
+          }
+        </style>
+        <div>
+          <div class="story-header">
+            <h2 class="story-title">Theme Demo</h2>
+            <p class="story-description">
+              This demo shows how tokens automatically adapt between light and
+              dark themes. Use the theme control above to switch between modes.
+            </p>
+          </div>
+
+          <div class="demo-card">
+            <h3 class="demo-card__title">Sample Component</h3>
+            <p class="demo-card__description">
+              This card demonstrates how semantic tokens adapt to different
+              themes. The background, text colors, and borders all update
+              automatically using the light-dark() CSS function.
+            </p>
+            <div class="button-group">
+              <button class="demo-button demo-button--primary">
+                Primary Button
+              </button>
+              <button class="demo-button demo-button--secondary">
+                Secondary Button
+              </button>
+              <button class="demo-button demo-button--outline">
                 Outline Button
               </button>
             </div>
           </div>
 
-          <!-- Status Examples -->
-          <div style="margin-bottom: 24px;">
-            <h3
-              style="
-          margin: 0 0 16px 0;
-          color: var(--color-text-primary);
-          font-size: 18px;
-          font-weight: 600;
-        ">
-              Status Colors
-            </h3>
-
-            <div
-              style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-              <div
-                style="
-            padding: 16px;
-            background: var(--color-error-50);
-            border-left: 4px solid var(--color-error-500);
-            border-radius: 4px;
-          ">
-                <div
-                  style="color: var(--color-error-600); font-weight: 600; margin-bottom: 4px;">
+          <div class="status-section">
+            <h3 class="status-title">Status Colors</h3>
+            <div class="status-grid">
+              <div class="status-card status-card--error">
+                <div class="status-card__title status-card__title--error">
                   Error
                 </div>
-                <div
-                  style="color: var(--color-text-secondary); font-size: 14px;">
-                  Something went wrong
-                </div>
+                <div class="status-card__description">Something went wrong</div>
               </div>
-
-              <div
-                style="
-            padding: 16px;
-            background: var(--color-warning-50);
-            border-left: 4px solid var(--color-warning-500);
-            border-radius: 4px;
-          ">
-                <div
-                  style="color: var(--color-warning-600); font-weight: 600; margin-bottom: 4px;">
+              <div class="status-card status-card--warning">
+                <div class="status-card__title status-card__title--warning">
                   Warning
                 </div>
-                <div
-                  style="color: var(--color-text-secondary); font-size: 14px;">
-                  Please be careful
-                </div>
+                <div class="status-card__description">Please be careful</div>
               </div>
-
-              <div
-                style="
-            padding: 16px;
-            background: var(--color-success-50);
-            border-left: 4px solid var(--color-success-500);
-            border-radius: 4px;
-          ">
-                <div
-                  style="color: var(--color-success-600); font-weight: 600; margin-bottom: 4px;">
+              <div class="status-card status-card--success">
+                <div class="status-card__title status-card__title--success">
                   Success
                 </div>
-                <div
-                  style="color: var(--color-text-secondary); font-size: 14px;">
-                  Task completed!
-                </div>
+                <div class="status-card__description">Task completed!</div>
               </div>
-
-              <div
-                style="
-            padding: 16px;
-            background: var(--color-info-50);
-            border-left: 4px solid var(--color-info-500);
-            border-radius: 4px;
-          ">
-                <div
-                  style="color: var(--color-info-600); font-weight: 600; margin-bottom: 4px;">
+              <div class="status-card status-card--info">
+                <div class="status-card__title status-card__title--info">
                   Info
                 </div>
-                <div
-                  style="color: var(--color-text-secondary); font-size: 14px;">
-                  Here's some info
-                </div>
+                <div class="status-card__description">Here's some info</div>
               </div>
             </div>
           </div>
 
-          <!-- Text Hierarchy -->
-          <div
-            style="
-        padding: 20px;
-        background: var(--color-background-subtle);
-        border-radius: 8px;
-        margin-bottom: 24px;
-      ">
-            <h3
-              style="
-          margin: 0 0 16px 0;
-          color: var(--color-text-primary);
-          font-size: 18px;
-          font-weight: 600;
-        ">
-              Text Hierarchy
-            </h3>
-
-            <div
-              style="color: var(--color-text-primary); font-size: 18px; font-weight: 600; margin-bottom: 12px;">
+          <div class="text-hierarchy">
+            <h3 class="text-hierarchy__title">Text Hierarchy</h3>
+            <div class="text-sample--primary">
               Primary text - highest contrast
             </div>
-            <div
-              style="color: var(--color-text-secondary); font-size: 16px; margin-bottom: 10px;">
+            <div class="text-sample--secondary">
               Secondary text - good contrast
             </div>
-            <div
-              style="color: var(--color-text-tertiary); font-size: 14px; margin-bottom: 10px;">
+            <div class="text-sample--tertiary">
               Tertiary text - readable contrast
             </div>
           </div>
 
-          <div
-            style="
-        padding: 16px;
-        background: var(--color-background-muted);
-        border: 1px solid var(--color-border-subtle);
-        border-radius: 8px;
-        font-family: 'SF Mono', 'Monaco', monospace;
-        font-size: 14px;
-        color: var(--color-text-secondary);
-      ">
+          <div class="theme-info">
             Current theme: <strong>${theme}</strong> | color-scheme:
             <strong
               >${theme === 'light'

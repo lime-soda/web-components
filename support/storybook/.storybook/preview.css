@@ -1,0 +1,8 @@
+@import '@lime-soda/tokens/tokens.css';
+
+html {
+  font-family: 'Inter', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: normal;
+  font-style: normal;
+}
