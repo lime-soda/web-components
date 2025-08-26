@@ -6,7 +6,7 @@
         "$value": "Times New Roman, serif"
       },
       "sans": {
-        "$value": "Open Sans, sans-serif"
+        "$value": "Inter, system-ui, sans-serif"
       }
     },
     "size": {
