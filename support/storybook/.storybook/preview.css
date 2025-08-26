@@ -6,3 +6,26 @@ html {
   font-weight: normal;
   font-style: normal;
 }
+
+/* Theme classes for global theme switching */
+.theme-system {
+  color-scheme: light dark;
+}
+
+.theme-light {
+  color-scheme: light;
+}
+
+.theme-dark {
+  color-scheme: dark;
+}
+
+/* Ensure theme classes apply to full viewport */
+.theme-system,
+.theme-light,
+.theme-dark {
+  min-height: 100vh;
+  background: var(--color-background-default);
+  color: var(--color-text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
