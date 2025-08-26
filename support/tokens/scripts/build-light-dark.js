@@ -56,14 +56,11 @@ function generateCombinedCSS(lightVars, darkVars) {
  * Design Tokens - Combined Light & Dark Mode using light-dark() function
  * Do not edit directly, this file was auto-generated.
  *
- * Uses the modern CSS light-dark() function for automatic theme switching.
- * Semantic tokens reference primitive CSS custom properties for better maintainability.
+ * Uses the CSS light-dark() function for automatic theme switching.
  * Requires color-scheme property to be set on html or :root.
  */
 
 :root {
-  color-scheme: light dark;
-
 `
 
   let cssContent = header
