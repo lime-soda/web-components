@@ -3,48 +3,48 @@
     "$type": "color",
     "primary": {
       "50": {
-        "$value": "{color.green.950}",
-        "$description": "Primary surface - darkest green for dark backgrounds"
+        "$value": "{color.green.50}",
+        "$description": "Primary surface - lightest green (same as light mode)"
       },
       "100": {
-        "$value": "{color.green.900}",
-        "$description": "Primary surface - very dark green"
+        "$value": "{color.green.100}",
+        "$description": "Primary surface - very light green"
       },
       "200": {
-        "$value": "{color.green.800}",
-        "$description": "Primary surface - dark green"
+        "$value": "{color.green.200}",
+        "$description": "Primary surface - light green"
       },
       "300": {
-        "$value": "{color.green.700}",
-        "$description": "Primary border - medium dark green"
+        "$value": "{color.green.300}",
+        "$description": "Primary border - medium light green"
       },
       "400": {
-        "$value": "{color.green.600}",
+        "$value": "{color.green.400}",
         "$description": "Primary hover - medium green"
       },
       "500": {
-        "$value": "{color.green.400}",
+        "$value": "{color.green.500}",
         "$description": "Primary default - bright green for dark mode"
       },
       "600": {
-        "$value": "{color.green.400}",
-        "$description": "Primary active - lighter green for dark mode"
+        "$value": "{color.green.600}",
+        "$description": "Primary active - bright green for dark mode"
       },
       "700": {
-        "$value": "{color.green.300}",
+        "$value": "{color.green.700}",
         "$description": "Primary emphasis - light green"
       },
       "800": {
-        "$value": "{color.green.200}",
+        "$value": "{color.green.800}",
         "$description": "Primary strong - very light green"
       },
       "900": {
-        "$value": "{color.green.100}",
-        "$description": "Primary strongest - lightest green"
+        "$value": "{color.green.900}",
+        "$description": "Primary strongest - dark green"
       },
       "950": {
-        "$value": "{color.green.50}",
-        "$description": "Primary text on dark - very light green for text"
+        "$value": "{color.green.950}",
+        "$description": "Primary text on dark - darkest green"
       },
       "on-primary": {
         "$value": "{color.black}",
@@ -57,48 +57,48 @@
     },
     "secondary": {
       "50": {
-        "$value": "{color.pink.950}",
-        "$description": "Secondary surface - darkest pink for dark backgrounds"
+        "$value": "{color.pink.50}",
+        "$description": "Secondary surface - lightest pink (same as light mode)"
       },
       "100": {
-        "$value": "{color.pink.900}",
-        "$description": "Secondary surface - very dark pink"
+        "$value": "{color.pink.100}",
+        "$description": "Secondary surface - very light pink"
       },
       "200": {
-        "$value": "{color.pink.800}",
-        "$description": "Secondary surface - dark pink"
+        "$value": "{color.pink.200}",
+        "$description": "Secondary surface - light pink"
       },
       "300": {
-        "$value": "{color.pink.700}",
-        "$description": "Secondary border - medium dark pink"
+        "$value": "{color.pink.300}",
+        "$description": "Secondary border - medium light pink"
       },
       "400": {
-        "$value": "{color.pink.600}",
+        "$value": "{color.pink.400}",
         "$description": "Secondary hover - medium pink"
       },
       "500": {
-        "$value": "{color.pink.400}",
+        "$value": "{color.pink.500}",
         "$description": "Secondary default - bright pink for dark mode"
       },
       "600": {
-        "$value": "{color.pink.400}",
-        "$description": "Secondary active - lighter pink for dark mode"
+        "$value": "{color.pink.600}",
+        "$description": "Secondary active - bright pink for dark mode"
       },
       "700": {
-        "$value": "{color.pink.300}",
+        "$value": "{color.pink.700}",
         "$description": "Secondary emphasis - light pink"
       },
       "800": {
-        "$value": "{color.pink.200}",
+        "$value": "{color.pink.800}",
         "$description": "Secondary strong - very light pink"
       },
       "900": {
-        "$value": "{color.pink.100}",
-        "$description": "Secondary strongest - lightest pink"
+        "$value": "{color.pink.900}",
+        "$description": "Secondary strongest - dark pink"
       },
       "950": {
-        "$value": "{color.pink.50}",
-        "$description": "Secondary text on dark - very light pink for text"
+        "$value": "{color.pink.950}",
+        "$description": "Secondary text on dark - darkest pink"
       },
       "on-secondary": {
         "$value": "{color.black}",
@@ -189,12 +189,12 @@
     },
     "error": {
       "50": {
-        "$value": "{color.red.950}",
-        "$description": "Error background - very dark in dark mode"
+        "$value": "{color.red.50}",
+        "$description": "Error background - very light (same as light mode)"
       },
       "100": {
-        "$value": "{color.red.900}",
-        "$description": "Error background - dark in dark mode"
+        "$value": "{color.red.100}",
+        "$description": "Error background - light (same as light mode)"
       },
       "500": {
         "$value": "{color.red.400}",
@@ -215,12 +215,12 @@
     },
     "warning": {
       "50": {
-        "$value": "{color.amber.950}",
-        "$description": "Warning background - very dark in dark mode"
+        "$value": "{color.amber.50}",
+        "$description": "Warning background - very light (same as light mode)"
       },
       "100": {
-        "$value": "{color.amber.900}",
-        "$description": "Warning background - dark in dark mode"
+        "$value": "{color.amber.100}",
+        "$description": "Warning background - light (same as light mode)"
       },
       "500": {
         "$value": "{color.amber.400}",
@@ -241,12 +241,12 @@
     },
     "success": {
       "50": {
-        "$value": "{color.emerald.950}",
-        "$description": "Success background - very dark in dark mode"
+        "$value": "{color.emerald.50}",
+        "$description": "Success background - very light (same as light mode)"
       },
       "100": {
-        "$value": "{color.emerald.900}",
-        "$description": "Success background - dark in dark mode"
+        "$value": "{color.emerald.100}",
+        "$description": "Success background - light (same as light mode)"
       },
       "500": {
         "$value": "{color.emerald.400}",
@@ -267,12 +267,12 @@
     },
     "info": {
       "50": {
-        "$value": "{color.blue.950}",
-        "$description": "Info background - very dark in dark mode"
+        "$value": "{color.blue.50}",
+        "$description": "Info background - very light (same as light mode)"
       },
       "100": {
-        "$value": "{color.blue.900}",
-        "$description": "Info background - dark in dark mode"
+        "$value": "{color.blue.100}",
+        "$description": "Info background - light (same as light mode)"
       },
       "500": {
         "$value": "{color.blue.400}",

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite'
-import { html } from 'lit'
+import { html, type TemplateResult } from 'lit'
 import { expect } from 'storybook/test'
 
 const meta: Meta = {
@@ -35,7 +35,7 @@ export default meta
 type Story = StoryObj
 
 // Helper function to wrap content with theme handling
-const withTheme = (content: any, theme: string = 'auto') => {
+const withTheme = (content: TemplateResult, theme: string = 'auto') => {
   const themeStyles =
     theme === 'light'
       ? 'color-scheme: light;'
@@ -70,9 +70,9 @@ const renderColorSwatch = (
 ) => html`
   <div
     style="
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 8px;
     min-width: 120px;
   ">
@@ -275,8 +275,8 @@ export const PrimitiveColors: Story = {
     if (greenSwatch) {
       const computedStyle = getComputedStyle(greenSwatch)
       const backgroundColor = computedStyle.backgroundColor
-      expect(backgroundColor).toBeTruthy()
-      expect(backgroundColor).not.toBe('initial')
+      await expect(backgroundColor).toBeTruthy()
+      await expect(backgroundColor).not.toBe('initial')
     }
   },
 }
@@ -470,8 +470,8 @@ export const SemanticTokens: Story = {
     if (primarySwatch) {
       const computedStyle = getComputedStyle(primarySwatch)
       const backgroundColor = computedStyle.backgroundColor
-      expect(backgroundColor).toBeTruthy()
-      expect(backgroundColor).not.toBe('initial')
+      await expect(backgroundColor).toBeTruthy()
+      await expect(backgroundColor).not.toBe('initial')
     }
   },
 }
@@ -697,9 +697,6 @@ export const ThemeDemo: Story = {
               style="color: var(--color-text-tertiary); font-size: 14px; margin-bottom: 10px;">
               Tertiary text - readable contrast
             </div>
-            <div style="color: var(--color-text-disabled); font-size: 12px;">
-              Disabled text - reduced contrast
-            </div>
           </div>
 
           <div
@@ -733,7 +730,7 @@ export const ThemeDemo: Story = {
     if (themeDemo) {
       const computedStyle = getComputedStyle(themeDemo)
       const backgroundColor = computedStyle.backgroundColor
-      expect(backgroundColor).toBeTruthy()
+      await expect(backgroundColor).toBeTruthy()
     }
   },
 }

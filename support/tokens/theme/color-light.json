@@ -31,7 +31,7 @@
         "$description": "Primary active - darker green"
       },
       "700": {
-        "$value": "{color.green.800}",
+        "$value": "{color.green.700}",
         "$description": "Primary emphasis - dark green"
       },
       "800": {
@@ -85,7 +85,7 @@
         "$description": "Secondary active - darker pink"
       },
       "700": {
-        "$value": "{color.pink.800}",
+        "$value": "{color.pink.700}",
         "$description": "Secondary emphasis - dark pink"
       },
       "800": {
