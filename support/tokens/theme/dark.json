@@ -1,0 +1,75 @@
+{
+  "color": {
+    "$type": "color",
+    "primary": {
+      "50": {
+        "$value": "{swatch.green.950}"
+      },
+      "100": {
+        "$value": "{swatch.green.900}"
+      },
+      "200": {
+        "$value": "{swatch.green.800}"
+      },
+      "300": {
+        "$value": "{swatch.green.700}"
+      },
+      "400": {
+        "$value": "{swatch.green.600}"
+      },
+      "500": {
+        "$value": "{swatch.green.300}"
+      },
+      "600": {
+        "$value": "{swatch.green.300}"
+      },
+      "700": {
+        "$value": "{swatch.green.300}"
+      },
+      "800": {
+        "$value": "{swatch.green.200}"
+      },
+      "900": {
+        "$value": "{swatch.green.100}"
+      },
+      "950": {
+        "$value": "{swatch.green.50}"
+      }
+    },
+    "secondary": {
+      "50": {
+        "$value": "{swatch.pink.950}"
+      },
+      "100": {
+        "$value": "{swatch.pink.900}"
+      },
+      "200": {
+        "$value": "{swatch.pink.800}"
+      },
+      "300": {
+        "$value": "{swatch.pink.700}"
+      },
+      "400": {
+        "$value": "{swatch.pink.600}"
+      },
+      "500": {
+        "$value": "{swatch.pink.300}"
+      },
+      "600": {
+        "$value": "{swatch.pink.300}"
+      },
+      "700": {
+        "$value": "{swatch.pink.300}"
+      },
+      "800": {
+        "$value": "{swatch.pink.200}"
+      },
+      "900": {
+        "$value": "{swatch.pink.100}"
+      },
+      "950": {
+        "$value": "{swatch.pink.50}"
+      }
+    }
+  }
+}

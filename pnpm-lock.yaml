@@ -53,6 +53,9 @@ importers:
 
   packages/button:
     dependencies:
+      '@lime-soda/tokens':
+        specifier: workspace:*
+        version: link:../../support/tokens
       lit:
         specifier: '>= 3.3.0'
         version: 3.3.1

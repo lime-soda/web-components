@@ -1,5 +1,5 @@
 {
-  "color": {
+  "swatch": {
     "$type": "color",
     "black": {
       "$value": "#000000",
@@ -12,77 +12,63 @@
     "green": {
       "50": {
         "$value": "#f0fdf4",
-        "$description": "Green 50 - Lightest green tint"
+        "$description": "Lightest green tint"
       },
       "100": {
-        "$value": "#dcfce7",
-        "$description": "Green 100"
+        "$value": "#dcfce7"
       },
       "200": {
-        "$value": "#bbf7d0",
-        "$description": "Green 200"
+        "$value": "#bbf7d0"
       },
       "300": {
-        "$value": "#86efac",
-        "$description": "Green 300"
+        "$value": "#86efac"
       },
       "400": {
-        "$value": "#4ade80",
-        "$description": "Green 400"
+        "$value": "#4ade80"
       },
       "500": {
         "$value": "#22c55e",
-        "$description": "Green 500 - Primary green"
+        "$description": "Primary green"
       },
       "600": {
-        "$value": "#16a34a",
-        "$description": "Green 600"
+        "$value": "#16a34a"
       },
       "700": {
-        "$value": "#15803d",
-        "$description": "Green 700"
+        "$value": "#15803d"
       },
       "800": {
-        "$value": "#166534",
-        "$description": "Green 800"
+        "$value": "#166534"
       },
       "900": {
-        "$value": "#14532d",
-        "$description": "Green 900"
+        "$value": "#14532d"
       },
       "950": {
         "$value": "#052e16",
-        "$description": "Green 950 - Darkest green shade"
+        "$description": "Darkest green shade"
       }
     },
     "pink": {
       "50": {
         "$value": "#fdf2f8",
-        "$description": "Pink 50 - Lightest pink tint"
+        "$description": "Lightest pink tint"
       },
       "100": {
-        "$value": "#fce7f3",
-        "$description": "Pink 100"
+        "$value": "#fce7f3"
       },
       "200": {
-        "$value": "#fbcfe8",
-        "$description": "Pink 200"
+        "$value": "#fbcfe8"
       },
       "300": {
-        "$value": "#f9a8d4",
-        "$description": "Pink 300"
+        "$value": "#f9a8d4"
       },
       "400": {
-        "$value": "#f472b6",
-        "$description": "Pink 400"
+        "$value": "#f472b6"
       },
       "500": {
-        "$value": "#ec4899",
-        "$description": "Pink 500 - Primary pink"
+        "$value": "#ec4899"
       },
       "600": {
-        "$value": "#db2777",
-        "$description": "Pink 600"
+        "$value": "#db2777"
       },
       "700": {
         "$value": "#be185d",

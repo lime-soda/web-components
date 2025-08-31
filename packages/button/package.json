@@ -24,6 +24,9 @@
     "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\"",
     "lint": "eslint ."
   },
+  "dependencies": {
+    "@lime-soda/tokens": "workspace:*"
+  },
   "peerDependencies": {
     "lit": ">= 3.3.0"
   },

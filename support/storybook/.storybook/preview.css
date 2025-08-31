@@ -1,4 +1,4 @@
-@import '@lime-soda/tokens/tokens.css';
+@import '@lime-soda/tokens/light.css';
 
 html {
   font-family: 'Inter', sans-serif;
@@ -26,6 +26,8 @@ html {
 .theme-dark {
   min-height: 100vh;
   background: var(--color-background-default);
-  color: var(--color-text-primary);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  color: var(--color-text-default);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }

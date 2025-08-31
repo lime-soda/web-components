@@ -4,13 +4,13 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "build": "style-dictionary build",
+    "build": "node build.js",
     "lint": "eslint ."
   },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/tokens.js"
+      "import": "./dist/index.js"
     },
     "./*.css": "./dist/css/*.css"
   },
