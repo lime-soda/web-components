@@ -18,10 +18,10 @@
         "$value": "{swatch.green.600}"
       },
       "500": {
-        "$value": "{swatch.green.300}"
+        "$value": "{swatch.green.500}"
       },
       "600": {
-        "$value": "{swatch.green.300}"
+        "$value": "{swatch.green.400}"
       },
       "700": {
         "$value": "{swatch.green.300}"
@@ -53,10 +53,10 @@
         "$value": "{swatch.pink.600}"
       },
       "500": {
-        "$value": "{swatch.pink.300}"
+        "$value": "{swatch.pink.500}"
       },
       "600": {
-        "$value": "{swatch.pink.300}"
+        "$value": "{swatch.pink.400}"
       },
       "700": {
         "$value": "{swatch.pink.300}"
@@ -69,6 +69,20 @@
       },
       "950": {
         "$value": "{swatch.pink.50}"
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{swatch.gray.100}"
+      },
+      "inverse": {
+        "$value": "{swatch.gray.900}"
+      },
+      "primary": {
+        "$value": "{color.primary.500}"
+      },
+      "on-primary": {
+        "$value": "{swatch.white}"
       }
     }
   }

@@ -28,9 +28,9 @@ export class Button extends LitElement {
 
   static styles = css`
     :host {
-      --bg-color: var(--button-bg, var(--color-primary-300));
-      --bg-color-hover: var(--button-bg-hover, var(--color-primary-400));
-      --text-color: var(--button-text-color, var(--color-primary-on-primary));
+      --bg-color: var(--button-bg, var(--color-primary-400));
+      --bg-color-hover: var(--button-bg-hover, var(--color-primary-300));
+      --text-color: var(--button-text-color, var(--color-text-on-primary));
     }
 
     button {
