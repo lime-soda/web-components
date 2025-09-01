@@ -23,10 +23,10 @@ function buildTheme(theme) {
       css: {
         transformGroup: 'css',
         transforms: [transforms.sizeRem],
-        buildPath: `dist/${theme}`,
+        buildPath: `dist/css`,
         files: [
           {
-            destination: `tokens.css`,
+            destination: `${theme}.css`,
             format: 'css/variables',
             options: {
               outputReferences: true,
