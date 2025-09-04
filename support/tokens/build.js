@@ -34,17 +34,6 @@ function buildTheme(theme) {
           },
         ],
       },
-      jsVars: {
-        transformGroup: 'js',
-        transforms: [transforms.nameCamel, 'javascript/cssRef'],
-        buildPath: `dist/${theme}`,
-        files: [
-          {
-            destination: `variables.js`,
-            format: 'javascript/es6',
-          },
-        ],
-      },
       js: {
         transformGroup: 'js',
         transforms: [transforms.nameCamel],
@@ -53,17 +42,20 @@ function buildTheme(theme) {
           {
             destination: `index.js`,
             format: 'javascript/esm',
+            options: {
+              outputReferences: true,
+            },
           },
         ],
       },
-      types: {
+      typescript: {
         transformGroup: 'js',
         transforms: [transforms.nameCamel],
         buildPath: `dist/${theme}`,
         files: [
           {
             destination: `index.d.ts`,
-            format: 'typescript/es6-declarations',
+            format: 'typescript/module-declarations',
           },
         ],
       },
@@ -72,3 +64,26 @@ function buildTheme(theme) {
 
   return sd.buildAllPlatforms()
 }
+
+const darkTheme = await import('./dist/dark/index.js')
+const lightTheme = await import('./dist/light/index.js')
+
+function flattenLightDark(light, dark, acc = {}) {
+  for (let [key, tokenOrType] of Object.entries(light)) {
+    if ('$value' in tokenOrType) {
+      const path = tokenOrType.path.join('-')
+
+      acc[key] =
+        `--${path}: light-dark(${light[key].$value}, ${dark[key].$value})`
+    } else {
+      acc = {
+        ...acc,
+        [key]: { ...flattenLightDark(light[key], dark[key] || acc) },
+      }
+    }
+  }
+
+  return acc
+}
+
+console.log(flattenLightDark(lightTheme.default.color, darkTheme.default.color))

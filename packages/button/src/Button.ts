@@ -1,5 +1,7 @@
-import { LitElement, css, html } from 'lit'
+import { LitElement, css, html, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import darkTheme from '@lime-soda/tokens/dark'
+import lightTheme from '@lime-soda/tokens/light'
 
 /**
  * Button element.
@@ -28,7 +30,13 @@ export class Button extends LitElement {
 
   static styles = css`
     :host {
-      --bg-color: var(--button-bg, var(--color-primary-400));
+      --bg-color: var(
+        --button-bg,
+        light-dark(
+          ${unsafeCSS(lightTheme.color.primary['400'].$value)},
+          ${unsafeCSS(darkTheme.color.primary['400'].$value)}
+        )
+      );
       --bg-color-hover: var(--button-bg-hover, var(--color-primary-300));
       --text-color: var(--button-text-color, var(--color-text-on-primary));
     }

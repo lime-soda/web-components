@@ -22,7 +22,7 @@ const preview: Preview = {
   },
   decorators: [
     (story, { globals }) => {
-      const theme = (globals?.theme as string) ?? 'system'
+      const theme = (globals?.theme as 'light' | 'dark' | 'system') ?? 'system'
 
       // Set theme class on document body for global theming
       document.body.className =

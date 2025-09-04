@@ -1,5 +1,3 @@
-@import '@lime-soda/tokens/light.css';
-
 html {
   font-family: 'Inter', sans-serif;
   font-optical-sizing: auto;
@@ -13,10 +11,12 @@ html {
 }
 
 .theme-light {
+  @import '@lime-soda/tokens/light.css';
   color-scheme: light;
 }
 
 .theme-dark {
+  @import '@lime-soda/tokens/dark.css';
   color-scheme: dark;
 }
 
