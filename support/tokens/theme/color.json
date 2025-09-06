@@ -3,7 +3,6 @@
     "$type": "color",
     "primary": {
       "50": {
-        "$value": "{swatch.green.50}",
         "$extensions": {
           "org.lime-soda": {
             "modes": {
@@ -327,42 +326,6 @@
             "modes": {
               "dark": {
                 "$value": "{swatch.gray.900}"
-              }
-            }
-          }
-        }
-      },
-      "inverse": {
-        "$value": "{swatch.gray.900}",
-        "$extensions": {
-          "org.lime-soda": {
-            "modes": {
-              "dark": {
-                "$value": "{swatch.white}"
-              }
-            }
-          }
-        }
-      },
-      "primary": {
-        "$value": "{color.primary.500}",
-        "$extensions": {
-          "org.lime-soda": {
-            "modes": {
-              "dark": {
-                "$value": "{color.primary.400}"
-              }
-            }
-          }
-        }
-      },
-      "on-primary": {
-        "$value": "{swatch.white}",
-        "$extensions": {
-          "org.lime-soda": {
-            "modes": {
-              "dark": {
-                "$value": "{swatch.black}"
               }
             }
           }

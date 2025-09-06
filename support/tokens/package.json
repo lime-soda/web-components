@@ -12,11 +12,7 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./*": {
-      "types": "./dist/*/index.d.ts",
-      "import": "./dist/*/index.js"
-    },
-    "./*.css": "./dist/css/*.css"
+    "./*.css": "./dist/*.css"
   },
   "keywords": [],
   "author": "Phil Parsons",

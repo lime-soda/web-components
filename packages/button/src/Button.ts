@@ -1,6 +1,6 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
-import { colorPrimary300, colorPrimary400 } from '@lime-soda/tokens/lime-soda'
+import { colorPrimary300, colorPrimary400 } from '@lime-soda/tokens'
 
 /**
  * Button element.
