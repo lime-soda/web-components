@@ -24,6 +24,9 @@
   "dependencies": {
     "style-dictionary": "^5.0.1"
   },
+  "optionalDependencies": {
+    "lit": "^3.3.1"
+  },
   "devDependencies": {
     "@lime-soda/eslint-config": "workspace:*"
   }
