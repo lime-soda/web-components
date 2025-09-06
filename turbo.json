@@ -6,7 +6,7 @@
       "outputs": ["dist/**/*.{js,css}"]
     },
     "build:types": {
-      "dependsOn": ["^build:types"],
+      "dependsOn": ["^build", "^build:types"],
       "outputs": ["dist/**/*.d.ts"]
     },
     "build:manifest": {
