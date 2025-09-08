@@ -1,8 +1,15 @@
 {
   "color": {
     "$type": "color",
+    "white": {
+      "$value": "{swatch.white}"
+    },
+    "black": {
+      "$value": "{swatch.black}"
+    },
     "primary": {
       "50": {
+        "$value": "{swatch.green.50}",
         "$extensions": {
           "org.lime-soda": {
             "modes": {
@@ -294,12 +301,12 @@
         }
       },
       "primary": {
-        "$value": "{color.primary.500}",
+        "$value": "{swatch.green.500}",
         "$extensions": {
           "org.lime-soda": {
             "modes": {
               "dark": {
-                "$value": "{color.primary.400}"
+                "$value": "{swatch.green.400}"
               }
             }
           }

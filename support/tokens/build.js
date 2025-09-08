@@ -12,12 +12,27 @@ StyleDictionary.registerTransform({
 })
 
 StyleDictionary.registerTransform({
-  name: 'css/mode',
+  name: 'css/lightDark',
   type: 'value',
   transitive: true,
-  transform: (token) => {
+  transform: (token, ...args) => {
     if (token.$extensions?.['org.lime-soda']?.modes?.dark) {
-      return `light-dark(${token.$value}, ${token.$extensions['org.lime-soda'].modes.dark.$value})`
+      let darkValue = token.$extensions['org.lime-soda'].modes.dark.$value
+
+      if (token.$type === 'color' || token.$type === 'shadow') {
+        darkValue = StyleDictionary.hooks.transforms[
+          token.$type === 'shadow'
+            ? transforms.shadowCssShorthand
+            : transforms.colorCss
+        ].transform(
+          {
+            $value: darkValue,
+          },
+          ...args,
+        )
+      }
+
+      return `light-dark(${token.$value}, ${darkValue})`
     }
 
     return token.$value
@@ -45,49 +60,53 @@ StyleDictionary.registerFormat({
   },
 })
 
-const sd = new StyleDictionary({
-  source: ['primitives/*.json', `theme/**/*.json`],
-  platforms: {
-    css: {
-      transformGroup: 'css',
-      transforms: [transforms.sizeRem, 'css/mode'],
-      buildPath: `dist/`,
-      files: [
-        {
-          destination: `variables.css`,
-          format: 'css/variables',
-          options: {
-            // outputReferences: true,
+const sd = new StyleDictionary(
+  {
+    source: ['primitives/*.json', `theme/**/*.json`],
+    platforms: {
+      css: {
+        transformGroup: 'css',
+        transforms: [transforms.sizeRem, 'css/lightDark'],
+        buildPath: `dist/`,
+        files: [
+          {
+            destination: `variables.css`,
+            format: 'css/variables',
+            filter: (token) => !token.filePath?.includes('primitives'),
+            options: {
+              // outputReferences: true,
+            },
           },
-        },
-      ],
-    },
-    js: {
-      transformGroup: 'js',
-      transforms: [transforms.nameCamel, 'javascript/litRef'],
-      buildPath: `dist/`,
-      files: [
-        {
-          destination: `index.js`,
-          format: 'javascript/lit',
-          options: {
-            outputReferences: true,
+        ],
+      },
+      js: {
+        transformGroup: 'js',
+        transforms: [transforms.nameCamel, 'javascript/litRef'],
+        buildPath: `dist/`,
+        files: [
+          {
+            destination: `index.js`,
+            format: 'javascript/lit',
+            options: {
+              outputReferences: true,
+            },
           },
-        },
-      ],
-    },
-    typescript: {
-      transformGroup: 'js',
-      transforms: [transforms.nameCamel],
-      buildPath: `dist/`,
-      files: [
-        {
-          destination: `index.d.ts`,
-          format: 'typescript/lit',
-        },
-      ],
+        ],
+      },
+      typescript: {
+        transformGroup: 'js',
+        transforms: [transforms.nameCamel],
+        buildPath: `dist/`,
+        files: [
+          {
+            destination: `index.d.ts`,
+            format: 'typescript/lit',
+          },
+        ],
+      },
     },
   },
-})
+  { verbosity: 'verbose' },
+)
 
 await sd.buildAllPlatforms()
