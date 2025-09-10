@@ -92,8 +92,13 @@ const lightDark = {}
 light.matchAll(propertiesPattern).forEach(([, prop, value]) => {
   lightDark[prop] = value
 })
+
+// Any dark values that are not in light are added and any that
+// are different are combined into light-dark()
 dark.matchAll(propertiesPattern).forEach(([, prop, value]) => {
-  if (lightDark[prop] && lightDark[prop] !== value) {
+  if (!lightDark[prop]) {
+    lightDark[prop] = value
+  } else if (lightDark[prop] !== value) {
     lightDark[prop] = `light-dark(${lightDark[prop]}, ${value})`
   }
 })

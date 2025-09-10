@@ -1,0 +1,20 @@
+{
+  "radius": {
+    "xs": {
+      "$type": "dimension",
+      "$value": "{size.half}"
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": "{size.1}"
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": "{size.2}"
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": "{size.4}"
+    }
+  }
+}

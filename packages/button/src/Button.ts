@@ -1,6 +1,5 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
-import { colorPrimary300, colorPrimary400 } from '@lime-soda/tokens'
 
 /**
  * Button element.
@@ -19,47 +18,45 @@ export class Button extends LitElement {
   @property({ type: String })
   size: 'sm' | 'md' | 'lg' = 'sm'
 
+  @property({ type: String })
+  color: 'primary' | 'secondary' = 'primary'
+
   render() {
     return html`
-      <button part="button" class="${this.size}">
+      <button part="button" class="${this.size} ${this.color}">
         <slot></slot>
       </button>
     `
   }
 
   static styles = css`
-    :host {
-      --bg-color: var(
-        --button-bg,
-        light-dark(${colorPrimary300}, ${colorPrimary400})
-      );
-      --bg-color-hover: var(--button-bg-hover, var(--color-primary-300));
-      --text-color: var(--button-text-color, var(--color-text-on-primary));
-    }
-
     button {
-      background: var(--bg-color);
-      border-radius: 0.5rem;
       border: none;
-      color: var(--text-color);
       cursor: pointer;
-      font-weight: 500;
-      padding: 0.5rem 1rem;
       transition: background var(--transition-duration-medium, 0.3s);
 
       &.sm {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
+        border-radius: var(--button-sm-border-radius);
+        font: var(--button-sm-font);
+        padding: var(--button-sm-padding);
+      }
+
+      &.md {
+        border-radius: var(--button-md-border-radius);
+        font: var(--button-md-font);
+        padding: var(--button-md-padding);
       }
 
       &.lg {
-        font-size: 1.25rem;
-        padding: 0.75rem 1.25rem;
+        border-radius: var(--button-lg-border-radius);
+        font: var(--button-lg-font);
+        padding: var(--button-lg-padding);
       }
-    }
 
-    button:hover {
-      background: var(--bg-color-hover);
+      &.primary {
+        background: var(--button-primary-background-color);
+        color: var(--button-primary-color);
+      }
     }
   `
 }
