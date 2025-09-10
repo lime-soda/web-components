@@ -1,41 +1,14 @@
 import StyleDictionary from 'style-dictionary'
 import { transforms } from 'style-dictionary/enums'
 import * as prettier from 'prettier'
+import fs from 'node:fs/promises'
 
 StyleDictionary.registerTransform({
-  name: 'javascript/litRef',
+  name: 'javascript/cssRef',
   type: 'value',
   transitive: true,
   transform: (token) => {
-    return `css\`var(--${token.path.join('-')})\``
-  },
-})
-
-StyleDictionary.registerTransform({
-  name: 'css/lightDark',
-  type: 'value',
-  transitive: true,
-  transform: (token, ...args) => {
-    if (token.$extensions?.['org.lime-soda']?.modes?.dark) {
-      let darkValue = token.$extensions['org.lime-soda'].modes.dark.$value
-
-      if (token.$type === 'color' || token.$type === 'shadow') {
-        darkValue = StyleDictionary.hooks.transforms[
-          token.$type === 'shadow'
-            ? transforms.shadowCssShorthand
-            : transforms.colorCss
-        ].transform(
-          {
-            $value: darkValue,
-          },
-          ...args,
-        )
-      }
-
-      return `light-dark(${token.$value}, ${darkValue})`
-    }
-
-    return token.$value
+    return `var(--${token.path.join('-')})`
   },
 })
 
@@ -44,7 +17,7 @@ StyleDictionary.registerFormat({
   format({ dictionary }) {
     return prettier.format(
       `import { css } from 'lit';\n\n${dictionary.allTokens
-        .map((token) => `export const ${token.name} = ${token.$value};`)
+        .map((token) => `export const ${token.name} = css\`${token.$value}\`;`)
         .join('\n')}`,
       { parser: 'babel' },
     )
@@ -60,53 +33,75 @@ StyleDictionary.registerFormat({
   },
 })
 
-const sd = new StyleDictionary(
-  {
-    source: ['primitives/*.json', `theme/**/*.json`],
-    platforms: {
-      css: {
-        transformGroup: 'css',
-        transforms: [transforms.sizeRem, 'css/lightDark'],
-        buildPath: `dist/`,
-        files: [
-          {
-            destination: `variables.css`,
-            format: 'css/variables',
-            filter: (token) => !token.filePath?.includes('primitives'),
-            options: {
-              // outputReferences: true,
+for (let mode of ['light', 'dark']) {
+  const sd = new StyleDictionary(
+    {
+      source: ['primitives/*.json', 'theme/*.json', `theme/${mode}/*.json`],
+      platforms: {
+        css: {
+          transformGroup: 'css',
+          transforms: [transforms.sizeRem],
+          buildPath: `dist/`,
+          files: [
+            {
+              destination: `${mode}.css`,
+              format: 'css/variables',
+              options: {
+                outputReferences: true,
+              },
             },
-          },
-        ],
-      },
-      js: {
-        transformGroup: 'js',
-        transforms: [transforms.nameCamel, 'javascript/litRef'],
-        buildPath: `dist/`,
-        files: [
-          {
-            destination: `index.js`,
-            format: 'javascript/lit',
-            options: {
-              outputReferences: true,
+          ],
+        },
+        js: {
+          transformGroup: 'js',
+          transforms: [transforms.nameCamel, 'javascript/cssRef'],
+          buildPath: `dist/`,
+          files: [
+            {
+              destination: `${mode}.js`,
+              format: 'javascript/lit',
             },
-          },
-        ],
-      },
-      typescript: {
-        transformGroup: 'js',
-        transforms: [transforms.nameCamel],
-        buildPath: `dist/`,
-        files: [
-          {
-            destination: `index.d.ts`,
-            format: 'typescript/lit',
-          },
-        ],
+          ],
+        },
+        ts: {
+          transformGroup: 'js',
+          transforms: [transforms.nameCamel],
+          buildPath: `dist/`,
+          files: [
+            {
+              destination: `${mode}.d.ts`,
+              format: 'typescript/lit',
+            },
+          ],
+        },
       },
     },
-  },
-  { verbosity: 'verbose' },
-)
+    { verbosity: 'verbose' },
+  )
 
-await sd.buildAllPlatforms()
+  await sd.buildAllPlatforms()
+}
+
+// Combine light and dark CSS variables into one file
+const light = await fs.readFile('dist/light.css', 'utf-8')
+const dark = await fs.readFile('dist/dark.css', 'utf-8')
+
+const propertiesPattern = /(--[^:]+?):\s*([^;]+?);/g
+const lightDark = {}
+
+light.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+  lightDark[prop] = value
+})
+dark.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+  if (lightDark[prop] && lightDark[prop] !== value) {
+    lightDark[prop] = `light-dark(${lightDark[prop]}, ${value})`
+  }
+})
+
+await fs.writeFile(
+  'dist/variables.css',
+  `:root {\n${Object.entries(lightDark)
+    .map(([prop, value]) => `  ${prop}: ${value};`)
+    .join('\n')}\n}`,
+  'utf-8',
+)

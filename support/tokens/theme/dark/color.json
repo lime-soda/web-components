@@ -1,0 +1,10 @@
+{
+  "color": {
+    "$type": "color",
+    "background": {
+      "default": {
+        "$value": "{color.gray.950}"
+      }
+    }
+  }
+}
