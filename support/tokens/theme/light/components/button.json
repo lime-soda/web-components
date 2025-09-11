@@ -1,5 +1,20 @@
 {
   "button": {
+    "transition": {
+      "$type": "transition",
+      "$value": [
+        {
+          "property": "background-color",
+          "duration": "0.2s",
+          "timing-function": "ease-in-out"
+        },
+        {
+          "property": "color",
+          "duration": "0.2s",
+          "timing-function": "ease-in-out"
+        }
+      ]
+    },
     "sm": {
       "font": {
         "$type": "typography",

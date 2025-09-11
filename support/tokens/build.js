@@ -6,24 +6,30 @@ import { glob } from 'glob'
 
 function groupTokensByPath(tokens, options) {
   const groups = {}
+  const singleLevelTokens = {}
 
   tokens.forEach((token) => {
     // Skip the component name (first path segment) and group by the next segment
     const [, groupKey, ...rest] = token.path
     if (!groupKey) return
 
+    // If there are no remaining path segments, this is a single-level token
+    if (rest.length === 0) {
+      singleLevelTokens[groupKey] = {
+        cssVar: `--${token.path.join('-')}`,
+        token,
+      }
+      return
+    }
+
     if (!groups[groupKey]) {
       groups[groupKey] = []
     }
 
     // Create property name from remaining path segments
-    const propName =
-      rest.length > 0
-        ? StyleDictionary.hooks.transforms[transforms.nameCamel].transform(
-            { path: rest },
-            options,
-          )
-        : 'value'
+    const propName = StyleDictionary.hooks.transforms[
+      transforms.nameCamel
+    ].transform({ path: rest }, options)
 
     groups[groupKey].push({
       propName,
@@ -32,13 +38,21 @@ function groupTokensByPath(tokens, options) {
     })
   })
 
-  return groups
+  return { groups, singleLevelTokens }
 }
 
 StyleDictionary.registerFormat({
   name: 'typescript/lit',
   format({ dictionary, options }) {
-    const groups = groupTokensByPath(dictionary.allTokens, options)
+    const { groups, singleLevelTokens } = groupTokensByPath(
+      dictionary.allTokens,
+      options,
+    )
+
+    // Generate single-level token exports
+    const singleExports = Object.keys(singleLevelTokens).map(
+      (tokenKey) => `export const ${tokenKey}: CSSResultGroup;`,
+    )
 
     // Generate grouped type declarations
     const groupExports = Object.entries(groups).map(([groupKey, tokens]) => {
@@ -49,7 +63,9 @@ StyleDictionary.registerFormat({
       return `export const ${groupKey}: {\n${properties};\n};`
     })
 
-    return `import type { CSSResultGroup } from 'lit';\n\nexport const props: CSSResultGroup;\n\n${groupExports.join('\n\n')}\n\nexport default props;`
+    const allExports = [...singleExports, ...groupExports]
+
+    return `import type { CSSResultGroup } from 'lit';\n\nexport const props: CSSResultGroup;\n\n${allExports.join('\n\n')}\n\nexport default props;`
   },
 })
 
@@ -66,7 +82,16 @@ StyleDictionary.registerFormat({
       },
     )}\n}\``
 
-    const groups = groupTokensByPath(dictionary.allTokens, options)
+    const { groups, singleLevelTokens } = groupTokensByPath(
+      dictionary.allTokens,
+      options,
+    )
+
+    // Generate single-level token exports
+    const singleExports = Object.entries(singleLevelTokens).map(
+      ([tokenKey, { cssVar }]) =>
+        `export const ${tokenKey} = css\`var(${cssVar})\`;`,
+    )
 
     // Generate grouped exports
     const groupExports = Object.entries(groups).map(([groupKey, tokens]) => {
@@ -77,7 +102,9 @@ StyleDictionary.registerFormat({
       return `export const ${groupKey} = {\n${properties}\n};`
     })
 
-    return `import { css } from 'lit';\n\n${propsExport}\n\n${groupExports.join('\n\n')}`
+    const allExports = [...singleExports, ...groupExports]
+
+    return `import { css } from 'lit';\n\n${propsExport}\n\n${allExports.join('\n\n')}`
   },
 })
 
