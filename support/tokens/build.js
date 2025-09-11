@@ -6,8 +6,15 @@ import { glob } from 'glob'
 
 StyleDictionary.registerFormat({
   name: 'typescript/lit',
-  format() {
-    return `import type { CSSResultGroup } from 'lit';\n\nconst css: CSSResultGroup;\nexport default css;`
+  format({ dictionary, options }) {
+    const tokenExports = dictionary.allTokens.map((token) => {
+      const name = StyleDictionary.hooks.transforms[
+        transforms.nameCamel
+      ].transform(token, options)
+      return `export const ${name}: CSSResultGroup`
+    })
+
+    return `import type { CSSResultGroup } from 'lit';\n\nexport const props: CSSResultGroup;\n\n${tokenExports.join('\n')}\n\nexport default props;`
   },
 })
 
@@ -15,16 +22,21 @@ StyleDictionary.registerFormat({
   name: 'javascript/lit',
   format: async ({ dictionary, options }) => {
     const { outputReferences } = options
-    return (
-      `import { css } from 'lit';\n\nexport default css\`:host {\n` +
-      formattedVariables({
+    const propsExport = `export const props = css\`:host {\n${formattedVariables(
+      {
         format: propertyFormatNames.css,
         dictionary,
         outputReferences,
         usesDtcg: true,
-      }) +
-      '\n}`\n'
-    )
+      },
+    )}\n}\``
+    const tokenExports = dictionary.allTokens.map((token) => {
+      const name = StyleDictionary.hooks.transforms[
+        transforms.nameCamel
+      ].transform(token, options)
+      return `export const ${name} = css\`var(--${token.path.join('-')})\`;`
+    })
+    return `import { css } from 'lit';\n\n${propsExport}\n\n${tokenExports.join('\n')}`
   },
 })
 
