@@ -12,6 +12,10 @@
       "types": "./dist/light.d.ts",
       "import": "./dist/light.js"
     },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    },
     "./*.css": "./dist/*.css"
   },
   "keywords": [],

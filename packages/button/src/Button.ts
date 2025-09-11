@@ -1,5 +1,6 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import buttonCssProps from '@lime-soda/tokens/button'
 
 /**
  * Button element.
@@ -30,6 +31,8 @@ export class Button extends LitElement {
   }
 
   static styles = css`
+    ${buttonCssProps}
+
     button {
       border: none;
       cursor: pointer;

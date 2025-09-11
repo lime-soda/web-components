@@ -1,42 +1,43 @@
 import StyleDictionary from 'style-dictionary'
-import { transforms } from 'style-dictionary/enums'
-import * as prettier from 'prettier'
+import { propertyFormatNames, transforms } from 'style-dictionary/enums'
+import { formattedVariables } from 'style-dictionary/utils'
 import fs from 'node:fs/promises'
+import { glob } from 'glob'
 
-StyleDictionary.registerTransform({
-  name: 'javascript/cssRef',
-  type: 'value',
-  transitive: true,
-  transform: (token) => {
-    return `var(--${token.path.join('-')})`
+StyleDictionary.registerFormat({
+  name: 'typescript/lit',
+  format() {
+    return `import type { CSSResultGroup } from 'lit';\n\nconst css: CSSResultGroup;\nexport default css;`
   },
 })
 
 StyleDictionary.registerFormat({
   name: 'javascript/lit',
-  format({ dictionary }) {
-    return prettier.format(
-      `import { css } from 'lit';\n\n${dictionary.allTokens
-        .map((token) => `export const ${token.name} = css\`${token.$value}\`;`)
-        .join('\n')}`,
-      { parser: 'babel' },
+  format: async ({ dictionary, options }) => {
+    const { outputReferences } = options
+    return (
+      `import { css } from 'lit';\n\nexport default css\`:host {\n` +
+      formattedVariables({
+        format: propertyFormatNames.css,
+        dictionary,
+        outputReferences,
+        usesDtcg: true,
+      }) +
+      '\n}`\n'
     )
   },
 })
 
-StyleDictionary.registerFormat({
-  name: 'typescript/lit',
-  format({ dictionary }) {
-    return `import type { CSSResultGroup } from 'lit';\n\n${dictionary.allTokens
-      .map((token) => `export const ${token.name}: CSSResultGroup;`)
-      .join('\n')}`
-  },
-})
-
 for (let mode of ['light', 'dark']) {
+  const components = (await glob(`theme/${mode}/components/*.json`)).map((c) =>
+    c.replace(/^.*?\/([^/]+)\.json$/, '$1'),
+  )
+
+  const variablesFilter = (token) => !token.filePath.includes('components')
+
   const sd = new StyleDictionary(
     {
-      source: ['primitives/*.json', 'theme/*.json', `theme/${mode}/*.json`],
+      source: ['primitives/*.json', 'theme/*.json', `theme/${mode}/**/*.json`],
       platforms: {
         css: {
           transformGroup: 'css',
@@ -49,18 +50,23 @@ for (let mode of ['light', 'dark']) {
               options: {
                 outputReferences: true,
               },
+              filter: variablesFilter,
             },
-          ],
-        },
-        js: {
-          transformGroup: 'js',
-          transforms: [transforms.nameCamel, 'javascript/cssRef'],
-          buildPath: `dist/`,
-          files: [
-            {
-              destination: `${mode}.js`,
+            ...components.map((component) => ({
+              destination: `${component}.js`,
               format: 'javascript/lit',
-            },
+              options: {
+                outputReferences: true,
+              },
+              filter: (token) =>
+                token.filePath.includes(`components/${component}.json`),
+            })),
+            ...components.map((component) => ({
+              destination: `${component}.d.ts`,
+              format: 'typescript/lit',
+              filter: (token) =>
+                token.filePath.includes(`components/${component}.json`),
+            })),
           ],
         },
         ts: {
@@ -69,8 +75,12 @@ for (let mode of ['light', 'dark']) {
           buildPath: `dist/`,
           files: [
             {
+              destination: `${mode}.js`,
+              format: 'javascript/esm',
+            },
+            {
               destination: `${mode}.d.ts`,
-              format: 'typescript/lit',
+              format: 'typescript/module-declarations',
             },
           ],
         },
