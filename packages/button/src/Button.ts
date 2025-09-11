@@ -39,26 +39,26 @@ export class Button extends LitElement {
         transition: background var(--transition-duration-medium, 0.3s);
 
         &.sm {
-          border-radius: ${styles.buttonSmBorderRadius};
-          font: ${styles.buttonSmFont};
-          padding: ${styles.buttonSmPadding};
+          border-radius: ${styles.sm.borderRadius};
+          font: ${styles.sm.font};
+          padding: ${styles.sm.padding};
         }
 
         &.md {
-          border-radius: ${styles.buttonMdBorderRadius};
-          font: ${styles.buttonMdFont};
-          padding: ${styles.buttonMdPadding};
+          border-radius: ${styles.md.borderRadius};
+          font: ${styles.md.font};
+          padding: ${styles.md.padding};
         }
 
         &.lg {
-          border-radius: ${styles.buttonLgBorderRadius};
-          font: ${styles.buttonLgFont};
-          padding: ${styles.buttonLgPadding};
+          border-radius: ${styles.lg.borderRadius};
+          font: ${styles.lg.font};
+          padding: ${styles.lg.padding};
         }
 
         &.primary {
-          background: ${styles.buttonPrimaryBackgroundColor};
-          color: ${styles.buttonPrimaryColor};
+          background: ${styles.primary.backgroundColor};
+          color: ${styles.primary.color};
         }
       }
     `,
