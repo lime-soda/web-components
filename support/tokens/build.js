@@ -4,36 +4,46 @@ import { formattedVariables } from 'style-dictionary/utils'
 import fs from 'node:fs/promises'
 import { glob } from 'glob'
 
+function groupTokensByPath(tokens, options) {
+  const groups = {}
+
+  tokens.forEach((token) => {
+    // Skip the component name (first path segment) and group by the next segment
+    const [, groupKey, ...rest] = token.path
+    if (!groupKey) return
+
+    if (!groups[groupKey]) {
+      groups[groupKey] = []
+    }
+
+    // Create property name from remaining path segments
+    const propName =
+      rest.length > 0
+        ? StyleDictionary.hooks.transforms[transforms.nameCamel].transform(
+            { path: rest },
+            options,
+          )
+        : 'value'
+
+    groups[groupKey].push({
+      propName,
+      cssVar: `--${token.path.join('-')}`,
+      token,
+    })
+  })
+
+  return groups
+}
+
 StyleDictionary.registerFormat({
   name: 'typescript/lit',
   format({ dictionary, options }) {
-    // Group tokens by their first path segment after component name
-    const groups = {}
-    dictionary.allTokens.forEach((token) => {
-      // Skip the component name (first path segment) and group by the next segment
-      const [, groupKey, ...rest] = token.path
-      if (!groupKey) return
-
-      if (!groups[groupKey]) {
-        groups[groupKey] = []
-      }
-
-      // Create property name from remaining path segments
-      const propName =
-        rest.length > 0
-          ? StyleDictionary.hooks.transforms[transforms.nameCamel].transform(
-              { path: rest },
-              options,
-            )
-          : 'value'
-
-      groups[groupKey].push(propName)
-    })
+    const groups = groupTokensByPath(dictionary.allTokens, options)
 
     // Generate grouped type declarations
-    const groupExports = Object.entries(groups).map(([groupKey, propNames]) => {
-      const properties = propNames
-        .map((propName) => `  ${propName}: CSSResultGroup`)
+    const groupExports = Object.entries(groups).map(([groupKey, tokens]) => {
+      const properties = tokens
+        .map(({ propName }) => `  ${propName}: CSSResultGroup`)
         .join(';\n')
 
       return `export const ${groupKey}: {\n${properties};\n};`
@@ -56,31 +66,7 @@ StyleDictionary.registerFormat({
       },
     )}\n}\``
 
-    // Group tokens by their first path segment after component name
-    const groups = {}
-    dictionary.allTokens.forEach((token) => {
-      // Skip the component name (first path segment) and group by the next segment
-      const [, groupKey, ...rest] = token.path
-      if (!groupKey) return
-
-      if (!groups[groupKey]) {
-        groups[groupKey] = []
-      }
-
-      // Create property name from remaining path segments
-      const propName =
-        rest.length > 0
-          ? StyleDictionary.hooks.transforms[transforms.nameCamel].transform(
-              { path: rest },
-              options,
-            )
-          : 'value'
-
-      groups[groupKey].push({
-        propName,
-        cssVar: `--${token.path.join('-')}`,
-      })
-    })
+    const groups = groupTokensByPath(dictionary.allTokens, options)
 
     // Generate grouped exports
     const groupExports = Object.entries(groups).map(([groupKey, tokens]) => {
