@@ -39,15 +39,15 @@ export class Button extends LitElement {
         transition: background var(--transition-duration-medium, 0.3s);
 
         &.sm {
-          border-radius: var(--button-sm-border-radius);
-          font: var(--button-sm-font);
-          padding: var(--button-sm-padding);
+          border-radius: ${styles.buttonSmBorderRadius};
+          font: ${styles.buttonSmFont};
+          padding: ${styles.buttonSmPadding};
         }
 
         &.md {
-          border-radius: var(--button-md-border-radius);
-          font: var(--button-md-font);
-          padding: var(--button-md-padding);
+          border-radius: ${styles.buttonMdBorderRadius};
+          font: ${styles.buttonMdFont};
+          padding: ${styles.buttonMdPadding};
         }
 
         &.lg {
@@ -57,8 +57,8 @@ export class Button extends LitElement {
         }
 
         &.primary {
-          background: var(--button-primary-background-color);
-          color: var(--button-primary-color);
+          background: ${styles.buttonPrimaryBackgroundColor};
+          color: ${styles.buttonPrimaryColor};
         }
       }
     `,
