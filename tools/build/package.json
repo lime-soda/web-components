@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "description": "",
   "bin": {
-    "build-component": "./index.js",
+    "build-component": "./build-component.js",
     "build-manifest": "./build-manifest.js"
   },
   "scripts": {

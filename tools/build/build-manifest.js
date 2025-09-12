@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { create, ts } from '@custom-elements-manifest/analyzer'
+import { litPlugin } from '@custom-elements-manifest/analyzer/src/features/framework-plugins/lit/lit.js'
 import { glob } from 'glob'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -21,7 +22,7 @@ async function detectComponentName(override) {
     const packageData = await fs.readFile('package.json', 'utf-8')
     const pkg = JSON.parse(packageData)
 
-    if (pkg.name?.startsWith('@lime-soda/')) {
+    if (pkg.name?.split('/').length === 2) {
       const componentName = pkg.name.split('/')[1]
       console.log(
         `📦 Detected component name from package.json: ${componentName}`,
@@ -112,7 +113,7 @@ async function runCEMAnalysis() {
   // Run CEM analysis with Lit support enabled
   const manifest = create({
     modules,
-    plugins: [],
+    plugins: [...litPlugin()],
     context: { dev: false, litelement: true },
   })
 
