@@ -180,6 +180,9 @@ importers:
 
   tools/build:
     dependencies:
+      '@custom-elements-manifest/analyzer':
+        specifier: ^0.10.5
+        version: 0.10.5
       '@lime-soda/tokens':
         specifier: workspace:*
         version: link:../../support/tokens

@@ -6,7 +6,7 @@
   "description": "",
   "bin": {
     "build-component": "./index.js",
-    "enhance-manifest": "./enhance-manifest.js"
+    "build-manifest": "./build-manifest.js"
   },
   "scripts": {
     "lint": "eslint ."
@@ -17,7 +17,8 @@
   "dependencies": {
     "esbuild": "^0.25.8",
     "glob": "^11.0.3",
-    "@lime-soda/tokens": "workspace:*"
+    "@lime-soda/tokens": "workspace:*",
+    "@custom-elements-manifest/analyzer": "^0.10.5"
   },
   "devDependencies": {
     "@lime-soda/eslint-config": "workspace:*"
