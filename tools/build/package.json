@@ -5,7 +5,8 @@
   "version": "0.0.0",
   "description": "",
   "bin": {
-    "build-component": "./index.js"
+    "build-component": "./index.js",
+    "enhance-manifest": "./enhance-manifest.js"
   },
   "scripts": {
     "lint": "eslint ."
@@ -15,7 +16,8 @@
   "license": "MIT",
   "dependencies": {
     "esbuild": "^0.25.8",
-    "glob": "^11.0.3"
+    "glob": "^11.0.3",
+    "@lime-soda/tokens": "workspace:*"
   },
   "devDependencies": {
     "@lime-soda/eslint-config": "workspace:*"

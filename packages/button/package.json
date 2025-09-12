@@ -21,7 +21,7 @@
   "scripts": {
     "build": "build-component",
     "build:types": "tsc --project tsconfig.types.json",
-    "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\"",
+    "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\" && enhance-manifest button",
     "lint": "eslint ."
   },
   "dependencies": {
