@@ -7,9 +7,6 @@ import * as styles from '@lime-soda/tokens/button'
  *
  * @slot - Default slot for button content
  * @csspart button - The button
- * @cssproperty --button-bg - Background color of the button
- * @cssproperty --button-bg-hover - Background color of the button on hover
- * @cssproperty --button-text-color - Text color of the button
  */
 @customElement('ls-button')
 export class Button extends LitElement {
@@ -36,7 +33,7 @@ export class Button extends LitElement {
       button {
         border: none;
         cursor: pointer;
-        transition: background var(--transition-duration-medium, 0.3s);
+        transition: background ${styles.transition};
 
         &.sm {
           border-radius: ${styles.sm.borderRadius};
@@ -59,6 +56,10 @@ export class Button extends LitElement {
         &.primary {
           background: ${styles.primary.backgroundColor};
           color: ${styles.primary.color};
+
+          &:hover {
+            background: ${styles.primary.backgroundColorHover};
+          }
         }
       }
     `,

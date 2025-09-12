@@ -2,18 +2,11 @@
   "button": {
     "transition": {
       "$type": "transition",
-      "$value": [
-        {
-          "property": "background-color",
-          "duration": "0.2s",
-          "timing-function": "ease-in-out"
-        },
-        {
-          "property": "color",
-          "duration": "0.2s",
-          "timing-function": "ease-in-out"
-        }
-      ]
+      "$value": {
+        "delay": "0",
+        "duration": "0.2s",
+        "timingFunction": "ease-in-out"
+      }
     },
     "sm": {
       "font": {
@@ -61,6 +54,10 @@
       "background-color": {
         "$type": "color",
         "$value": "{color.primary.400}"
+      },
+      "background-color-hover": {
+        "$type": "color",
+        "$value": "{color.primary.500}"
       },
       "color": {
         "$type": "color",
