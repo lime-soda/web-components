@@ -42,15 +42,17 @@ support, and extensive theming options.
 
 #### [`@lime-soda/tokens`](./support/tokens/)
 
-Design tokens built with Style Dictionary, providing CSS custom properties for
-colors, spacing, typography, and more.
+Design tokens built with Style Dictionary, providing CSS custom properties and
+grouped Lit exports for colors, spacing, typography, and component styling with
+DTCG-compliant descriptions.
 
 ### 🔧 Development Tools
 
 #### [`@lime-soda/build`](./tools/build/)
 
-Fast component bundler using esbuild, optimized for web components with ES
-module output.
+Fast component bundler using esbuild and unified Custom Elements Manifest
+generator with automatic design token integration for enhanced component
+documentation.
 
 #### [`@lime-soda/eslint-config`](./tools/eslint-config/)
 
@@ -124,6 +126,8 @@ web-components/
 - **🔍 Searchable** - Components and tokens discoverable via MCP server
 - **🧪 Tested** - Integration and accessibility testing with Storybook/Vitest
 - **📦 Optimized** - Tree-shakeable ES modules with minimal runtime
+- **🎯 Self-Documenting** - Auto-generated manifests with design token CSS
+  properties
 
 ## Development
 
@@ -161,21 +165,38 @@ pnpm create-component
 This creates a complete component package with:
 
 - Lit-based TypeScript implementation
-- Custom elements manifest generation
-- TypeScript declarations
+- Automated Custom Elements Manifest with design token CSS properties
+- TypeScript declarations and grouped token exports
 - ESLint and build configuration
 - README documentation template
 
 ### Design Tokens
 
-Update design tokens in `support/tokens/`:
+The design system uses DTCG-compliant tokens with automatic CSS generation and
+Lit exports:
 
 ```bash
-# Edit token files
-vim support/tokens/primitives/color.json
+# Edit component tokens (includes $description properties)
+vim support/tokens/theme/light/components/button.json
 
-# Rebuild CSS
+# Rebuild tokens and component manifests
 cd support/tokens && pnpm build
+
+# Build component manifest with token integration
+cd packages/button && pnpm build:manifest
+```
+
+Token exports provide both CSS custom properties and grouped Lit objects:
+
+```typescript
+import * as styles from '@lime-soda/tokens/button'
+
+// Use CSS custom properties
+styles.props // :host { --button-sm-padding: 0.375rem 0.75rem; }
+
+// Use grouped token objects
+styles.sm.padding // css`var(--button-sm-padding)`
+styles.primary.backgroundColor // css`var(--button-primary-background-color)`
 ```
 
 ## Contributing

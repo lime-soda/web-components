@@ -18,8 +18,8 @@ npm install @lime-soda/button
 </script>
 
 <ls-button>Click me</ls-button>
-<ls-button variant="primary">Primary Button</ls-button>
-<ls-button disabled>Disabled</ls-button>
+<ls-button size="lg" color="primary">Large Primary Button</ls-button>
+<ls-button size="sm">Small Button</ls-button>
 ```
 
 ### JavaScript/TypeScript
@@ -31,11 +31,12 @@ import { LsButton } from '@lime-soda/button'
 // Use in HTML templates
 const button = document.createElement('ls-button')
 button.textContent = 'Click me'
-button.variant = 'primary'
+button.size = 'lg'
+button.color = 'primary'
 
 // Type-safe access to properties
 const button = document.querySelector('ls-button') as LsButton
-button.disabled = true
+button.size = 'md'
 ```
 
 ### Lit Templates
@@ -45,7 +46,9 @@ import { html } from 'lit'
 import '@lime-soda/button'
 
 const template = html`
-  <ls-button @click=${handleClick} variant="primary"> Save Changes </ls-button>
+  <ls-button @click=${handleClick} size="lg" color="primary">
+    Save Changes
+  </ls-button>
 `
 ```
 
@@ -53,20 +56,30 @@ const template = html`
 
 ### Attributes/Properties
 
-| Property   | Attribute  | Type      | Default     | Description                    |
-| ---------- | ---------- | --------- | ----------- | ------------------------------ |
-| `variant`  | `variant`  | `string`  | `"default"` | Button style variant           |
-| `disabled` | `disabled` | `boolean` | `false`     | Whether the button is disabled |
+| Property | Attribute | Type                       | Default     | Description          |
+| -------- | --------- | -------------------------- | ----------- | -------------------- |
+| `size`   | `size`    | `'sm' \| 'md' \| 'lg'`     | `'sm'`      | Button size variant  |
+| `color`  | `color`   | `'primary' \| 'secondary'` | `'primary'` | Button color variant |
 
 ### CSS Custom Properties
 
-| Property                 | Description             | Default                          |
-| ------------------------ | ----------------------- | -------------------------------- |
-| `--button-background`    | Button background color | `var(--color-surface)`           |
-| `--button-color`         | Button text color       | `var(--color-on-surface)`        |
-| `--button-border`        | Button border           | `1px solid var(--color-outline)` |
-| `--button-border-radius` | Button border radius    | `var(--border-radius-md)`        |
-| `--button-padding`       | Button padding          | `var(--size-2) var(--size-4)`    |
+The button component uses design tokens for consistent styling:
+
+| Property                                  | Description                                |
+| ----------------------------------------- | ------------------------------------------ |
+| `--button-transition`                     | Transition timing for button state changes |
+| `--button-sm-font`                        | Typography scale for small button          |
+| `--button-sm-padding`                     | Internal spacing for small button          |
+| `--button-sm-border-radius`               | Corner radius for small button             |
+| `--button-md-font`                        | Typography scale for medium button         |
+| `--button-md-padding`                     | Internal spacing for medium button         |
+| `--button-md-border-radius`               | Corner radius for medium button            |
+| `--button-lg-font`                        | Typography scale for large button          |
+| `--button-lg-padding`                     | Internal spacing for large button          |
+| `--button-lg-border-radius`               | Corner radius for large button             |
+| `--button-primary-background-color`       | Primary button background color            |
+| `--button-primary-background-color-hover` | Primary button background color on hover   |
+| `--button-primary-color`                  | Primary button text color                  |
 
 ### CSS Parts
 
@@ -84,11 +97,18 @@ const template = html`
 
 ### Using CSS Custom Properties
 
+You can customize the button appearance by overriding design token CSS custom
+properties:
+
 ```css
 ls-button {
-  --button-background: #007bff;
-  --button-color: white;
-  --button-border-radius: 8px;
+  /* Override primary button colors */
+  --button-primary-background-color: #007bff;
+  --button-primary-color: white;
+
+  /* Customize size-specific styles */
+  --button-lg-border-radius: 12px;
+  --button-lg-padding: 1rem 1.5rem;
 }
 ```
 
@@ -119,22 +139,25 @@ The button component includes:
 <ls-button>Default Button</ls-button>
 ```
 
-### Primary Button
+### Size Variants
 
 ```html
-<ls-button variant="primary">Primary Action</ls-button>
+<ls-button size="sm">Small Button</ls-button>
+<ls-button size="md">Medium Button</ls-button>
+<ls-button size="lg">Large Button</ls-button>
 ```
 
-### Disabled State
+### Color Variants
 
 ```html
-<ls-button disabled>Cannot Click</ls-button>
+<ls-button color="primary">Primary Button</ls-button>
+<ls-button color="secondary">Secondary Button</ls-button>
 ```
 
 ### Custom Styling
 
 ```html
-<ls-button style="--button-background: #28a745;">
+<ls-button style="--button-primary-background-color: #28a745;">
   Custom Green Button
 </ls-button>
 ```

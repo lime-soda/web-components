@@ -149,6 +149,22 @@ import '@lime-soda/tokens/tokens-dark.css'
 
 ### Component Usage Examples
 
+#### Using Component Token Exports
+
+```ts
+import * as styles from '@lime-soda/tokens/button'
+
+// Use CSS custom properties
+styles.props // :host { --button-sm-padding: 0.375rem 0.75rem; ... }
+
+// Use grouped token objects
+styles.sm.padding // css`var(--button-sm-padding)`
+styles.primary.backgroundColor // css`var(--button-primary-background-color)`
+styles.transition // css`var(--button-transition)`
+```
+
+#### Traditional CSS Custom Properties
+
 ```ts
 // Button component
 const buttonStyles = css`
@@ -198,7 +214,7 @@ The semantic tokens ensure accessible color usage by default:
 ## Development
 
 ```bash
-# Build all token CSS files (includes light-dark() combined version)
+# Build all token CSS files and component exports (includes light-dark() combined version)
 pnpm run build
 
 # Build individual themes
@@ -209,6 +225,9 @@ pnpm run build:combined # Generate light-dark() combined tokens only
 # Lint tokens
 pnpm run lint
 ```
+
+The build process now generates both CSS files and TypeScript/JavaScript
+component token exports with DTCG descriptions included as CSS comments.
 
 ## File Structure
 
@@ -222,7 +241,10 @@ support/tokens/
 │   └── transition.json     # Animation tokens
 ├── theme/
 │   ├── color-light.json    # Light mode semantic colors
-│   └── color-dark.json     # Dark mode semantic colors
+│   ├── color-dark.json     # Dark mode semantic colors
+│   └── light/
+│       └── components/
+│           └── button.json # Component-specific tokens with DTCG descriptions
 ├── scripts/
 │   ├── build-combined.js   # Combines light/dark CSS
 │   └── check-accessibility.js # WCAG compliance checker
@@ -230,17 +252,24 @@ support/tokens/
 ├── config-dark.json        # Dark mode build config
 ├── config-combined.json    # Combined build config
 └── dist/
-    └── css/
-        ├── tokens.css      # Combined light/dark with media queries
-        ├── tokens-light.css # Light mode only
-        └── tokens-dark.css  # Dark mode only
+    ├── css/
+    │   ├── tokens.css      # Combined light/dark with media queries
+    │   ├── tokens-light.css # Light mode only
+    │   └── tokens-dark.css  # Dark mode only
+    ├── button.js           # Button component token exports (ES modules)
+    └── button.d.ts         # TypeScript declarations for button tokens
 ```
 
 ## Integration
 
-- **Style Dictionary 5.0** - Token transformation and CSS generation
+- **Style Dictionary 5.0** - Token transformation and CSS generation with custom
+  JavaScript/TypeScript formats
+- **DTCG Compliant** - Design Token Community Group specification with
+  `$description` properties
 - **Monorepo** - Shared across all Lime Soda component packages via
   `@lime-soda/tokens`
+- **Component Integration** - Automatic Custom Elements Manifest enhancement
+  with design token CSS properties
 - **MCP Server** - Design tokens accessible via Model Context Protocol for AI
   tools
 - **Turbo** - Integrated build pipeline for efficient development
