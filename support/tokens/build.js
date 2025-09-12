@@ -112,12 +112,15 @@ for (let mode of ['light', 'dark']) {
   const components = (await glob(`theme/${mode}/components/*.json`)).map((c) =>
     c.replace(/^.*?\/([^/]+)\.json$/, '$1'),
   )
-
   const variablesFilter = (token) => !token.filePath.includes('components')
 
   const sd = new StyleDictionary(
     {
-      source: ['primitives/*.json', 'theme/*.json', `theme/${mode}/**/*.json`],
+      source: [
+        'primitives/**/*.json',
+        'globals/**/*.json',
+        `theme/${mode}/**/*.json`,
+      ],
       platforms: {
         css: {
           transformGroup: 'css',

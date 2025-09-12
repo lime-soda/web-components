@@ -5,6 +5,26 @@
       "default": {
         "$value": "{color.gray.950}"
       }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.gray.50}"
+      },
+      "inverse": {
+        "$value": "{color.gray.950}"
+      },
+      "primary": {
+        "$value": "{color.green.300}"
+      },
+      "on-primary": {
+        "$value": "{color.black}"
+      },
+      "on-primary-dark": {
+        "$value": "{color.white}"
+      },
+      "on-primary-light": {
+        "$value": "{color.black}"
+      }
     }
   }
 }
