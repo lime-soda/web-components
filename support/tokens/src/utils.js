@@ -63,3 +63,14 @@ export async function writeFile(filePath, content) {
     throw new Error(`Failed to write ${filePath}: ${error.message}`)
   }
 }
+
+/**
+ * Safely removes a directory and its contents
+ */
+export async function removeDirectory(dirPath) {
+  try {
+    await fs.rm(dirPath, { recursive: true, force: true })
+  } catch (error) {
+    throw new Error(`Failed to remove directory ${dirPath}: ${error.message}`)
+  }
+}

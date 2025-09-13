@@ -6,6 +6,7 @@ import {
   combineComponentFiles,
   combineVariableFiles,
 } from './src/file-combiner.js'
+import { removeDirectory } from './src/utils.js'
 
 /**
  * Main build process for design tokens
@@ -29,6 +30,10 @@ async function build() {
 
     await combineVariableFiles()
     console.log('✅ Combined variable files')
+
+    await removeDirectory('dist/light')
+    await removeDirectory('dist/dark')
+    console.log('✅ Cleaned up temporary directories')
 
     console.log('🎉 Design tokens build complete!')
   } catch (error) {
