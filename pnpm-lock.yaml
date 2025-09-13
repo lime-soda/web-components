@@ -166,6 +166,9 @@ importers:
 
   support/tokens:
     dependencies:
+      glob:
+        specifier: ^11.0.0
+        version: 11.0.3
       style-dictionary:
         specifier: ^5.0.1
         version: 5.0.4
