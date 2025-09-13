@@ -108,9 +108,16 @@ StyleDictionary.registerFormat({
   },
 })
 
+const components = {
+  light: [],
+  dark: [],
+}
+
 for (let mode of ['light', 'dark']) {
-  const components = (await glob(`theme/${mode}/components/*.json`)).map((c) =>
-    c.replace(/^.*?\/([^/]+)\.json$/, '$1'),
+  components[mode].push(
+    ...(await glob(`theme/${mode}/components/*.json`)).map((c) =>
+      c.replace(/^.*?\/([^/]+)\.json$/, '$1'),
+    ),
   )
   const variablesFilter = (token) => !token.filePath.includes('components')
 
@@ -125,17 +132,17 @@ for (let mode of ['light', 'dark']) {
         css: {
           transformGroup: 'css',
           transforms: [transforms.sizeRem],
-          buildPath: `dist/`,
+          buildPath: `dist/${mode}`,
           files: [
             {
-              destination: `${mode}.css`,
+              destination: `variables.css`,
               format: 'css/variables',
               options: {
                 outputReferences: true,
               },
               filter: variablesFilter,
             },
-            ...components.map((component) => ({
+            ...components[mode].map((component) => ({
               destination: `${component}.js`,
               format: 'javascript/lit',
               options: {
@@ -144,27 +151,12 @@ for (let mode of ['light', 'dark']) {
               filter: (token) =>
                 token.filePath.includes(`components/${component}.json`),
             })),
-            ...components.map((component) => ({
+            ...components[mode].map((component) => ({
               destination: `${component}.d.ts`,
               format: 'typescript/lit',
               filter: (token) =>
                 token.filePath.includes(`components/${component}.json`),
             })),
-          ],
-        },
-        ts: {
-          transformGroup: 'js',
-          transforms: [transforms.nameCamel],
-          buildPath: `dist/`,
-          files: [
-            {
-              destination: `${mode}.js`,
-              format: 'javascript/esm',
-            },
-            {
-              destination: `${mode}.d.ts`,
-              format: 'typescript/module-declarations',
-            },
           ],
         },
       },
@@ -175,26 +167,67 @@ for (let mode of ['light', 'dark']) {
   await sd.buildAllPlatforms()
 }
 
-// Combine light and dark CSS variables into one file
-const light = await fs.readFile('dist/light.css', 'utf-8')
-const dark = await fs.readFile('dist/dark.css', 'utf-8')
+for (let component of components.light) {
+  await fs.copyFile(`dist/light/${component}.d.ts`, `dist/${component}.d.ts`)
 
-const propertiesPattern = /(--[^:]+?):\s*([^;]+?);/g
-const lightDark = {}
-
-light.matchAll(propertiesPattern).forEach(([, prop, value]) => {
-  lightDark[prop] = value
-})
-
-// Any dark values that are not in light are added and any that
-// are different are combined into light-dark()
-dark.matchAll(propertiesPattern).forEach(([, prop, value]) => {
-  if (!lightDark[prop]) {
-    lightDark[prop] = value
-  } else if (lightDark[prop] !== value) {
-    lightDark[prop] = `light-dark(${lightDark[prop]}, ${value})`
+  if (!components.dark.includes(component)) {
+    await fs.copyFile(`dist/light/${component}.js`, `dist/${component}.js`)
+    continue
   }
-})
+
+  const light = await fs.readFile(`dist/light/${component}.js`, 'utf-8')
+  const dark = await fs.readFile(`dist/dark/${component}.js`, 'utf-8')
+
+  const propsPattern = /:host {[\s\S]+?}/
+  const lightProps = light.match(propsPattern)?.[0]
+  const darkProps = dark.match(propsPattern)?.[0]
+
+  if (!lightProps || !darkProps) {
+    throw new Error(
+      `Could not find props for light and dark modes in ${component}`,
+    )
+  }
+
+  const lightDark = combineLightDarkValues(lightProps, darkProps)
+  await fs.writeFile(
+    `dist/${component}.js`,
+    light.replace(
+      propsPattern,
+      `:host {\n${Object.entries(lightDark)
+        .map(([prop, value]) => `  ${prop}: ${value};`)
+        .join('\n')}\n}`,
+    ),
+    'utf-8',
+  )
+}
+
+function combineLightDarkValues(light, dark) {
+  const propertiesPattern = /(--[^:]+?):\s*([^;]+?);/g
+
+  const lightDark = {}
+
+  light.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+    lightDark[prop] = value
+  })
+
+  // Any dark values that are not in light are added and any that
+  // are different are combined into light-dark()
+  dark.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+    if (!lightDark[prop]) {
+      lightDark[prop] = value
+    } else if (lightDark[prop] !== value) {
+      lightDark[prop] = `light-dark(${lightDark[prop]}, ${value})`
+    }
+  })
+
+  return lightDark
+}
+
+// Combine light and dark CSS variables into one file
+const light = await fs.readFile('dist/light/variables.css', 'utf-8')
+const dark = await fs.readFile('dist/dark/variables.css', 'utf-8')
+
+const lightDark = combineLightDarkValues(light, dark)
 
 await fs.writeFile(
   'dist/variables.css',

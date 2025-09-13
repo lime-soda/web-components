@@ -3,7 +3,7 @@
     "primary": {
       "background-color": {
         "$type": "color",
-        "$value": "{color.primary.600}"
+        "$value": "{color.primary.700}"
       },
       "background-color-hover": {
         "$type": "color",
