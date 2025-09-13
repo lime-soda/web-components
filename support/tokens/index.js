@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { registerCustomFormats } from './src/formats.js'
 import { discoverComponents } from './src/component-discovery.js'
 import { buildStyleDictionary } from './src/style-dictionary-config.js'
 import {
@@ -14,9 +13,6 @@ import {
 async function build() {
   try {
     console.log('🚀 Building design tokens...')
-
-    registerCustomFormats()
-    console.log('✅ Custom formats registered')
 
     const components = await discoverComponents()
     console.log(

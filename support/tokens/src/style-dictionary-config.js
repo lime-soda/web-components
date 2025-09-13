@@ -1,10 +1,11 @@
 import StyleDictionary from 'style-dictionary'
 import { transforms } from 'style-dictionary/enums'
+import { typescriptLitFormat, javascriptLitFormat } from './formats.js'
 
 /**
  * Creates Style Dictionary configuration for a specific mode
  */
-export function createStyleDictionaryConfig(mode, components) {
+function createStyleDictionaryConfig(mode, components) {
   const variablesFilter = (token) => !token.filePath.includes('components')
 
   return {
@@ -49,12 +50,31 @@ export function createStyleDictionaryConfig(mode, components) {
 }
 
 /**
+ * Creates and configures Style Dictionary instance with custom formats
+ */
+function createStyleDictionary(mode, components) {
+  const config = createStyleDictionaryConfig(mode, components)
+  const sd = new StyleDictionary(config, { verbosity: 'verbose' })
+
+  sd.registerFormat({
+    name: 'typescript/lit',
+    format: typescriptLitFormat,
+  })
+
+  sd.registerFormat({
+    name: 'javascript/lit',
+    format: javascriptLitFormat,
+  })
+
+  return sd
+}
+
+/**
  * Builds Style Dictionary for a specific mode
  */
 export async function buildStyleDictionary(mode, components) {
   try {
-    const config = createStyleDictionaryConfig(mode, components)
-    const sd = new StyleDictionary(config, { verbosity: 'verbose' })
+    const sd = createStyleDictionary(mode, components)
     await sd.buildAllPlatforms()
   } catch (error) {
     throw new Error(
