@@ -4,6 +4,34 @@ import { formattedVariables } from 'style-dictionary/utils'
 import fs from 'node:fs/promises'
 import { glob } from 'glob'
 
+function createCSSProperties(propsMap, selector = ':root') {
+  return `${selector} {\n${Object.entries(propsMap)
+    .map(([prop, value]) => `  ${prop}: ${value};`)
+    .join('\n')}\n}`
+}
+
+function combineLightDarkValues(light, dark) {
+  const propertiesPattern = /(--[^:]+?):\s*([^;]+?);/g
+
+  const lightDark = {}
+
+  light.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+    lightDark[prop] = value
+  })
+
+  // Any dark values that are not in light are added and any that
+  // are different are combined into light-dark()
+  dark.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+    if (!lightDark[prop]) {
+      lightDark[prop] = value
+    } else if (lightDark[prop] !== value) {
+      lightDark[prop] = `light-dark(${lightDark[prop]}, ${value})`
+    }
+  })
+
+  return lightDark
+}
+
 function groupTokensByPath(tokens, options) {
   const groups = {}
   const singleLevelTokens = {}
@@ -167,6 +195,7 @@ for (let mode of ['light', 'dark']) {
   await sd.buildAllPlatforms()
 }
 
+// Combine light and dark component files into one
 for (let component of components.light) {
   await fs.copyFile(`dist/light/${component}.d.ts`, `dist/${component}.d.ts`)
 
@@ -191,36 +220,9 @@ for (let component of components.light) {
   const lightDark = combineLightDarkValues(lightProps, darkProps)
   await fs.writeFile(
     `dist/${component}.js`,
-    light.replace(
-      propsPattern,
-      `:host {\n${Object.entries(lightDark)
-        .map(([prop, value]) => `  ${prop}: ${value};`)
-        .join('\n')}\n}`,
-    ),
+    light.replace(propsPattern, createCSSProperties(lightDark, ':host')),
     'utf-8',
   )
-}
-
-function combineLightDarkValues(light, dark) {
-  const propertiesPattern = /(--[^:]+?):\s*([^;]+?);/g
-
-  const lightDark = {}
-
-  light.matchAll(propertiesPattern).forEach(([, prop, value]) => {
-    lightDark[prop] = value
-  })
-
-  // Any dark values that are not in light are added and any that
-  // are different are combined into light-dark()
-  dark.matchAll(propertiesPattern).forEach(([, prop, value]) => {
-    if (!lightDark[prop]) {
-      lightDark[prop] = value
-    } else if (lightDark[prop] !== value) {
-      lightDark[prop] = `light-dark(${lightDark[prop]}, ${value})`
-    }
-  })
-
-  return lightDark
 }
 
 // Combine light and dark CSS variables into one file
@@ -231,8 +233,6 @@ const lightDark = combineLightDarkValues(light, dark)
 
 await fs.writeFile(
   'dist/variables.css',
-  `:root {\n${Object.entries(lightDark)
-    .map(([prop, value]) => `  ${prop}: ${value};`)
-    .join('\n')}\n}`,
+  createCSSProperties(lightDark),
   'utf-8',
 )
