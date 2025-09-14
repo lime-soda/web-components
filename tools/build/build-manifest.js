@@ -58,7 +58,7 @@ async function extractComponentTokens(componentName) {
     if (componentTokens) {
       // Recursively extract tokens from the component section
       function extractTokens(tokenObj) {
-        for (const [key, value] of Object.entries(tokenObj)) {
+        for (const [, value] of Object.entries(tokenObj)) {
           if (value && typeof value === 'object') {
             if (value.$value !== undefined && value.name) {
               // This is a token
