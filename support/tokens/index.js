@@ -5,6 +5,7 @@ import { buildStyleDictionary } from './src/style-dictionary-config.js'
 import {
   combineComponentFiles,
   combineVariableFiles,
+  copyTokenExportFiles,
 } from './src/file-combiner.js'
 import { removeDirectory } from './src/utils.js'
 
@@ -30,6 +31,9 @@ async function build() {
 
     await combineVariableFiles()
     console.log('✅ Combined variable files')
+
+    await copyTokenExportFiles()
+    console.log('✅ Copied complete token export files')
 
     await removeDirectory('dist/light')
     await removeDirectory('dist/dark')

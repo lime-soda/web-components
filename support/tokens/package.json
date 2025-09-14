@@ -9,8 +9,8 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/light.d.ts",
-      "import": "./dist/light.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./*": {
       "types": "./dist/*.d.ts",

@@ -8,6 +8,49 @@ import { typescriptLitFormat, javascriptLitFormat } from './formats.js'
 function createStyleDictionaryConfig(mode, components) {
   const variablesFilter = (token) => !token.filePath.includes('components')
 
+  const files = [
+    {
+      destination: 'variables.css',
+      format: 'css/variables',
+      options: {
+        outputReferences: true,
+      },
+      filter: variablesFilter,
+    },
+    ...components.map((component) => ({
+      destination: `${component}.js`,
+      format: 'javascript/lit',
+      options: {
+        outputReferences: true,
+      },
+      filter: (token) =>
+        token.filePath.includes(`components/${component}.json`),
+    })),
+    ...components.map((component) => ({
+      destination: `${component}.d.ts`,
+      format: 'typescript/lit',
+      filter: (token) =>
+        token.filePath.includes(`components/${component}.json`),
+    })),
+  ]
+
+  // Add complete token export for light mode only
+  if (mode === 'light') {
+    files.push(
+      {
+        destination: 'index.js',
+        format: 'javascript/esm',
+        options: {
+          outputReferences: true,
+        },
+      },
+      {
+        destination: 'index.d.ts',
+        format: 'typescript/module-declarations',
+      },
+    )
+  }
+
   return {
     source: [
       'primitives/**/*.json',
@@ -19,31 +62,7 @@ function createStyleDictionaryConfig(mode, components) {
         transformGroup: 'css',
         transforms: [transforms.sizeRem],
         buildPath: `dist/${mode}/`,
-        files: [
-          {
-            destination: 'variables.css',
-            format: 'css/variables',
-            options: {
-              outputReferences: true,
-            },
-            filter: variablesFilter,
-          },
-          ...components.map((component) => ({
-            destination: `${component}.js`,
-            format: 'javascript/lit',
-            options: {
-              outputReferences: true,
-            },
-            filter: (token) =>
-              token.filePath.includes(`components/${component}.json`),
-          })),
-          ...components.map((component) => ({
-            destination: `${component}.d.ts`,
-            format: 'typescript/lit',
-            filter: (token) =>
-              token.filePath.includes(`components/${component}.json`),
-          })),
-        ],
+        files,
       },
     },
   }

@@ -40,45 +40,54 @@ async function detectComponentName(override) {
 }
 
 /**
- * Recursively extracts tokens for a specific component from the token tree
- * @param {Object} tokenTree - The complete token tree from @lime-soda/tokens
+ * Extracts component tokens from the tokens package import
  * @param {string} componentName - Name of the component (e.g., 'button')
- * @returns {Array} Array of {name, description} objects
+ * @returns {Promise<Array>} Array of {name, description} objects
  */
-function extractComponentTokens(tokenTree, componentName) {
-  const componentTokens = tokenTree[componentName]
-  if (!componentTokens) {
-    return []
-  }
+async function extractComponentTokens(componentName) {
+  try {
+    const properties = []
 
-  const properties = []
+    // Import the main tokens package to get access to the complete token tree
+    const tokensModule = await import('@lime-soda/tokens')
+    const allTokens = tokensModule.default
 
-  /**
-   * Recursively walks the token tree to find leaf tokens
-   * @param {Object} obj - Current token object or group
-   * @param {Array} path - Current path array
-   */
-  function walkTokens(obj, path = []) {
-    for (const [key, value] of Object.entries(obj)) {
-      if (value && typeof value === 'object') {
-        // Check if this is a token (has $type and $value)
-        if (value.$type && value.$value !== undefined) {
-          const cssVarName = `--${componentName}-${path.concat(key).join('-')}`
+    // Look for component-specific tokens at the top level
+    const componentTokens = allTokens[componentName]
 
-          properties.push({
-            name: cssVarName,
-            description: value.$description,
-          })
-        } else {
-          // This is a group, recurse deeper
-          walkTokens(value, path.concat(key))
+    if (componentTokens) {
+      // Recursively extract tokens from the component section
+      function extractTokens(tokenObj) {
+        for (const [key, value] of Object.entries(tokenObj)) {
+          if (value && typeof value === 'object') {
+            if (value.$value !== undefined && value.name) {
+              // This is a token
+              properties.push({
+                name: `--${value.name}`,
+                description: value.$description || undefined,
+              })
+            } else {
+              // Recurse into nested objects
+              extractTokens(value)
+            }
+          }
         }
       }
-    }
-  }
 
-  walkTokens(componentTokens)
-  return properties
+      extractTokens(componentTokens)
+    } else {
+      console.warn(
+        `⚠️ No tokens found for component '${componentName}' at top level`,
+      )
+    }
+
+    return properties
+  } catch (error) {
+    console.warn(
+      `⚠️ Could not load component tokens for '${componentName}': ${error.message}`,
+    )
+    return []
+  }
 }
 
 /**
@@ -129,14 +138,10 @@ async function runCEMAnalysis() {
  */
 async function enhanceWithTokens(manifest, componentName) {
   try {
-    console.log('🎨 Loading design tokens...')
+    console.log('🎨 Loading component tokens...')
 
-    // Import tokens using the main package export
-    const tokensModule = await import('@lime-soda/tokens')
-    const tokenTree = tokensModule.default
-
-    // Extract CSS properties from token tree
-    const cssProperties = extractComponentTokens(tokenTree, componentName)
+    // Extract CSS properties from component token export
+    const cssProperties = await extractComponentTokens(componentName)
 
     if (cssProperties.length === 0) {
       console.warn(`⚠️ No tokens found for component '${componentName}'`)

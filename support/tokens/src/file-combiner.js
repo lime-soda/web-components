@@ -60,3 +60,16 @@ export async function combineVariableFiles() {
     throw new Error(`Failed to combine variable files: ${error.message}`)
   }
 }
+
+/**
+ * Copies the complete token export files from light mode to root dist
+ */
+export async function copyTokenExportFiles() {
+  try {
+    // Copy the complete token export files from light mode to root
+    await copyFile('dist/light/index.js', 'dist/index.js')
+    await copyFile('dist/light/index.d.ts', 'dist/index.d.ts')
+  } catch (error) {
+    throw new Error(`Failed to copy token export files: ${error.message}`)
+  }
+}
