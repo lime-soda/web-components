@@ -226,6 +226,61 @@ export function createServer() {
     },
   )
 
+  server.registerTool(
+    'get-component-token-exports',
+    {
+      title: 'Get Component Token Exports',
+      description:
+        'Get all component token exports (JavaScript and TypeScript)',
+    },
+    async () => {
+      const exports = await tokens.getComponentTokenExports()
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(exports, null, 2),
+          },
+        ],
+      }
+    },
+  )
+
+  server.registerTool(
+    'get-component-token-export',
+    {
+      title: 'Get Component Token Export',
+      description: 'Get token exports for a specific component',
+      inputSchema: {
+        componentName: z.string().describe('Component name (e.g., "button")'),
+      },
+    },
+    async ({ componentName }: { componentName: string }) => {
+      const componentExport =
+        await tokens.getComponentTokenExport(componentName)
+
+      if (!componentExport) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Component token export "${componentName}" not found`,
+            },
+          ],
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(componentExport, null, 2),
+          },
+        ],
+      }
+    },
+  )
+
   return {
     async start() {
       const transport = new StdioServerTransport()

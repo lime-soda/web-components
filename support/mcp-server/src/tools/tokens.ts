@@ -21,8 +21,15 @@ export interface CSSVariable {
   value: string
 }
 
+export interface ComponentTokenExports {
+  component: string
+  jsContent: string
+  tsContent: string
+}
+
 let tokensCache: Record<string, TokenCategory> | null = null
 let cssVariablesCache: CSSVariable[] | null = null
+let componentExportsCache: ComponentTokenExports[] | null = null
 
 async function loadAllTokens(): Promise<Record<string, TokenCategory>> {
   if (tokensCache) {
@@ -77,7 +84,7 @@ export async function getCssVariables(): Promise<CSSVariable[]> {
   }
 
   const tokensPath = getTokensPath()
-  const cssFilePath = resolve(tokensPath, 'dist/css/variables.css')
+  const cssFilePath = resolve(tokensPath, 'dist/variables.css')
   const cssContent = await readTextFile(cssFilePath)
 
   if (!cssContent) {
@@ -145,7 +152,52 @@ export async function searchTokens(
   return results
 }
 
+export async function getComponentTokenExports(): Promise<
+  ComponentTokenExports[]
+> {
+  if (componentExportsCache) {
+    return componentExportsCache
+  }
+
+  const tokensPath = getTokensPath()
+  const exports: ComponentTokenExports[] = []
+
+  // Find all component .js and .d.ts files in dist directory
+  const componentFiles = await glob('*.js', {
+    cwd: resolve(tokensPath, 'dist'),
+    ignore: ['index.js', 'lit.js'],
+  })
+
+  for (const jsFile of componentFiles) {
+    const componentName = basename(jsFile, '.js')
+    const jsPath = resolve(tokensPath, 'dist', jsFile)
+    const tsPath = resolve(tokensPath, 'dist', `${componentName}.d.ts`)
+
+    const jsContent = await readTextFile(jsPath)
+    const tsContent = await readTextFile(tsPath)
+
+    if (jsContent && tsContent) {
+      exports.push({
+        component: componentName,
+        jsContent,
+        tsContent,
+      })
+    }
+  }
+
+  componentExportsCache = exports
+  return exports
+}
+
+export async function getComponentTokenExport(
+  componentName: string,
+): Promise<ComponentTokenExports | null> {
+  const exports = await getComponentTokenExports()
+  return exports.find((exp) => exp.component === componentName) || null
+}
+
 export function clearCache(): void {
   tokensCache = null
   cssVariablesCache = null
+  componentExportsCache = null
 }

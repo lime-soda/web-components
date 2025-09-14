@@ -76,3 +76,6 @@ The inspector allows you to:
 - `get-tokens` - Get design tokens (optionally filtered)
 - `get-css-variables` - Get CSS custom properties
 - `search-tokens` - Search tokens by name/value/description
+- `get-component-token-exports` - Get all component token exports (JavaScript
+  and TypeScript)
+- `get-component-token-export` - Get token exports for a specific component
