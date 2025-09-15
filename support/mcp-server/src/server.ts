@@ -131,8 +131,8 @@ export function createServer() {
       title: 'List Token Categories',
       description: 'List all available design token categories',
     },
-    async () => {
-      const categories = await tokens.listTokenCategories()
+    () => {
+      const categories = tokens.listTokenCategories()
       return {
         content: [
           {
@@ -156,8 +156,8 @@ export function createServer() {
           .describe('Optional category name to filter tokens'),
       },
     },
-    async ({ category }: { category?: string }) => {
-      const tokenData = await tokens.getTokens(category)
+    ({ category }: { category?: string }) => {
+      const tokenData = tokens.getTokens(category)
 
       if (category && !tokenData) {
         return {
@@ -213,8 +213,8 @@ export function createServer() {
           ),
       },
     },
-    async ({ query }: { query: string }) => {
-      const matchingTokens = await tokens.searchTokens(query)
+    ({ query }: { query: string }) => {
+      const matchingTokens = tokens.searchTokens(query)
       return {
         content: [
           {

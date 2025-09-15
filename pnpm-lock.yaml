@@ -68,6 +68,9 @@ importers:
 
   support/mcp-server:
     dependencies:
+      '@lime-soda/tokens':
+        specifier: workspace:*
+        version: link:../tokens
       '@modelcontextprotocol/sdk':
         specifier: ^1.17.3
         version: 1.17.5

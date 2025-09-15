@@ -1,15 +1,15 @@
+import tokens from '@lime-soda/tokens'
+import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import {
-  getTokensPath,
-  readJsonFile,
-  readTextFile,
-  getWorkspaceRoot,
-} from '../utils/filesystem.js'
 
 export interface TokenValue {
   $value: string
   $type?: string
   $description?: string
+  name?: string
+  path?: string[]
+  attributes?: Record<string, unknown>
+  [key: string]: unknown
 }
 
 export interface TokenCategory {
@@ -21,7 +21,6 @@ export interface CSSVariable {
   value: string
 }
 
-let tokensCache: Record<string, TokenCategory> | null = null
 let cssVariablesCache: CSSVariable[] | null = null
 
 // Debug logging helper
@@ -34,84 +33,34 @@ function debugLog(message: string, data?: unknown): void {
   }
 }
 
-async function loadAllTokens(): Promise<Record<string, TokenCategory>> {
-  if (tokensCache) {
-    debugLog('Returning cached tokens', Object.keys(tokensCache))
-    return tokensCache
-  }
+function getAllTokens(): Record<string, TokenCategory> {
+  debugLog('Loading tokens from package export')
 
   try {
-    const tokensPath = getTokensPath()
-    debugLog('Environment variables:', {
-      WORKSPACE_ROOT: process.env.WORKSPACE_ROOT,
-      TOKENS_PATH: process.env.TOKENS_PATH,
-      workspaceRoot: getWorkspaceRoot(),
-      tokensPath,
-      cwd: process.cwd(),
-    })
+    // Convert the imported tokens to our expected format
+    const categorizedTokens: Record<string, TokenCategory> = {}
 
-    const tokens: Record<string, TokenCategory> = {}
-
-    const tokenFiles = await glob('**/*.json', {
-      cwd: tokensPath,
-      ignore: [
-        '**/node_modules/**',
-        '**/dist/**',
-        'config.json',
-        'package.json',
-      ],
-    })
-
-    debugLog(`Found ${tokenFiles.length} token files`, tokenFiles)
-
-    for (const tokenFile of tokenFiles) {
-      try {
-        const fullPath = resolve(tokensPath, tokenFile)
-        const tokenData = await readJsonFile<TokenCategory>(fullPath)
-
-        if (tokenData) {
-          // Create a more descriptive key that includes the directory structure
-          const pathParts = tokenFile.split('/')
-          const fileName = basename(tokenFile, '.json')
-
-          // Create hierarchical key: theme-light-color, primitives-color, etc.
-          let key: string
-          if (pathParts.length > 1) {
-            const dirParts = pathParts.slice(0, -1)
-            key = [...dirParts, fileName].join('-')
-          } else {
-            key = fileName
-          }
-
-          tokens[key] = tokenData
-          debugLog(`Loaded token file: ${tokenFile} as key: ${key}`, {
-            hasColorProperty: 'color' in tokenData,
-            topLevelKeys: Object.keys(tokenData),
-          })
-        } else {
-          console.warn(`Failed to load token data from ${tokenFile}`)
-        }
-      } catch (error) {
-        console.error(`Error processing token file ${tokenFile}:`, error)
-      }
+    // The tokens are already organized by category (color, font, size, etc.)
+    for (const [categoryKey, categoryValue] of Object.entries(tokens)) {
+      categorizedTokens[categoryKey] = categoryValue as TokenCategory
     }
 
     debugLog(
-      `Total tokens loaded: ${Object.keys(tokens).length}`,
-      Object.keys(tokens),
+      `Total token categories loaded: ${Object.keys(categorizedTokens).length}`,
+      Object.keys(categorizedTokens),
     )
-    tokensCache = tokens
-    return tokens
+
+    return categorizedTokens
   } catch (error) {
-    console.error('Error in loadAllTokens:', error)
+    console.error('Error in getAllTokens:', error)
     return {}
   }
 }
 
-export async function listTokenCategories(): Promise<string[]> {
+export function listTokenCategories(): string[] {
   try {
-    const tokens = await loadAllTokens()
-    const categories = Object.keys(tokens).sort()
+    const allTokens = getAllTokens()
+    const categories = Object.keys(allTokens).sort()
     debugLog(`Listing ${categories.length} token categories`, categories)
     return categories
   } catch (error) {
@@ -120,21 +69,21 @@ export async function listTokenCategories(): Promise<string[]> {
   }
 }
 
-export async function getTokens(
+export function getTokens(
   category?: string,
-): Promise<Record<string, TokenCategory> | TokenCategory | null> {
+): Record<string, TokenCategory> | TokenCategory | null {
   try {
-    const tokens = await loadAllTokens()
+    const allTokens = getAllTokens()
     debugLog(`Getting tokens for category: ${category || 'all'}`, {
-      availableCategories: Object.keys(tokens),
+      availableCategories: Object.keys(allTokens),
       requestedCategory: category,
     })
 
     if (!category) {
-      return tokens
+      return allTokens
     }
 
-    const result = tokens[category] || null
+    const result = allTokens[category] || null
     debugLog(
       `Token lookup result for '${category}':`,
       result ? 'found' : 'not found',
@@ -156,29 +105,80 @@ export async function getCssVariables(): Promise<CSSVariable[]> {
   }
 
   try {
-    const tokensPath = getTokensPath()
-    const cssFilePath = resolve(tokensPath, 'dist/variables.css')
-    debugLog('Reading CSS variables from:', cssFilePath)
+    // Try to find the CSS file path from the tokens package
+    // First, try to find the package location dynamically
+    let cssFilePath: string | null = null
 
-    const cssContent = await readTextFile(cssFilePath)
-
-    if (!cssContent) {
-      console.warn('No CSS content found in variables.css')
-      return []
+    try {
+      // Try to resolve the CSS file from the package exports
+      const tokensPackagePath = require.resolve(
+        '@lime-soda/tokens/package.json',
+      )
+      const packageDir = resolve(tokensPackagePath, '..')
+      cssFilePath = resolve(packageDir, 'dist/variables.css')
+      debugLog('Resolved CSS file path:', cssFilePath)
+    } catch {
+      // Fallback: generate from tokens if we can't read the CSS file
+      debugLog('Could not resolve CSS file, generating from tokens')
     }
 
+    if (cssFilePath) {
+      try {
+        const cssContent = await readFile(cssFilePath, 'utf-8')
+        const variables: CSSVariable[] = []
+        const variableRegex = /--([^:]+):\s*([^;]+);/g
+        let match
+
+        while ((match = variableRegex.exec(cssContent)) !== null) {
+          variables.push({
+            name: `--${match[1].trim()}`,
+            value: match[2].trim(),
+          })
+        }
+
+        debugLog(`Parsed ${variables.length} CSS variables from file`)
+        cssVariablesCache = variables
+        return variables
+      } catch (fileError) {
+        console.warn(
+          'Failed to read CSS file, falling back to token generation:',
+          fileError,
+        )
+      }
+    }
+
+    // Fallback: generate CSS variables from the token structure
+    debugLog('Generating CSS variables from token structure')
+    const allTokens = getAllTokens()
     const variables: CSSVariable[] = []
-    const variableRegex = /--([^:]+):\s*([^;]+);/g
-    let match
 
-    while ((match = variableRegex.exec(cssContent)) !== null) {
-      variables.push({
-        name: `--${match[1].trim()}`,
-        value: match[2].trim(),
-      })
+    function extractCssVariables(
+      obj: Record<string, unknown>,
+      prefix = '',
+    ): void {
+      for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === 'object' && value !== null) {
+          if ('$value' in value && typeof value.$value === 'string') {
+            const tokenValue = value as TokenValue
+            const cssVarName =
+              tokenValue.name || `${prefix}${prefix ? '-' : ''}${key}`
+            variables.push({
+              name: `--${cssVarName}`,
+              value: tokenValue.$value,
+            })
+          } else {
+            extractCssVariables(
+              value as Record<string, unknown>,
+              prefix ? `${prefix}-${key}` : key,
+            )
+          }
+        }
+      }
     }
 
-    debugLog(`Parsed ${variables.length} CSS variables`)
+    extractCssVariables(allTokens)
+
+    debugLog(`Generated ${variables.length} CSS variables from tokens`)
     cssVariablesCache = variables
     return variables
   } catch (error) {
@@ -187,11 +187,11 @@ export async function getCssVariables(): Promise<CSSVariable[]> {
   }
 }
 
-export async function searchTokens(
+export function searchTokens(
   query: string,
-): Promise<Array<{ category: string; path: string; value: TokenValue }>> {
+): Array<{ category: string; path: string; value: TokenValue }> {
   try {
-    const tokens = await loadAllTokens()
+    const allTokens = getAllTokens()
     const results: Array<{
       category: string
       path: string
@@ -200,8 +200,8 @@ export async function searchTokens(
     const lowerQuery = query.toLowerCase()
 
     debugLog(`Searching tokens for query: '${query}'`, {
-      availableCategories: Object.keys(tokens),
-      totalCategories: Object.keys(tokens).length,
+      availableCategories: Object.keys(allTokens),
+      totalCategories: Object.keys(allTokens).length,
     })
 
     function searchInCategory(
@@ -222,8 +222,16 @@ export async function searchTokens(
             const matchesDescription = tokenValue.$description
               ?.toLowerCase()
               .includes(lowerQuery)
+            const matchesName = tokenValue.name
+              ?.toLowerCase()
+              .includes(lowerQuery)
 
-            if (matchesKey || matchesValue || matchesDescription) {
+            if (
+              matchesKey ||
+              matchesValue ||
+              matchesDescription ||
+              matchesName
+            ) {
               results.push({ category, path: currentPath, value: tokenValue })
               debugLog(`Found match in ${category}:`, {
                 path: currentPath,
@@ -232,6 +240,7 @@ export async function searchTokens(
                   key: matchesKey,
                   value: matchesValue,
                   description: matchesDescription,
+                  name: matchesName,
                 },
               })
             }
@@ -246,7 +255,7 @@ export async function searchTokens(
       }
     }
 
-    for (const [category, categoryTokens] of Object.entries(tokens)) {
+    for (const [category, categoryTokens] of Object.entries(allTokens)) {
       if (typeof categoryTokens === 'object' && categoryTokens !== null) {
         debugLog(`Searching in category: ${category}`, {
           hasTokens: Object.keys(categoryTokens).length > 0,
@@ -265,8 +274,7 @@ export async function searchTokens(
 }
 
 export function clearCache(): void {
-  debugLog('Clearing all caches')
-  tokensCache = null
+  debugLog('Clearing CSS variables cache')
   cssVariablesCache = null
 }
 
@@ -279,7 +287,7 @@ export function enableDebugMode(): void {
 // Helper function to get cache status
 export function getCacheStatus(): { tokens: boolean; cssVariables: boolean } {
   return {
-    tokens: tokensCache !== null,
+    tokens: true, // Always available from package import
     cssVariables: cssVariablesCache !== null,
   }
 }

@@ -24,6 +24,7 @@
   "author": "Phil Parsons",
   "license": "MIT",
   "dependencies": {
+    "@lime-soda/tokens": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.17.3",
     "custom-elements-manifest": "^2.1.0",
     "dotenv": "^17.2.1",
