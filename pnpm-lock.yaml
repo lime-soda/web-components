@@ -10,9 +10,6 @@ importers:
       '@changesets/cli':
         specifier: ^2.29.5
         version: 2.29.7(@types/node@24.3.3)
-      '@custom-elements-manifest/analyzer':
-        specifier: ^0.10.5
-        version: 0.10.5
       '@eslint/js':
         specifier: ^9.32.0
         version: 9.35.0
@@ -28,9 +25,6 @@ importers:
       eslint:
         specifier: ^9.32.0
         version: 9.35.0
-      glob:
-        specifier: ^11.0.3
-        version: 11.0.3
       globals:
         specifier: ^16.3.0
         version: 16.4.0
@@ -117,9 +111,6 @@ importers:
       '@lime-soda/button':
         specifier: workspace:*
         version: link:../../packages/button
-      '@lime-soda/eslint-config':
-        specifier: workspace:*
-        version: link:../../tools/eslint-config
       '@lime-soda/tokens':
         specifier: workspace:*
         version: link:../tokens
@@ -129,6 +120,9 @@ importers:
       '@storybook/addon-docs':
         specifier: ^9.1.0
         version: 9.1.5(@types/react@19.1.8)(storybook@9.1.5(@testing-library/dom@10.4.1)(prettier@3.6.2)(vite@7.0.6(@types/node@24.3.3)(tsx@4.20.5)(yaml@2.8.1)))
+      '@storybook/addon-vitest':
+        specifier: ^9.1.0
+        version: 9.1.5(@vitest/browser@3.2.4)(@vitest/runner@3.2.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(storybook@9.1.5(@testing-library/dom@10.4.1)(prettier@3.6.2)(vite@7.0.6(@types/node@24.3.3)(tsx@4.20.5)(yaml@2.8.1)))(vitest@3.2.4)
       '@storybook/web-components-vite':
         specifier: ^9.1.0
         version: 9.1.5(lit@3.3.1)(storybook@9.1.5(@testing-library/dom@10.4.1)(prettier@3.6.2)(vite@7.0.6(@types/node@24.3.3)(tsx@4.20.5)(yaml@2.8.1)))(vite@7.0.6(@types/node@24.3.3)(tsx@4.20.5)(yaml@2.8.1))
@@ -160,9 +154,9 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.3.3)(@vitest/browser@3.2.4)(tsx@4.20.5)(yaml@2.8.1)
     devDependencies:
-      '@storybook/addon-vitest':
-        specifier: ^9.1.0
-        version: 9.1.5(@vitest/browser@3.2.4)(@vitest/runner@3.2.4)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(storybook@9.1.5(@testing-library/dom@10.4.1)(prettier@3.6.2)(vite@7.0.6(@types/node@24.3.3)(tsx@4.20.5)(yaml@2.8.1)))(vitest@3.2.4)
+      '@lime-soda/eslint-config':
+        specifier: workspace:*
+        version: link:../../tools/eslint-config
 
   support/tokens:
     dependencies:
@@ -183,6 +177,9 @@ importers:
 
   tools/build:
     dependencies:
+      '@custom-elements-manifest/analyzer':
+        specifier: ^0.10.5
+        version: 0.10.5
       '@lime-soda/tokens':
         specifier: workspace:*
         version: link:../../support/tokens

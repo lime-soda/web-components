@@ -1,8 +1,3 @@
 import config from '@lime-soda/eslint-config/browser'
 
-export default [
-  {
-    ignores: ['stories'],
-  },
-  ...config,
-]
+export default config

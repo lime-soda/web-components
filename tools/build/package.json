@@ -15,9 +15,10 @@
   "author": "Phil Parsons",
   "license": "MIT",
   "dependencies": {
+    "@custom-elements-manifest/analyzer": "^0.10.5",
+    "@lime-soda/tokens": "workspace:*",
     "esbuild": "^0.25.8",
-    "glob": "^11.0.3",
-    "@lime-soda/tokens": "workspace:*"
+    "glob": "^11.0.3"
   },
   "devDependencies": {
     "@lime-soda/eslint-config": "workspace:*"

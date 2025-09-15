@@ -16,6 +16,9 @@ export class Button extends LitElement {
   @property({ type: String })
   size: 'sm' | 'md' | 'lg' = 'sm'
 
+  /**
+   * The color of the button.
+   */
   @property({ type: String })
   color: 'primary' | 'secondary' = 'primary'
 

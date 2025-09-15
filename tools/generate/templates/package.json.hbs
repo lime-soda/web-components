@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "custom-element",
     "web-component"
@@ -21,14 +23,19 @@
   "scripts": {
     "build": "build-component",
     "build:types": "tsc --project tsconfig.types.json",
-    "build:manifest": "cem analyze --litelement --globs \"src/**/*.ts\"",
+    "build:manifest": "build-manifest",
     "lint": "eslint .",
+  },
+  "dependencies": {
+    "@lime-soda/tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "@lime-soda/build": "workspace:*",
+    "@lime-soda/eslint-config": "workspace:*",
+    "@lime-soda/tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "lit": ">= 3.3.0"
-  },
-  "devDependencies": {
-    "@lime-soda/eslint-config": "workspace:*"
   },
   "customElements": "custom-elements.json"
 }
