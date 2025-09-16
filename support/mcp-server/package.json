@@ -1,6 +1,6 @@
 {
   "name": "@lime-soda/mcp-server",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "MCP server for Lime Soda web components and design tokens",
   "type": "module",
   "bin": {
