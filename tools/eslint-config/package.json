@@ -1,7 +1,7 @@
 {
   "name": "@lime-soda/eslint-config",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Shared ESLint configuration for Lime Soda monorepo",
   "type": "module",
   "main": "./dist/index.js",

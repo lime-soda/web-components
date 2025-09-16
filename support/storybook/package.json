@@ -1,6 +1,6 @@
 {
   "name": "@lime-soda/storybook",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Storybook for Lime Soda web components",
   "private": true,
   "type": "module",
