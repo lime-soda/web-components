@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@custom-elements-manifest/analyzer": "^0.10.5",
+    "@lime-soda/cem-plugin-css-properties": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
     "esbuild": "^0.25.8",
     "glob": "^11.0.3"

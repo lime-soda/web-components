@@ -1,0 +1,40 @@
+{
+  "name": "@lime-soda/cem-plugin-css-properties",
+  "version": "0.1.0",
+  "description": "Custom Elements Manifest plugin for adding CSS custom properties from design tokens",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [
+    "custom-elements-manifest",
+    "cem-plugin",
+    "css-properties",
+    "design-tokens"
+  ],
+  "files": [
+    "CHANGELOG.md",
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@lime-soda/eslint-config": "workspace:*",
+    "@lime-soda/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.2"
+  },
+  "peerDependencies": {
+    "@custom-elements-manifest/analyzer": ">= 0.10.0"
+  },
+  "author": "Phil Parsons",
+  "license": "MIT"
+}
