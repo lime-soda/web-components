@@ -5,6 +5,7 @@ import { litPlugin } from '@custom-elements-manifest/analyzer/src/features/frame
 import { glob } from 'glob'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { createCssCustomPropertiesPlugin } from './src/plugins/index.js'
 
 /**
  * Detects component name from CLI args, package.json, or directory name
@@ -40,61 +41,11 @@ async function detectComponentName(override) {
 }
 
 /**
- * Extracts component tokens from the tokens package import
- * @param {string} componentName - Name of the component (e.g., 'button')
- * @returns {Promise<Array>} Array of {name, description} objects
+ * Runs Custom Elements Manifest analysis programmatically with CSS custom properties plugin
+ * @param {string} componentName - Detected component name for token lookup
+ * @returns {Promise<Object>} Generated manifest with CSS properties
  */
-async function extractComponentTokens(componentName) {
-  try {
-    const properties = []
-
-    // Import the main tokens package to get access to the complete token tree
-    const tokensModule = await import('@lime-soda/tokens')
-    const allTokens = tokensModule.default
-
-    // Look for component-specific tokens at the top level
-    const componentTokens = allTokens[componentName]
-
-    if (componentTokens) {
-      // Recursively extract tokens from the component section
-      function extractTokens(tokenObj) {
-        for (const [, value] of Object.entries(tokenObj)) {
-          if (value && typeof value === 'object') {
-            if (value.$value !== undefined && value.name) {
-              // This is a token
-              properties.push({
-                name: `--${value.name}`,
-                description: value.$description || undefined,
-              })
-            } else {
-              // Recurse into nested objects
-              extractTokens(value)
-            }
-          }
-        }
-      }
-
-      extractTokens(componentTokens)
-    } else {
-      console.warn(
-        `⚠️ No tokens found for component '${componentName}' at top level`,
-      )
-    }
-
-    return properties
-  } catch (error) {
-    console.warn(
-      `⚠️ Could not load component tokens for '${componentName}': ${error.message}`,
-    )
-    return []
-  }
-}
-
-/**
- * Runs Custom Elements Manifest analysis programmatically
- * @returns {Promise<Object>} Generated manifest
- */
-async function runCEMAnalysis() {
+async function runCEMAnalysis(componentName) {
   console.log('🔍 Analyzing TypeScript files...')
 
   // Find all TypeScript files
@@ -119,57 +70,39 @@ async function runCEMAnalysis() {
     }),
   )
 
-  // Run CEM analysis with Lit support enabled
+  // Import design tokens
+  let cssPropertiesPlugin = null
+  try {
+    const tokensModule = await import('@lime-soda/tokens')
+    const tokens = tokensModule.default
+
+    // Create CSS custom properties plugin with tokens
+    cssPropertiesPlugin = createCssCustomPropertiesPlugin(tokens, {
+      elementPrefix: 'ls-',
+      componentName,
+    })
+
+    console.log('🎨 CSS Custom Properties Plugin configured with design tokens')
+  } catch (error) {
+    console.warn(`⚠️ Could not load design tokens: ${error.message}`)
+    console.warn('📝 Manifest will be generated without CSS custom properties')
+  }
+
+  // Prepare plugins array
+  const plugins = [...litPlugin()]
+  if (cssPropertiesPlugin) {
+    plugins.push(cssPropertiesPlugin)
+  }
+
+  // Run CEM analysis with plugins enabled
   const manifest = create({
     modules,
-    plugins: [...litPlugin()],
+    plugins,
     context: { dev: false, litelement: true },
   })
 
   console.log('✅ Custom Elements Manifest analysis complete')
   return manifest
-}
-
-/**
- * Enhances manifest with CSS properties from design tokens
- * @param {Object} manifest - Base manifest from CEM analysis
- * @param {string} componentName - Component name for token lookup
- * @returns {Promise<Object>} Enhanced manifest
- */
-async function enhanceWithTokens(manifest, componentName) {
-  try {
-    console.log('🎨 Loading component tokens...')
-
-    // Extract CSS properties from component token export
-    const cssProperties = await extractComponentTokens(componentName)
-
-    if (cssProperties.length === 0) {
-      console.warn(`⚠️ No tokens found for component '${componentName}'`)
-      return manifest
-    }
-
-    // Find the component declaration
-    const declaration = manifest.modules?.[0]?.declarations?.find(
-      (decl) => decl.kind === 'class' && decl.customElement,
-    )
-
-    if (!declaration) {
-      console.warn('⚠️ No custom element declaration found in manifest')
-      return manifest
-    }
-
-    // Update CSS properties
-    declaration.cssProperties = cssProperties
-
-    console.log(
-      `🎯 Enhanced manifest with ${cssProperties.length} CSS properties`,
-    )
-    return manifest
-  } catch (error) {
-    console.warn(`⚠️ Could not load tokens: ${error.message}`)
-    console.warn('📝 Manifest will be generated without token enhancement')
-    return manifest
-  }
 }
 
 /**
@@ -185,18 +118,14 @@ async function buildManifest() {
     // Detect component name
     const detectedName = await detectComponentName(componentName)
 
-    // Run CEM analysis
-    const baseManifest = await runCEMAnalysis()
-
-    // Enhance with design tokens
-    const enhancedManifest = await enhanceWithTokens(baseManifest, detectedName)
+    // Run CEM analysis with CSS custom properties plugin
+    const manifest = await runCEMAnalysis(detectedName)
 
     // Write final manifest
-    await fs.writeFile(manifestPath, JSON.stringify(enhancedManifest, null, 2))
+    await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2))
 
     const tokenCount =
-      enhancedManifest.modules?.[0]?.declarations?.[0]?.cssProperties?.length ||
-      0
+      manifest.modules?.[0]?.declarations?.[0]?.cssProperties?.length || 0
 
     console.log('✨ Custom Elements Manifest built successfully!')
     console.log(`📁 Written to: ${manifestPath}`)
