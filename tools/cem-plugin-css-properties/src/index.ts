@@ -117,7 +117,17 @@ export function cssPropertiesPlugin(
     packageLinkPhase({
       customElementsManifest,
     }: {
-      customElementsManifest: any
+      customElementsManifest: {
+        modules?: Array<{
+          declarations?: Array<{
+            kind?: string
+            customElement?: boolean
+            tagName?: string
+            name?: string
+            cssProperties?: CSSProperty[]
+          }>
+        }>
+      }
     }) {
       // Find custom element declarations and process each one
       if (customElementsManifest.modules) {
@@ -158,7 +168,7 @@ export function cssPropertiesPlugin(
                 declaration.cssProperties.push(...cssProperties)
 
                 console.log(
-                  `✨ Added ${cssProperties.length} CSS properties to '${declaration.name}' declaration`,
+                  `✨ Added ${cssProperties.length} CSS properties to '${declaration.name ?? 'unknown'}' declaration`,
                 )
               }
             }

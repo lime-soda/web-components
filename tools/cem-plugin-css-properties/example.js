@@ -1,7 +1,8 @@
+/* eslint-disable no-undef */
 /**
  * Example usage of the CSS Custom Properties Plugin
  */
-import { cssCustomPropertiesPlugin } from './dist/index.js'
+import { cssPropertiesPlugin } from './dist/index.js'
 
 // Mock tokens for demonstration
 const tokens = {
@@ -26,14 +27,12 @@ const tokens = {
 }
 
 // Example 1: Simple prefix removal
-const prefixPlugin = cssCustomPropertiesPlugin({
-  tokens,
+const prefixPlugin = cssPropertiesPlugin(tokens, {
   elementMapping: 'my-', // Removes 'my-' prefix from element names
 })
 
 // Example 2: Custom mapping function
-const customMappingPlugin = cssCustomPropertiesPlugin({
-  tokens,
+const customMappingPlugin = cssPropertiesPlugin(tokens, {
   elementMapping: (tagName) => {
     // Remove prefix and handle special cases
     const baseName = tagName.replace(/^my-/, '')
