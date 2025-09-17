@@ -40,9 +40,6 @@ function createStyleDictionaryConfig(mode, components) {
       {
         destination: 'index.js',
         format: 'javascript/esm',
-        options: {
-          outputReferences: true,
-        },
       },
       {
         destination: 'index.d.ts',
