@@ -28,10 +28,13 @@ export function groupTokensByPath(tokens, options) {
     const propName = StyleDictionary.hooks.transforms[
       transforms.nameCamel
     ].transform({ path: rest }, options)
+    const cssVarName = StyleDictionary.hooks.transforms[
+      transforms.nameKebab
+    ].transform(token, options)
 
     groups[groupKey].push({
       propName,
-      cssVar: `--${token.path.join('-')}`,
+      cssVar: `--${cssVarName}`,
       token,
     })
   })
