@@ -1,16 +1,7 @@
 # @lime-soda/cem-plugin-css-properties
 
 A Custom Elements Manifest (CEM) plugin that automatically adds CSS custom
-properties from design tokens to your web component manifests.
-
-## Features
-
-- ✅ Automatically extracts CSS custom properties from design tokens
-- ✅ Flexible element-to-token mapping with custom functions or simple prefix
-  removal
-- ✅ Type-safe TypeScript implementation
-- ✅ Infers CSS syntax from token types
-- ✅ Integrates seamlessly with Custom Elements Manifest analyzer
+properties from design tokens to your custom element manifests.
 
 ## Installation
 
