@@ -215,9 +215,6 @@ importers:
       '@lime-soda/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.18.5
       typescript:
         specifier: ~5.9.2
         version: 5.9.2
