@@ -10,6 +10,7 @@
       "outputs": ["dist/**/*.d.ts"]
     },
     "build:manifest": {
+      "dependsOn": ["^build"],
       "outputs": ["custom-elements.json"]
     },
     "lint": {

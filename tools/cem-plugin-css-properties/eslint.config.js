@@ -1,3 +1,3 @@
-import config from '@lime-soda/eslint-config'
+import config from '@lime-soda/eslint-config/node'
 
-export default config
+export default [{ ignores: ['eslint.config.js'] }, ...config]

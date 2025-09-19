@@ -209,6 +209,9 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
     devDependencies:
+      '@lime-soda/build':
+        specifier: workspace:*
+        version: link:../build
       '@lime-soda/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
