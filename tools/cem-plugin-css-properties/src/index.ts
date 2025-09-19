@@ -1,4 +1,13 @@
 /**
+ * Custom Elements Manifest plugin for adding CSS custom properties from design tokens
+ */
+import type {
+  Package,
+  CssCustomProperty,
+  CustomElementDeclaration,
+} from 'custom-elements-manifest/schema.js'
+
+/**
  * Represents a design token with value and metadata
  */
 export interface DesignToken {
@@ -7,13 +16,24 @@ export interface DesignToken {
   name?: string
 }
 
+// Using CssCustomProperty from the schema instead of our custom interface
+
 /**
- * Represents a CSS custom property to be added to the manifest
+ * Type guard to check if a declaration is a custom element declaration
  */
-export interface CSSProperty {
-  name: string
-  description?: string
-  default?: string
+function isCustomElementDeclaration(
+  declaration: unknown,
+): declaration is CustomElementDeclaration {
+  return (
+    typeof declaration === 'object' &&
+    declaration !== null &&
+    'kind' in declaration &&
+    'customElement' in declaration &&
+    'tagName' in declaration &&
+    (declaration as Record<string, unknown>).kind === 'class' &&
+    (declaration as Record<string, unknown>).customElement === true &&
+    typeof (declaration as Record<string, unknown>).tagName === 'string'
+  )
 }
 
 /**
@@ -33,8 +53,8 @@ export interface PluginOptions {
 function extractCssPropertiesFromTokens(
   allTokens: Record<string, unknown>,
   tokenKey: string,
-): CSSProperty[] {
-  const properties: CSSProperty[] = []
+): CssCustomProperty[] {
+  const properties: CssCustomProperty[] = []
 
   try {
     // Look for component-specific tokens at the specified key
@@ -117,30 +137,16 @@ export function cssPropertiesPlugin(
     packageLinkPhase({
       customElementsManifest,
     }: {
-      customElementsManifest: {
-        modules?: Array<{
-          declarations?: Array<{
-            kind?: string
-            customElement?: boolean
-            tagName?: string
-            name?: string
-            cssProperties?: CSSProperty[]
-          }>
-        }>
-      }
+      customElementsManifest: Package
     }) {
       // Find custom element declarations and process each one
       if (customElementsManifest.modules) {
         for (const module of customElementsManifest.modules) {
           if (module.declarations) {
             for (const declaration of module.declarations) {
-              if (
-                declaration.kind === 'class' &&
-                declaration.customElement &&
-                declaration.tagName
-              ) {
+              if (isCustomElementDeclaration(declaration)) {
                 // Map the element tag name to the tokens key
-                const tokenKey = mapElementToTokenKey(declaration.tagName)
+                const tokenKey = mapElementToTokenKey(declaration.tagName!)
 
                 console.log(
                   `🗺️ Mapping element '${declaration.tagName}' to token key '${tokenKey}'`,
@@ -168,7 +174,7 @@ export function cssPropertiesPlugin(
                 declaration.cssProperties.push(...cssProperties)
 
                 console.log(
-                  `✨ Added ${cssProperties.length} CSS properties to '${declaration.name ?? 'unknown'}' declaration`,
+                  `✨ Added ${cssProperties.length} CSS properties to '${declaration.name}' declaration`,
                 )
               }
             }

@@ -205,6 +205,9 @@ importers:
       '@custom-elements-manifest/analyzer':
         specifier: '>= 0.10.0'
         version: 0.10.5
+      custom-elements-manifest:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@lime-soda/eslint-config':
         specifier: workspace:*

@@ -75,7 +75,7 @@ export default {
 | Option           | Type                                      | Default | Description                                                      |
 | ---------------- | ----------------------------------------- | ------- | ---------------------------------------------------------------- |
 | `tokens`         | `Record<string, unknown>`                 | -       | Design tokens object (required)                                  |
-| `elementMapping` | `((tagName: string) => string) \| string` | `'ls-'` | Function to map element names to token keys, or prefix to remove |
+| `elementMapping` | `((tagName: string) => string) \| string` | -       | Function to map element names to token keys, or prefix to remove |
 | `componentName`  | `string`                                  | -       | Override component name detection                                |
 
 ## Token Structure
@@ -107,24 +107,11 @@ The plugin adds CSS custom properties to your Custom Elements Manifest:
     {
       "name": "--button-primary-background",
       "description": "Primary button background",
-      "syntax": "<color>",
       "default": "#4ade80"
     }
   ]
 }
 ```
-
-## Supported Token Types
-
-The plugin automatically infers CSS syntax from token `$type` fields:
-
-- `color` → `<color>`
-- `dimension` → `<length>`
-- `fontFamily` → `<custom-ident>#`
-- `fontWeight` → `<number> | <custom-ident>`
-- `duration` → `<time>`
-- `transition` → `<single-transition>#`
-- `typography` → `<'font'>`
 
 ## License
 

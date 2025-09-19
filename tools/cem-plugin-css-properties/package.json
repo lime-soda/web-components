@@ -36,5 +36,8 @@
     "@custom-elements-manifest/analyzer": ">= 0.10.0"
   },
   "author": "Phil Parsons",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "custom-elements-manifest": "^2.1.0"
+  }
 }
