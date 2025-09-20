@@ -1,0 +1,4 @@
+{
+  "extends": "@lime-soda/tsconfig/types",
+  "include": ["src/**/*.ts"]
+}

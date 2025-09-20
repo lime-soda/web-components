@@ -1,11 +1,4 @@
 {
   "extends": "@lime-soda/tsconfig",
-  "compilerOptions": {
-    "declaration": true,
-    "declarationDir": "dist",
-    "declarationMap": true,
-    "noEmit": false,
-    "outDir": "dist"
-  },
-  "include": ["src/**/*.ts"]
+  "include": ["*.ts", "src/**/*.ts", "eslint.config.js"]
 }

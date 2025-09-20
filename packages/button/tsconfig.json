@@ -1,13 +1,4 @@
 {
   "extends": "@lime-soda/tsconfig",
-  "include": [
-    "*.ts",
-    "src/**/*.ts",
-    "eslint.config.js"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.types.json"
-    }
-  ]
+  "include": ["*.ts", "src/**/*.ts", "eslint.config.js"]
 }
