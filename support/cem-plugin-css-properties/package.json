@@ -24,7 +24,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.dist.json",
     "build:types": "tsc --project tsconfig.types.json",
     "lint": "eslint ."
   },
