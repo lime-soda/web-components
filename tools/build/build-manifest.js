@@ -44,7 +44,7 @@ async function runCEMAnalysis() {
   const plugins = [
     ...litPlugin(),
     cssPropertiesPlugin(tokens, {
-      elementMapping: 'ls-', // Remove 'ls-' prefix from element names
+      elementPrefix: 'ls-', // Remove 'ls-' prefix from element names
     }),
   ]
 

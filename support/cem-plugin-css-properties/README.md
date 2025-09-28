@@ -11,17 +11,16 @@ npm install @lime-soda/cem-plugin-css-properties
 
 ## Usage
 
-### Basic Usage with Prefix Mapping
+### Basic Usage with Element Prefix
 
 ```javascript
-import { cssCustomPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties'
+import { cssPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties'
 import tokens from './design-tokens.js'
 
 export default {
   plugins: [
-    cssCustomPropertiesPlugin({
-      tokens,
-      elementMapping: 'ls-', // Removes 'ls-' prefix from element names
+    cssPropertiesPlugin(tokens, {
+      elementPrefix: 'ls-', // Removes 'ls-' prefix from element names
     }),
   ],
 }
@@ -30,30 +29,47 @@ export default {
 ### Advanced Usage with Custom Mapping Function
 
 ```javascript
-import { cssCustomPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties'
+import { cssPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties'
 import tokens from './design-tokens.js'
 
 // Custom mapping function
-function mapElementToTokens(tagName) {
-  // Remove prefix and handle special cases
-  const baseName = tagName.replace(/^ls-/, '')
+function mapElementToTokens(manifest, tokens) {
+  const mapping = new Map()
 
-  // Map specific elements to different token keys
-  switch (baseName) {
-    case 'btn':
-      return 'button'
-    case 'input-field':
-      return 'input'
-    default:
-      return baseName
+  // Process manifest to create custom mappings
+  if (manifest.modules) {
+    for (const module of manifest.modules) {
+      if (module.declarations) {
+        for (const declaration of module.declarations) {
+          if (declaration.tagName) {
+            // Custom logic for mapping element to token key
+            const baseName = declaration.tagName.replace(/^ls-/, '')
+
+            switch (baseName) {
+              case 'btn':
+                mapping.set(declaration.tagName, 'button')
+                break
+              case 'input-field':
+                mapping.set(declaration.tagName, 'input')
+                break
+              default:
+                if (baseName in tokens) {
+                  mapping.set(declaration.tagName, baseName)
+                }
+            }
+          }
+        }
+      }
+    }
   }
+
+  return mapping
 }
 
 export default {
   plugins: [
-    cssCustomPropertiesPlugin({
-      tokens,
-      elementMapping: mapElementToTokens,
+    cssPropertiesPlugin(tokens, {
+      mapElementToTokens,
     }),
   ],
 }
@@ -63,11 +79,10 @@ export default {
 
 ### `PluginOptions`
 
-| Option           | Type                                      | Default | Description                                                      |
-| ---------------- | ----------------------------------------- | ------- | ---------------------------------------------------------------- |
-| `tokens`         | `Record<string, unknown>`                 | -       | Design tokens object (required)                                  |
-| `elementMapping` | `((tagName: string) => string) \| string` | -       | Function to map element names to token keys, or prefix to remove |
-| `componentName`  | `string`                                  | -       | Override component name detection                                |
+| Option               | Type                                                                          | Default | Description                                   |
+| -------------------- | ----------------------------------------------------------------------------- | ------- | --------------------------------------------- |
+| `mapElementToTokens` | `(manifest: Package, tokens: Record<string, unknown>) => Map<string, string>` | -       | Custom function to map elements to token keys |
+| `elementPrefix`      | `string`                                                                      | `'ls-'` | Element prefix to remove for default mapping  |
 
 ## Token Structure
 

@@ -40,8 +40,13 @@ function isCustomElementDeclaration(
  * Plugin configuration options
  */
 export interface PluginOptions {
-  /** Function to map element tag name to tokens key, or element prefix to remove */
-  elementMapping?: ((tagName: string) => string) | string
+  /** Custom function to map elements to tokens */
+  mapElementToTokens?: (
+    manifest: Package,
+    tokens: Record<string, unknown>,
+  ) => Map<string, string>
+  /** Element prefix to remove for default mapping (e.g., 'ls-') */
+  elementPrefix?: string
 }
 
 /**
@@ -102,17 +107,42 @@ function extractCssPropertiesFromTokens(
 }
 
 /**
- * Default element mapping function that removes a prefix
- * @param prefix - Prefix to remove from element tag names
- * @returns Mapping function
+ * Default mapping function that removes element prefix to get token keys
+ * @param manifest - The custom elements manifest
+ * @param tokens - The design tokens object
+ * @param elementPrefix - Prefix to remove from element tag names
+ * @returns Map of element tag names to token keys
  */
-function createPrefixMapper(prefix: string): (tagName: string) => string {
-  return (tagName: string) => {
-    if (tagName.startsWith(prefix)) {
-      return tagName.slice(prefix.length)
+function createDefaultElementToTokensMapping(
+  manifest: Package,
+  tokens: Record<string, unknown>,
+  elementPrefix = '',
+): Map<string, string> {
+  const mapping = new Map<string, string>()
+
+  // Find all custom element declarations in the manifest
+  if (manifest.modules) {
+    for (const module of manifest.modules) {
+      if (module.declarations) {
+        for (const declaration of module.declarations) {
+          if (isCustomElementDeclaration(declaration) && declaration.tagName) {
+            // Remove prefix to get token key
+            let tokenKey = declaration.tagName
+            if (elementPrefix && tokenKey.startsWith(elementPrefix)) {
+              tokenKey = tokenKey.slice(elementPrefix.length)
+            }
+
+            // Only add mapping if the token key exists in tokens
+            if (tokenKey in tokens) {
+              mapping.set(declaration.tagName, tokenKey)
+            }
+          }
+        }
+      }
     }
-    return tagName
   }
+
+  return mapping
 }
 
 /**
@@ -125,12 +155,6 @@ export function cssPropertiesPlugin(
   tokens: Record<string, unknown>,
   options: PluginOptions = {},
 ) {
-  // Create mapping function
-  const mapElementToTokenKey =
-    typeof options.elementMapping === 'function'
-      ? options.elementMapping
-      : createPrefixMapper(options.elementMapping ?? '')
-
   return {
     name: 'css-custom-properties',
 
@@ -139,43 +163,57 @@ export function cssPropertiesPlugin(
     }: {
       customElementsManifest: Package
     }) {
-      // Find custom element declarations and process each one
-      if (customElementsManifest.modules) {
-        for (const module of customElementsManifest.modules) {
-          if (module.declarations) {
-            for (const declaration of module.declarations) {
-              if (isCustomElementDeclaration(declaration)) {
-                // Map the element tag name to the tokens key
-                const tokenKey = mapElementToTokenKey(declaration.tagName!)
+      // Create element-to-token mapping using custom function or default
+      const elementToTokenMapping = options.mapElementToTokens
+        ? options.mapElementToTokens(customElementsManifest, tokens)
+        : createDefaultElementToTokensMapping(
+            customElementsManifest,
+            tokens,
+            options.elementPrefix ?? 'ls-',
+          )
 
-                console.log(
-                  `🗺️ Mapping element '${declaration.tagName}' to token key '${tokenKey}'`,
-                )
+      console.log(
+        `🗺️ Created mapping for ${elementToTokenMapping.size} element(s)`,
+      )
 
-                // Extract CSS properties from design tokens
-                const cssProperties = extractCssPropertiesFromTokens(
-                  tokens,
-                  tokenKey,
-                )
+      // Process each mapped element
+      for (const [tagName, tokenKey] of elementToTokenMapping) {
+        console.log(
+          `🔍 Processing element '${tagName}' with token key '${tokenKey}'`,
+        )
 
-                if (cssProperties.length === 0) {
-                  console.warn(
-                    `⚠️ No CSS properties found for element '${declaration.tagName}' (token key: '${tokenKey}')`,
+        // Extract CSS properties from design tokens
+        const cssProperties = extractCssPropertiesFromTokens(tokens, tokenKey)
+
+        if (cssProperties.length === 0) {
+          console.warn(
+            `⚠️ No CSS properties found for element '${tagName}' (token key: '${tokenKey}')`,
+          )
+          continue
+        }
+
+        // Find the custom element declaration and add properties
+        if (customElementsManifest.modules) {
+          for (const module of customElementsManifest.modules) {
+            if (module.declarations) {
+              for (const declaration of module.declarations) {
+                if (
+                  isCustomElementDeclaration(declaration) &&
+                  declaration.tagName === tagName
+                ) {
+                  // Add CSS properties to the custom element declaration
+                  if (!declaration.cssProperties) {
+                    declaration.cssProperties = []
+                  }
+
+                  // Add our token-derived properties
+                  declaration.cssProperties.push(...cssProperties)
+
+                  console.log(
+                    `✨ Added ${cssProperties.length} CSS properties to '${declaration.name}' declaration`,
                   )
-                  continue
+                  break
                 }
-
-                // Add CSS properties to the custom element declaration
-                if (!declaration.cssProperties) {
-                  declaration.cssProperties = []
-                }
-
-                // Add our token-derived properties
-                declaration.cssProperties.push(...cssProperties)
-
-                console.log(
-                  `✨ Added ${cssProperties.length} CSS properties to '${declaration.name}' declaration`,
-                )
               }
             }
           }
