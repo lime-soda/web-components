@@ -20,7 +20,7 @@ import tokens from './design-tokens.js'
 export default {
   plugins: [
     cssPropertiesPlugin(tokens, {
-      elementPrefix: 'ls-', // Removes 'ls-' prefix from element names
+      prefix: 'ls', // Removes 'ls-' prefix from element names (dash added automatically)
     }),
   ],
 }
@@ -79,10 +79,10 @@ export default {
 
 ### `PluginOptions`
 
-| Option               | Type                                                                          | Default | Description                                   |
-| -------------------- | ----------------------------------------------------------------------------- | ------- | --------------------------------------------- |
-| `mapElementToTokens` | `(manifest: Package, tokens: Record<string, unknown>) => Map<string, string>` | -       | Custom function to map elements to token keys |
-| `elementPrefix`      | `string`                                                                      | `'ls-'` | Element prefix to remove for default mapping  |
+| Option               | Type                                                                          | Default | Description                                                             |
+| -------------------- | ----------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------- |
+| `mapElementToTokens` | `(manifest: Package, tokens: Record<string, unknown>) => Map<string, string>` | -       | Custom function to map elements to token keys                           |
+| `prefix`             | `string`                                                                      | `'ls'`  | Element prefix to remove for default mapping (dash added automatically) |
 
 ## Token Structure
 

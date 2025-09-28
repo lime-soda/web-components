@@ -27,7 +27,7 @@ const tokens = {
 
 // Example 1: Simple prefix removal
 const prefixPlugin = cssPropertiesPlugin(tokens, {
-  elementPrefix: 'my-', // Removes 'my-' prefix from element names
+  prefix: 'my', // Removes 'my-' prefix from element names (dash added automatically)
 })
 
 // Example 2: Custom mapping function

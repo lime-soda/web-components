@@ -45,8 +45,8 @@ export interface PluginOptions {
     manifest: Package,
     tokens: Record<string, unknown>,
   ) => Map<string, string>
-  /** Element prefix to remove for default mapping (e.g., 'ls-') */
-  elementPrefix?: string
+  /** Element prefix to remove for default mapping (e.g., 'ls') */
+  prefix?: string
 }
 
 /**
@@ -110,16 +110,18 @@ function extractCssPropertiesFromTokens(
  * Default mapping function that removes element prefix to get token keys
  * @param manifest - The custom elements manifest
  * @param tokens - The design tokens object
- * @param elementPrefix - Prefix to remove from element tag names
+ * @param prefix - Prefix to remove from element tag names (dash will be added automatically)
  * @returns Map of element tag names to token keys
  */
 function createDefaultElementToTokensMapping(
   manifest: Package,
   tokens: Record<string, unknown>,
-  elementPrefix = '',
+  prefix = '',
 ): Map<string, string> {
   const mapping = new Map<string, string>()
 
+  // Add dash to prefix if provided
+  const elementPrefix = prefix ? `${prefix}-` : ''
   // Find all custom element declarations in the manifest
   if (manifest.modules) {
     for (const module of manifest.modules) {
@@ -169,7 +171,7 @@ export function cssPropertiesPlugin(
         : createDefaultElementToTokensMapping(
             customElementsManifest,
             tokens,
-            options.elementPrefix ?? 'ls-',
+            options.prefix ?? 'ls',
           )
 
       console.log(
