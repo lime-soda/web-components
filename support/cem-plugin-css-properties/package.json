@@ -1,6 +1,6 @@
 {
   "name": "@lime-soda/cem-plugin-css-properties",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Custom Elements Manifest plugin for adding CSS custom properties from design tokens",
   "author": "Phil Parsons",
   "type": "module",
