@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- fe444c9: update plugin api and options
+
 All notable changes to this project will be documented in this file.
 
 ## [0.1.0] - 2024-01-XX
