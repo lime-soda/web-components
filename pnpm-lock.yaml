@@ -109,7 +109,7 @@ importers:
     devDependencies:
       '@custom-elements-manifest/analyzer':
         specifier: ^0.10.4
-        version: 0.10.8
+        version: 0.10.10
       '@lime-soda/eslint-config':
         specifier: workspace:*
         version: link:../../tools/eslint-config
@@ -202,7 +202,7 @@ importers:
     dependencies:
       '@custom-elements-manifest/analyzer':
         specifier: ^0.10.5
-        version: 0.10.8
+        version: 0.10.10
       '@lime-soda/cem-plugin-css-properties':
         specifier: workspace:*
         version: link:../../support/cem-plugin-css-properties
@@ -388,12 +388,12 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
-  '@custom-elements-manifest/analyzer@0.10.6':
-    resolution: {integrity: sha512-zWz7BIjY1o7DUrHZPFpsSNtQjkEbLPbEkH1zxSJB3RX/SvyKnw8mvdkTl7nDYgVYEzokIDMZhdPrPzqpV0OXYg==}
+  '@custom-elements-manifest/analyzer@0.10.10':
+    resolution: {integrity: sha512-R1pbKssP3Psb2OiGfheiUbXtBgTGQ0Vu5cn2CHSdZoJV66oZPSSw/TdCf8WlnQ6dfKSy5L8hNneClnmD80GEwA==}
     hasBin: true
 
-  '@custom-elements-manifest/analyzer@0.10.8':
-    resolution: {integrity: sha512-SyZMf0lE6PzZzS2pYy9ONReNZ3duQj9/Cd2n6j79hxVgLS333l+0SAeXadsn9/RYmDQ+oXm+VuNAJujeR7SMoA==}
+  '@custom-elements-manifest/analyzer@0.10.6':
+    resolution: {integrity: sha512-zWz7BIjY1o7DUrHZPFpsSNtQjkEbLPbEkH1zxSJB3RX/SvyKnw8mvdkTl7nDYgVYEzokIDMZhdPrPzqpV0OXYg==}
     hasBin: true
 
   '@custom-elements-manifest/find-dependencies@0.0.6':
@@ -4390,7 +4390,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
-  '@custom-elements-manifest/analyzer@0.10.6':
+  '@custom-elements-manifest/analyzer@0.10.10':
     dependencies:
       '@custom-elements-manifest/find-dependencies': 0.0.6
       '@github/catalyst': 1.7.0
@@ -4403,7 +4403,7 @@ snapshots:
       globby: 11.0.4
       typescript: 5.4.5
 
-  '@custom-elements-manifest/analyzer@0.10.8':
+  '@custom-elements-manifest/analyzer@0.10.6':
     dependencies:
       '@custom-elements-manifest/find-dependencies': 0.0.6
       '@github/catalyst': 1.7.0
