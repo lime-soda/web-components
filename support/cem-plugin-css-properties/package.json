@@ -29,11 +29,13 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "custom-elements-manifest": "^2.1.0"
+    "custom-elements-manifest": "^2.1.0",
+    "debug": "^4.3.7"
   },
   "devDependencies": {
     "@lime-soda/eslint-config": "workspace:*",
     "@lime-soda/tsconfig": "workspace:*",
+    "@types/debug": "^4.1.12",
     "typescript": "~5.9.2"
   },
   "peerDependencies": {

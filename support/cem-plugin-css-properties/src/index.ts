@@ -1,11 +1,17 @@
 /**
  * Custom Elements Manifest plugin for adding CSS custom properties from design tokens
  */
+import debugFn from 'debug'
 import type {
   Package,
   CssCustomProperty,
   CustomElementDeclaration,
 } from 'custom-elements-manifest/schema.js'
+
+// Create debug instances for different aspects of the plugin
+const debug = debugFn('cem-plugin:css-properties')
+const debugMapping = debugFn('cem-plugin:css-properties:mapping')
+const debugExtraction = debugFn('cem-plugin:css-properties:extraction')
 
 /**
  * Represents a design token with value and metadata
@@ -68,7 +74,9 @@ function extractCssPropertiesFromTokens(
       | undefined
 
     if (!componentTokens) {
-      console.warn(`⚠️ No tokens found for key '${tokenKey}' in tokens object`)
+      debugExtraction(
+        `⚠️ No tokens found for key '${tokenKey}' in tokens object`,
+      )
       return properties
     }
 
@@ -94,12 +102,12 @@ function extractCssPropertiesFromTokens(
 
     extractTokens(componentTokens)
 
-    console.log(
+    debugExtraction(
       `🎨 Extracted ${properties.length} CSS properties for token key '${tokenKey}'`,
     )
     return properties
   } catch (error) {
-    console.warn(
+    debugExtraction(
       `⚠️ Could not extract CSS properties for '${tokenKey}': ${(error as Error).message}`,
     )
     return properties
@@ -174,21 +182,19 @@ export function cssPropertiesPlugin(
             options.prefix ?? 'ls',
           )
 
-      console.log(
+      debugMapping(
         `🗺️ Created mapping for ${elementToTokenMapping.size} element(s)`,
       )
 
       // Process each mapped element
       for (const [tagName, tokenKey] of elementToTokenMapping) {
-        console.log(
-          `🔍 Processing element '${tagName}' with token key '${tokenKey}'`,
-        )
+        debug(`🔍 Processing element '${tagName}' with token key '${tokenKey}'`)
 
         // Extract CSS properties from design tokens
         const cssProperties = extractCssPropertiesFromTokens(tokens, tokenKey)
 
         if (cssProperties.length === 0) {
-          console.warn(
+          debug(
             `⚠️ No CSS properties found for element '${tagName}' (token key: '${tokenKey}')`,
           )
           continue
@@ -211,7 +217,7 @@ export function cssPropertiesPlugin(
                   // Add our token-derived properties
                   declaration.cssProperties.push(...cssProperties)
 
-                  console.log(
+                  debug(
                     `✨ Added ${cssProperties.length} CSS properties to '${declaration.name}' declaration`,
                   )
                   break

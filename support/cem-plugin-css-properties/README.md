@@ -84,6 +84,37 @@ export default {
 | `mapElementToTokens` | `(manifest: Package, tokens: Record<string, unknown>) => Map<string, string>` | -       | Custom function to map elements to token keys                           |
 | `prefix`             | `string`                                                                      | `'ls'`  | Element prefix to remove for default mapping (dash added automatically) |
 
+## Debug Output
+
+The plugin uses the [debug](https://www.npmjs.com/package/debug) package for
+conditional logging. Set the `DEBUG` environment variable to control output:
+
+```bash
+# Show all plugin debug output
+DEBUG=cem-plugin:* npm run build-manifest
+
+# Show only main plugin operations
+DEBUG=cem-plugin:css-properties npm run build-manifest
+
+# Show only element-to-token mapping debug info
+DEBUG=cem-plugin:css-properties:mapping npm run build-manifest
+
+# Show only token extraction debug info
+DEBUG=cem-plugin:css-properties:extraction npm run build-manifest
+
+# Combine multiple namespaces
+DEBUG=cem-plugin:css-properties:mapping,cem-plugin:css-properties:extraction npm run build-manifest
+```
+
+### Debug Namespaces
+
+- `cem-plugin:css-properties` - Main plugin operations (element processing,
+  property addition)
+- `cem-plugin:css-properties:mapping` - Element-to-token mapping creation and
+  statistics
+- `cem-plugin:css-properties:extraction` - Token extraction processes and
+  results
+
 ## Token Structure
 
 The plugin expects design tokens to follow this structure:
