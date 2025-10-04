@@ -1,5 +1,12 @@
 # @lime-soda/build
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [89da732]
+  - @lime-soda/cem-plugin-css-properties@0.3.0
+
 ## 0.1.1
 
 ### Patch Changes
