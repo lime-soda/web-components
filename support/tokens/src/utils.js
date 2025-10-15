@@ -16,17 +16,17 @@ export function combineLightDarkValues(light, dark) {
   const propertiesPattern = /(--[^:]+?):\s*([^;]+?);/g
   const lightDark = {}
 
-  light.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+  for (const [, prop, value] of light.matchAll(propertiesPattern)) {
     lightDark[prop] = value
-  })
+  }
 
-  dark.matchAll(propertiesPattern).forEach(([, prop, value]) => {
+  for (const [, prop, value] of dark.matchAll(propertiesPattern)) {
     if (!lightDark[prop]) {
       lightDark[prop] = value
     } else if (lightDark[prop] !== value) {
       lightDark[prop] = `light-dark(${lightDark[prop]}, ${value})`
     }
-  })
+  }
 
   return lightDark
 }

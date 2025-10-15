@@ -3,115 +3,127 @@
     "color": {
       "$type": "color",
       "primary": {
-        "50": {
+        "background": {
+          "$value": "{color.green.400}",
+          "$description": "Primary background color for dark theme"
+        },
+        "backgroundHover": {
+          "$value": "{color.green.300}",
+          "$description": "Primary background color on hover for dark theme"
+        },
+        "backgroundActive": {
+          "$value": "{color.green.200}",
+          "$description": "Primary background color when active for dark theme"
+        },
+        "backgroundSubtle": {
           "$value": "{color.green.950}",
-          "$description": "Primary color - inverted for dark theme"
+          "$description": "Subtle primary background color for dark theme"
         },
-        "100": {
-          "$value": "{color.green.900}"
+        "text": {
+          "$value": "{color.green.300}",
+          "$description": "Primary text color for dark theme"
         },
-        "200": {
-          "$value": "{color.green.800}"
-        },
-        "300": {
-          "$value": "{color.green.700}"
-        },
-        "400": {
-          "$value": "{color.green.600}"
-        },
-        "500": {
-          "$value": "{color.green.500}",
-          "$description": "Primary color - main (consistent across themes)"
-        },
-        "600": {
-          "$value": "{color.green.400}"
-        },
-        "700": {
-          "$value": "{color.green.300}"
-        },
-        "800": {
-          "$value": "{color.green.200}"
-        },
-        "900": {
-          "$value": "{color.green.100}"
-        },
-        "950": {
-          "$value": "{color.green.50}",
-          "$description": "Primary color - lightest for dark theme"
+        "textOnBackground": {
+          "$value": "{color.black}",
+          "$description": "Text color on primary background for dark theme"
         }
       },
       "secondary": {
-        "50": {
+        "background": {
+          "$value": "{color.pink.400}",
+          "$description": "Secondary background color for dark theme"
+        },
+        "backgroundHover": {
+          "$value": "{color.pink.300}",
+          "$description": "Secondary background color on hover for dark theme"
+        },
+        "backgroundActive": {
+          "$value": "{color.pink.200}",
+          "$description": "Secondary background color when active for dark theme"
+        },
+        "backgroundSubtle": {
           "$value": "{color.pink.950}",
-          "$description": "Secondary color - inverted for dark theme"
+          "$description": "Subtle secondary background color for dark theme"
         },
-        "100": {
-          "$value": "{color.pink.900}"
+        "text": {
+          "$value": "{color.pink.300}",
+          "$description": "Secondary text color for dark theme"
         },
-        "200": {
-          "$value": "{color.pink.800}"
-        },
-        "300": {
-          "$value": "{color.pink.700}"
-        },
-        "400": {
-          "$value": "{color.pink.600}"
-        },
-        "500": {
-          "$value": "{color.pink.500}",
-          "$description": "Secondary color - main (consistent across themes)"
-        },
-        "600": {
-          "$value": "{color.pink.400}"
-        },
-        "700": {
-          "$value": "{color.pink.300}"
-        },
-        "800": {
-          "$value": "{color.pink.200}"
-        },
-        "900": {
-          "$value": "{color.pink.100}"
-        },
-        "950": {
-          "$value": "{color.pink.50}",
-          "$description": "Secondary color - lightest for dark theme"
+        "textOnBackground": {
+          "$value": "{color.black}",
+          "$description": "Text color on secondary background for dark theme"
         }
       },
       "success": {
-        "500": {
+        "background": {
           "$value": "{color.emerald.400}",
-          "$description": "Success state color - brighter for dark theme"
+          "$description": "Success background color for dark theme"
         },
-        "600": {
-          "$value": "{color.emerald.300}"
+        "backgroundHover": {
+          "$value": "{color.emerald.300}",
+          "$description": "Success background color on hover for dark theme"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.emerald.950}",
+          "$description": "Subtle success background color for dark theme"
+        },
+        "text": {
+          "$value": "{color.emerald.300}",
+          "$description": "Success text color for dark theme"
         }
       },
       "warning": {
-        "500": {
+        "background": {
           "$value": "{color.amber.400}",
-          "$description": "Warning state color - brighter for dark theme"
+          "$description": "Warning background color for dark theme"
         },
-        "600": {
-          "$value": "{color.amber.300}"
+        "backgroundHover": {
+          "$value": "{color.amber.300}",
+          "$description": "Warning background color on hover for dark theme"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.amber.950}",
+          "$description": "Subtle warning background color for dark theme"
+        },
+        "text": {
+          "$value": "{color.amber.300}",
+          "$description": "Warning text color for dark theme"
         }
       },
       "error": {
-        "500": {
+        "background": {
           "$value": "{color.red.400}",
-          "$description": "Error state color - brighter for dark theme"
+          "$description": "Error background color for dark theme"
         },
-        "600": {
-          "$value": "{color.red.300}"
+        "backgroundHover": {
+          "$value": "{color.red.300}",
+          "$description": "Error background color on hover for dark theme"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.red.950}",
+          "$description": "Subtle error background color for dark theme"
+        },
+        "text": {
+          "$value": "{color.red.300}",
+          "$description": "Error text color for dark theme"
         }
       },
       "info": {
-        "500": {
+        "background": {
           "$value": "{color.blue.400}",
-          "$description": "Info state color - brighter for dark theme"
+          "$description": "Info background color for dark theme"
         },
-        "600": {
-          "$value": "{color.blue.300}"
+        "backgroundHover": {
+          "$value": "{color.blue.300}",
+          "$description": "Info background color on hover for dark theme"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.blue.950}",
+          "$description": "Subtle info background color for dark theme"
+        },
+        "text": {
+          "$value": "{color.blue.300}",
+          "$description": "Info text color for dark theme"
         }
       },
       "background": {

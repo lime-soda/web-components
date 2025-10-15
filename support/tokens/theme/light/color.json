@@ -3,115 +3,127 @@
     "color": {
       "$type": "color",
       "primary": {
-        "50": {
-          "$value": "{color.green.50}",
-          "$description": "Primary color - lightest tint"
-        },
-        "100": {
-          "$value": "{color.green.100}"
-        },
-        "200": {
-          "$value": "{color.green.200}"
-        },
-        "300": {
-          "$value": "{color.green.300}"
-        },
-        "400": {
-          "$value": "{color.green.400}"
-        },
-        "500": {
+        "background": {
           "$value": "{color.green.500}",
-          "$description": "Primary color - main"
+          "$description": "Primary background color"
         },
-        "600": {
-          "$value": "{color.green.600}"
+        "backgroundHover": {
+          "$value": "{color.green.600}",
+          "$description": "Primary background color on hover"
         },
-        "700": {
-          "$value": "{color.green.700}"
+        "backgroundActive": {
+          "$value": "{color.green.700}",
+          "$description": "Primary background color when active"
         },
-        "800": {
-          "$value": "{color.green.800}"
+        "backgroundSubtle": {
+          "$value": "{color.green.50}",
+          "$description": "Subtle primary background color"
         },
-        "900": {
-          "$value": "{color.green.900}"
+        "text": {
+          "$value": "{color.green.600}",
+          "$description": "Primary text color"
         },
-        "950": {
-          "$value": "{color.green.950}",
-          "$description": "Primary color - darkest shade"
+        "textOnBackground": {
+          "$value": "{color.white}",
+          "$description": "Text color on primary background"
         }
       },
       "secondary": {
-        "50": {
-          "$value": "{color.pink.50}",
-          "$description": "Secondary color - lightest tint"
-        },
-        "100": {
-          "$value": "{color.pink.100}"
-        },
-        "200": {
-          "$value": "{color.pink.200}"
-        },
-        "300": {
-          "$value": "{color.pink.300}"
-        },
-        "400": {
-          "$value": "{color.pink.400}"
-        },
-        "500": {
+        "background": {
           "$value": "{color.pink.500}",
-          "$description": "Secondary color - main"
+          "$description": "Secondary background color"
         },
-        "600": {
-          "$value": "{color.pink.600}"
+        "backgroundHover": {
+          "$value": "{color.pink.600}",
+          "$description": "Secondary background color on hover"
         },
-        "700": {
-          "$value": "{color.pink.700}"
+        "backgroundActive": {
+          "$value": "{color.pink.700}",
+          "$description": "Secondary background color when active"
         },
-        "800": {
-          "$value": "{color.pink.800}"
+        "backgroundSubtle": {
+          "$value": "{color.pink.50}",
+          "$description": "Subtle secondary background color"
         },
-        "900": {
-          "$value": "{color.pink.900}"
+        "text": {
+          "$value": "{color.pink.600}",
+          "$description": "Secondary text color"
         },
-        "950": {
-          "$value": "{color.pink.950}",
-          "$description": "Secondary color - darkest shade"
+        "textOnBackground": {
+          "$value": "{color.white}",
+          "$description": "Text color on secondary background"
         }
       },
       "success": {
-        "500": {
+        "background": {
           "$value": "{color.emerald.500}",
-          "$description": "Success state color"
+          "$description": "Success background color"
         },
-        "600": {
-          "$value": "{color.emerald.600}"
+        "backgroundHover": {
+          "$value": "{color.emerald.600}",
+          "$description": "Success background color on hover"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.emerald.50}",
+          "$description": "Subtle success background color"
+        },
+        "text": {
+          "$value": "{color.emerald.600}",
+          "$description": "Success text color"
         }
       },
       "warning": {
-        "500": {
+        "background": {
           "$value": "{color.amber.500}",
-          "$description": "Warning state color"
+          "$description": "Warning background color"
         },
-        "600": {
-          "$value": "{color.amber.600}"
+        "backgroundHover": {
+          "$value": "{color.amber.600}",
+          "$description": "Warning background color on hover"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.amber.50}",
+          "$description": "Subtle warning background color"
+        },
+        "text": {
+          "$value": "{color.amber.600}",
+          "$description": "Warning text color"
         }
       },
       "error": {
-        "500": {
+        "background": {
           "$value": "{color.red.500}",
-          "$description": "Error state color"
+          "$description": "Error background color"
         },
-        "600": {
-          "$value": "{color.red.600}"
+        "backgroundHover": {
+          "$value": "{color.red.600}",
+          "$description": "Error background color on hover"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.red.50}",
+          "$description": "Subtle error background color"
+        },
+        "text": {
+          "$value": "{color.red.600}",
+          "$description": "Error text color"
         }
       },
       "info": {
-        "500": {
+        "background": {
           "$value": "{color.blue.500}",
-          "$description": "Info state color"
+          "$description": "Info background color"
         },
-        "600": {
-          "$value": "{color.blue.600}"
+        "backgroundHover": {
+          "$value": "{color.blue.600}",
+          "$description": "Info background color on hover"
+        },
+        "backgroundSubtle": {
+          "$value": "{color.blue.50}",
+          "$description": "Subtle info background color"
+        },
+        "text": {
+          "$value": "{color.blue.600}",
+          "$description": "Info text color"
         }
       },
       "background": {

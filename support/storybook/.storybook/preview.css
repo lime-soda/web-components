@@ -23,8 +23,8 @@ html {
 /* Ensure theme classes apply to full viewport */
 body {
   min-height: 100vh;
-  background: var(--color-background-default);
-  color: var(--color-text-default);
+  background: var(--theme-color-background-default);
+  color: var(--theme-color-text-default);
   transition:
     background-color 0.2s ease,
     color 0.2s ease;

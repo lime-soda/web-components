@@ -71,22 +71,22 @@
       "primary": {
         "background": {
           "$type": "color",
-          "$value": "{theme.color.primary.500}",
+          "$value": "{theme.color.primary.background}",
           "$description": "Primary button background color"
         },
         "backgroundHover": {
           "$type": "color",
-          "$value": "{theme.color.primary.600}",
+          "$value": "{theme.color.primary.backgroundHover}",
           "$description": "Primary button hover background color"
         },
         "backgroundActive": {
           "$type": "color",
-          "$value": "{theme.color.primary.700}",
+          "$value": "{theme.color.primary.backgroundActive}",
           "$description": "Primary button active background color"
         },
         "text": {
           "$type": "color",
-          "$value": "{theme.color.text.onPrimary}",
+          "$value": "{theme.color.primary.textOnBackground}",
           "$description": "Primary button text color"
         },
         "border": {
@@ -98,22 +98,22 @@
       "secondary": {
         "background": {
           "$type": "color",
-          "$value": "{theme.color.secondary.500}",
+          "$value": "{theme.color.secondary.background}",
           "$description": "Secondary button background color"
         },
         "backgroundHover": {
           "$type": "color",
-          "$value": "{theme.color.secondary.600}",
+          "$value": "{theme.color.secondary.backgroundHover}",
           "$description": "Secondary button hover background color"
         },
         "backgroundActive": {
           "$type": "color",
-          "$value": "{theme.color.secondary.700}",
+          "$value": "{theme.color.secondary.backgroundActive}",
           "$description": "Secondary button active background color"
         },
         "text": {
           "$type": "color",
-          "$value": "{theme.color.text.onPrimary}",
+          "$value": "{theme.color.secondary.textOnBackground}",
           "$description": "Secondary button text color"
         },
         "border": {
@@ -140,7 +140,7 @@
         },
         "text": {
           "$type": "color",
-          "$value": "{theme.color.text.primary}",
+          "$value": "{theme.color.primary.text}",
           "$description": "Outline button text color"
         },
         "border": {
