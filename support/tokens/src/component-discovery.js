@@ -1,19 +1,22 @@
 import { glob } from 'glob'
 
 /**
- * Discovers available components for light and dark modes
+ * Discovers available components from the components directory
+ * Components are now theme-agnostic and work for both light and dark modes
  */
 export async function discoverComponents() {
-  const components = { light: [], dark: [] }
-
   try {
-    for (const mode of ['light', 'dark']) {
-      const componentFiles = await glob(`theme/${mode}/components/*.json`)
-      components[mode] = componentFiles.map((filePath) =>
-        filePath.replace(/^.*?\/([^/]+)\.json$/, '$1'),
-      )
+    const componentFiles = await glob('components/*.json')
+    const componentNames = componentFiles.map((filePath) =>
+      filePath.replace(/^.*?\/([^/]+)\.json$/, '$1'),
+    )
+
+    // Return the same component list for both modes since components
+    // now reference theme tokens that handle light/dark differences
+    return {
+      light: componentNames,
+      dark: componentNames,
     }
-    return components
   } catch (error) {
     throw new Error(`Failed to discover components: ${error.message}`)
   }

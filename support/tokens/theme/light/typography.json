@@ -1,0 +1,83 @@
+{
+  "theme": {
+    "typography": {
+      "$type": "typography",
+      "heading": {
+        "xl": {
+          "$value": {
+            "fontFamily": "{font.family.sans}",
+            "fontSize": "{font.size.3xl}",
+            "fontWeight": "{font.weight.bold}"
+          },
+          "$description": "Extra large heading"
+        },
+        "lg": {
+          "$value": {
+            "fontFamily": "{font.family.sans}",
+            "fontSize": "{font.size.2xl}",
+            "fontWeight": "{font.weight.bold}"
+          },
+          "$description": "Large heading"
+        },
+        "md": {
+          "$value": {
+            "fontFamily": "{font.family.sans}",
+            "fontSize": "{font.size.xl}",
+            "fontWeight": "{font.weight.bold}"
+          },
+          "$description": "Medium heading"
+        },
+        "sm": {
+          "$value": {
+            "fontFamily": "{font.family.sans}",
+            "fontSize": "{font.size.lg}",
+            "fontWeight": "{font.weight.medium}"
+          },
+          "$description": "Small heading"
+        }
+      },
+      "body": {
+        "lg": {
+          "$value": {
+            "fontFamily": "{font.family.sans}",
+            "fontSize": "{font.size.lg}",
+            "fontWeight": "{font.weight.normal}"
+          },
+          "$description": "Large body text"
+        },
+        "default": {
+          "$value": {
+            "fontFamily": "{font.family.sans}",
+            "fontSize": "{font.size.base}",
+            "fontWeight": "{font.weight.normal}"
+          },
+          "$description": "Default body text"
+        },
+        "sm": {
+          "$value": {
+            "fontFamily": "{font.family.sans}",
+            "fontSize": "{font.size.sm}",
+            "fontWeight": "{font.weight.normal}"
+          },
+          "$description": "Small body text"
+        }
+      },
+      "caption": {
+        "$value": {
+          "fontFamily": "{font.family.sans}",
+          "fontSize": "{font.size.xs}",
+          "fontWeight": "{font.weight.normal}"
+        },
+        "$description": "Caption text"
+      },
+      "code": {
+        "$value": {
+          "fontFamily": "{font.family.mono}",
+          "fontSize": "{font.size.sm}",
+          "fontWeight": "{font.weight.normal}"
+        },
+        "$description": "Code text"
+      }
+    }
+  }
+}

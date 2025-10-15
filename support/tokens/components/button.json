@@ -1,0 +1,181 @@
+{
+  "button": {
+    "$description": "Design tokens for button component styling and behavior",
+    "motion": {
+      "transition": {
+        "$type": "transition",
+        "$value": {
+          "delay": "0",
+          "duration": "{motion.duration.normal}",
+          "timingFunction": "{motion.easing.easeInOut}"
+        },
+        "$description": "Transition timing for button state changes"
+      }
+    },
+    "size": {
+      "$description": "Button size variants",
+      "sm": {
+        "typography": {
+          "$type": "typography",
+          "$value": "{theme.typography.body.sm}",
+          "$description": "Typography for small button"
+        },
+        "padding": {
+          "$type": "dimension",
+          "$value": "{theme.spacing.component.xs} {theme.spacing.component.sm}",
+          "$description": "Padding for small button"
+        },
+        "borderRadius": {
+          "$type": "dimension",
+          "$value": "{theme.radius.sm}",
+          "$description": "Border radius for small button"
+        }
+      },
+      "md": {
+        "typography": {
+          "$type": "typography",
+          "$value": "{theme.typography.body.default}",
+          "$description": "Typography for medium button"
+        },
+        "padding": {
+          "$type": "dimension",
+          "$value": "{theme.spacing.component.sm} {theme.spacing.component.md}",
+          "$description": "Padding for medium button"
+        },
+        "borderRadius": {
+          "$type": "dimension",
+          "$value": "{theme.radius.md}",
+          "$description": "Border radius for medium button"
+        }
+      },
+      "lg": {
+        "typography": {
+          "$type": "typography",
+          "$value": "{theme.typography.body.lg}",
+          "$description": "Typography for large button"
+        },
+        "padding": {
+          "$type": "dimension",
+          "$value": "{theme.spacing.component.md} {theme.spacing.component.lg}",
+          "$description": "Padding for large button"
+        },
+        "borderRadius": {
+          "$type": "dimension",
+          "$value": "{theme.radius.md}",
+          "$description": "Border radius for large button"
+        }
+      }
+    },
+    "variant": {
+      "$description": "Button color variants",
+      "primary": {
+        "background": {
+          "$type": "color",
+          "$value": "{theme.color.primary.500}",
+          "$description": "Primary button background color"
+        },
+        "backgroundHover": {
+          "$type": "color",
+          "$value": "{theme.color.primary.600}",
+          "$description": "Primary button hover background color"
+        },
+        "backgroundActive": {
+          "$type": "color",
+          "$value": "{theme.color.primary.700}",
+          "$description": "Primary button active background color"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{theme.color.text.onPrimary}",
+          "$description": "Primary button text color"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent",
+          "$description": "Primary button border color"
+        }
+      },
+      "secondary": {
+        "background": {
+          "$type": "color",
+          "$value": "{theme.color.secondary.500}",
+          "$description": "Secondary button background color"
+        },
+        "backgroundHover": {
+          "$type": "color",
+          "$value": "{theme.color.secondary.600}",
+          "$description": "Secondary button hover background color"
+        },
+        "backgroundActive": {
+          "$type": "color",
+          "$value": "{theme.color.secondary.700}",
+          "$description": "Secondary button active background color"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{theme.color.text.onPrimary}",
+          "$description": "Secondary button text color"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent",
+          "$description": "Secondary button border color"
+        }
+      },
+      "outline": {
+        "background": {
+          "$type": "color",
+          "$value": "transparent",
+          "$description": "Outline button background color"
+        },
+        "backgroundHover": {
+          "$type": "color",
+          "$value": "{theme.color.background.muted}",
+          "$description": "Outline button hover background color"
+        },
+        "backgroundActive": {
+          "$type": "color",
+          "$value": "{theme.color.background.surface}",
+          "$description": "Outline button active background color"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{theme.color.text.primary}",
+          "$description": "Outline button text color"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{theme.color.border.default}",
+          "$description": "Outline button border color"
+        }
+      },
+      "ghost": {
+        "background": {
+          "$type": "color",
+          "$value": "transparent",
+          "$description": "Ghost button background color"
+        },
+        "backgroundHover": {
+          "$type": "color",
+          "$value": "{theme.color.background.muted}",
+          "$description": "Ghost button hover background color"
+        },
+        "backgroundActive": {
+          "$type": "color",
+          "$value": "{theme.color.background.surface}",
+          "$description": "Ghost button active background color"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{theme.color.text.default}",
+          "$description": "Ghost button text color"
+        },
+        "border": {
+          "$type": "color",
+          "$value": "transparent",
+          "$description": "Ghost button border color"
+        }
+      }
+    }
+  }
+}

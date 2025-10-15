@@ -6,31 +6,50 @@ import { typescriptLitFormat, javascriptLitFormat } from './formats.js'
  * Creates Style Dictionary configuration for a specific mode
  */
 function createStyleDictionaryConfig(mode, components) {
-  const variablesFilter = (token) => !token.filePath.includes('components')
+  // Filter for theme and definition tokens (excludes components)
+  const globalVariablesFilter = (token) =>
+    !token.filePath.includes('components/') &&
+    (token.filePath.includes('definitions/') ||
+      token.filePath.includes('theme/'))
+
+  // Filter for component-specific tokens
+  const componentFilter = (componentName) => (token) =>
+    token.filePath.includes(`components/${componentName}.json`)
 
   const files = [
+    // Global CSS variables (definitions + theme tokens)
     {
       destination: 'variables.css',
       format: 'css/variables',
       options: {
         outputReferences: true,
       },
-      filter: variablesFilter,
+      filter: globalVariablesFilter,
     },
+    // Component-specific JS exports
     ...components.map((component) => ({
       destination: `${component}.js`,
       format: 'javascript/lit',
       options: {
         outputReferences: true,
       },
-      filter: (token) =>
-        token.filePath.includes(`components/${component}.json`),
+      filter: componentFilter(component),
     })),
+    // Component-specific TypeScript definitions
     ...components.map((component) => ({
       destination: `${component}.d.ts`,
       format: 'typescript/lit',
-      filter: (token) =>
-        token.filePath.includes(`components/${component}.json`),
+      filter: componentFilter(component),
+    })),
+    // Component-specific CSS (isolated component tokens)
+    ...components.map((component) => ({
+      destination: `${component}.css`,
+      format: 'css/variables',
+      options: {
+        outputReferences: true,
+        selector: `:root, :host`,
+      },
+      filter: componentFilter(component),
     })),
   ]
 
@@ -40,19 +59,21 @@ function createStyleDictionaryConfig(mode, components) {
       {
         destination: 'index.js',
         format: 'javascript/esm',
+        filter: globalVariablesFilter,
       },
       {
         destination: 'index.d.ts',
         format: 'typescript/module-declarations',
+        filter: globalVariablesFilter,
       },
     )
   }
 
   return {
     source: [
-      'primitives/**/*.json',
-      'globals/**/*.json',
-      `theme/${mode}/**/*.json`,
+      'definitions/**/*.json', // Tier 1: Raw values
+      `theme/${mode}/**/*.json`, // Tier 2: Semantic tokens for this mode
+      'components/**/*.json', // Tier 3: Component tokens
     ],
     platforms: {
       css: {

@@ -6,7 +6,7 @@ properties from design tokens to your custom element manifests.
 ## Installation
 
 ```bash
-npm install @lime-soda/cem-plugin-css-properties
+pnpm add @lime-soda/cem-plugin-css-properties
 ```
 
 ## Usage
@@ -91,19 +91,19 @@ conditional logging. Set the `DEBUG` environment variable to control output:
 
 ```bash
 # Show all plugin debug output
-DEBUG=cem-plugin:* npm run build-manifest
+DEBUG=cem-plugin:* pnpm build:manifest
 
 # Show only main plugin operations
-DEBUG=cem-plugin:css-properties npm run build-manifest
+DEBUG=cem-plugin:css-properties pnpm build:manifest
 
 # Show only element-to-token mapping debug info
-DEBUG=cem-plugin:css-properties:mapping npm run build-manifest
+DEBUG=cem-plugin:css-properties:mapping pnpm build:manifest
 
 # Show only token extraction debug info
-DEBUG=cem-plugin:css-properties:extraction npm run build-manifest
+DEBUG=cem-plugin:css-properties:extraction pnpm build:manifest
 
 # Combine multiple namespaces
-DEBUG=cem-plugin:css-properties:mapping,cem-plugin:css-properties:extraction npm run build-manifest
+DEBUG=cem-plugin:css-properties:mapping,cem-plugin:css-properties:extraction pnpm build:manifest
 ```
 
 ### Debug Namespaces

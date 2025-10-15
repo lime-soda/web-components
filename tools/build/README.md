@@ -33,6 +33,7 @@ The build tool:
 3. **Handles imports** - Resolves and bundles dependencies appropriately
 4. **Optimizes output** - Minifies and optimizes the final bundle
 5. **Preserves exports** - Maintains proper ES module exports for consumption
+6. **Generates manifests** - Creates Custom Elements Manifests using plugins
 
 ## Configuration
 
@@ -49,6 +50,9 @@ components:
 
 - **esbuild** - Fast JavaScript bundler and minifier
 - **glob** - File pattern matching for finding source files
+- **@custom-elements-manifest/analyzer** - Custom Elements Manifest generation
+- **@lime-soda/cem-plugin-css-properties** - Plugin for adding design token CSS
+  properties
 
 ## Integration
 
@@ -57,4 +61,5 @@ This tool is designed to work with the Lime Soda monorepo build system:
 - Used by component packages in their build scripts
 - Integrates with Turbo for parallel builds
 - Works with TypeScript declaration generation
-- Compatible with Custom Elements Manifest generation
+- Generates Custom Elements Manifests with design token CSS properties via
+  plugin architecture

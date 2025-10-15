@@ -1,0 +1,95 @@
+{
+  "font": {
+    "family": {
+      "sans": {
+        "$type": "string",
+        "$value": "'Helvetica Neue', Arial, sans-serif",
+        "$description": "Sans-serif font family"
+      },
+      "serif": {
+        "$type": "string",
+        "$value": "Georgia, 'Times New Roman', serif",
+        "$description": "Serif font family"
+      },
+      "mono": {
+        "$type": "string",
+        "$value": "'Courier New', Courier, monospace",
+        "$description": "Monospace font family"
+      }
+    },
+    "size": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "0.75rem",
+        "$description": "Extra small font size"
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "0.875rem",
+        "$description": "Small font size"
+      },
+      "base": {
+        "$type": "dimension",
+        "$value": "1rem",
+        "$description": "Base font size"
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "1.125rem",
+        "$description": "Large font size"
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "1.25rem",
+        "$description": "Extra large font size"
+      },
+      "2xl": {
+        "$type": "dimension",
+        "$value": "1.5rem",
+        "$description": "2x large font size"
+      },
+      "3xl": {
+        "$type": "dimension",
+        "$value": "1.875rem",
+        "$description": "3x large font size"
+      },
+      "4xl": {
+        "$type": "dimension",
+        "$value": "2.25rem",
+        "$description": "4x large font size"
+      },
+      "5xl": {
+        "$type": "dimension",
+        "$value": "3rem",
+        "$description": "5x large font size"
+      }
+    },
+    "weight": {
+      "light": {
+        "$type": "number",
+        "$value": 300,
+        "$description": "Light font weight"
+      },
+      "normal": {
+        "$type": "number",
+        "$value": 400,
+        "$description": "Normal font weight"
+      },
+      "medium": {
+        "$type": "number",
+        "$value": 500,
+        "$description": "Medium font weight"
+      },
+      "bold": {
+        "$type": "number",
+        "$value": 700,
+        "$description": "Bold font weight"
+      },
+      "black": {
+        "$type": "number",
+        "$value": 900,
+        "$description": "Black font weight"
+      }
+    }
+  }
+}

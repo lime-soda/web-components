@@ -1,29 +1,176 @@
 {
-  "color": {
-    "$type": "color",
-    "background": {
-      "default": {
-        "$value": "{color.gray.950}"
-      }
-    },
-    "text": {
-      "default": {
-        "$value": "{color.gray.50}"
-      },
-      "inverse": {
-        "$value": "{color.gray.950}"
-      },
+  "theme": {
+    "color": {
+      "$type": "color",
       "primary": {
-        "$value": "{color.green.300}"
+        "50": {
+          "$value": "{color.green.950}",
+          "$description": "Primary color - inverted for dark theme"
+        },
+        "100": {
+          "$value": "{color.green.900}"
+        },
+        "200": {
+          "$value": "{color.green.800}"
+        },
+        "300": {
+          "$value": "{color.green.700}"
+        },
+        "400": {
+          "$value": "{color.green.600}"
+        },
+        "500": {
+          "$value": "{color.green.500}",
+          "$description": "Primary color - main (consistent across themes)"
+        },
+        "600": {
+          "$value": "{color.green.400}"
+        },
+        "700": {
+          "$value": "{color.green.300}"
+        },
+        "800": {
+          "$value": "{color.green.200}"
+        },
+        "900": {
+          "$value": "{color.green.100}"
+        },
+        "950": {
+          "$value": "{color.green.50}",
+          "$description": "Primary color - lightest for dark theme"
+        }
       },
-      "on-primary": {
-        "$value": "{color.black}"
+      "secondary": {
+        "50": {
+          "$value": "{color.pink.950}",
+          "$description": "Secondary color - inverted for dark theme"
+        },
+        "100": {
+          "$value": "{color.pink.900}"
+        },
+        "200": {
+          "$value": "{color.pink.800}"
+        },
+        "300": {
+          "$value": "{color.pink.700}"
+        },
+        "400": {
+          "$value": "{color.pink.600}"
+        },
+        "500": {
+          "$value": "{color.pink.500}",
+          "$description": "Secondary color - main (consistent across themes)"
+        },
+        "600": {
+          "$value": "{color.pink.400}"
+        },
+        "700": {
+          "$value": "{color.pink.300}"
+        },
+        "800": {
+          "$value": "{color.pink.200}"
+        },
+        "900": {
+          "$value": "{color.pink.100}"
+        },
+        "950": {
+          "$value": "{color.pink.50}",
+          "$description": "Secondary color - lightest for dark theme"
+        }
       },
-      "on-primary-dark": {
-        "$value": "{color.white}"
+      "success": {
+        "500": {
+          "$value": "{color.emerald.400}",
+          "$description": "Success state color - brighter for dark theme"
+        },
+        "600": {
+          "$value": "{color.emerald.300}"
+        }
       },
-      "on-primary-light": {
-        "$value": "{color.black}"
+      "warning": {
+        "500": {
+          "$value": "{color.amber.400}",
+          "$description": "Warning state color - brighter for dark theme"
+        },
+        "600": {
+          "$value": "{color.amber.300}"
+        }
+      },
+      "error": {
+        "500": {
+          "$value": "{color.red.400}",
+          "$description": "Error state color - brighter for dark theme"
+        },
+        "600": {
+          "$value": "{color.red.300}"
+        }
+      },
+      "info": {
+        "500": {
+          "$value": "{color.blue.400}",
+          "$description": "Info state color - brighter for dark theme"
+        },
+        "600": {
+          "$value": "{color.blue.300}"
+        }
+      },
+      "background": {
+        "default": {
+          "$value": "{color.gray.950}",
+          "$description": "Default background color for dark theme"
+        },
+        "surface": {
+          "$value": "{color.gray.900}",
+          "$description": "Surface background color for dark theme"
+        },
+        "muted": {
+          "$value": "{color.gray.800}",
+          "$description": "Muted background color for dark theme"
+        }
+      },
+      "text": {
+        "default": {
+          "$value": "{color.gray.50}",
+          "$description": "Default text color for dark theme"
+        },
+        "muted": {
+          "$value": "{color.gray.400}",
+          "$description": "Muted text color for dark theme"
+        },
+        "inverse": {
+          "$value": "{color.gray.950}",
+          "$description": "Inverse text color for dark theme"
+        },
+        "primary": {
+          "$value": "{color.green.300}",
+          "$description": "Primary text color for dark theme"
+        },
+        "onPrimary": {
+          "$value": "{color.black}",
+          "$description": "Text on primary background"
+        },
+        "onPrimaryDark": {
+          "$value": "{color.white}",
+          "$description": "Text on dark primary background"
+        },
+        "onPrimaryLight": {
+          "$value": "{color.black}",
+          "$description": "Text on light primary background"
+        }
+      },
+      "border": {
+        "default": {
+          "$value": "{color.gray.700}",
+          "$description": "Default border color for dark theme"
+        },
+        "muted": {
+          "$value": "{color.gray.800}",
+          "$description": "Muted border color for dark theme"
+        },
+        "strong": {
+          "$value": "{color.gray.600}",
+          "$description": "Strong border color for dark theme"
+        }
       }
     }
   }

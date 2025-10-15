@@ -1,0 +1,74 @@
+{
+  "theme": {
+    "spacing": {
+      "$type": "dimension",
+      "component": {
+        "xs": {
+          "$value": "{size.space.1}",
+          "$description": "Extra small component spacing"
+        },
+        "sm": {
+          "$value": "{size.space.2}",
+          "$description": "Small component spacing"
+        },
+        "md": {
+          "$value": "{size.space.4}",
+          "$description": "Medium component spacing"
+        },
+        "lg": {
+          "$value": "{size.space.6}",
+          "$description": "Large component spacing"
+        },
+        "xl": {
+          "$value": "{size.space.8}",
+          "$description": "Extra large component spacing"
+        }
+      },
+      "layout": {
+        "xs": {
+          "$value": "{size.space.4}",
+          "$description": "Extra small layout spacing"
+        },
+        "sm": {
+          "$value": "{size.space.6}",
+          "$description": "Small layout spacing"
+        },
+        "md": {
+          "$value": "{size.space.8}",
+          "$description": "Medium layout spacing"
+        },
+        "lg": {
+          "$value": "{size.space.12}",
+          "$description": "Large layout spacing"
+        },
+        "xl": {
+          "$value": "{size.space.16}",
+          "$description": "Extra large layout spacing"
+        }
+      }
+    },
+    "radius": {
+      "$type": "dimension",
+      "xs": {
+        "$value": "{size.radius.xs}",
+        "$description": "Extra small border radius"
+      },
+      "sm": {
+        "$value": "{size.radius.sm}",
+        "$description": "Small border radius"
+      },
+      "md": {
+        "$value": "{size.radius.md}",
+        "$description": "Medium border radius"
+      },
+      "lg": {
+        "$value": "{size.radius.lg}",
+        "$description": "Large border radius"
+      },
+      "full": {
+        "$value": "{size.radius.full}",
+        "$description": "Fully rounded"
+      }
+    }
+  }
+}

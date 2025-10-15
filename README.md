@@ -50,9 +50,14 @@ DTCG-compliant descriptions.
 
 #### [`@lime-soda/build`](./tools/build/)
 
-Fast component bundler using esbuild and unified Custom Elements Manifest
-generator with automatic design token integration for enhanced component
-documentation.
+Fast component bundler using esbuild with Custom Elements Manifest generation
+support for enhanced component documentation.
+
+#### [`@lime-soda/cem-plugin-css-properties`](./support/cem-plugin-css-properties/)
+
+Custom Elements Manifest plugin that automatically adds CSS custom properties
+from design tokens to component manifests, with conditional debug logging for
+troubleshooting.
 
 #### [`@lime-soda/eslint-config`](./tools/eslint-config/)
 
@@ -149,6 +154,9 @@ pnpm dev:mcp           # Start MCP server
 pnpm build             # Build all packages
 pnpm lint              # Lint all packages
 pnpm create-component  # Generate new component
+
+# Debugging
+DEBUG=cem-plugin:* pnpm build  # Debug CEM plugin during build
 
 # Testing
 cd support/storybook && pnpm test  # Run component tests

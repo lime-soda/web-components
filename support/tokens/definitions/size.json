@@ -1,0 +1,99 @@
+{
+  "size": {
+    "space": {
+      "$type": "dimension",
+      "0": {
+        "$value": "0px",
+        "$description": "No spacing"
+      },
+      "half": {
+        "$value": "2px",
+        "$description": "Minimal spacing"
+      },
+      "1": {
+        "$value": "4px",
+        "$description": "Tiny spacing"
+      },
+      "2": {
+        "$value": "8px",
+        "$description": "Small spacing"
+      },
+      "3": {
+        "$value": "12px",
+        "$description": "Medium-small spacing"
+      },
+      "4": {
+        "$value": "16px",
+        "$description": "Medium spacing"
+      },
+      "5": {
+        "$value": "20px",
+        "$description": "Medium-large spacing"
+      },
+      "6": {
+        "$value": "24px",
+        "$description": "Large spacing"
+      },
+      "7": {
+        "$value": "28px"
+      },
+      "8": {
+        "$value": "32px",
+        "$description": "Extra large spacing"
+      },
+      "9": {
+        "$value": "36px"
+      },
+      "10": {
+        "$value": "40px"
+      },
+      "11": {
+        "$value": "44px"
+      },
+      "12": {
+        "$value": "48px",
+        "$description": "Huge spacing"
+      },
+      "13": {
+        "$value": "52px"
+      },
+      "14": {
+        "$value": "56px"
+      },
+      "15": {
+        "$value": "60px"
+      },
+      "16": {
+        "$value": "64px",
+        "$description": "Maximum spacing"
+      }
+    },
+    "radius": {
+      "$type": "dimension",
+      "none": {
+        "$value": "0px",
+        "$description": "No border radius"
+      },
+      "xs": {
+        "$value": "2px",
+        "$description": "Extra small border radius"
+      },
+      "sm": {
+        "$value": "4px",
+        "$description": "Small border radius"
+      },
+      "md": {
+        "$value": "8px",
+        "$description": "Medium border radius"
+      },
+      "lg": {
+        "$value": "16px",
+        "$description": "Large border radius"
+      },
+      "full": {
+        "$value": "9999px",
+        "$description": "Fully rounded"
+      }
+    }
+  }
+}
