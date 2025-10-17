@@ -90,9 +90,11 @@
           "$description": "Primary button text color"
         },
         "border": {
-          "$type": "color",
-          "$value": "transparent",
-          "$description": "Primary button border color"
+          "$type": "border",
+          "$value": {
+            "width": "{size.borderWidth.none}"
+          },
+          "$description": "Primary button border"
         }
       },
       "secondary": {
@@ -117,9 +119,11 @@
           "$description": "Secondary button text color"
         },
         "border": {
-          "$type": "color",
-          "$value": "transparent",
-          "$description": "Secondary button border color"
+          "$type": "border",
+          "$value": {
+            "width": "{size.borderWidth.none}"
+          },
+          "$description": "Secondary button border"
         }
       },
       "outline": {
@@ -144,9 +148,13 @@
           "$description": "Outline button text color"
         },
         "border": {
-          "$type": "color",
-          "$value": "{theme.color.border.default}",
-          "$description": "Outline button border color"
+          "$type": "border",
+          "$value": {
+            "color": "{theme.color.border.default}",
+            "width": "{size.borderWidth.thin}",
+            "style": "{size.borderStyle.solid}"
+          },
+          "$description": "Outline button border"
         }
       },
       "ghost": {
@@ -171,9 +179,11 @@
           "$description": "Ghost button text color"
         },
         "border": {
-          "$type": "color",
-          "$value": "transparent",
-          "$description": "Ghost button border color"
+          "$type": "border",
+          "$value": {
+            "width": "{size.borderWidth.none}"
+          },
+          "$description": "Ghost button border"
         }
       }
     }

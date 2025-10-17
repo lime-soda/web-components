@@ -34,7 +34,6 @@ export class Button extends LitElement {
     tokens.props,
     css`
       button {
-        border: 1px solid transparent;
         cursor: pointer;
         transition: all ${tokens.motion.transition};
         font-family: inherit;
@@ -67,7 +66,7 @@ export class Button extends LitElement {
         &.primary {
           background: ${tokens.variant.primaryBackground};
           color: ${tokens.variant.primaryText};
-          border-color: ${tokens.variant.primaryBorder};
+          border: ${tokens.variant.primaryBorder};
 
           &:hover {
             background: ${tokens.variant.primaryBackgroundHover};
@@ -81,7 +80,7 @@ export class Button extends LitElement {
         &.secondary {
           background: ${tokens.variant.secondaryBackground};
           color: ${tokens.variant.secondaryText};
-          border-color: ${tokens.variant.secondaryBorder};
+          border: ${tokens.variant.secondaryBorder};
 
           &:hover {
             background: ${tokens.variant.secondaryBackgroundHover};
@@ -95,7 +94,7 @@ export class Button extends LitElement {
         &.outline {
           background: ${tokens.variant.outlineBackground};
           color: ${tokens.variant.outlineText};
-          border-color: ${tokens.variant.outlineBorder};
+          border: ${tokens.variant.outlineBorder};
 
           &:hover {
             background: ${tokens.variant.outlineBackgroundHover};
@@ -109,7 +108,7 @@ export class Button extends LitElement {
         &.ghost {
           background: ${tokens.variant.ghostBackground};
           color: ${tokens.variant.ghostText};
-          border-color: ${tokens.variant.ghostBorder};
+          border: ${tokens.variant.ghostBorder};
 
           &:hover {
             background: ${tokens.variant.ghostBackgroundHover};

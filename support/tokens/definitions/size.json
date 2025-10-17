@@ -94,6 +94,40 @@
         "$value": "9999px",
         "$description": "Fully rounded"
       }
+    },
+    "borderWidth": {
+      "$type": "dimension",
+      "none": {
+        "$value": "0px",
+        "$description": "No border"
+      },
+      "thin": {
+        "$value": "1px",
+        "$description": "Thin border"
+      },
+      "medium": {
+        "$value": "2px",
+        "$description": "Medium border"
+      },
+      "thick": {
+        "$value": "4px",
+        "$description": "Thick border"
+      }
+    },
+    "borderStyle": {
+      "$type": "strokeStyle",
+      "solid": {
+        "$value": "solid",
+        "$description": "Solid border style"
+      },
+      "dashed": {
+        "$value": "dashed",
+        "$description": "Dashed border style"
+      },
+      "dotted": {
+        "$value": "dotted",
+        "$description": "Dotted border style"
+      }
     }
   }
 }
