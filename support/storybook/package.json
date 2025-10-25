@@ -25,15 +25,15 @@
     "@storybook/addon-docs": "^9.1.0",
     "@storybook/addon-vitest": "^9.1.0",
     "@storybook/web-components-vite": "^9.1.0",
-    "@vitest/browser": "^3.2.4",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/browser": "^4.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
     "chromatic": "^13.0.0",
     "eslint-plugin-storybook": "^9.1.0",
     "lit": "^3.3.1",
     "playwright": "^1.54.2",
     "storybook": "^9.1.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.0"
   },
   "devDependencies": {
     "@lime-soda/eslint-config": "workspace:*"
