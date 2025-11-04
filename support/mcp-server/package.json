@@ -31,7 +31,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@custom-elements-manifest/analyzer": "^0.10.4",
+    "@custom-elements-manifest/analyzer": "^0.11.0",
     "@lime-soda/eslint-config": "workspace:*",
     "@modelcontextprotocol/inspector": "^0.17.0",
     "@types/node": "^22.0.0",
