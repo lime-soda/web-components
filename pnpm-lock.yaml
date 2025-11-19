@@ -107,8 +107,8 @@ importers:
         specifier: ^17.2.1
         version: 17.2.3
       glob:
-        specifier: ^11.0.3
-        version: 11.1.0
+        specifier: ^12.0.0
+        version: 12.0.0
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -190,8 +190,8 @@ importers:
   support/tokens:
     dependencies:
       glob:
-        specifier: ^11.0.0
-        version: 11.1.0
+        specifier: ^12.0.0
+        version: 12.0.0
       style-dictionary:
         specifier: ^5.0.1
         version: 5.1.1
@@ -219,8 +219,8 @@ importers:
         specifier: ^0.27.0
         version: 0.27.0
       glob:
-        specifier: ^11.0.3
-        version: 11.1.0
+        specifier: ^12.0.0
+        version: 12.0.0
     devDependencies:
       '@lime-soda/eslint-config':
         specifier: workspace:*
@@ -3157,6 +3157,11 @@ packages:
 
   glob@11.1.0:
     resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
+    engines: {node: 20 || >=22}
+    hasBin: true
+
+  glob@12.0.0:
+    resolution: {integrity: sha512-5Qcll1z7IKgHr5g485ePDdHcNQY0k2dtv/bjYy0iuyGxQw2qSOiiXUXJ+AYQpg3HNoUMHqAruX478Jeev7UULw==}
     engines: {node: 20 || >=22}
     hasBin: true
 
@@ -7659,6 +7664,15 @@ snapshots:
       tslib: 2.8.1
 
   glob@11.1.0:
+    dependencies:
+      foreground-child: 3.3.1
+      jackspeak: 4.1.1
+      minimatch: 10.1.1
+      minipass: 7.1.2
+      package-json-from-dist: 1.0.1
+      path-scurry: 2.0.1
+
+  glob@12.0.0:
     dependencies:
       foreground-child: 3.3.1
       jackspeak: 4.1.1

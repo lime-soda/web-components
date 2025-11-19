@@ -19,7 +19,7 @@
     "@lime-soda/cem-plugin-css-properties": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
     "esbuild": "^0.27.0",
-    "glob": "^11.0.3"
+    "glob": "^12.0.0"
   },
   "devDependencies": {
     "@lime-soda/eslint-config": "workspace:*"
