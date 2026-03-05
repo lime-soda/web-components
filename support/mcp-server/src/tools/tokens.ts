@@ -111,9 +111,8 @@ export async function getCssVariables(): Promise<CSSVariable[]> {
 
     try {
       // Try to resolve the CSS file from the package exports
-      const tokensPackagePath = require.resolve(
-        '@lime-soda/tokens/package.json',
-      )
+      const tokensPackagePath =
+        require.resolve('@lime-soda/tokens/package.json')
       const packageDir = resolve(tokensPackagePath, '..')
       cssFilePath = resolve(packageDir, 'dist/variables.css')
       debugLog('Resolved CSS file path:', cssFilePath)
