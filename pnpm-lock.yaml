@@ -121,10 +121,10 @@ importers:
         version: link:../../tools/eslint-config
       '@modelcontextprotocol/inspector':
         specifier: ^0.21.0
-        version: 0.21.1(@preact/signals-core@1.13.0)(@types/node@24.10.1)(@types/react@19.1.8)(typescript@5.9.3)
+        version: 0.21.1(@preact/signals-core@1.13.0)(@types/node@24.12.0)(@types/react@19.1.8)(typescript@5.9.3)
       '@types/node':
         specifier: ^24.0.0
-        version: 24.10.1
+        version: 24.12.0
       tsx:
         specifier: ^4.20.4
         version: 4.20.6
@@ -1861,8 +1861,8 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@24.10.1':
-    resolution: {integrity: sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==}
+  '@types/node@24.12.0':
+    resolution: {integrity: sha512-GYDxsZi3ChgmckRT9HPU0WEhKLP08ev/Yfcq2AstjrDASOYCSXeyjDsHg4v5t4jOj7cyDX3vmprafKlWIG9MXQ==}
 
   '@types/node@25.3.5':
     resolution: {integrity: sha512-oX8xrhvpiyRCQkG1MFchB09f+cXftgIXb3a7UUa4Y3wpmZPw5tyZGTLWhlESOLq1Rq6oDlc8npVU2/9xiCuXMA==}
@@ -5474,7 +5474,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@modelcontextprotocol/inspector@0.21.1(@preact/signals-core@1.13.0)(@types/node@24.10.1)(@types/react@19.1.8)(typescript@5.9.3)':
+  '@modelcontextprotocol/inspector@0.21.1(@preact/signals-core@1.13.0)(@types/node@24.12.0)(@types/react@19.1.8)(typescript@5.9.3)':
     dependencies:
       '@modelcontextprotocol/inspector-cli': 0.21.1(zod@3.25.76)
       '@modelcontextprotocol/inspector-client': 0.21.1(@preact/signals-core@1.13.0)(@types/react@19.1.8)
@@ -5485,7 +5485,7 @@ snapshots:
       open: 10.2.0
       shell-quote: 1.8.3
       spawn-rx: 5.1.2
-      ts-node: 10.9.2(@types/node@24.10.1)(typescript@5.9.3)
+      ts-node: 10.9.2(@types/node@24.12.0)(typescript@5.9.3)
       zod: 3.25.76
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -6291,7 +6291,7 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
-  '@types/node@24.10.1':
+  '@types/node@24.12.0':
     dependencies:
       undici-types: 7.16.0
 
@@ -8986,14 +8986,14 @@ snapshots:
 
   ts-dedent@2.2.0: {}
 
-  ts-node@10.9.2(@types/node@24.10.1)(typescript@5.9.3):
+  ts-node@10.9.2(@types/node@24.12.0)(typescript@5.9.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 24.10.1
+      '@types/node': 24.12.0
       acorn: 8.16.0
       acorn-walk: 8.3.4
       arg: 4.1.3
