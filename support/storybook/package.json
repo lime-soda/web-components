@@ -18,7 +18,7 @@
   "author": "Phil Parsons",
   "license": "MIT",
   "dependencies": {
-    "@chromatic-com/storybook": "^4.1.0",
+    "@chromatic-com/storybook": "^5.0.0",
     "@lime-soda/button": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
     "@storybook/addon-a11y": "^10.0.0",
