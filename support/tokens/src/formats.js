@@ -12,12 +12,12 @@ export function typescriptLitFormat({ dictionary, options }) {
   )
 
   const singleExports = Object.keys(singleLevelTokens).map(
-    (tokenKey) => `export const ${tokenKey}: CSSResultGroup;`,
+    (tokenKey) => `export const ${tokenKey}: CSSResult;`,
   )
 
   const groupExports = Object.entries(groups).map(([groupKey, tokens]) => {
     const properties = tokens
-      .map(({ propName }) => `  ${propName}: CSSResultGroup`)
+      .map(({ propName }) => `  ${propName}: CSSResult`)
       .join(';\n')
 
     return `export const ${groupKey}: {\n${properties};\n};`
@@ -25,7 +25,7 @@ export function typescriptLitFormat({ dictionary, options }) {
 
   const allExports = [...singleExports, ...groupExports]
 
-  return `import type { CSSResultGroup } from 'lit';\n\nexport const props: CSSResultGroup;\n\n${allExports.join('\n\n')}\n\nexport default props;`
+  return `import type { CSSResult } from 'lit';\n\nexport const props: CSSResult;\n\n${allExports.join('\n\n')}\n\nexport default props;`
 }
 
 /**
