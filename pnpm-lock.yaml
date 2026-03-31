@@ -230,7 +230,7 @@ importers:
     dependencies:
       '@eslint/css':
         specifier: ^1.0.0
-        version: 1.0.0
+        version: 1.1.0
       '@eslint/js':
         specifier: ^9.32.0
         version: 9.39.4
@@ -768,8 +768,8 @@ packages:
     resolution: {integrity: sha512-3D5/OHibNEGk+wKwNwMbz63NMf367EoR4mVNNpxddCHKEb2Nez7z62J2U6YjtErSsZDoY0CsccmoUpdEbkogNA==}
     engines: {node: ^10 || ^12.20.0 || ^14.13.0 || >=15.0.0}
 
-  '@eslint/css@1.0.0':
-    resolution: {integrity: sha512-2MjyL517F1wrLrmmfaFntKKiImudiXW6Dd80oE7VRIRu64bT5YieRs+WPgdZy9m8izs/tSUqi3j2mBnjUrqJfA==}
+  '@eslint/css@1.1.0':
+    resolution: {integrity: sha512-sNwfLcU3nKXv/v2YglqujwMU4Iv3BDhxldNUd/2FckVab0zdvc9pPlKWxjR6Ap/EU+Y8Pdu853iwvcUpemRhRw==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
   '@eslint/eslintrc@3.3.5':
@@ -5216,7 +5216,7 @@ snapshots:
       mdn-data: 2.23.0
       source-map-js: 1.2.1
 
-  '@eslint/css@1.0.0':
+  '@eslint/css@1.1.0':
     dependencies:
       '@eslint/core': 1.1.1
       '@eslint/css-tree': 3.6.9
