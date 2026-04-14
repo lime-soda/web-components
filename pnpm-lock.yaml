@@ -162,8 +162,8 @@ importers:
         specifier: ^4.0.0
         version: 4.1.4(@vitest/browser@4.1.4)(vitest@4.1.4)
       chromatic:
-        specifier: ^15.0.0
-        version: 15.3.1
+        specifier: ^16.0.0
+        version: 16.3.0
       eslint-plugin-storybook:
         specifier: ^10.0.0
         version: 10.3.5(eslint@9.39.4)(storybook@10.3.5(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
@@ -2609,16 +2609,19 @@ packages:
       '@chromatic-com/playwright':
         optional: true
 
-  chromatic@15.3.1:
-    resolution: {integrity: sha512-2u4ow+Hf2xNusaTj9xkfp7pHMJ2pMnmOQxZPWyB+4SNEqjrMz813E6CJJzczBSlZzeY0waYq56uvpK/CkiUNvQ==}
+  chromatic@16.3.0:
+    resolution: {integrity: sha512-PvXUpXP3l8p2NxLEYhMgo4kGNNBQgCgbslMu+O4Bb37ujiiDWk8QExX/Jk7JeHUewNgK2wg98rtw3gdfz3U+Kg==}
     hasBin: true
     peerDependencies:
       '@chromatic-com/cypress': ^0.*.* || ^1.0.0
       '@chromatic-com/playwright': ^0.*.* || ^1.0.0
+      '@chromatic-com/vitest': ^0.*.* || ^1.0.0
     peerDependenciesMeta:
       '@chromatic-com/cypress':
         optional: true
       '@chromatic-com/playwright':
+        optional: true
+      '@chromatic-com/vitest':
         optional: true
 
   class-variance-authority@0.7.1:
@@ -7138,7 +7141,7 @@ snapshots:
 
   chromatic@13.3.5: {}
 
-  chromatic@15.3.1: {}
+  chromatic@16.3.0: {}
 
   class-variance-authority@0.7.1:
     dependencies:
