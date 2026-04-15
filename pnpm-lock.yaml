@@ -37,7 +37,7 @@ importers:
         version: 16.4.0
       prettier:
         specifier: ^3.6.2
-        version: 3.8.2
+        version: 3.8.3
       turbo:
         specifier: ^2.5.5
         version: 2.9.6
@@ -3986,11 +3986,6 @@ packages:
   prettier@2.8.8:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
     engines: {node: '>=10.13.0'}
-    hasBin: true
-
-  prettier@3.8.2:
-    resolution: {integrity: sha512-8c3mgTe0ASwWAJK+78dpviD+A8EqhndQPUBpNUIPt6+xWlIigCwfN01lWr9MAede4uqXGTEKeQWTvzb3vjia0Q==}
-    engines: {node: '>=14'}
     hasBin: true
 
   prettier@3.8.3:
@@ -8544,8 +8539,6 @@ snapshots:
 
   prettier@2.8.8: {}
 
-  prettier@3.8.2: {}
-
   prettier@3.8.3: {}
 
   pretty-format@27.5.1:
@@ -9023,7 +9016,7 @@ snapshots:
       is-plain-obj: 4.1.0
       json5: 2.2.3
       path-unified: 0.2.0
-      prettier: 3.8.2
+      prettier: 3.8.3
       tinycolor2: 1.6.0
     transitivePeerDependencies:
       - tslib
