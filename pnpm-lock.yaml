@@ -163,7 +163,7 @@ importers:
         version: 4.1.5(@vitest/browser@4.1.5)(vitest@4.1.5)
       chromatic:
         specifier: ^16.0.0
-        version: 16.6.0
+        version: 16.6.1
       eslint-plugin-storybook:
         specifier: ^10.0.0
         version: 10.3.5(eslint@9.39.4)(storybook@10.3.5(@testing-library/dom@10.4.1)(prettier@3.8.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
@@ -2609,8 +2609,8 @@ packages:
       '@chromatic-com/playwright':
         optional: true
 
-  chromatic@16.6.0:
-    resolution: {integrity: sha512-cxRHMa3HJYrQtuL1F3J2x6wuVvfP+d7frUzltS7SiCVE8HbUBQTejH6TzveTKAHzErgrMrXjxvjD37bOTi4Mhw==}
+  chromatic@16.6.1:
+    resolution: {integrity: sha512-QlrPBFFrMtR9LlP1FcnIsmIiMSQ055K94i/cDNHd8opo405AHO2oMEPPSfi1cKC2GyB3bEpXPZ+MW5bCHMcrLA==}
     hasBin: true
     peerDependencies:
       '@chromatic-com/cypress': ^0.*.* || ^1.0.0
@@ -7141,7 +7141,7 @@ snapshots:
 
   chromatic@13.3.5: {}
 
-  chromatic@16.6.0:
+  chromatic@16.6.1:
     dependencies:
       semver: 7.7.4
 
