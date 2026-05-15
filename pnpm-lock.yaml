@@ -163,7 +163,7 @@ importers:
         version: 4.1.6(@vitest/browser@4.1.6)(vitest@4.1.6)
       chromatic:
         specifier: ^16.0.0
-        version: 16.10.0
+        version: 16.10.1
       eslint-plugin-storybook:
         specifier: ^10.0.0
         version: 10.4.0(eslint@9.39.4)(storybook@10.4.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.1.8)(prettier@3.8.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(typescript@5.9.3)
@@ -2671,6 +2671,21 @@ packages:
 
   chromatic@16.10.0:
     resolution: {integrity: sha512-nFsztmnu7rFiGafUJgXvLUNpqmRylz92eNvzBoJNTKKQj4EQUyxznwnfpf1dTs7hXtWD8JwcH92jADydaHA1sw==}
+    hasBin: true
+    peerDependencies:
+      '@chromatic-com/cypress': ^0.*.* || ^1.0.0
+      '@chromatic-com/playwright': ^0.*.* || ^1.0.0
+      '@chromatic-com/vitest': ^0.*.* || ^1.0.0
+    peerDependenciesMeta:
+      '@chromatic-com/cypress':
+        optional: true
+      '@chromatic-com/playwright':
+        optional: true
+      '@chromatic-com/vitest':
+        optional: true
+
+  chromatic@16.10.1:
+    resolution: {integrity: sha512-u3RusLCCJxN8IZV3qLh6RTpo6Mu5A77bpOTAGJL5A+v2to9fsVKcK3j0GvGjPQeJJPNSI8rAI5c4U9ukbGiZJQ==}
     hasBin: true
     peerDependencies:
       '@chromatic-com/cypress': ^0.*.* || ^1.0.0
@@ -7235,6 +7250,10 @@ snapshots:
       fsevents: 2.3.3
 
   chromatic@16.10.0:
+    dependencies:
+      semver: 7.8.0
+
+  chromatic@16.10.1:
     dependencies:
       semver: 7.8.0
 
