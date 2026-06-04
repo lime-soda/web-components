@@ -120,8 +120,8 @@ importers:
         specifier: workspace:*
         version: link:../../tools/eslint-config
       '@modelcontextprotocol/inspector':
-        specifier: ^0.21.0
-        version: 0.21.2(@types/node@24.13.0)(@types/react@19.1.8)(typescript@5.9.3)
+        specifier: ^0.22.0
+        version: 0.22.0(@types/node@24.13.0)(@types/react@19.1.8)(typescript@5.9.3)
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.0
@@ -1036,20 +1036,20 @@ packages:
       react-dom:
         optional: true
 
-  '@modelcontextprotocol/inspector-cli@0.21.2':
-    resolution: {integrity: sha512-Om2ApfIbkbfR7+PqJX0bO2Qwg0z55MgxquC+G0YL6x80ElpZMfxITsWQ1238kh3bv1zlwPSePc2kvDnCcU5tXw==}
+  '@modelcontextprotocol/inspector-cli@0.22.0':
+    resolution: {integrity: sha512-Z3NHqa1zTjZyfcd3qJcpIwqiSG7QlR3YkYPFAIoMsPw3hId0AoHtlG4SRueJzymCsF9Rqein3NzUn3qT+aqUBw==}
     hasBin: true
 
-  '@modelcontextprotocol/inspector-client@0.21.2':
-    resolution: {integrity: sha512-8us3hVXDgMHGb5jF1bBE/a6rRRlEaS+SKjbDFB56oE6+mNcAP9JgL8h6T0fYd3XQ3vL/CYxjVeQE+5yRdvhsVg==}
+  '@modelcontextprotocol/inspector-client@0.22.0':
+    resolution: {integrity: sha512-LAFijdt2L4xxjqA16dkqVPjB85VeyHAa32M+nAZyMe4to8s35cW9sZVPnBEFjXGFN4A2WsZ07ViiG+wM6SKS4w==}
     hasBin: true
 
-  '@modelcontextprotocol/inspector-server@0.21.2':
-    resolution: {integrity: sha512-ASFNPFMnT0Vn5u6aYRwwMrwA/0qpxb1lg3sE5GjWii5bUfPNXuIaLOXuXKSOFIMG4o82RxpuipdqX1ZdsmTPUw==}
+  '@modelcontextprotocol/inspector-server@0.22.0':
+    resolution: {integrity: sha512-hOrExnp8wOlSEWVU+t9UD/POHFZy09Xx8LZqX7P9R7mzcDdrwTVB96tbPD8cIi9mVYWFQDKGNVUsF6I7u7fPGA==}
     hasBin: true
 
-  '@modelcontextprotocol/inspector@0.21.2':
-    resolution: {integrity: sha512-f/zIzl6ccYjIxSTgmol9EKvd8AXsXkIaZX16kLGhrYwxrApvU3IL6IzgOqATKP/2kgyKdFUOVLlHMxX9e6BZZA==}
+  '@modelcontextprotocol/inspector@0.22.0':
+    resolution: {integrity: sha512-HUyvF+6C3e/sL3wZSc71Li1SkuWysixblFpVdm8csJKBOlT2kNG5kWP0AAgdXRiRWRZ27ZajNtagYgwoJ+QBpQ==}
     engines: {node: '>=22.7.5'}
     hasBin: true
 
@@ -5571,7 +5571,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@modelcontextprotocol/inspector-cli@0.21.2(zod@3.25.76)':
+  '@modelcontextprotocol/inspector-cli@0.22.0(zod@3.25.76)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(zod@3.25.76)
       commander: 13.1.0
@@ -5582,7 +5582,7 @@ snapshots:
       - supports-color
       - zod
 
-  '@modelcontextprotocol/inspector-client@0.21.2(@types/react@19.1.8)':
+  '@modelcontextprotocol/inspector-client@0.22.0(@types/react@19.1.8)':
     dependencies:
       '@mcp-ui/client': 6.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@modelcontextprotocol/ext-apps': 1.6.0(@modelcontextprotocol/sdk@1.29.0(zod@3.25.76))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod@3.25.76)
@@ -5617,7 +5617,7 @@ snapshots:
       - '@types/react-dom'
       - supports-color
 
-  '@modelcontextprotocol/inspector-server@0.21.2':
+  '@modelcontextprotocol/inspector-server@0.22.0':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(zod@3.25.76)
       cors: 2.8.6
@@ -5634,11 +5634,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@modelcontextprotocol/inspector@0.21.2(@types/node@24.13.0)(@types/react@19.1.8)(typescript@5.9.3)':
+  '@modelcontextprotocol/inspector@0.22.0(@types/node@24.13.0)(@types/react@19.1.8)(typescript@5.9.3)':
     dependencies:
-      '@modelcontextprotocol/inspector-cli': 0.21.2(zod@3.25.76)
-      '@modelcontextprotocol/inspector-client': 0.21.2(@types/react@19.1.8)
-      '@modelcontextprotocol/inspector-server': 0.21.2
+      '@modelcontextprotocol/inspector-cli': 0.22.0(zod@3.25.76)
+      '@modelcontextprotocol/inspector-client': 0.22.0(@types/react@19.1.8)
+      '@modelcontextprotocol/inspector-server': 0.22.0
       '@modelcontextprotocol/sdk': 1.29.0(zod@3.25.76)
       concurrently: 9.2.1
       node-fetch: 3.3.2
