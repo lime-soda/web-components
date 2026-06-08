@@ -194,7 +194,7 @@ importers:
         version: 13.0.6
       style-dictionary:
         specifier: ^5.0.1
-        version: 5.4.3(tslib@2.8.1)
+        version: 5.4.4(tslib@2.8.1)
     devDependencies:
       '@lime-soda/eslint-config':
         specifier: workspace:*
@@ -4353,8 +4353,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  style-dictionary@5.4.3:
-    resolution: {integrity: sha512-VpIXPFqIJXR5bLzWhV9PjB7NBteyAVHq9THk5Hyw6zRqAjgfJkH9zalC9szLthkQlS+S8szmmq6tlnLWFksmTQ==}
+  style-dictionary@5.4.4:
+    resolution: {integrity: sha512-Sd7dkEOLn33EpvlMyS8ykUu0us2EIFUqsysf4DSwZQ46nqQkZ2Q9o5mozu8cSizj3t7E220HaPk7EV1O7LjvDQ==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -4717,8 +4717,8 @@ packages:
   webpack-virtual-modules@0.6.2:
     resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
 
-  which-typed-array@1.1.21:
-    resolution: {integrity: sha512-zbRA8cVm6io/d5W8uIe2hblzN76/Wm3v/yiythQvr+dpBWeqhPSWIDNj4zOyHi4zKbMK6DN34Xsr9jPHJERAEw==}
+  which-typed-array@1.1.22:
+    resolution: {integrity: sha512-fvO4ExWMFsqyhG3AiPAObMuY1lxaqgYcxbc49CNdWDDECOJNgQyvsOWVwbZc+qf3rzRtxojBK+CMEv0Ld5CYpw==}
     engines: {node: '>= 0.4'}
 
   which@1.3.1:
@@ -7910,7 +7910,7 @@ snapshots:
 
   is-typed-array@1.1.15:
     dependencies:
-      which-typed-array: 1.1.21
+      which-typed-array: 1.1.22
 
   is-unc-path@1.0.0:
     dependencies:
@@ -8935,7 +8935,7 @@ snapshots:
 
   strip-json-comments@3.1.1: {}
 
-  style-dictionary@5.4.3(tslib@2.8.1):
+  style-dictionary@5.4.4(tslib@2.8.1):
     dependencies:
       '@bundled-es-modules/deepmerge': 4.3.2
       '@bundled-es-modules/glob': 13.0.6
@@ -9163,7 +9163,7 @@ snapshots:
       is-arguments: 1.2.0
       is-generator-function: 1.1.2
       is-typed-array: 1.1.15
-      which-typed-array: 1.1.21
+      which-typed-array: 1.1.22
 
   v8-compile-cache-lib@3.0.1: {}
 
@@ -9231,7 +9231,7 @@ snapshots:
 
   webpack-virtual-modules@0.6.2: {}
 
-  which-typed-array@1.1.21:
+  which-typed-array@1.1.22:
     dependencies:
       available-typed-arrays: 1.0.7
       call-bind: 1.0.9
