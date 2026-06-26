@@ -36,7 +36,7 @@
     "@lime-soda/eslint-config": "workspace:*",
     "@lime-soda/tsconfig": "workspace:*",
     "@types/debug": "^4.1.12",
-    "typescript": "~5.9.2"
+    "typescript": "~6.0.0"
   },
   "peerDependencies": {
     "@custom-elements-manifest/analyzer": ">= 0.10.0"
