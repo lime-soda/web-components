@@ -18,6 +18,7 @@ export class TreeIndex<TData = unknown> {
   private readonly parents = new Map<string, string | null>();
   private readonly children = new Map<string | null, string[]>();
   private readonly getParent: (data: TData) => string | null;
+  private builtVersion = -1;
 
   constructor(
     private readonly store: RowStore<TData>,
@@ -27,8 +28,25 @@ export class TreeIndex<TData = unknown> {
     this.rebuild();
   }
 
+  /**
+   * Rebuilds if the store has changed shape since the last build.
+   *
+   * Called at projection time rather than from a store subscription, because a
+   * grid registers its modules before any data arrives: the module is initialised
+   * in the controller's constructor, and `rowData` is set afterwards. Deriving
+   * freshness from the store's own version removes that ordering hazard entirely.
+   *
+   * @returns whether a rebuild actually happened.
+   */
+  ensureFresh(): boolean {
+    if (this.store.structuralVersion.get() === this.builtVersion) return false;
+    this.rebuild();
+    return true;
+  }
+
   /** Rebuilds from the store. Cheap relative to a render, and only on structural change. */
   rebuild(): void {
+    this.builtVersion = this.store.structuralVersion.get();
     this.parents.clear();
     this.children.clear();
 

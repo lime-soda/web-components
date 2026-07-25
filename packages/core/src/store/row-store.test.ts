@@ -81,7 +81,9 @@ describe('RowStore', () => {
     it('reports added and removed fields, not just changed values', () => {
       const s = store([{ id: 'a', instrument: 'A', price: 100 }]);
 
-      const result = s.applyTransaction({ update: [{ id: 'a', instrument: 'A', price: 100, size: 9 }] });
+      const result = s.applyTransaction({
+        update: [{ id: 'a', instrument: 'A', price: 100, size: 9 }],
+      });
 
       expect([...result.fieldsChanged]).toEqual(['size']);
     });
@@ -117,7 +119,12 @@ describe('RowStore', () => {
         remove: ['a'],
       });
 
-      expect(result).toMatchObject({ added: ['c'], updated: ['b'], removed: ['a'], structural: true });
+      expect(result).toMatchObject({
+        added: ['c'],
+        updated: ['b'],
+        removed: ['a'],
+        structural: true,
+      });
       expect(s.rows.get().map((r) => r.id)).toEqual(['b', 'c']);
       expect(s.getRow('b')?.price).toBe(55);
     });

@@ -57,7 +57,10 @@ describe('RowProjector', () => {
     it('runs phases in filter → sort → expand → decorate order regardless of registration order', () => {
       const { projector } = setup([quote('a')]);
       const order: string[] = [];
-      const record = (id: string, phase: ProjectionStage<Quote>['phase']): ProjectionStage<Quote> => ({
+      const record = (
+        id: string,
+        phase: ProjectionStage<Quote>['phase'],
+      ): ProjectionStage<Quote> => ({
         id,
         phase,
         run: (rows) => {
@@ -114,7 +117,9 @@ describe('RowProjector', () => {
         id: 'sort',
         phase: 'sort',
         run: (rows, ctx) =>
-          [...rows].sort((x, y) => ctx.store.getRow(x.rowId)!.price - ctx.store.getRow(y.rowId)!.price),
+          [...rows].sort(
+            (x, y) => ctx.store.getRow(x.rowId)!.price - ctx.store.getRow(y.rowId)!.price,
+          ),
       });
 
       expect(ids(projector.rows.get())).toEqual(['b', 'a']);
@@ -125,7 +130,11 @@ describe('RowProjector', () => {
       projector.addStage({
         id: 'expand',
         phase: 'expand',
-        run: (rows) => rows.flatMap((r) => [{ ...r, meta: { depth: 0 } }, { id: `${r.id}-child`, rowId: 'a' }]),
+        run: (rows) =>
+          rows.flatMap((r) => [
+            { ...r, meta: { depth: 0 } },
+            { id: `${r.id}-child`, rowId: 'a' },
+          ]),
       });
 
       const result = projector.rows.get();

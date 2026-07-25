@@ -156,7 +156,9 @@ export class ModuleRegistry<TData = unknown> {
 
   private orderedModules(): readonly GridModule<TData>[] {
     const ids = this.order.length > 0 ? this.order : [...this.modules.keys()];
-    return ids.map((id) => this.modules.get(id)).filter((m): m is GridModule<TData> => m !== undefined);
+    return ids
+      .map((id) => this.modules.get(id))
+      .filter((m): m is GridModule<TData> => m !== undefined);
   }
 
   private each<T>(fn: (module: GridModule<TData>) => T): T[] {

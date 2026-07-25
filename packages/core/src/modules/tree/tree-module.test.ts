@@ -209,6 +209,34 @@ describe('TreeModule', () => {
   });
 
   describe('reacting to data', () => {
+    it('indexes data that arrives after the module is registered', () => {
+      // The real order of events: <fg-grid> builds its controller and starts its
+      // modules in the constructor, then rowData is assigned. A module that
+      // indexed only at init would see an empty store and report every row as a
+      // depth-0 root with no children — no hierarchy, no expanders, no repeated
+      // group headings.
+      const p = new GridPipeline<Bond>({ getRowId: (d) => d.id });
+      const module = new TreeModule<Bond>({
+        getParentId: (d) => d.parentId,
+        defaultExpanded: (d) => d.parentId === null,
+      });
+      const reg = new ModuleRegistry<Bond>({
+        pipeline: p,
+        getColumns: () => [],
+        dispatch: () => {},
+      });
+      reg.register(module);
+      reg.start();
+
+      p.store.setRowData([...group('g1', 2)]);
+
+      const projected = p.projector.rows.get();
+      expect(projected.map((r) => r.rowId)).toEqual(['g1', 'g1-c0', 'g1-c1']);
+      expect(projected[0]!.meta?.['hasChildren']).toBe(true);
+      expect(projected[1]!.meta?.['depth']).toBe(1);
+      expect(projected[1]!.repeatOnBreak?.map((r) => r.rowId)).toEqual(['g1']);
+    });
+
     it('picks up a child added under an expanded parent', () => {
       setup([...group('g1', 1)]);
       tree.expandAll();

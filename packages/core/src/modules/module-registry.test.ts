@@ -86,10 +86,7 @@ describe('ModuleRegistry', () => {
     });
 
     it('reports a dependency cycle', () => {
-      const { registry } = setup([
-        mod('a', { dependsOn: ['b'] }),
-        mod('b', { dependsOn: ['a'] }),
-      ]);
+      const { registry } = setup([mod('a', { dependsOn: ['b'] }), mod('b', { dependsOn: ['a'] })]);
 
       expect(() => registry.start()).toThrow(/cycle/i);
     });

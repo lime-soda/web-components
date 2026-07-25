@@ -40,12 +40,26 @@ export class FgCell extends SignalWatcher(LitElement) {
       outline-offset: -2px;
     }
 
+    /* Plain values: single line, ellipsised, vertically centred by the host. */
     .content {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       min-width: 0;
       flex: 1;
+    }
+
+    /*
+     * A custom renderer owns its box instead, stretched to the full row height.
+     * Otherwise a renderer drawing a bar or a background resolves its own
+     * height: 100% against a text-height parent and collapses to nothing.
+     */
+    .renderer {
+      flex: 1;
+      min-width: 0;
+      align-self: stretch;
+      position: relative;
+      overflow: hidden;
     }
 
     .affix {
@@ -86,9 +100,13 @@ export class FgCell extends SignalWatcher(LitElement) {
 
     this.applyDecorations(decorations);
 
+    const hasRenderer = this.column.cellRenderer !== undefined;
+
     return html`
       ${decorations.map((d) => (d.prefix ? html`<span class="affix">${d.prefix}</span>` : nothing))}
-      <span class="content" part="cell-content">${this.renderContent(value, node)}</span>
+      <span class=${hasRenderer ? 'renderer' : 'content'} part="cell-content">
+        ${this.renderContent(value, node)}
+      </span>
       ${decorations.map((d) => (d.suffix ? html`<span class="affix">${d.suffix}</span>` : nothing))}
     `;
   }

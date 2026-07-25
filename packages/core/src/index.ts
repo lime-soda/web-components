@@ -13,7 +13,13 @@ export { FgHeaderCell } from './components/fg-header-cell.js';
 export { CellRendererElement } from './components/cell-renderer-element.js';
 
 // Contexts — how a custom cell renderer reaches its row and column.
-export { gridContext, instanceContext, rowContext, columnContext, RowContextValue } from './context/index.js';
+export {
+  gridContext,
+  instanceContext,
+  rowContext,
+  columnContext,
+  RowContextValue,
+} from './context/index.js';
 
 // Controller and options.
 export { GridController } from './controller/grid-controller.js';

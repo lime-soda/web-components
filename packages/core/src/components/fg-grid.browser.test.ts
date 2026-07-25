@@ -152,8 +152,9 @@ describe('<fg-grid>', () => {
   describe('rendering values', () => {
     it('renders the formatted value', async () => {
       const grid = await mount();
-      const cell = instances(grid)[0]!.shadowRoot!.querySelector('fg-row')!.shadowRoot!
-        .querySelectorAll('fg-cell')[1]!;
+      const cell = instances(grid)[0]!
+        .shadowRoot!.querySelector('fg-row')!
+        .shadowRoot!.querySelectorAll('fg-cell')[1]!;
 
       expect(cell.shadowRoot?.textContent).toContain('100.00');
     });
@@ -273,8 +274,9 @@ describe('<fg-grid>', () => {
       };
 
       const grid = await mount({ modules: [module] });
-      const cell = instances(grid)[0]!.shadowRoot!.querySelector('fg-row')!.shadowRoot!
-        .querySelectorAll('fg-cell')[1]!;
+      const cell = instances(grid)[0]!
+        .shadowRoot!.querySelector('fg-row')!
+        .shadowRoot!.querySelectorAll('fg-cell')[1]!;
 
       expect(cell.classList.contains('numeric')).toBe(true);
       expect(cell.shadowRoot?.textContent).toContain('*');

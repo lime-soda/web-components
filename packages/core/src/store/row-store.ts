@@ -1,4 +1,10 @@
-import { type ReadableSignal, type WritableSignal, computed, signal, Version } from '../reactive/index.js';
+import {
+  type ReadableSignal,
+  type WritableSignal,
+  computed,
+  signal,
+  Version,
+} from '../reactive/index.js';
 import type { RowNode, RowTransaction, TransactionResult } from './types.js';
 
 export interface RowStoreOptions<TData> {

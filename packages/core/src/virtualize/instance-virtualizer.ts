@@ -26,14 +26,11 @@ export class InstanceVirtualizer {
     private readonly onChange: (visible: ReadonlySet<string>) => void,
     options: InstanceVirtualizerOptions = {},
   ) {
-    this.observer = new IntersectionObserver(
-      (entries) => this.handle(entries),
-      {
-        root: options.root ?? null,
-        rootMargin: options.rootMargin ?? '0px 100% 0px 100%',
-        threshold: 0,
-      },
-    );
+    this.observer = new IntersectionObserver((entries) => this.handle(entries), {
+      root: options.root ?? null,
+      rootMargin: options.rootMargin ?? '0px 100% 0px 100%',
+      threshold: 0,
+    });
   }
 
   observe(element: Element): void {

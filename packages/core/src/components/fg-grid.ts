@@ -157,7 +157,11 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
     const mode = controller.options.layout ?? 'flow';
     const layout = controller.layout.get();
+    const viewport = controller.pipeline.viewport;
 
+    // The engine's capacity arithmetic and the CSS that lays rows out must agree.
+    // Publishing the configured heights as custom properties is what keeps them
+    // in step; leaving CSS on its own default silently overflows every instance.
     return html`
       <div
         class="scroller"
@@ -165,6 +169,7 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
         data-layout=${mode}
         role="presentation"
         aria-label=${controller.options.ariaLabel ?? 'Data grid'}
+        style="--fg-row-height: ${viewport.rowHeight}px; --fg-header-height: ${viewport.headerHeight}px; --fg-instance-gap: ${viewport.instanceGap}px"
         ${ref(this.scrollerRef)}
       >
         ${mode === 'stack' ? this.renderStack(layout) : this.renderFlow(layout)}
@@ -185,12 +190,14 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
           style="width: ${instance.width}px; height: ${height}px;"
           ${ref((element) => this.observeSlot(element))}
         >
-          ${this.visibleInstances.has(instance.id)
-            ? html`<fg-instance part="instance" .instance=${instance}></fg-instance>`
-            : html`<div
-                class="placeholder"
-                style="width: ${instance.width}px; height: ${height}px;"
-              ></div>`}
+          ${
+            this.visibleInstances.has(instance.id)
+              ? html`<fg-instance part="instance" .instance=${instance}></fg-instance>`
+              : html`<div
+                  class="placeholder"
+                  style="width: ${instance.width}px; height: ${height}px;"
+                ></div>`
+          }
         </div>
       `,
     );
@@ -202,7 +209,12 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
     // Spacers above and below stand in for the rows outside the window, so the
     // scrollbar reflects the full dataset rather than what is realised.
-    const below = Math.max(0, layout.totalHeight - instance.offset - instance.rows.length * (this.controller?.options.rowHeight ?? 32));
+    const below = Math.max(
+      0,
+      layout.totalHeight -
+        instance.offset -
+        instance.rows.length * (this.controller?.options.rowHeight ?? 32),
+    );
 
     return html`
       <div class="stack-spacer" style="height: ${instance.offset}px"></div>

@@ -63,7 +63,7 @@ export class FgInstance extends SignalWatcher(LitElement) {
 
     const columns = grid.columns.get();
     const template = columns.map((column) => `${column.width}px`).join(' ');
-    const headerHeight = grid.options.headerHeight ?? 32;
+    const headerHeight = grid.pipeline.viewport.headerHeight;
 
     return html`
       <div
@@ -75,7 +75,8 @@ export class FgInstance extends SignalWatcher(LitElement) {
           ${repeat(
             columns,
             (column) => column.colId,
-            (column) => html`<fg-header-cell part="header-cell" .column=${column}></fg-header-cell>`,
+            (column) =>
+              html`<fg-header-cell part="header-cell" .column=${column}></fg-header-cell>`,
           )}
         </div>
         ${repeat(

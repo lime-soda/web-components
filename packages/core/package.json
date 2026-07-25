@@ -45,7 +45,10 @@
       "development": "./src/modules/cell-flash/index.ts",
       "default": "./dist/modules/cell-flash/index.js"
     },
-    "./themes/*.css": "./dist/themes/*.css"
+    "./themes/*.css": {
+      "development": "./src/themes/*.css",
+      "default": "./dist/themes/*.css"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && cp -R src/themes dist/themes",

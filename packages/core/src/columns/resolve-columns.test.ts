@@ -126,9 +126,7 @@ describe('getCellValue', () => {
   });
 
   it('prefers valueGetter over field', () => {
-    const column = resolve([
-      { field: 'price', valueGetter: ({ data }) => data.price * 2 },
-    ])[0]!;
+    const column = resolve([{ field: 'price', valueGetter: ({ data }) => data.price * 2 }])[0]!;
 
     expect(getCellValue(column, node())).toBe(202.5);
   });

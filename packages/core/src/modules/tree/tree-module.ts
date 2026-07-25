@@ -43,15 +43,6 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
     const store = context.pipeline.store;
     this.index = new TreeIndex(store, this.options);
     this.seedExpansion();
-
-    context.addTeardown(
-      store.subscribe((result) => {
-        if (!result.structural) return;
-        this.index?.rebuild();
-        this.seedExpansion();
-      }),
-    );
-
     context.addStage(this.createStage());
   }
 
@@ -137,24 +128,26 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
       attributes: { 'data-fg-depth': String(depth) },
       prefix: html`
         <span style="display:inline-block;width:${indent}px;flex:0 0 auto"></span>
-        ${hasChildren
-          ? html`<button
-              part="tree-expander"
-              class="fg-expander"
-              aria-label=${isExpanded ? 'Collapse' : 'Expand'}
-              aria-expanded=${isExpanded}
-              tabindex="-1"
-              @click=${(event: Event) => {
+        ${
+          hasChildren
+            ? html`<button
+                part="tree-expander"
+                class="fg-expander"
+                aria-label=${isExpanded ? 'Collapse' : 'Expand'}
+                aria-expanded=${isExpanded}
+                tabindex="-1"
+                @click=${(event: Event) => {
                 event.stopPropagation();
                 this.toggleExpanded(ctx.row.rowId);
               }}
-              style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:10px;line-height:1;color:var(--fg-text-muted,#666);transition:transform 150ms ease-out;transform:rotate(${isExpanded
-                ? 90
-                : 0}deg)"
-            >
-              ▶
-            </button>`
-          : html`<span style="display:inline-block;width:18px;flex:0 0 auto"></span>`}
+                style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:10px;line-height:1;color:var(--fg-text-muted,#666);transition:transform 150ms ease-out;transform:rotate(${
+                isExpanded ? 90 : 0
+              }deg)"
+              >
+                ▶
+              </button>`
+            : html`<span style="display:inline-block;width:18px;flex:0 0 auto"></span>`
+        }
       `,
     };
   }
@@ -172,6 +165,11 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
   private flatten(rows: readonly DisplayRow[]): readonly DisplayRow[] {
     const index = this.index;
     if (!index) return rows;
+
+    // Rows that arrived since the last projection need indexing, and any of them
+    // matching defaultExpanded need seeding, before the first paint that shows
+    // them — not a microtask later.
+    if (index.ensureFresh()) this.seedExpansion();
 
     const byId = new Map<string, DisplayRow>();
     for (const row of rows) byId.set(row.rowId, row);

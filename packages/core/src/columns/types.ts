@@ -55,8 +55,10 @@ export interface ColumnDef<TData = unknown, TValue = unknown> {
 }
 
 /** A column after defaults, column types and derived values have been applied. */
-export interface ResolvedColumn<TData = unknown, TValue = unknown>
-  extends Omit<ColumnDef<TData, TValue>, 'colId' | 'type'> {
+export interface ResolvedColumn<TData = unknown, TValue = unknown> extends Omit<
+  ColumnDef<TData, TValue>,
+  'colId' | 'type'
+> {
   readonly colId: string;
   readonly headerName: string;
   readonly width: number;
