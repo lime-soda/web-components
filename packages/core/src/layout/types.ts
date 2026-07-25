@@ -38,6 +38,16 @@ export interface ViewportMetrics {
   readonly instanceGap: number;
   /** Hard cap on instances produced. Rows beyond it are not laid out. */
   readonly maxInstances?: number;
+  /**
+   * Current scroll position along the engine's scroll axis, in px.
+   *
+   * The flow engine ignores this — it virtualises whole instances through an
+   * IntersectionObserver, so it never needs to know where the scroller is. The
+   * stack engine windows rows and does.
+   */
+  readonly scrollOffset?: number;
+  /** Rows to render beyond each edge of the window. Stack layout only. */
+  readonly overscan?: number;
 }
 
 export interface LayoutInstance {

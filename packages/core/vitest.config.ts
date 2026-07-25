@@ -6,6 +6,12 @@ export default defineConfig({
   resolve: {
     conditions: ['development', 'browser', 'import', 'module', 'default'],
   },
+  // Vite defaults esbuild to `esnext`, which leaves standard decorators as native
+  // syntax — and no browser implements them yet, so the served module fails to
+  // parse. Pinning the target makes esbuild downlevel them.
+  esbuild: {
+    target: 'es2022',
+  },
   test: {
     projects: [
       {

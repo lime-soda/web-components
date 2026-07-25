@@ -1,0 +1,83 @@
+/*
+ * Default theme.
+ *
+ * Every value the components read is a custom property with an inline fallback,
+ * so this file is optional — a grid renders without it. Import it to get a
+ * coherent light/dark pair, or define the same properties yourself on `fg-grid`
+ * (or any ancestor) to theme the grid from your own design tokens.
+ *
+ * Custom properties inherit through shadow roots, which is why theming works
+ * without any ::part() rules for colour. Parts are there for structural
+ * overrides: fg-grid exposes scroller, instance, instance-grid, header-cell,
+ * header-label, header-slots, cell and cell-content.
+ */
+
+:root,
+:host {
+  --fg-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --fg-font-size: 13px;
+  --fg-header-font-size: 13px;
+
+  --fg-row-height: 32px;
+  --fg-cell-padding-x: 8px;
+  --fg-instance-gap: 16px;
+  --fg-radius: 4px;
+
+  --fg-surface: transparent;
+  --fg-bg: #ffffff;
+  --fg-text: #101010;
+  --fg-text-muted: #666666;
+
+  --fg-header-bg: #f5f5f5;
+  --fg-header-text: #101010;
+
+  --fg-border: #d8d8d8;
+  --fg-border-subtle: #f0f0f0;
+
+  --fg-focus: #3b82f6;
+  --fg-selection-bg: rgba(59, 130, 246, 0.12);
+
+  /* Trading convention: green up, red down. Used by the cell-flash module. */
+  --fg-flash-up: rgba(34, 197, 94, 0.35);
+  --fg-flash-down: rgba(239, 68, 68, 0.35);
+  --fg-flash-duration: 600ms;
+}
+
+/*
+ * Dark by preference, with an explicit opt-in for applications that manage their
+ * own theme switch rather than following the OS.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-fg-theme='light']),
+  :host(:not([data-fg-theme='light'])) {
+    --fg-surface: #0a0a0a;
+    --fg-bg: #1a1a1a;
+    --fg-text: #e5e5e5;
+    --fg-text-muted: #a3a3a3;
+
+    --fg-header-bg: #262626;
+    --fg-header-text: #e5e5e5;
+
+    --fg-border: #333333;
+    --fg-border-subtle: #2a2a2a;
+
+    --fg-focus: #60a5fa;
+    --fg-selection-bg: rgba(59, 130, 246, 0.18);
+  }
+}
+
+[data-fg-theme='dark'] {
+  --fg-surface: #0a0a0a;
+  --fg-bg: #1a1a1a;
+  --fg-text: #e5e5e5;
+  --fg-text-muted: #a3a3a3;
+
+  --fg-header-bg: #262626;
+  --fg-header-text: #e5e5e5;
+
+  --fg-border: #333333;
+  --fg-border-subtle: #2a2a2a;
+
+  --fg-focus: #60a5fa;
+  --fg-selection-bg: rgba(59, 130, 246, 0.18);
+}

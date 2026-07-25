@@ -8,3 +8,4 @@ custom-elements.json
 .DS_Store
 test-results/
 playwright-report/
+__screenshots__/
