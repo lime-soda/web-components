@@ -1,0 +1,295 @@
+import { html } from 'lit';
+import type { DisplayRow } from '../../layout/types.js';
+import type { ProjectionStage } from '../../projection/types.js';
+import type { CellContext, CellDecoration, GridModule, ModuleContext } from '../types.js';
+import { TreeIndex, type TreeIndexOptions } from './tree-index.js';
+
+export interface TreeModuleOptions<TData = unknown> extends TreeIndexOptions<TData> {
+  /** colId of the column carrying the expander. Defaults to the first column. */
+  treeColumn?: string;
+  defaultExpanded?: boolean | ((data: TData) => boolean);
+  /**
+   * Keep ancestors of surviving rows even when a filter dropped them, so a match
+   * deep in the tree stays reachable. On by default.
+   */
+  retainAncestors?: boolean;
+  /** Indent per depth level, in px. */
+  indentSize?: number;
+}
+
+const DEFAULT_INDENT = 16;
+
+/**
+ * Hierarchical data: grouping, expansion, and the sticky ancestors that let the
+ * horizontal layout split a group across instances without losing its heading.
+ *
+ * Everything hierarchy-shaped lives here. Core has no notion of a parent, a depth
+ * or an expanded state; this module flattens its tree into ordered display rows
+ * and hangs each row's ancestor chain off `repeatOnBreak`, which is the only thing
+ * the layout engine needs in order to reproduce the behaviour in layouts.md.
+ */
+export class TreeModule<TData = unknown> implements GridModule<TData, string[]> {
+  readonly id = 'tree';
+
+  private context?: ModuleContext<TData>;
+  private index?: TreeIndex<TData>;
+  private readonly expanded = new Set<string>();
+  private readonly seeded = new Set<string>();
+
+  constructor(private readonly options: TreeModuleOptions<TData>) {}
+
+  init(context: ModuleContext<TData>): void {
+    this.context = context;
+    const store = context.pipeline.store;
+    this.index = new TreeIndex(store, this.options);
+    this.seedExpansion();
+
+    context.addTeardown(
+      store.subscribe((result) => {
+        if (!result.structural) return;
+        this.index?.rebuild();
+        this.seedExpansion();
+      }),
+    );
+
+    context.addStage(this.createStage());
+  }
+
+  private createStage(): ProjectionStage<TData> {
+    return {
+      id: 'tree',
+      phase: 'expand',
+      run: (rows) => this.flatten(rows),
+    };
+  }
+
+  // -- Public API, exposed on GridApi via apiExtension ------------------------
+
+  isExpanded(id: string): boolean {
+    return this.expanded.has(id);
+  }
+
+  setExpanded(id: string, expanded: boolean): void {
+    if (this.expanded.has(id) === expanded) return;
+    if (expanded) this.expanded.add(id);
+    else this.expanded.delete(id);
+    this.onExpansionChanged([id]);
+  }
+
+  toggleExpanded(id: string): void {
+    this.setExpanded(id, !this.expanded.has(id));
+  }
+
+  expandAll(): void {
+    const ids = this.index?.allIds() ?? [];
+    for (const id of ids) {
+      if (this.index?.hasChildren(id)) this.expanded.add(id);
+    }
+    this.onExpansionChanged(ids);
+  }
+
+  collapseAll(): void {
+    const ids = [...this.expanded];
+    this.expanded.clear();
+    this.onExpansionChanged(ids);
+  }
+
+  /** Ancestor ids from root down to the row's parent. */
+  getPath(id: string): readonly string[] {
+    return this.index?.ancestorsOf(id) ?? [];
+  }
+
+  getState(): string[] {
+    return [...this.expanded];
+  }
+
+  setState(state: string[]): void {
+    this.expanded.clear();
+    for (const id of state) this.expanded.add(id);
+    this.onExpansionChanged(state);
+  }
+
+  apiExtension(): Record<string, unknown> {
+    return {
+      isExpanded: (id: string) => this.isExpanded(id),
+      setExpanded: (id: string, expanded: boolean) => this.setExpanded(id, expanded),
+      toggleExpanded: (id: string) => this.toggleExpanded(id),
+      expandAll: () => this.expandAll(),
+      collapseAll: () => this.collapseAll(),
+      getPath: (id: string) => this.getPath(id),
+    };
+  }
+
+  // -- Rendering --------------------------------------------------------------
+
+  cellDecorator(ctx: CellContext<TData>): CellDecoration | null {
+    const columns = this.context?.getColumns() ?? [];
+    const target = this.options.treeColumn ?? columns[0]?.colId;
+    if (ctx.column.colId !== target) return null;
+
+    const depth = (ctx.row.meta?.['depth'] as number | undefined) ?? 0;
+    const hasChildren = (ctx.row.meta?.['hasChildren'] as boolean | undefined) ?? false;
+    const isExpanded = this.expanded.has(ctx.row.rowId);
+    const indent = depth * (this.options.indentSize ?? DEFAULT_INDENT);
+
+    return {
+      classes: ['fg-tree-cell'],
+      attributes: { 'data-fg-depth': String(depth) },
+      prefix: html`
+        <span style="display:inline-block;width:${indent}px;flex:0 0 auto"></span>
+        ${hasChildren
+          ? html`<button
+              part="tree-expander"
+              class="fg-expander"
+              aria-label=${isExpanded ? 'Collapse' : 'Expand'}
+              aria-expanded=${isExpanded}
+              tabindex="-1"
+              @click=${(event: Event) => {
+                event.stopPropagation();
+                this.toggleExpanded(ctx.row.rowId);
+              }}
+              style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:10px;line-height:1;color:var(--fg-text-muted,#666);transition:transform 150ms ease-out;transform:rotate(${isExpanded
+                ? 90
+                : 0}deg)"
+            >
+              ▶
+            </button>`
+          : html`<span style="display:inline-block;width:18px;flex:0 0 auto"></span>`}
+      `,
+    };
+  }
+
+  // -- Flattening -------------------------------------------------------------
+
+  /**
+   * Turns the incoming flat, already-filtered and already-sorted list into tree
+   * order.
+   *
+   * Sibling order is taken from the incoming list, which is precisely how the sort
+   * module stays hierarchy-blind: it sorts a flat list, and the order it produced
+   * survives here.
+   */
+  private flatten(rows: readonly DisplayRow[]): readonly DisplayRow[] {
+    const index = this.index;
+    if (!index) return rows;
+
+    const byId = new Map<string, DisplayRow>();
+    for (const row of rows) byId.set(row.rowId, row);
+
+    // Ancestors a filter removed are added back so a deep match stays reachable.
+    // Tracked separately rather than diffed against `rows`, which would be
+    // quadratic on a large filtered set.
+    const restored: DisplayRow[] = [];
+    if (this.options.retainAncestors ?? true) {
+      for (const row of rows) {
+        for (const ancestorId of index.ancestorsOf(row.rowId)) {
+          if (byId.has(ancestorId)) continue;
+          const ancestor: DisplayRow = {
+            id: ancestorId,
+            rowId: ancestorId,
+            meta: { isAncestorOnly: true },
+          };
+          byId.set(ancestorId, ancestor);
+          restored.push(ancestor);
+        }
+      }
+    }
+
+    // Group by parent, preserving the order rows arrived in.
+    const childrenOf = new Map<string | null, DisplayRow[]>();
+    const parentInGraph = new Map<string, string | null>();
+    for (const row of [...rows, ...restored]) {
+      const declaredParent = index.parentOf(row.rowId);
+      const parent = declaredParent !== null && byId.has(declaredParent) ? declaredParent : null;
+      parentInGraph.set(row.rowId, parent);
+      const bucket = childrenOf.get(parent);
+      if (bucket) bucket.push(row);
+      else childrenOf.set(parent, [row]);
+    }
+
+    /** Whether walking up from a row terminates at the root rather than in a cycle. */
+    const isRooted = (id: string): boolean => {
+      const guard = new Set<string>([id]);
+      let current = parentInGraph.get(id) ?? null;
+      while (current !== null) {
+        if (guard.has(current)) return false;
+        guard.add(current);
+        current = parentInGraph.get(current) ?? null;
+      }
+      return true;
+    };
+
+    const out: DisplayRow[] = [];
+    const seen = new Set<string>();
+
+    const walk = (parentId: string | null, chain: readonly DisplayRow[]): void => {
+      for (const row of childrenOf.get(parentId) ?? []) {
+        if (seen.has(row.rowId)) continue;
+        seen.add(row.rowId);
+
+        const children = childrenOf.get(row.rowId) ?? [];
+        const emitted: DisplayRow = {
+          ...row,
+          meta: {
+            ...row.meta,
+            depth: chain.length,
+            hasChildren: children.length > 0,
+            isExpanded: this.expanded.has(row.rowId),
+          },
+          ...(chain.length > 0 ? { repeatOnBreak: chain } : {}),
+        };
+        out.push(emitted);
+
+        if (children.length > 0 && this.expanded.has(row.rowId)) {
+          walk(row.rowId, [...chain, emitted]);
+        }
+      }
+    };
+
+    walk(null, []);
+
+    // Rows unreachable from any root — which happens when parent references form
+    // a cycle — are surfaced at root level. Bad hierarchy data should degrade to a
+    // flat list, never to rows silently missing from a trader's blotter.
+    //
+    // Rows merely hidden by a collapsed ancestor are rooted, so they are correctly
+    // left out here rather than reappearing.
+    for (const row of [...rows, ...restored]) {
+      if (seen.has(row.rowId) || isRooted(row.rowId)) continue;
+      seen.add(row.rowId);
+      out.push({
+        ...row,
+        meta: { ...row.meta, depth: 0, hasChildren: false, isExpanded: false, isOrphaned: true },
+      });
+    }
+
+    return out;
+  }
+
+  private seedExpansion(): void {
+    const defaultExpanded = this.options.defaultExpanded;
+    if (defaultExpanded === undefined || defaultExpanded === false) return;
+
+    const store = this.context?.pipeline.store;
+    if (!store) return;
+
+    for (const node of store.rows.get()) {
+      // Seeded once per row so a user's later collapse is not undone by the next
+      // structural change.
+      if (this.seeded.has(node.id)) continue;
+      this.seeded.add(node.id);
+
+      const shouldExpand =
+        typeof defaultExpanded === 'function' ? defaultExpanded(node.data) : defaultExpanded;
+      if (shouldExpand) this.expanded.add(node.id);
+    }
+  }
+
+  private onExpansionChanged(ids: readonly string[]): void {
+    this.context?.invalidate();
+    this.context?.dispatch('fg-expansion-changed', {
+      ids,
+      expanded: [...this.expanded],
+    });
+  }
+}

@@ -1,4 +1,4 @@
-import type { GridApi } from '../api/types.js';
+import type { CoreGridApi, GridApi } from '../api/types.js';
 import { resolveColumns } from '../columns/resolve-columns.js';
 import type { ColumnDef, ColumnResolutionOptions, ResolvedColumn } from '../columns/types.js';
 import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
@@ -133,7 +133,7 @@ export class GridController<TData = unknown> {
   }
 
   private createApi(): GridApi<TData> {
-    const core: GridApi<TData> = {
+    const core: CoreGridApi<TData> = {
       applyTransaction: (transaction: RowTransaction<TData>): TransactionResult => {
         const result = this.pipeline.store.applyTransaction(transaction);
         this.dispatcher('fg-data-changed', { result });
@@ -165,7 +165,11 @@ export class GridController<TData = unknown> {
       (core as unknown as Record<string, unknown>)[key] = value;
     }
 
-    return core;
+    // The cast is the accepted cost of typing module methods by declaration
+    // merging: whether they exist is a runtime fact about which modules were
+    // registered, which the type system cannot express. Registering a module is
+    // what makes its methods both present and typed.
+    return core as GridApi<TData>;
   }
 }
 

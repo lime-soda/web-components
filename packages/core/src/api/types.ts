@@ -19,7 +19,17 @@ import type { RowTransaction, TransactionResult } from '../store/types.js';
  * }
  * ```
  */
-export interface GridApi<TData = unknown> {
+export interface GridApi<TData = unknown> extends CoreGridApi<TData> {}
+
+/**
+ * The methods core itself implements.
+ *
+ * Split out from {@link GridApi} so that core can build and type-check its own api
+ * object without the module augmentations being in scope — when the whole package
+ * compiles together, every module's `declare module` block is visible, and core
+ * must not be required to implement them.
+ */
+export interface CoreGridApi<TData = unknown> {
   applyTransaction(transaction: RowTransaction<TData>): TransactionResult;
   setRowData(data: readonly TData[]): TransactionResult;
   getRow(id: string): TData | undefined;
