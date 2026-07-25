@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+storybook-static/
+custom-elements.json
+.turbo/
+*.tsbuildinfo
+.DS_Store
+test-results/
+playwright-report/

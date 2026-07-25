@@ -1,0 +1,70 @@
+{
+  "name": "@flowgrid/core",
+  "version": "0.0.0",
+  "description": "Horizontal-flow data grid web component for trading platforms. Minimal core, additive modules.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "custom-elements.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./tree": {
+      "types": "./dist/modules/tree/index.d.ts",
+      "development": "./src/modules/tree/index.ts",
+      "default": "./dist/modules/tree/index.js"
+    },
+    "./sort": {
+      "types": "./dist/modules/sort/index.d.ts",
+      "development": "./src/modules/sort/index.ts",
+      "default": "./dist/modules/sort/index.js"
+    },
+    "./filter": {
+      "types": "./dist/modules/filter/index.d.ts",
+      "development": "./src/modules/filter/index.ts",
+      "default": "./dist/modules/filter/index.js"
+    },
+    "./selection": {
+      "types": "./dist/modules/selection/index.d.ts",
+      "development": "./src/modules/selection/index.ts",
+      "default": "./dist/modules/selection/index.js"
+    },
+    "./keyboard": {
+      "types": "./dist/modules/keyboard/index.d.ts",
+      "development": "./src/modules/keyboard/index.ts",
+      "default": "./dist/modules/keyboard/index.js"
+    },
+    "./cell-flash": {
+      "types": "./dist/modules/cell-flash/index.d.ts",
+      "development": "./src/modules/cell-flash/index.ts",
+      "default": "./dist/modules/cell-flash/index.js"
+    },
+    "./themes/*.css": "./dist/themes/*.css"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && cp -R src/themes dist/themes",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:node": "vitest run --project node",
+    "test:browser": "vitest run --project browser",
+    "analyze": "cem analyze --litelement --globs \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@lit-labs/signals": "^0.1.3",
+    "@lit/context": "^1.1.6",
+    "lit": "^3.3.1"
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.10.4",
+    "@vitest/browser": "^3.2.4",
+    "playwright": "^1.56.1",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
