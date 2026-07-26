@@ -9,7 +9,7 @@ narrow column, forcing applications to build bespoke multi-pane UX so a trader c
 instrument groups at once.
 
 The `experiments/grid` prototype (built earlier this year) proved a different model: rows flow **left to
-right**, each grid *instance* filled to the viewport height, then a new instance starts beside it.
+right**, each grid _instance_ filled to the viewport height, then a new instance starts beside it.
 Instances are virtualised by `IntersectionObserver` rather than rows being virtualised by scroll offset.
 A trader fills the monitor with one component and no pane management.
 
@@ -26,22 +26,22 @@ The prototype (`packages/grid-lit`) validated the layout but is not a product:
 - **Plugin surface is two hooks** (`transform`, `renderHeader`) — too narrow for AG-Grid-like modularity.
 - Lit 2.7, no tests in the Lit package, and 543/767-line components.
 
-**Outcome:** a published, open-source web-component grid whose *core is minimal* and whose features —
+**Outcome:** a published, open-source web-component grid whose _core is minimal_ and whose features —
 including tree data — are additive modules, with the horizontal instance layout as the differentiator.
 
 ## Decisions
 
-| Decision | Choice |
-|---|---|
-| Starting point | Fresh repo. Prototype is reference only; port proven algorithms, redesign the API. |
-| Data model | Client-side row store, transactional updates (`applyTransaction`). |
-| Consumers | Web components only (Lit/vanilla), published to npm as open source. |
-| Core boundary | Ultra-minimal. Tree, sort, filter, selection, keyboard, cell-flash are all modules. |
-| Layouts | Both flow (horizontal) and stack (vertical) ship in core, behind a `LayoutEngine` interface. |
-| Column API | `valueGetter` + `valueFormatter`; cell renderers are custom elements. Module-specific column properties arrive via TS declaration merging. |
-| Tree/layout seam | Sticky-ancestor row projection: `DisplayRow.repeatOnBreak`. Core stays hierarchy-blind. |
-| Reactivity | `@lit/context` carrying stable controllers; signals inside for cell-granular updates. |
-| Testing | Vitest (node + browser/Chromium projects) plus Playwright e2e. |
+| Decision         | Choice                                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Starting point   | Fresh repo. Prototype is reference only; port proven algorithms, redesign the API.                                                         |
+| Data model       | Client-side row store, transactional updates (`applyTransaction`).                                                                         |
+| Consumers        | Web components only (Lit/vanilla), published to npm as open source.                                                                        |
+| Core boundary    | Ultra-minimal. Tree, sort, filter, selection, keyboard, cell-flash are all modules.                                                        |
+| Layouts          | Both flow (horizontal) and stack (vertical) ship in core, behind a `LayoutEngine` interface.                                               |
+| Column API       | `valueGetter` + `valueFormatter`; cell renderers are custom elements. Module-specific column properties arrive via TS declaration merging. |
+| Tree/layout seam | Sticky-ancestor row projection: `DisplayRow.repeatOnBreak`. Core stays hierarchy-blind.                                                    |
+| Reactivity       | `@lit/context` carrying stable controllers; signals inside for cell-granular updates.                                                      |
+| Testing          | Vitest (node + browser/Chromium projects) plus Playwright e2e.                                                                             |
 
 ---
 
@@ -59,7 +59,7 @@ RowStore ──► RowProjector ──► DisplayRow[] ──► LayoutEngine �
 
 The bottom path is the central performance idea and the main departure from the prototype: a price tick
 writes one signal and re-renders the bound cells. It does not rebuild the tree, the projection, or the
-instance layout. Only *structural* change (add/remove, sort key change, expand, filter) re-runs the
+instance layout. Only _structural_ change (add/remove, sort key change, expand, filter) re-runs the
 pipeline above.
 
 ### Single package, module subpaths
@@ -109,7 +109,7 @@ Components stay small and single-purpose — no repeat of the prototype's 543- a
 `Map<rowId, RowNode<TData>>`, insertion-ordered. `RowNode = { id, data }` — **no `parentId`, `level`,
 `childIds`, or `isExpanded`**; that vocabulary belongs to the tree module.
 
-- `applyTransaction({ add, update, remove })` returns changed ids and whether the change is *structural*.
+- `applyTransaction({ add, update, remove })` returns changed ids and whether the change is _structural_.
 - Updates produce a new `data` object (identity-based change detection).
 - Each row has a signal; `update` writes the signal. Transactions inside a microtask coalesce;
   `flushSync()` is the escape hatch for tests.
@@ -118,11 +118,11 @@ Components stay small and single-purpose — no repeat of the prototype's 543- a
 
 ```ts
 interface ProjectionStage {
-  readonly id: string
-  readonly phase: 'filter' | 'sort' | 'expand' | 'decorate'
-  run(rows: readonly RowNode[], ctx: StageContext): readonly RowNode[] | readonly DisplayRow[]
+  readonly id: string;
+  readonly phase: 'filter' | 'sort' | 'expand' | 'decorate';
+  run(rows: readonly RowNode[], ctx: StageContext): readonly RowNode[] | readonly DisplayRow[];
   /** Fields whose change invalidates this stage. Set | '*' | null */
-  readonly dependsOn?: ReadonlySet<string> | '*' | null
+  readonly dependsOn?: ReadonlySet<string> | '*' | null;
 }
 ```
 
@@ -140,11 +140,11 @@ stage granularity: a price tick invalidates the sort stage only when price is an
 
 ```ts
 interface DisplayRow {
-  readonly id: string                              // unique in projection (DOM key)
-  readonly rowId: string                           // RowStore id; repeats share it
-  readonly height?: number
-  readonly repeatOnBreak?: readonly DisplayRow[]   // re-emitted atop the next instance
-  readonly meta: Readonly<Record<string, unknown>> // depth, isGroup, isRepeat, groupKey …
+  readonly id: string; // unique in projection (DOM key)
+  readonly rowId: string; // RowStore id; repeats share it
+  readonly height?: number;
+  readonly repeatOnBreak?: readonly DisplayRow[]; // re-emitted atop the next instance
+  readonly meta: Readonly<Record<string, unknown>>; // depth, isGroup, isRepeat, groupKey …
 }
 ```
 
@@ -160,10 +160,16 @@ Two consequences worth naming:
 
 ```ts
 interface LayoutEngine {
-  readonly id: string
-  layout(rows: readonly DisplayRow[], viewport: ViewportMetrics): LayoutResult
+  readonly id: string;
+  layout(rows: readonly DisplayRow[], viewport: ViewportMetrics): LayoutResult;
 }
-interface Instance { id: string; index: number; rows: readonly DisplayRow[]; width: number; height: number }
+interface Instance {
+  id: string;
+  index: number;
+  rows: readonly DisplayRow[];
+  width: number;
+  height: number;
+}
 ```
 
 - **`FlowLayoutEngine`** (default) — ported from `SnakeLayoutStore.distributeNodes`
@@ -185,13 +191,13 @@ Scroll-jacking (wheel-Y → scroll-X, `snake-grid.ts:326`) carries over as opt-i
 
 ### Components and contexts
 
-| Element | Responsibility | Provides |
-|---|---|---|
-| `<fg-grid>` | host, controller, scroller, virtualizer | `gridContext` |
-| `<fg-instance>` | header + rows for one instance | `instanceContext` |
-| `<fg-row>` | one `DisplayRow`, reads its row signal | `rowContext` |
-| `<fg-cell>` | value resolution + renderer host | `columnContext` |
-| `<fg-header-cell>` | header label + module header slots | `columnContext` |
+| Element            | Responsibility                          | Provides          |
+| ------------------ | --------------------------------------- | ----------------- |
+| `<fg-grid>`        | host, controller, scroller, virtualizer | `gridContext`     |
+| `<fg-instance>`    | header + rows for one instance          | `instanceContext` |
+| `<fg-row>`         | one `DisplayRow`, reads its row signal  | `rowContext`      |
+| `<fg-cell>`        | value resolution + renderer host        | `columnContext`   |
+| `<fg-header-cell>` | header label + module header slots      | `columnContext`   |
 
 Contexts carry **stable controller objects**; reactive values inside them are signals. Nothing re-provides
 context on data change, and no component hand-manages subscriptions — the prototype's `snake-grid-row`
@@ -202,16 +208,18 @@ maintains three (`nodeUnsubscribe`, `selectionUnsubscribe`, `storeUnsubscribe`) 
 
 ```ts
 interface ColumnDef<TData = unknown, TValue = unknown> {
-  colId?: string
-  field?: string                                   // dot paths supported
-  headerName?: string
-  width?: number; minWidth?: number; flex?: number
-  type?: string | string[]                         // columnTypes presets
-  valueGetter?: (p: ValueGetterParams<TData>) => TValue
-  valueFormatter?: (p: ValueFormatterParams<TData, TValue>) => string
-  cellRenderer?: string | CellRendererFn           // custom element tag OR function
-  cellRendererParams?: Record<string, unknown>
-  cellClass?: string | ((p: CellParams<TData, TValue>) => string)
+  colId?: string;
+  field?: string; // dot paths supported
+  headerName?: string;
+  width?: number;
+  minWidth?: number;
+  flex?: number;
+  type?: string | string[]; // columnTypes presets
+  valueGetter?: (p: ValueGetterParams<TData>) => TValue;
+  valueFormatter?: (p: ValueFormatterParams<TData, TValue>) => string;
+  cellRenderer?: string | CellRendererFn; // custom element tag OR function
+  cellRendererParams?: Record<string, unknown>;
+  cellClass?: string | ((p: CellParams<TData, TValue>) => string);
 }
 ```
 
@@ -224,9 +232,9 @@ Modules add their own column properties by augmentation, so core's `ColumnDef` n
 // @flowgrid/core/sort
 declare module '@flowgrid/core' {
   interface ColumnDef<TData, TValue> {
-    sortable?: boolean
-    comparator?: (a: TValue, b: TValue, ctx: ComparatorContext<TData>) => number
-    initialSort?: 'asc' | 'desc'
+    sortable?: boolean;
+    comparator?: (a: TValue, b: TValue, ctx: ComparatorContext<TData>) => number;
+    initialSort?: 'asc' | 'desc';
   }
 }
 ```
@@ -235,10 +243,10 @@ declare module '@flowgrid/core' {
 
 ```ts
 export abstract class CellRendererElement<TData = unknown, TValue = unknown> extends LitElement {
-  @consume({ context: rowContext, subscribe: true })    protected row!: RowController<TData>
-  @consume({ context: columnContext, subscribe: true }) protected column!: ResolvedColumn
-  protected get value(): TValue
-  protected get api(): GridApi<TData>
+  @consume({ context: rowContext, subscribe: true }) protected row!: RowController<TData>;
+  @consume({ context: columnContext, subscribe: true }) protected column!: ResolvedColumn;
+  protected get value(): TValue;
+  protected get api(): GridApi<TData>;
 }
 ```
 
@@ -251,19 +259,19 @@ remain supported for trivial cases. `<fg-cell>` instantiates tag-name renderers 
 
 ```ts
 interface GridModule<TState = unknown> {
-  readonly id: string
-  readonly dependsOn?: readonly string[]
-  init(ctx: ModuleContext): void
-  destroy?(): void
+  readonly id: string;
+  readonly dependsOn?: readonly string[];
+  init(ctx: ModuleContext): void;
+  destroy?(): void;
 
-  projectionStage?: ProjectionStage
-  provideColumns?(): readonly ColumnDef[]            // e.g. selection's checkbox column
-  headerSlot?(ctx: HeaderSlotContext): TemplateResult | null
-  cellDecorator?(ctx: CellContext): CellDecoration | null   // classes/parts/attrs/prefix content
-  rowDecorator?(ctx: RowContext): RowDecoration | null
-  apiExtension?(): Record<string, unknown>           // merged onto GridApi
-  getState?(): TState
-  setState?(s: TState): void
+  projectionStage?: ProjectionStage;
+  provideColumns?(): readonly ColumnDef[]; // e.g. selection's checkbox column
+  headerSlot?(ctx: HeaderSlotContext): TemplateResult | null;
+  cellDecorator?(ctx: CellContext): CellDecoration | null; // classes/parts/attrs/prefix content
+  rowDecorator?(ctx: RowContext): RowDecoration | null;
+  apiExtension?(): Record<string, unknown>; // merged onto GridApi
+  getState?(): TState;
+  setState?(s: TState): void;
 }
 ```
 
@@ -291,7 +299,7 @@ dark.
 
 ## Modules (v1)
 
-1. **tree** — `getDataPath(data)` or a `hierarchy` field; parent index maintained *incrementally* per
+1. **tree** — `getDataPath(data)` or a `hierarchy` field; parent index maintained _incrementally_ per
    transaction rather than rebuilt (prototype: `GridStore.buildTreeFromMap` per notification). `expand`
    stage emits visible rows with `meta.depth` and `repeatOnBreak = ancestorChain` — this is what makes
    `layouts.md`'s duplicated-parent behaviour work. Expander via `cellDecorator` on the configured tree
@@ -325,16 +333,16 @@ pnpm + turbo (as the prototype) · TypeScript 5.9 strict · **Lit 3.x** (upgrade
 
 ## Milestones
 
-| # | Deliverable |
-|---|---|
-| M0 | Repo scaffold, tooling, CI, Vitest node+browser projects, Storybook harness |
-| M1 | Core: RowStore + transactions + signals, projection pipeline, `LayoutEngine` + `FlowLayoutEngine`, virtualizer, five components, contexts, columns/value resolution, module registry, GridApi, theming |
-| M2 | tree module — the layout differentiator end to end |
-| M3 | sort + filter modules |
-| M4 | selection module |
-| M5 | keyboard + cell-flash modules |
-| M6 | `StackLayoutEngine` (vertical mode) |
-| M7 | Docs site, benchmarks, `0.1.0` release |
+| #   | Deliverable                                                                                                                                                                                            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| M0  | Repo scaffold, tooling, CI, Vitest node+browser projects, Storybook harness                                                                                                                            |
+| M1  | Core: RowStore + transactions + signals, projection pipeline, `LayoutEngine` + `FlowLayoutEngine`, virtualizer, five components, contexts, columns/value resolution, module registry, GridApi, theming |
+| M2  | tree module — the layout differentiator end to end                                                                                                                                                     |
+| M3  | sort + filter modules                                                                                                                                                                                  |
+| M4  | selection module                                                                                                                                                                                       |
+| M5  | keyboard + cell-flash modules                                                                                                                                                                          |
+| M6  | `StackLayoutEngine` (vertical mode)                                                                                                                                                                    |
+| M7  | Docs site, benchmarks, `0.1.0` release                                                                                                                                                                 |
 
 Each milestone is TDD: pure units (store, projection stages, layout engines) get node tests written first —
 a real dividend of the `DisplayRow` seam, since layout is a pure function of rows and viewport metrics.
@@ -344,14 +352,16 @@ a real dividend of the `DisplayRow` seam, since layout is a pure function of row
 ## Verification
 
 **Unit (Vitest, node)**
+
 - `FlowLayoutEngine`: exact break points for N rows × viewport height; `repeatOnBreak` emitted at every
-  break and *not* at instance start; `maxInstances` honoured; zero/one-row and taller-than-viewport cases.
+  break and _not_ at instance start; `maxInstances` honoured; zero/one-row and taller-than-viewport cases.
 - `RowStore`: transaction results, structural vs value-only classification, microtask coalescing.
 - Projection: phase ordering fixed regardless of registration order; `dependsOn` correctly skips
   re-running stages; identity projection with zero modules.
 - Each module's stage in isolation against fixture data.
 
 **Component (Vitest browser, Chromium via Playwright provider)**
+
 - Real `IntersectionObserver`: scrolling right mounts instances ahead of the viewport and unmounts
   behind; placeholders preserve `scrollWidth`.
 - A price tick re-renders only the bound cells — assert via a render counter on `<fg-cell>` that neither
@@ -360,11 +370,13 @@ a real dividend of the `DisplayRow` seam, since layout is a pure function of row
 - Import core alone and assert no tree/sort/filter/selection code is reachable and no expander renders.
 
 **E2E (Playwright, Storybook)**
+
 - Bond-market story ported from `SnakeGrid.lit.stories.tsx` (50 groups / 10k instruments): expand-all,
   sort, filter, select, keyboard traversal across instances, scroll-jacking.
 - Visual regression on the flow layout at three viewport heights.
 
 **Benchmarks (`bench/`)** — targets to hold, measured in CI:
+
 - initial layout of 10k rows < 100 ms
 - sort toggle (projection + layout) < 50 ms
 - 20 row updates per frame for 60 s with no dropped frames
