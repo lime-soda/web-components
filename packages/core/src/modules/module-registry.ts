@@ -1,4 +1,4 @@
-import type { ColumnDef, ResolvedColumn } from '../columns/types.js';
+import type { ColumnDefs, ResolvedColumn } from '../columns/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
 import { FocusController } from '../controller/focus-controller.js';
 import { Version } from '../reactive/index.js';
@@ -100,7 +100,7 @@ export class ModuleRegistry<TData = unknown> {
     this.started = false;
   }
 
-  provideColumns(): readonly ColumnDef<TData>[] {
+  provideColumns(): ColumnDefs<TData> {
     return this.orderedModules().flatMap((module) =>
       (module.provideColumns?.() ?? []).map((column) => ({ ...column, providedBy: module.id })),
     );

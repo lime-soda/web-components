@@ -1,6 +1,11 @@
 import type { CoreGridApi, GridApi } from '../api/types.js';
 import { resolveColumns } from '../columns/resolve-columns.js';
-import type { ColumnDef, ColumnResolutionOptions, ResolvedColumn } from '../columns/types.js';
+import type {
+  ColumnDef,
+  ColumnDefs,
+  ColumnResolutionOptions,
+  ResolvedColumn,
+} from '../columns/types.js';
 import type { FocusController } from './focus-controller.js';
 import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
 import { StackLayoutEngine } from '../layout/stack-layout-engine.js';
@@ -14,7 +19,7 @@ import type { RowTransaction, TransactionResult } from '../store/types.js';
 export type LayoutMode = 'flow' | 'stack';
 
 export interface GridOptions<TData = unknown> extends ColumnResolutionOptions<TData> {
-  columns: readonly ColumnDef<TData>[];
+  columns: ColumnDefs<TData>;
   getRowId?: (data: TData) => string;
   modules?: readonly GridModule<TData>[];
   layout?: LayoutMode;

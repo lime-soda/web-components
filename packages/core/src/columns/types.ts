@@ -4,7 +4,12 @@ import type { RowNode } from '../store/types.js';
 export interface ValueGetterParams<TData = unknown, TValue = unknown> {
   readonly data: TData;
   readonly node: RowNode<TData>;
-  readonly column: ResolvedColumn<TData, TValue>;
+  // Deliberately not ResolvedColumn<TData, TValue>. That self-reference put
+  // TValue in both an input and an output position, making ColumnDef invariant
+  // in it — so a ColumnDef<Quote, number> could not sit in a column array
+  // beside its siblings, which is what anyone writing a comparator needs.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see above
+  readonly column: ResolvedColumn<TData, any>;
 }
 
 export interface ValueFormatterParams<TData = unknown, TValue = unknown> {
@@ -12,7 +17,8 @@ export interface ValueFormatterParams<TData = unknown, TValue = unknown> {
   readonly value: TValue | undefined;
   readonly data: TData;
   readonly node: RowNode<TData>;
-  readonly column: ResolvedColumn<TData, TValue>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see ValueGetterParams
+  readonly column: ResolvedColumn<TData, any>;
 }
 
 export type CellRendererFn<TData = unknown, TValue = unknown> = (
@@ -77,3 +83,13 @@ export interface ColumnResolutionOptions<TData = unknown> {
   defaultColDef?: ColumnDef<TData>;
   columnTypes?: Record<string, ColumnDef<TData>>;
 }
+
+/**
+ * A list of column definitions.
+ *
+ * Each entry may carry its own value type, so a numeric column can declare
+ * `ColumnDef<Quote, number>` and get a typed comparator and formatter while
+ * sitting in the same array as its siblings.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous by design
+export type ColumnDefs<TData = unknown> = readonly ColumnDef<TData, any>[];

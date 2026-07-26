@@ -1,4 +1,4 @@
-import type { ColumnDef, ResolvedColumn } from '../columns/types.js';
+import type { ColumnDefs, ResolvedColumn } from '../columns/types.js';
 import type { LayoutResult } from '../layout/types.js';
 import type { GridModule } from '../modules/types.js';
 import type { RowTransaction, TransactionResult } from '../store/types.js';
@@ -35,7 +35,7 @@ export interface CoreGridApi<TData = unknown> {
   getRow(id: string): TData | undefined;
   getRowCount(): number;
 
-  setColumnDefs(defs: readonly ColumnDef<TData>[]): void;
+  setColumnDefs(defs: ColumnDefs<TData>): void;
   getColumns(): readonly ResolvedColumn<TData>[];
 
   /** Current instance layout. Mainly for tests and diagnostics. */

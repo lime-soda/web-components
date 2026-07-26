@@ -1,6 +1,7 @@
 import type { RowNode } from '../store/types.js';
 import type {
   ColumnDef,
+  ColumnDefs,
   ColumnResolutionOptions,
   ResolvedColumn,
   ValueFormatterParams,
@@ -17,7 +18,7 @@ const DEFAULT_WIDTH = 100;
  * the column's own definition.
  */
 export function resolveColumns<TData = unknown>(
-  defs: readonly ColumnDef<TData>[],
+  defs: ColumnDefs<TData>,
   options: ColumnResolutionOptions<TData> = {},
 ): readonly ResolvedColumn<TData>[] {
   const seen = new Set<string>();

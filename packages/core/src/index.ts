@@ -29,6 +29,7 @@ export type { GridOptions, LayoutMode } from './controller/grid-controller.js';
 export { resolveColumns, getCellValue, formatCellValue } from './columns/resolve-columns.js';
 export type {
   ColumnDef,
+  ColumnDefs,
   ResolvedColumn,
   ColumnResolutionOptions,
   CellRendererFn,

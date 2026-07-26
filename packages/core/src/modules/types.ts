@@ -1,5 +1,5 @@
 import type { TemplateResult } from 'lit';
-import type { ColumnDef, ResolvedColumn } from '../columns/types.js';
+import type { ColumnDefs, ResolvedColumn } from '../columns/types.js';
 import type { DisplayRow } from '../layout/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
 import type { FocusController } from '../controller/focus-controller.js';
@@ -113,7 +113,7 @@ export interface GridModule<TData = unknown, TState = unknown> {
   destroy?(): void;
 
   /** Columns the module owns, such as selection's checkbox column. */
-  provideColumns?(): readonly ColumnDef<TData>[];
+  provideColumns?(): ColumnDefs<TData>;
   headerSlot?(ctx: HeaderSlotContext<TData>): TemplateResult | null;
   headerDecorator?(ctx: HeaderSlotContext<TData>): HeaderDecoration | null;
   cellDecorator?(ctx: CellContext<TData>): CellDecoration | null;

@@ -2,12 +2,40 @@
   "name": "@flowgrid/core",
   "version": "0.0.0",
   "description": "Horizontal-flow data grid web component for trading platforms. Minimal core, additive modules.",
+  "keywords": [
+    "grid",
+    "datagrid",
+    "data-grid",
+    "table",
+    "web-components",
+    "lit",
+    "custom-elements",
+    "trading",
+    "virtualization",
+    "tree-data"
+  ],
+  "author": "Phil Parsons",
   "license": "MIT",
+  "homepage": "https://github.com/philparsons/flowgrid#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philparsons/flowgrid.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/philparsons/flowgrid/issues"
+  },
   "type": "module",
   "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "customElements": "custom-elements.json",
   "files": [
     "dist",
-    "custom-elements.json"
+    "custom-elements.json",
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
@@ -51,12 +79,14 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && cp -R src/themes dist/themes",
+    "build": "pnpm clean && tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('src/themes','dist/themes',{recursive:true})\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:node": "vitest run --project node",
     "test:browser": "vitest run --project browser",
-    "analyze": "cem analyze --litelement --globs \"src/**/*.ts\""
+    "analyze": "cem analyze",
+    "prepublishOnly": "pnpm build && pnpm analyze",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
     "@lit/context": "^1.1.6",
