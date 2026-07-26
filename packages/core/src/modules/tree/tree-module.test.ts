@@ -297,6 +297,78 @@ describe('TreeModule', () => {
     });
   });
 
+  describe('the expander column', () => {
+    const cellContextFor = (colId: string) => ({
+      row: { id: 'g1', rowId: 'g1', meta: { depth: 0, hasChildren: true } },
+      node: undefined,
+      column: { colId, headerName: colId, width: 100, index: 0 },
+      value: undefined,
+    });
+
+    const withColumns = (columns: { colId: string; providedBy?: string }[]) => {
+      const p = new GridPipeline<Bond>({ getRowId: (d) => d.id });
+      p.store.setRowData([...group('g1', 2)]);
+      const module = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
+      const reg = new ModuleRegistry<Bond>({
+        pipeline: p,
+        getColumns: () =>
+          columns.map((c, index) => ({
+            colId: c.colId,
+            headerName: c.colId,
+            width: 100,
+            index,
+            ...(c.providedBy === undefined ? {} : { providedBy: c.providedBy }),
+          })) as never,
+        dispatch: () => {},
+      });
+      reg.register(module);
+      reg.start();
+      return module;
+    };
+
+    it('skips a column another module contributed', () => {
+      // Selection prepends a 36px checkbox column. Putting the expander and its
+      // indent there pushes the checkbox out of the cell entirely.
+      const module = withColumns([
+        { colId: 'fg-selection', providedBy: 'selection' },
+        { colId: 'instrument' },
+      ]);
+
+      expect(module.cellDecorator(cellContextFor('fg-selection') as never)).toBeNull();
+      expect(module.cellDecorator(cellContextFor('instrument') as never)).not.toBeNull();
+    });
+
+    it('uses the first column when no module contributed any', () => {
+      const module = withColumns([{ colId: 'instrument' }, { colId: 'price' }]);
+
+      expect(module.cellDecorator(cellContextFor('instrument') as never)).not.toBeNull();
+      expect(module.cellDecorator(cellContextFor('price') as never)).toBeNull();
+    });
+
+    it('honours an explicit treeColumn over both', () => {
+      const p = new GridPipeline<Bond>({ getRowId: (d) => d.id });
+      p.store.setRowData([...group('g1', 2)]);
+      const module = new TreeModule<Bond>({
+        getParentId: (d) => d.parentId,
+        treeColumn: 'price',
+      });
+      const reg = new ModuleRegistry<Bond>({
+        pipeline: p,
+        getColumns: () =>
+          [
+            { colId: 'instrument', headerName: 'i', width: 100, index: 0 },
+            { colId: 'price', headerName: 'p', width: 100, index: 1 },
+          ] as never,
+        dispatch: () => {},
+      });
+      reg.register(module);
+      reg.start();
+
+      expect(module.cellDecorator(cellContextFor('price') as never)).not.toBeNull();
+      expect(module.cellDecorator(cellContextFor('instrument') as never)).toBeNull();
+    });
+  });
+
   describe('state', () => {
     it('round-trips expansion', () => {
       setup([...group('g1', 1), ...group('g2', 1)]);

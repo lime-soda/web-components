@@ -101,7 +101,9 @@ export class ModuleRegistry<TData = unknown> {
   }
 
   provideColumns(): readonly ColumnDef<TData>[] {
-    return this.each((module) => module.provideColumns?.() ?? []).flat();
+    return this.orderedModules().flatMap((module) =>
+      (module.provideColumns?.() ?? []).map((column) => ({ ...column, providedBy: module.id })),
+    );
   }
 
   cellDecorations(ctx: CellContext<TData>): readonly CellDecoration[] {

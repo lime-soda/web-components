@@ -38,6 +38,14 @@ export type CellRendererFn<TData = unknown, TValue = unknown> = (
  */
 export interface ColumnDef<TData = unknown, TValue = unknown> {
   colId?: string;
+  /**
+   * Id of the module that contributed this column, stamped by the registry.
+   *
+   * Not for consumers to set. It lets a module tell a data column from another
+   * module's furniture — the tree module puts its expander on the first column
+   * the application declared, rather than on the selection module's checkbox.
+   */
+  readonly providedBy?: string;
   /** Property name, or a dot path such as `quote.bid.price`. */
   field?: string;
   headerName?: string;

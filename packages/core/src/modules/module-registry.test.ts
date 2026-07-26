@@ -156,7 +156,17 @@ describe('ModuleRegistry', () => {
         mod('sort'),
       ]);
 
-      expect(registry.provideColumns()).toEqual([{ colId: 'check' }]);
+      expect(registry.provideColumns()).toEqual([{ colId: 'check', providedBy: 'selection' }]);
+    });
+
+    it('stamps each contributed column with the module that provided it', () => {
+      // How another module tells a data column from a module's own furniture.
+      const { registry } = setup([
+        mod('selection', { provideColumns: () => [{ colId: 'check' }] }),
+        mod('detail', { provideColumns: () => [{ colId: 'expand' }] }),
+      ]);
+
+      expect(registry.provideColumns().map((c) => c.providedBy)).toEqual(['selection', 'detail']);
     });
 
     it('collects cell decorations from every module', () => {

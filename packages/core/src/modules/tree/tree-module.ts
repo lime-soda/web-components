@@ -113,10 +113,23 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
 
   // -- Rendering --------------------------------------------------------------
 
-  cellDecorator(ctx: CellContext<TData>): CellDecoration | null {
+  /**
+   * The column carrying the expander and indentation.
+   *
+   * Defaults to the first column the *application* declared, skipping any a
+   * module contributed. Taking `columns[0]` blindly put the expander in the
+   * selection module's 36px checkbox column, where the indent and spacer pushed
+   * the checkbox out of the cell entirely.
+   */
+  private treeColumnId(): string | undefined {
+    if (this.options.treeColumn !== undefined) return this.options.treeColumn;
+
     const columns = this.context?.getColumns() ?? [];
-    const target = this.options.treeColumn ?? columns[0]?.colId;
-    if (ctx.column.colId !== target) return null;
+    return (columns.find((column) => column.providedBy === undefined) ?? columns[0])?.colId;
+  }
+
+  cellDecorator(ctx: CellContext<TData>): CellDecoration | null {
+    if (ctx.column.colId !== this.treeColumnId()) return null;
 
     const depth = (ctx.row.meta?.['depth'] as number | undefined) ?? 0;
     const hasChildren = (ctx.row.meta?.['hasChildren'] as boolean | undefined) ?? false;
