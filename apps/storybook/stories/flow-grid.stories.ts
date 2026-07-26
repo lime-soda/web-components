@@ -8,6 +8,7 @@ import { SortModule } from '@flowgrid/core/sort';
 import { FilterModule } from '@flowgrid/core/filter';
 import { SelectionModule } from '@flowgrid/core/selection';
 import { CellFlashModule } from '@flowgrid/core/cell-flash';
+import { KeyboardModule } from '@flowgrid/core/keyboard';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 
@@ -106,6 +107,7 @@ export const BondMarket: StoryObj<Args> = {
         new SortModule<Bond>(),
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
+        new KeyboardModule<Bond>(),
         new SelectionModule<Bond>({
           mode: 'multi',
           // Group headings are context, not instruments a trader can put in a basket.
