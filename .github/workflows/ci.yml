@@ -33,3 +33,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm build
+
+      # Budgets, not timings: these catch an order-of-magnitude regression such
+      # as a lost memo or a retained element, not a few ms of runner noise.
+      - run: pnpm bench

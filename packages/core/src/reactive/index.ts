@@ -1,13 +1,14 @@
 /**
- * The single place `@lit-labs/signals` is imported.
+ * The single place the signal implementation is imported.
  *
- * That package is still labs, which is a real risk for a published library. Every
- * other file in core imports from here, so swapping the implementation — for the
- * TC39 proposal once it lands, or for something else entirely — touches one file.
+ * Every other file in core goes through here, which is what made it a one-file
+ * change to drop `@lit-labs/signals` for its own leaking mixin — see
+ * {@link SignalWatcher}. The primitives below come straight from the TC39
+ * proposal's polyfill and are swappable for the native API when it ships.
  */
-import { computed as labsComputed, signal as labsSignal } from '@lit-labs/signals';
+import { Signal } from 'signal-polyfill';
 
-export { SignalWatcher, watch } from '@lit-labs/signals';
+export { SignalWatcher } from './signal-watcher.js';
 
 export interface ReadableSignal<T> {
   get(): T;
@@ -18,7 +19,7 @@ export interface WritableSignal<T> extends ReadableSignal<T> {
 }
 
 export function signal<T>(value: T): WritableSignal<T> {
-  return labsSignal(value);
+  return new Signal.State(value);
 }
 
 /**
@@ -28,7 +29,7 @@ export function signal<T>(value: T): WritableSignal<T> {
  * recomputes.
  */
 export function computed<T>(fn: () => T): ReadableSignal<T> {
-  return labsComputed(fn);
+  return new Signal.Computed(fn);
 }
 
 /** A monotonic counter used to invalidate computeds on structural change. */

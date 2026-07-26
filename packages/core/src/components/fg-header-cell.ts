@@ -138,10 +138,10 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
               tabindex=${activators.length > 0 ? 0 : nothing}
               @click=${(event: Event) => activators.forEach((fn) => fn(event))}
               @keydown=${(event: KeyboardEvent) => {
-              if (event.key !== 'Enter' && event.key !== ' ') return;
-              event.preventDefault();
-              activators.forEach((fn) => fn(event));
-            }}
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                activators.forEach((fn) => fn(event));
+              }}
             >
               ${this.column.headerName}
             </span>`

@@ -83,5 +83,5 @@ export type {
 } from './api/events.js';
 
 // Reactivity — exported so modules and renderers can hold their own signals.
-export { signal, computed, SignalWatcher, watch } from './reactive/index.js';
+export { signal, computed, SignalWatcher } from './reactive/index.js';
 export type { ReadableSignal, WritableSignal } from './reactive/index.js';
