@@ -208,8 +208,8 @@ export const selectionCheckboxTemplate = (
     ?disabled=${disabled}
     aria-label=${checked ? 'Deselect row' : 'Select row'}
     @click=${(event: Event) => {
-    event.stopPropagation();
-    onChange((event.target as HTMLInputElement).checked, (event as MouseEvent).shiftKey);
-  }}
+      event.stopPropagation();
+      onChange((event.target as HTMLInputElement).checked, (event as MouseEvent).shiftKey);
+    }}
     style="cursor:pointer;margin:0"
   />`;

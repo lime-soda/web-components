@@ -7,12 +7,19 @@ import { TreeModule } from '@flowgrid/core/tree';
 import { SortModule } from '@flowgrid/core/sort';
 import { FilterModule } from '@flowgrid/core/filter';
 import { SelectionModule } from '@flowgrid/core/selection';
+import { CellFlashModule } from '@flowgrid/core/cell-flash';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 
 const columns: ColumnDef<Bond>[] = [
   { field: 'instrument', headerName: 'Instrument', width: 260 },
-  { field: 'bidDepth', headerName: 'Bid Depth', width: 90, cellRenderer: 'depth-bar' },
+  {
+    field: 'bidDepth',
+    headerName: 'Bid Depth',
+    width: 90,
+    cellRenderer: 'depth-bar',
+    enableCellFlash: false,
+  },
   {
     field: 'bidSize',
     headerName: 'Bid Size',
@@ -34,7 +41,13 @@ const columns: ColumnDef<Bond>[] = [
     valueFormatter: ({ value, node }) =>
       node.data.parentId === null ? '' : (value as number).toLocaleString(),
   },
-  { field: 'askDepth', headerName: 'Ask Depth', width: 90, cellRenderer: 'depth-bar' },
+  {
+    field: 'askDepth',
+    headerName: 'Ask Depth',
+    width: 90,
+    cellRenderer: 'depth-bar',
+    enableCellFlash: false,
+  },
 ];
 
 interface Args {
@@ -92,6 +105,7 @@ export const BondMarket: StoryObj<Args> = {
         }),
         new SortModule<Bond>(),
         new FilterModule<Bond>(),
+        new CellFlashModule<Bond>(),
         new SelectionModule<Bond>({
           mode: 'multi',
           // Group headings are context, not instruments a trader can put in a basket.

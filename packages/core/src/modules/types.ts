@@ -55,6 +55,15 @@ export interface CellDecoration {
   readonly prefix?: TemplateResult;
   /** Rendered after the cell's own content. */
   readonly suffix?: TemplateResult;
+  /**
+   * Called with the cell element after it has updated.
+   *
+   * The escape hatch for effects that are not expressible as markup — running a
+   * Web Animation, measuring, moving focus. Everything declarative should use the
+   * fields above instead; this exists because a value-change flash has to be
+   * imperative to retrigger reliably.
+   */
+  readonly onRendered?: (cell: HTMLElement) => void;
 }
 
 export interface RowDecoration {

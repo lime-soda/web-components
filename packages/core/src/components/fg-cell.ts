@@ -132,6 +132,15 @@ export class FgCell extends SignalWatcher(LitElement) {
 
   private appliedClasses = new Set<string>();
   private appliedAttributes = new Set<string>();
+  private pendingEffects: ((cell: HTMLElement) => void)[] = [];
+
+  override updated(): void {
+    // Run after the DOM settles, so a module measuring or animating sees the
+    // finished cell rather than the one being replaced.
+    const effects = this.pendingEffects;
+    this.pendingEffects = [];
+    for (const effect of effects) effect(this);
+  }
 
   /**
    * Applies module decorations and withdraws any from the previous render.
@@ -161,6 +170,10 @@ export class FgCell extends SignalWatcher(LitElement) {
 
     for (const className of classes) this.classList.add(className);
     for (const [name, value] of attributes) this.setAttribute(name, value);
+
+    this.pendingEffects = decorations
+      .map((decoration) => decoration.onRendered)
+      .filter((fn): fn is (cell: HTMLElement) => void => fn !== undefined);
 
     this.appliedClasses = classes;
     this.appliedAttributes = new Set(attributes.keys());
