@@ -89,6 +89,9 @@ export class FgCell extends SignalWatcher(LitElement) {
     const node = this.row?.node;
     if (!node || !this.column) return nothing;
 
+    // See fg-header-cell: keeps module-contributed decorations current.
+    this.grid?.registry.version.get();
+
     const value = getCellValue(this.column, node);
     const decorations =
       this.grid?.registry.cellDecorations({

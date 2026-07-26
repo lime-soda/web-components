@@ -1,9 +1,11 @@
 import type { ColumnDef, ResolvedColumn } from '../columns/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
+import { Version } from '../reactive/index.js';
 import type {
   CellContext,
   CellDecoration,
   GridModule,
+  HeaderDecoration,
   HeaderSlotContext,
   ModuleContext,
   RowContextInfo,
@@ -29,7 +31,23 @@ export class ModuleRegistry<TData = unknown> {
   private order: string[] = [];
   private started = false;
 
+  /**
+   * Bumped whenever module state changes.
+   *
+   * Module state lives in plain fields, not signals, so nothing would otherwise
+   * tell a header or cell that a decoration it already rendered is now stale — a
+   * sort indicator would stay blank until some unrelated change forced a repaint.
+   * Components read this during render, which subscribes them to every module at
+   * once.
+   */
+  readonly version = new Version();
+
   constructor(private readonly options: ModuleRegistryOptions<TData>) {}
+
+  /** Repaints module-contributed content without re-running the projection. */
+  requestRender(): void {
+    this.version.bump();
+  }
 
   register(module: GridModule<TData>): void {
     if (this.modules.has(module.id)) {
@@ -85,6 +103,10 @@ export class ModuleRegistry<TData = unknown> {
     return this.collect((module) => module.headerSlot?.(ctx));
   }
 
+  headerDecorations(ctx: HeaderSlotContext<TData>): readonly HeaderDecoration[] {
+    return this.collect((module) => module.headerDecorator?.(ctx));
+  }
+
   apiExtensions(): Record<string, unknown> {
     return Object.assign({}, ...this.each((module) => module.apiExtension?.() ?? {}));
   }
@@ -111,7 +133,11 @@ export class ModuleRegistry<TData = unknown> {
     const context: ModuleContext<TData> = {
       pipeline: this.options.pipeline,
       addStage: (stage) => void teardowns.push(this.options.pipeline.addStage(stage)),
-      invalidate: () => this.options.pipeline.projector.invalidate(),
+      invalidate: () => {
+        this.options.pipeline.projector.invalidate();
+        this.requestRender();
+      },
+      requestRender: () => this.requestRender(),
       getColumns: () => this.options.getColumns(),
       getModule: (id) => this.get(id),
       dispatch: (type, detail) => this.options.dispatch(type, detail),

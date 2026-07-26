@@ -50,6 +50,20 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
       text-overflow: ellipsis;
       flex: 1;
       min-width: 0;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Only when a module made the header do something. */
+    .label.activatable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .label.activatable:focus-visible {
+      outline: 2px solid var(--fg-focus, #3b82f6);
+      outline-offset: -2px;
     }
 
     .slots {
@@ -81,10 +95,39 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
   override render(): unknown {
     if (!this.column) return nothing;
 
-    const slots = this.grid?.registry.headerSlots({ column: this.column }) ?? [];
+    const registry = this.grid?.registry;
+    // Subscribes this header to every module's state, so a sort indicator
+    // appears the moment the model changes rather than on the next unrelated
+    // repaint.
+    registry?.version.get();
+    const slots = registry?.headerSlots({ column: this.column }) ?? [];
+    const decorations = registry?.headerDecorations({ column: this.column }) ?? [];
+
+    for (const decoration of decorations) {
+      for (const className of decoration.classes ?? []) this.classList.add(className);
+      for (const [name, value] of Object.entries(decoration.attributes ?? {})) {
+        this.setAttribute(name, value);
+      }
+    }
+
+    const activators = decorations
+      .map((decoration) => decoration.onActivate)
+      .filter((fn): fn is (event: Event) => void => fn !== undefined);
 
     return html`
-      <span class="label" part="header-label" title=${this.column.headerName}>
+      <span
+        class=${activators.length > 0 ? 'label activatable' : 'label'}
+        part="header-label"
+        title=${this.column.headerName}
+        role=${activators.length > 0 ? 'button' : nothing}
+        tabindex=${activators.length > 0 ? 0 : nothing}
+        @click=${(event: Event) => activators.forEach((fn) => fn(event))}
+        @keydown=${(event: KeyboardEvent) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          activators.forEach((fn) => fn(event));
+        }}
+      >
         ${this.column.headerName}
       </span>
       ${slots.length === 0 ? nothing : html`<span class="slots" part="header-slots">${slots}</span>`}

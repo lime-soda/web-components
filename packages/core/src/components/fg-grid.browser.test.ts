@@ -284,6 +284,33 @@ describe('<fg-grid>', () => {
       expect(cell.shadowRoot?.textContent).toContain('100.00');
     });
 
+    it('repaints a header when module state changes', async () => {
+      // Module state lives in plain fields, not signals. Without the registry
+      // version a sort indicator would render once and then never update — the
+      // grid would re-sort while its header still claimed nothing was sorted.
+      let flag = false;
+      const module: GridModule<Quote> = {
+        id: 'toggler',
+        headerDecorator: () => ({ attributes: { 'data-flag': String(flag) } }),
+        init: (ctx) => {
+          toggle = () => {
+            flag = !flag;
+            ctx.requestRender();
+          };
+        },
+      };
+      let toggle = (): void => {};
+
+      const grid = await mount({ modules: [module] });
+      const header = instances(grid)[0]!.shadowRoot!.querySelector('fg-header-cell')!;
+      expect(header.getAttribute('data-flag')).toBe('false');
+
+      toggle();
+      await header.updateComplete;
+
+      expect(header.getAttribute('data-flag')).toBe('true');
+    });
+
     it('merges a module method onto the api', async () => {
       const module: GridModule<Quote> = {
         id: 'counter',

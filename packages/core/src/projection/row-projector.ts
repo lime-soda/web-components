@@ -38,13 +38,14 @@ export class RowProjector<TData = unknown> {
     });
 
     this.unsubscribe = store.subscribe((result) => {
-      if (result.structural) {
-        this.notify();
-        return;
-      }
-      if (!this.someStageDependsOn(result.fieldsChanged)) return;
-      this.dataVersion.bump();
-      this.notify();
+      // Both checks always run. Notifications are coalesced, so one delivery can
+      // report a structural change *and* a value change at once — common on a
+      // live feed, where a tick lands in the same batch as an add. Returning
+      // early on `structural` would drop the value invalidation and leave a sort
+      // stale against data that had already moved.
+      const valuesMatter = this.someStageDependsOn(result.fieldsChanged);
+      if (valuesMatter) this.dataVersion.bump();
+      if (result.structural || valuesMatter) this.notify();
     });
   }
 

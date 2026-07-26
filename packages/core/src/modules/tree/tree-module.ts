@@ -137,12 +137,12 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
                 aria-expanded=${isExpanded}
                 tabindex="-1"
                 @click=${(event: Event) => {
-                event.stopPropagation();
-                this.toggleExpanded(ctx.row.rowId);
-              }}
+                  event.stopPropagation();
+                  this.toggleExpanded(ctx.row.rowId);
+                }}
                 style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:10px;line-height:1;color:var(--fg-text-muted,#666);transition:transform 150ms ease-out;transform:rotate(${
-                isExpanded ? 90 : 0
-              }deg)"
+                  isExpanded ? 90 : 0
+                }deg)"
               >
                 ▶
               </button>`

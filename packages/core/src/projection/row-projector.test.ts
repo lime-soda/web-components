@@ -252,6 +252,24 @@ describe('RowProjector', () => {
       expect(stage.runs).toBe(1);
     });
 
+    it('re-runs a stage when a structural change and a value change coalesce', () => {
+      // Notifications are batched, so one delivery can report both. A live feed
+      // does this constantly: a tick arriving in the same batch as an added row.
+      // Handling only the structural half leaves a sort stale against data that
+      // has already moved.
+      const { projector, store } = setup([quote('a', 100)]);
+      const stage = countingStage({ dependsOn: new Set(['price']) });
+      projector.addStage(stage);
+      projector.rows.get();
+
+      store.applyTransaction({ add: [quote('b', 50)] });
+      store.applyTransaction({ update: [{ id: 'a', price: 101 }] });
+      store.flushSync();
+      projector.rows.get();
+
+      expect(stage.runs).toBe(2);
+    });
+
     it('consults dependsOn freshly each time, so a changing sort model is respected', () => {
       // A module returns a live set: sort by price now, by group later.
       const { projector, store } = setup([quote('a', 100)]);

@@ -4,6 +4,8 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import type { ColumnDef, FgGrid, GridOptions } from '@flowgrid/core';
 import '@flowgrid/core';
 import { TreeModule } from '@flowgrid/core/tree';
+import { SortModule } from '@flowgrid/core/sort';
+import { FilterModule } from '@flowgrid/core/filter';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 
@@ -87,6 +89,8 @@ export const BondMarket: StoryObj<Args> = {
           getParentId: (bond) => bond.parentId,
           defaultExpanded: args.expandByDefault ? (bond) => bond.parentId === null : false,
         }),
+        new SortModule<Bond>(),
+        new FilterModule<Bond>(),
       ],
     };
 
@@ -119,6 +123,15 @@ export const BondMarket: StoryObj<Args> = {
           <button @click=${toggleTicking}>Start ticking</button>
           <button @click=${() => gridRef.value?.api.expandAll()}>Expand all</button>
           <button @click=${() => gridRef.value?.api.collapseAll()}>Collapse all</button>
+          <input
+            type="search"
+            placeholder="Quick filter…"
+            aria-label="Quick filter"
+            @input=${(event: Event) =>
+              gridRef.value?.api.setQuickFilter((event.target as HTMLInputElement).value)}
+            style="background:#262626;color:#e5e5e5;border:1px solid #404040;padding:6px 10px;border-radius:4px;font:inherit"
+          />
+          <button @click=${() => gridRef.value?.api.clearSort()}>Clear sort</button>
           <span class="demo__stat">
             <strong>${args.instruments.toLocaleString()}</strong> instruments in
             <strong>${args.groups}</strong> groups

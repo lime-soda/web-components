@@ -10,8 +10,13 @@ export interface ModuleContext<TData = unknown> {
   readonly pipeline: GridPipeline<TData>;
   /** Registers a projection stage. Removed automatically when the module is destroyed. */
   addStage(stage: ProjectionStage<TData>): void;
-  /** Re-runs the projection. Call after the module's own config changes. */
+  /** Re-runs the projection, and repaints. Call after the module's own config changes. */
   invalidate(): void;
+  /**
+   * Repaints module-contributed headers, cells and rows without re-running the
+   * projection. For presentation-only state such as an open filter popover.
+   */
+  requestRender(): void;
   /** Resolved columns, including any contributed by modules. */
   getColumns(): readonly ResolvedColumn<TData>[];
   getModule<T extends GridModule<TData>>(id: string): T | undefined;
@@ -58,6 +63,19 @@ export interface RowDecoration {
 }
 
 /**
+ * Presentation and activation a module contributes to a column header.
+ *
+ * `onActivate` exists because a trader expects to click anywhere on a header to
+ * sort it, not to hit a small icon. Core binds click, Enter and Space to it
+ * without knowing what activation means — sorting is the sort module's idea.
+ */
+export interface HeaderDecoration {
+  readonly classes?: readonly string[];
+  readonly attributes?: Readonly<Record<string, string>>;
+  readonly onActivate?: (event: Event) => void;
+}
+
+/**
  * An additive feature.
  *
  * The rule that makes modularity real: no core component may import a module.
@@ -75,6 +93,7 @@ export interface GridModule<TData = unknown, TState = unknown> {
   /** Columns the module owns, such as selection's checkbox column. */
   provideColumns?(): readonly ColumnDef<TData>[];
   headerSlot?(ctx: HeaderSlotContext<TData>): TemplateResult | null;
+  headerDecorator?(ctx: HeaderSlotContext<TData>): HeaderDecoration | null;
   cellDecorator?(ctx: CellContext<TData>): CellDecoration | null;
   rowDecorator?(ctx: RowContextInfo<TData>): RowDecoration | null;
   /** Methods merged onto the GridApi, typed by declaration merging. */
