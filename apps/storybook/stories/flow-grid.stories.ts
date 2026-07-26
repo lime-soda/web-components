@@ -6,6 +6,7 @@ import '@flowgrid/core';
 import { TreeModule } from '@flowgrid/core/tree';
 import { SortModule } from '@flowgrid/core/sort';
 import { FilterModule } from '@flowgrid/core/filter';
+import { SelectionModule } from '@flowgrid/core/selection';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 
@@ -91,6 +92,11 @@ export const BondMarket: StoryObj<Args> = {
         }),
         new SortModule<Bond>(),
         new FilterModule<Bond>(),
+        new SelectionModule<Bond>({
+          mode: 'multi',
+          // Group headings are context, not instruments a trader can put in a basket.
+          isSelectable: (_id, meta) => meta['hasChildren'] !== true,
+        }),
       ],
     };
 
@@ -132,6 +138,8 @@ export const BondMarket: StoryObj<Args> = {
             style="background:#262626;color:#e5e5e5;border:1px solid #404040;padding:6px 10px;border-radius:4px;font:inherit"
           />
           <button @click=${() => gridRef.value?.api.clearSort()}>Clear sort</button>
+          <button @click=${() => gridRef.value?.api.selectAll()}>Select all</button>
+          <button @click=${() => gridRef.value?.api.clearSelection()}>Clear selection</button>
           <span class="demo__stat">
             <strong>${args.instruments.toLocaleString()}</strong> instruments in
             <strong>${args.groups}</strong> groups

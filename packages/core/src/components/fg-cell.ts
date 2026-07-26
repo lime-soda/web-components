@@ -130,13 +130,40 @@ export class FgCell extends SignalWatcher(LitElement) {
     return formatCellValue(this.column, node);
   }
 
+  private appliedClasses = new Set<string>();
+  private appliedAttributes = new Set<string>();
+
+  /**
+   * Applies module decorations and withdraws any from the previous render.
+   *
+   * Reversal is the whole point: a decoration that stops applying has to come
+   * off. Only adding would leave a deselected row highlighted and a cleared
+   * filter's markers stuck on, with the classes accumulating for as long as the
+   * cell lives.
+   */
   private applyDecorations(decorations: readonly CellDecoration[]): void {
+    const classes = new Set<string>();
+    const attributes = new Map<string, string>();
+
     for (const decoration of decorations) {
-      for (const className of decoration.classes ?? []) this.classList.add(className);
+      for (const className of decoration.classes ?? []) classes.add(className);
       for (const [name, value] of Object.entries(decoration.attributes ?? {})) {
-        this.setAttribute(name, value);
+        attributes.set(name, value);
       }
     }
+
+    for (const className of this.appliedClasses) {
+      if (!classes.has(className)) this.classList.remove(className);
+    }
+    for (const name of this.appliedAttributes) {
+      if (!attributes.has(name)) this.removeAttribute(name);
+    }
+
+    for (const className of classes) this.classList.add(className);
+    for (const [name, value] of attributes) this.setAttribute(name, value);
+
+    this.appliedClasses = classes;
+    this.appliedAttributes = new Set(attributes.keys());
   }
 }
 

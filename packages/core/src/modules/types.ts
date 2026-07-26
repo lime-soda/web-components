@@ -60,6 +60,16 @@ export interface CellDecoration {
 export interface RowDecoration {
   readonly classes?: readonly string[];
   readonly attributes?: Readonly<Record<string, string>>;
+  /**
+   * Applied to every cell in the row rather than to the row element.
+   *
+   * A row is `display: contents` so it has no box of its own to paint — its cells
+   * are the grid items. Anything visual therefore has to reach them.
+   */
+  readonly cellAttributes?: Readonly<Record<string, string>>;
+  readonly cellClasses?: readonly string[];
+  /** Called when the row is clicked or activated from the keyboard. */
+  readonly onActivate?: (event: Event) => void;
 }
 
 /**
