@@ -108,11 +108,9 @@ export const BondMarket: StoryObj<Args> = {
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
         new KeyboardModule<Bond>(),
-        new SelectionModule<Bond>({
-          mode: 'multi',
-          // Group headings are context, not instruments a trader can put in a basket.
-          isSelectable: (_id, meta) => meta['hasChildren'] !== true,
-        }),
+        // Ticking a category selects the instruments beneath it, respecting the
+        // current filter; the category shows indeterminate while only some are.
+        new SelectionModule<Bond>({ mode: 'multi' }),
       ],
     };
 

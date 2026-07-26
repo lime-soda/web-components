@@ -44,6 +44,12 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
       outline-offset: -2px;
     }
 
+    /* No label to sit beside, so whatever a module contributed is centred. */
+    :host([data-fg-unnamed]) {
+      justify-content: center;
+      padding: 0;
+    }
+
     .label {
       overflow: hidden;
       white-space: nowrap;
@@ -114,22 +120,32 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
       .map((decoration) => decoration.onActivate)
       .filter((fn): fn is (event: Event) => void => fn !== undefined);
 
+    // A column with no name — a checkbox column, say — gets no label box at all,
+    // so its slot content centres in the header instead of being pushed aside by
+    // an empty flex:1 span.
+    const unnamed = this.column.headerName === '';
+    this.toggleAttribute('data-fg-unnamed', unnamed);
+
     return html`
-      <span
-        class=${activators.length > 0 ? 'label activatable' : 'label'}
-        part="header-label"
-        title=${this.column.headerName}
-        role=${activators.length > 0 ? 'button' : nothing}
-        tabindex=${activators.length > 0 ? 0 : nothing}
-        @click=${(event: Event) => activators.forEach((fn) => fn(event))}
-        @keydown=${(event: KeyboardEvent) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          activators.forEach((fn) => fn(event));
-        }}
-      >
-        ${this.column.headerName}
-      </span>
+      ${
+        unnamed
+          ? nothing
+          : html`<span
+              class=${activators.length > 0 ? 'label activatable' : 'label'}
+              part="header-label"
+              title=${this.column.headerName}
+              role=${activators.length > 0 ? 'button' : nothing}
+              tabindex=${activators.length > 0 ? 0 : nothing}
+              @click=${(event: Event) => activators.forEach((fn) => fn(event))}
+              @keydown=${(event: KeyboardEvent) => {
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
+              activators.forEach((fn) => fn(event));
+            }}
+            >
+              ${this.column.headerName}
+            </span>`
+      }
       ${slots.length === 0 ? nothing : html`<span class="slots" part="header-slots">${slots}</span>`}
     `;
   }

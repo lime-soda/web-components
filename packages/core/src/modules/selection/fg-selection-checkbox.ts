@@ -1,5 +1,5 @@
+import { css, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { nothing } from 'lit';
 import { CellRendererElement } from '../../components/cell-renderer-element.js';
 import { type SelectionModule, selectionCheckboxTemplate } from './selection-module.js';
 
@@ -11,6 +11,20 @@ import { type SelectionModule, selectionCheckboxTemplate } from './selection-mod
  */
 @customElement('fg-selection-checkbox')
 export class FgSelectionCheckbox extends CellRendererElement {
+  static override styles = css`
+    /*
+     * Fills the cell and centres the control. The cell drops its own padding for
+     * element renderers, so the whole column width is available to centre in.
+     */
+    :host {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+  `;
+
   override render(): unknown {
     const rowId = this.row?.rowId;
     const selection = this.grid?.registry.get<SelectionModule>('selection');
@@ -20,10 +34,10 @@ export class FgSelectionCheckbox extends CellRendererElement {
     // the mode is single.
     this.grid?.registry.version.get();
 
-    const selectable = selection.canSelect(rowId, this.row?.meta ?? {});
-
-    return selectionCheckboxTemplate(selection.isSelected(rowId), !selectable, (checked, shift) =>
-      selection.handleCheckbox(rowId, checked, shift),
+    return selectionCheckboxTemplate(
+      selection.getRowState(rowId),
+      !selection.isRowSelectable(rowId),
+      (checked, shift) => selection.handleCheckbox(rowId, checked, shift),
     );
   }
 }

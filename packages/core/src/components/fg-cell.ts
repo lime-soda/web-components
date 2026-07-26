@@ -37,6 +37,16 @@ export class FgCell extends SignalWatcher(LitElement) {
       justify-content: flex-end;
     }
 
+    /*
+     * A custom element renderer owns the whole cell, so the cell stops reserving
+     * its own gutter. Without this a depth bar cannot reach the cell edges and a
+     * checkbox cannot sit centred in a narrow column — 16px of padding leaves
+     * nothing to centre a 13px control in.
+     */
+    :host([data-fg-renderer]) {
+      padding: 0;
+    }
+
     :host(:focus-visible) {
       outline: 2px solid var(--fg-focus, #3b82f6);
       outline-offset: -2px;
@@ -112,6 +122,9 @@ export class FgCell extends SignalWatcher(LitElement) {
     this.applyDecorations(decorations);
 
     const hasRenderer = this.column.cellRenderer !== undefined;
+    // Element renderers own their box; function renderers and plain values are
+    // content and keep the cell's gutter.
+    this.toggleAttribute('data-fg-renderer', typeof this.column.cellRenderer === 'string');
 
     return html`
       ${decorations.map((d) => (d.prefix ? html`<span class="affix">${d.prefix}</span>` : nothing))}

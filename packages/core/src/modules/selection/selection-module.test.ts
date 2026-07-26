@@ -202,6 +202,74 @@ describe('SelectionModule', () => {
     });
   });
 
+  describe('select-all header', () => {
+    const headerFor = (selection: SelectionModule<Quote>, colId = 'fg-selection') =>
+      selection.headerSlot({
+        column: { colId, headerName: '', width: 28, index: 0 },
+      } as never);
+
+    it('offers one on its own column', () => {
+      expect(headerFor(setup(rows(3)).selection)).not.toBeNull();
+    });
+
+    it('offers none on any other column', () => {
+      expect(headerFor(setup(rows(3)).selection, 'instrument')).toBeNull();
+    });
+
+    it('offers none in single mode, where select-all is meaningless', () => {
+      expect(headerFor(setup(rows(3), { mode: 'single' }).selection)).toBeNull();
+    });
+
+    it('selects everything visible when nothing is selected', () => {
+      const { selection } = setup(rows(3));
+
+      selection.selectAll();
+
+      expect(selection.getSelectedCount()).toBe(3);
+    });
+
+    it('counts only selectable rows, so excluded group headings do not block the all state', () => {
+      // With a group heading excluded, selecting the two children must read as
+      // "all", not as "two of three".
+      const { selection } = setup([quote('g'), quote('c1', 'g'), quote('c2', 'g')], {
+        isSelectable: (rowId) => rowId !== 'g',
+      });
+
+      selection.selectAll();
+
+      expect(selection.getSelectedRows()).toEqual(['c1', 'c2']);
+    });
+
+    it('counts a repeated ancestor once, not once per instance', () => {
+      // The layout repeats a group heading atop each continuation instance. Those
+      // copies share a rowId and are one row for selection purposes.
+      const { selection, pipeline } = setup(rows(2));
+      pipeline.addStage({
+        id: 'repeat',
+        phase: 'decorate',
+        run: (all) => [...all, { ...all[0]!, id: 'r0@1' }],
+      });
+
+      selection.selectAll();
+
+      expect(selection.getSelectedCount()).toBe(2);
+    });
+  });
+
+  describe('checkbox column', () => {
+    it('is narrow, because the cell drops its gutter for element renderers', () => {
+      expect(setup().selection.provideColumns()[0]!.width).toBe(28);
+    });
+
+    it('accepts an explicit width', () => {
+      expect(setup([], { checkboxColumnWidth: 44 }).selection.provideColumns()[0]!.width).toBe(44);
+    });
+
+    it('has an empty header name, so the header centres its checkbox', () => {
+      expect(setup().selection.provideColumns()[0]!.headerName).toBe('');
+    });
+  });
+
   describe('row decoration', () => {
     const info = (rowId: string) => ({ row: { id: rowId, rowId }, node: undefined });
 
