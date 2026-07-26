@@ -7,6 +7,7 @@ import type { FgGrid } from './fg-grid.js';
 import type { GridModule } from '../modules/types.js';
 import type { ColumnDef } from '../columns/types.js';
 import type { GridOptions } from '../controller/grid-controller.js';
+import { KeyboardModule } from '../modules/keyboard/keyboard-module.js';
 
 interface Quote {
   id: string;
@@ -65,6 +66,17 @@ const rowText = (row: Element): string =>
   [...(row.shadowRoot?.querySelectorAll('fg-cell') ?? [])]
     .map((cell) => cell.shadowRoot?.textContent ?? '')
     .join(' ');
+
+/**
+ * Every cell in the grid. Cells live inside fg-row's shadow root, not
+ * fg-instance's, so a single querySelectorAll from the instance finds none.
+ */
+const allCells = (grid: FgGrid<Quote>) =>
+  [...instances(grid)].flatMap((instance) =>
+    [...instance.shadowRoot!.querySelectorAll('fg-row')].flatMap((row) => [
+      ...row.shadowRoot!.querySelectorAll('fg-cell'),
+    ]),
+  );
 
 const firstRow = (grid: FgGrid<Quote>): Element =>
   instances(grid)[0]!.shadowRoot!.querySelector('fg-row')!;
@@ -320,6 +332,51 @@ describe('<fg-grid>', () => {
       const grid = await mount({ modules: [module] });
 
       expect((grid.api as unknown as { countRows(): number }).countRows()).toBe(42);
+    });
+  });
+
+  describe('keyboard navigation', () => {
+    it('gives the focused cell DOM focus and a roving tabindex', async () => {
+      const grid = await mount({ modules: [new KeyboardModule<Quote>()] });
+      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+
+      scroller.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }),
+      );
+      await grid.updateComplete;
+      await Promise.all(allCells(grid).map((cell) => cell.updateComplete));
+
+      // Exactly one cell is tabbable, and it holds real focus.
+      const tabbable = allCells(grid).filter((cell) => cell.tabIndex === 0);
+      expect(tabbable).toHaveLength(1);
+      expect(tabbable[0]!.matches(':focus')).toBe(true);
+    });
+
+    it('moves focus across instances, following the layout rather than the DOM order', async () => {
+      const grid = await mount({ modules: [new KeyboardModule<Quote>()] });
+      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+      const send = (key: string, init: KeyboardEventInit = {}) =>
+        scroller.dispatchEvent(
+          new KeyboardEvent('keydown', { key, bubbles: true, composed: true, ...init }),
+        );
+
+      send('ArrowDown');
+      send('ArrowRight', { ctrlKey: true });
+      await grid.updateComplete;
+
+      expect(grid.controller!.focus.focused.get()?.instanceId).toBe('instance-1');
+    });
+
+    it('does nothing without the keyboard module', async () => {
+      const grid = await mount();
+      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+
+      scroller.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }),
+      );
+      await grid.updateComplete;
+
+      expect(grid.controller!.focus.focused.get()).toBeNull();
     });
   });
 

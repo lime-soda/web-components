@@ -2,6 +2,7 @@ import type { TemplateResult } from 'lit';
 import type { ColumnDef, ResolvedColumn } from '../columns/types.js';
 import type { DisplayRow } from '../layout/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
+import type { FocusController } from '../controller/focus-controller.js';
 import type { ProjectionStage } from '../projection/types.js';
 import type { RowNode } from '../store/types.js';
 
@@ -17,6 +18,8 @@ export interface ModuleContext<TData = unknown> {
    * projection. For presentation-only state such as an open filter popover.
    */
   requestRender(): void;
+  /** Focus position and traversal. Core owns the mechanics; modules bind keys to them. */
+  readonly focus: FocusController;
   /** Resolved columns, including any contributed by modules. */
   getColumns(): readonly ResolvedColumn<TData>[];
   getModule<T extends GridModule<TData>>(id: string): T | undefined;
@@ -115,6 +118,11 @@ export interface GridModule<TData = unknown, TState = unknown> {
   headerDecorator?(ctx: HeaderSlotContext<TData>): HeaderDecoration | null;
   cellDecorator?(ctx: CellContext<TData>): CellDecoration | null;
   rowDecorator?(ctx: RowContextInfo<TData>): RowDecoration | null;
+  /**
+   * Handles a key pressed inside the grid. Return true when handled, which
+   * stops later modules seeing it and prevents the browser default.
+   */
+  onKeyDown?(event: KeyboardEvent): boolean;
   /** Methods merged onto the GridApi, typed by declaration merging. */
   apiExtension?(): Record<string, unknown>;
 

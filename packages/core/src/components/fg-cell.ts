@@ -1,4 +1,5 @@
 import { consume, provide } from '@lit/context';
+import { instanceContext } from '../context/index.js';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
@@ -6,6 +7,7 @@ import { formatCellValue, getCellValue } from '../columns/resolve-columns.js';
 import type { ResolvedColumn } from '../columns/types.js';
 import { RowContextValue, columnContext, gridContext, rowContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
+import type { LayoutInstance } from '../layout/types.js';
 import type { CellDecoration } from '../modules/types.js';
 import { SignalWatcher } from '../reactive/index.js';
 
@@ -78,6 +80,9 @@ export class FgCell extends SignalWatcher(LitElement) {
   @consume({ context: rowContext, subscribe: true })
   accessor row: RowContextValue | undefined;
 
+  @consume({ context: instanceContext, subscribe: true })
+  accessor instance: LayoutInstance | undefined;
+
   @provide({ context: columnContext })
   accessor providedColumn: ResolvedColumn | undefined;
 
@@ -91,6 +96,9 @@ export class FgCell extends SignalWatcher(LitElement) {
 
     // See fg-header-cell: keeps module-contributed decorations current.
     this.grid?.registry.version.get();
+
+    const focused = this.isFocusedCell();
+    this.tabIndex = focused ? 0 : -1;
 
     const value = getCellValue(this.column, node);
     const decorations =
@@ -140,6 +148,19 @@ export class FgCell extends SignalWatcher(LitElement) {
     const effects = this.pendingEffects;
     this.pendingEffects = [];
     for (const effect of effects) effect(this);
+
+    // Roving tabindex: exactly one cell is tabbable, and it pulls DOM focus to
+    // itself so the browser scrolls it into view and screen readers follow.
+    if (this.isFocusedCell() && this.getRootNode() instanceof ShadowRoot) {
+      if (!this.matches(':focus')) this.focus({ preventScroll: false });
+    }
+  }
+
+  private isFocusedCell(): boolean {
+    const instanceId = this.instance?.id;
+    const rowKey = this.row?.displayRow.id;
+    if (instanceId === undefined || rowKey === undefined || !this.grid) return false;
+    return this.grid.focus.isFocused(instanceId, rowKey, this.column.colId);
   }
 
   /**

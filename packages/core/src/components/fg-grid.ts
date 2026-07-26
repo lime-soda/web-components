@@ -169,6 +169,7 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
         data-layout=${mode}
         role="presentation"
         aria-label=${controller.options.ariaLabel ?? 'Data grid'}
+        @keydown=${this.handleKeyDown}
         style="--fg-row-height: ${viewport.rowHeight}px; --fg-header-height: ${viewport.headerHeight}px; --fg-instance-gap: ${viewport.instanceGap}px"
         ${ref(this.scrollerRef)}
       >
@@ -222,6 +223,17 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
       <div class="stack-spacer" style="height: ${below}px"></div>
     `;
   }
+
+  /**
+   * Offers keys to modules. Core binds nothing itself: with no keyboard module
+   * installed the grid has no key behaviour at all, which is the point.
+   */
+  private readonly handleKeyDown = (event: KeyboardEvent): void => {
+    if (this.controller?.registry.handleKeyDown(event) === true) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
 
   private observeSlot(element: Element | undefined): void {
     if (!element || !this.virtualizer) return;

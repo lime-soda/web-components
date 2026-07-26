@@ -1,5 +1,6 @@
 import type { ColumnDef, ResolvedColumn } from '../columns/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
+import { FocusController } from '../controller/focus-controller.js';
 import { Version } from '../reactive/index.js';
 import type {
   CellContext,
@@ -42,7 +43,19 @@ export class ModuleRegistry<TData = unknown> {
    */
   readonly version = new Version();
 
-  constructor(private readonly options: ModuleRegistryOptions<TData>) {}
+  /**
+   * Focus lives here so that it exists before any module is initialised — a
+   * module receives it during init, which happens while the grid controller is
+   * still being constructed.
+   */
+  readonly focus: FocusController;
+
+  constructor(private readonly options: ModuleRegistryOptions<TData>) {
+    this.focus = new FocusController(
+      () => options.pipeline.layout.get(),
+      () => options.getColumns(),
+    );
+  }
 
   /** Repaints module-contributed content without re-running the projection. */
   requestRender(): void {
@@ -107,6 +120,14 @@ export class ModuleRegistry<TData = unknown> {
     return this.collect((module) => module.headerDecorator?.(ctx));
   }
 
+  /** Offers a key to each module in order. Stops at the first that handles it. */
+  handleKeyDown(event: KeyboardEvent): boolean {
+    for (const module of this.orderedModules()) {
+      if (module.onKeyDown?.(event) === true) return true;
+    }
+    return false;
+  }
+
   apiExtensions(): Record<string, unknown> {
     return Object.assign({}, ...this.each((module) => module.apiExtension?.() ?? {}));
   }
@@ -132,6 +153,7 @@ export class ModuleRegistry<TData = unknown> {
 
     const context: ModuleContext<TData> = {
       pipeline: this.options.pipeline,
+      focus: this.focus,
       addStage: (stage) => void teardowns.push(this.options.pipeline.addStage(stage)),
       invalidate: () => {
         this.options.pipeline.projector.invalidate();

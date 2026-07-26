@@ -1,6 +1,7 @@
 import type { CoreGridApi, GridApi } from '../api/types.js';
 import { resolveColumns } from '../columns/resolve-columns.js';
 import type { ColumnDef, ColumnResolutionOptions, ResolvedColumn } from '../columns/types.js';
+import type { FocusController } from './focus-controller.js';
 import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
 import { StackLayoutEngine } from '../layout/stack-layout-engine.js';
 import type { LayoutResult, ViewportMetrics } from '../layout/types.js';
@@ -81,6 +82,11 @@ export class GridController<TData = unknown> {
 
     this.api = this.createApi();
     this.syncViewport();
+  }
+
+  /** Focus position and traversal. */
+  get focus(): FocusController {
+    return this.registry.focus;
   }
 
   get options(): GridOptions<TData> {
