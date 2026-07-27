@@ -25,6 +25,10 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
+      # Node 22 bundles npm 10.9.x, but OIDC trusted publishing needs >= 11.5.1.
+      # Without this the publish silently falls back to wanting a token.
+      - run: npm install -g npm@latest
+
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm build
