@@ -3,7 +3,7 @@ import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import '../index.js';
 import { CellRendererElement } from './cell-renderer-element.js';
-import type { FgGrid } from './fg-grid.js';
+import type { TfGrid } from './tf-grid.js';
 import type { GridModule } from '../modules/types.js';
 import type { ColumnDef } from '../columns/types.js';
 import type { GridOptions } from '../controller/grid-controller.js';
@@ -30,12 +30,12 @@ async function mount(
   options: Partial<GridOptions<Quote>> = {},
   rows = quotes(25),
   { width = 700, height = 360 } = {},
-): Promise<FgGrid<Quote>> {
+): Promise<TfGrid<Quote>> {
   host = document.createElement('div');
   host.style.cssText = `width:${width}px;height:${height}px`;
   document.body.append(host);
 
-  const grid = document.createElement('fg-grid') as FgGrid<Quote>;
+  const grid = document.createElement('tf-grid') as TfGrid<Quote>;
   grid.gridOptions = { columns, rowHeight: 32, headerHeight: 40, instanceGap: 16, ...options };
   grid.rowData = rows;
   host.append(grid);
@@ -47,14 +47,14 @@ async function mount(
   return grid;
 }
 
-const slots = (grid: FgGrid<Quote>) =>
+const slots = (grid: TfGrid<Quote>) =>
   [...(grid.shadowRoot?.querySelectorAll('.instance-slot') ?? [])] as HTMLElement[];
 
-const instances = (grid: FgGrid<Quote>) => grid.shadowRoot?.querySelectorAll('fg-instance') ?? [];
+const instances = (grid: TfGrid<Quote>) => grid.shadowRoot?.querySelectorAll('tf-instance') ?? [];
 
-const cellsOf = (grid: FgGrid<Quote>) =>
+const cellsOf = (grid: TfGrid<Quote>) =>
   [...instances(grid)].flatMap((instance) => [
-    ...(instance.shadowRoot?.querySelectorAll('fg-row') ?? []),
+    ...(instance.shadowRoot?.querySelectorAll('tf-row') ?? []),
   ]);
 
 /**
@@ -63,30 +63,30 @@ const cellsOf = (grid: FgGrid<Quote>) =>
  * DOM. This walks one level further down.
  */
 const rowText = (row: Element): string =>
-  [...(row.shadowRoot?.querySelectorAll('fg-cell') ?? [])]
+  [...(row.shadowRoot?.querySelectorAll('tf-cell') ?? [])]
     .map((cell) => cell.shadowRoot?.textContent ?? '')
     .join(' ');
 
 /**
- * Every cell in the grid. Cells live inside fg-row's shadow root, not
- * fg-instance's, so a single querySelectorAll from the instance finds none.
+ * Every cell in the grid. Cells live inside tf-row's shadow root, not
+ * tf-instance's, so a single querySelectorAll from the instance finds none.
  */
-const allCells = (grid: FgGrid<Quote>) =>
+const allCells = (grid: TfGrid<Quote>) =>
   [...instances(grid)].flatMap((instance) =>
-    [...instance.shadowRoot!.querySelectorAll('fg-row')].flatMap((row) => [
-      ...row.shadowRoot!.querySelectorAll('fg-cell'),
+    [...instance.shadowRoot!.querySelectorAll('tf-row')].flatMap((row) => [
+      ...row.shadowRoot!.querySelectorAll('tf-cell'),
     ]),
   );
 
-const firstRow = (grid: FgGrid<Quote>): Element =>
-  instances(grid)[0]!.shadowRoot!.querySelector('fg-row')!;
+const firstRow = (grid: TfGrid<Quote>): Element =>
+  instances(grid)[0]!.shadowRoot!.querySelector('tf-row')!;
 
 afterEach(() => {
   host?.remove();
   host = undefined;
 });
 
-describe('<fg-grid>', () => {
+describe('<tf-grid>', () => {
   describe('layout', () => {
     it('lays rows into instances sized to the measured container', async () => {
       // 360px tall, 40px header, 32px rows: 10 rows per instance, 25 rows -> 3.
@@ -110,7 +110,7 @@ describe('<fg-grid>', () => {
       const grid = await mount();
 
       for (const instance of instances(grid)) {
-        expect(instance.shadowRoot?.querySelectorAll('fg-header-cell')).toHaveLength(2);
+        expect(instance.shadowRoot?.querySelectorAll('tf-header-cell')).toHaveLength(2);
       }
     });
 
@@ -165,8 +165,8 @@ describe('<fg-grid>', () => {
     it('renders the formatted value', async () => {
       const grid = await mount();
       const cell = instances(grid)[0]!
-        .shadowRoot!.querySelector('fg-row')!
-        .shadowRoot!.querySelectorAll('fg-cell')[1]!;
+        .shadowRoot!.querySelector('tf-row')!
+        .shadowRoot!.querySelectorAll('tf-cell')[1]!;
 
       expect(cell.shadowRoot?.textContent).toContain('100.00');
     });
@@ -178,7 +178,7 @@ describe('<fg-grid>', () => {
 
       // The renderer lives inside the cell's shadow root, not the row's.
       const renderer = firstRow(grid)
-        .shadowRoot!.querySelector('fg-cell')!
+        .shadowRoot!.querySelector('tf-cell')!
         .shadowRoot!.querySelector('test-price-tag');
 
       expect(renderer?.shadowRoot?.textContent).toContain('100');
@@ -189,7 +189,7 @@ describe('<fg-grid>', () => {
     it('repaints the cell without re-running the layout', async () => {
       const grid = await mount();
       const layoutBefore = grid.api.getLayout();
-      const cell = firstRow(grid).shadowRoot!.querySelectorAll('fg-cell')[1]!;
+      const cell = firstRow(grid).shadowRoot!.querySelectorAll('tf-cell')[1]!;
 
       grid.api.applyTransaction({ update: [{ id: 'q0', instrument: 'INS0', price: 999 }] });
       await cell.updateComplete;
@@ -229,7 +229,7 @@ describe('<fg-grid>', () => {
       const grid = await mount({ modules: [repeatModule] }, [parent, ...children]);
 
       const copies = [...instances(grid)].flatMap((instance) =>
-        [...instance.shadowRoot!.querySelectorAll('fg-row')].filter(
+        [...instance.shadowRoot!.querySelectorAll('tf-row')].filter(
           (row) => (row as { row?: { rowId?: string } }).row?.rowId === 'p',
         ),
       );
@@ -238,7 +238,7 @@ describe('<fg-grid>', () => {
       grid.api.applyTransaction({ update: [{ id: 'p', instrument: 'RENAMED', price: 0 }] });
       await Promise.all(
         copies.flatMap((row) =>
-          [...row.shadowRoot!.querySelectorAll('fg-cell')].map((cell) => cell.updateComplete),
+          [...row.shadowRoot!.querySelectorAll('tf-cell')].map((cell) => cell.updateComplete),
         ),
       );
 
@@ -275,7 +275,7 @@ describe('<fg-grid>', () => {
 
       const grid = await mount({ modules: [module] });
 
-      expect(instances(grid)[0]!.shadowRoot!.querySelectorAll('fg-header-cell')).toHaveLength(3);
+      expect(instances(grid)[0]!.shadowRoot!.querySelectorAll('tf-header-cell')).toHaveLength(3);
     });
 
     it('lets a module decorate a cell without owning it', async () => {
@@ -287,8 +287,8 @@ describe('<fg-grid>', () => {
 
       const grid = await mount({ modules: [module] });
       const cell = instances(grid)[0]!
-        .shadowRoot!.querySelector('fg-row')!
-        .shadowRoot!.querySelectorAll('fg-cell')[1]!;
+        .shadowRoot!.querySelector('tf-row')!
+        .shadowRoot!.querySelectorAll('tf-cell')[1]!;
 
       expect(cell.classList.contains('numeric')).toBe(true);
       expect(cell.shadowRoot?.textContent).toContain('*');
@@ -314,7 +314,7 @@ describe('<fg-grid>', () => {
       let toggle = (): void => {};
 
       const grid = await mount({ modules: [module] });
-      const header = instances(grid)[0]!.shadowRoot!.querySelector('fg-header-cell')!;
+      const header = instances(grid)[0]!.shadowRoot!.querySelector('tf-header-cell')!;
       expect(header.getAttribute('data-flag')).toBe('false');
 
       toggle();
@@ -381,14 +381,14 @@ describe('<fg-grid>', () => {
   });
 
   describe('api and events', () => {
-    it('fires fg-grid-ready with the api', async () => {
+    it('fires tf-grid-ready with the api', async () => {
       const listener = vi.fn();
       host = document.createElement('div');
       host.style.cssText = 'width:700px;height:360px';
       document.body.append(host);
 
-      const grid = document.createElement('fg-grid') as FgGrid<Quote>;
-      grid.addEventListener('fg-grid-ready', listener);
+      const grid = document.createElement('tf-grid') as TfGrid<Quote>;
+      grid.addEventListener('tf-grid-ready', listener);
       grid.gridOptions = { columns };
       host.append(grid);
       await grid.updateComplete;

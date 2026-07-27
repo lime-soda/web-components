@@ -210,7 +210,7 @@ describe('TreeModule', () => {
 
   describe('reacting to data', () => {
     it('indexes data that arrives after the module is registered', () => {
-      // The real order of events: <fg-grid> builds its controller and starts its
+      // The real order of events: <tf-grid> builds its controller and starts its
       // modules in the constructor, then rowData is assigned. A module that
       // indexed only at init would see an empty store and report every row as a
       // depth-0 root with no children — no hierarchy, no expanders, no repeated
@@ -330,11 +330,11 @@ describe('TreeModule', () => {
       // Selection prepends a 36px checkbox column. Putting the expander and its
       // indent there pushes the checkbox out of the cell entirely.
       const module = withColumns([
-        { colId: 'fg-selection', providedBy: 'selection' },
+        { colId: 'tf-selection', providedBy: 'selection' },
         { colId: 'instrument' },
       ]);
 
-      expect(module.cellDecorator(cellContextFor('fg-selection') as never)).toBeNull();
+      expect(module.cellDecorator(cellContextFor('tf-selection') as never)).toBeNull();
       expect(module.cellDecorator(cellContextFor('instrument') as never)).not.toBeNull();
     });
 

@@ -13,22 +13,22 @@ import { SignalWatcher } from '../reactive/index.js';
  * arrive as module header slots, so a grid with neither module installed has a
  * header with no affordances rather than dead ones.
  */
-@customElement('fg-header-cell')
-export class FgHeaderCell extends SignalWatcher(LitElement) {
+@customElement('tf-header-cell')
+export class TfHeaderCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
       align-items: center;
       gap: 8px;
       box-sizing: border-box;
-      padding: 0 var(--fg-cell-padding-x, 8px);
+      padding: 0 var(--tf-cell-padding-x, 8px);
       height: 100%;
-      background: var(--fg-header-bg, #f5f5f5);
-      border-bottom: 2px solid var(--fg-border, #d8d8d8);
-      border-right: 1px solid var(--fg-border-subtle, #f0f0f0);
-      color: var(--fg-header-text, #101010);
+      background: var(--tf-header-bg, #f5f5f5);
+      border-bottom: 2px solid var(--tf-border, #d8d8d8);
+      border-right: 1px solid var(--tf-border-subtle, #f0f0f0);
+      color: var(--tf-header-text, #101010);
       font-weight: 500;
-      font-size: var(--fg-header-font-size, 13px);
+      font-size: var(--tf-header-font-size, 13px);
       overflow: hidden;
       position: sticky;
       top: 0;
@@ -40,12 +40,12 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
     }
 
     :host(:focus-visible) {
-      outline: 2px solid var(--fg-focus, #3b82f6);
+      outline: 2px solid var(--tf-focus, #3b82f6);
       outline-offset: -2px;
     }
 
     /* No label to sit beside, so whatever a module contributed is centred. */
-    :host([data-fg-unnamed]) {
+    :host([data-tf-unnamed]) {
       justify-content: center;
       padding: 0;
     }
@@ -68,7 +68,7 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
     }
 
     .label.activatable:focus-visible {
-      outline: 2px solid var(--fg-focus, #3b82f6);
+      outline: 2px solid var(--tf-focus, #3b82f6);
       outline-offset: -2px;
     }
 
@@ -124,7 +124,7 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
     // so its slot content centres in the header instead of being pushed aside by
     // an empty flex:1 span.
     const unnamed = this.column.headerName === '';
-    this.toggleAttribute('data-fg-unnamed', unnamed);
+    this.toggleAttribute('data-tf-unnamed', unnamed);
 
     return html`
       ${
@@ -153,6 +153,6 @@ export class FgHeaderCell extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'fg-header-cell': FgHeaderCell;
+    'tf-header-cell': TfHeaderCell;
   }
 }

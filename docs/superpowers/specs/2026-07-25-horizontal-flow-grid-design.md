@@ -1,6 +1,6 @@
 # Horizontal-Flow Trading Grid — Package Design
 
-> Naming was a placeholder while this was written; `@flowgrid` and the `fg-` element prefix were subsequently adopted as final.
+> Naming was a placeholder while this was written; `@tradeflow` and the `tf-` element prefix were subsequently adopted as final.
 
 ## Context
 
@@ -53,7 +53,7 @@ RowStore ──► RowProjector ──► DisplayRow[] ──► LayoutEngine �
    │      module ProjectionStages                                    InstanceVirtualizer
    │      (filter → sort → expand → decorate)                        (IntersectionObserver)
    │
-   └── per-row signals ──────────────────────────────────────────────────► <fg-cell>
+   └── per-row signals ──────────────────────────────────────────────────► <tf-cell>
        (value ticks bypass projection AND layout entirely)
 ```
 
@@ -67,14 +67,14 @@ pipeline above.
 One npm package with per-module entry points — AG Grid v33's consolidation, and it avoids version skew:
 
 ```
-@flowgrid/core            core: store, projection, layout, components, contexts, api
-@flowgrid/core/tree       tree data + expansion
-@flowgrid/core/sort
-@flowgrid/core/filter
-@flowgrid/core/selection
-@flowgrid/core/keyboard
-@flowgrid/core/cell-flash
-@flowgrid/core/themes     light + dark CSS
+@tradeflow/core            core: store, projection, layout, components, contexts, api
+@tradeflow/core/tree       tree data + expansion
+@tradeflow/core/sort
+@tradeflow/core/filter
+@tradeflow/core/selection
+@tradeflow/core/keyboard
+@tradeflow/core/cell-flash
+@tradeflow/core/themes     light + dark CSS
 ```
 
 `"sideEffects": false` and an `exports` map keep unused modules out of consumer bundles.
@@ -87,7 +87,7 @@ packages/core/src/
   projection/   RowProjector, ProjectionStage, memoisation + dependency tracking
   layout/       LayoutEngine, FlowLayoutEngine, StackLayoutEngine, ViewportMetrics
   virtualize/   InstanceVirtualizer
-  components/   fg-grid, fg-instance, fg-row, fg-cell, fg-header-cell
+  components/   tf-grid, tf-instance, tf-row, tf-cell, tf-header-cell
   context/      gridContext, instanceContext, rowContext, columnContext
   columns/      ColumnDef, resolveColumns, defaultColDef, columnTypes, value resolution
   modules/      GridModule, ModuleRegistry, ModuleContext
@@ -193,11 +193,11 @@ Scroll-jacking (wheel-Y → scroll-X, `snake-grid.ts:326`) carries over as opt-i
 
 | Element            | Responsibility                          | Provides          |
 | ------------------ | --------------------------------------- | ----------------- |
-| `<fg-grid>`        | host, controller, scroller, virtualizer | `gridContext`     |
-| `<fg-instance>`    | header + rows for one instance          | `instanceContext` |
-| `<fg-row>`         | one `DisplayRow`, reads its row signal  | `rowContext`      |
-| `<fg-cell>`        | value resolution + renderer host        | `columnContext`   |
-| `<fg-header-cell>` | header label + module header slots      | `columnContext`   |
+| `<tf-grid>`        | host, controller, scroller, virtualizer | `gridContext`     |
+| `<tf-instance>`    | header + rows for one instance          | `instanceContext` |
+| `<tf-row>`         | one `DisplayRow`, reads its row signal  | `rowContext`      |
+| `<tf-cell>`        | value resolution + renderer host        | `columnContext`   |
+| `<tf-header-cell>` | header label + module header slots      | `columnContext`   |
 
 Contexts carry **stable controller objects**; reactive values inside them are signals. Nothing re-provides
 context on data change, and no component hand-manages subscriptions — the prototype's `snake-grid-row`
@@ -229,8 +229,8 @@ Plus `defaultColDef` and `columnTypes` on grid config. Resolution order per cell
 Modules add their own column properties by augmentation, so core's `ColumnDef` never grows:
 
 ```ts
-// @flowgrid/core/sort
-declare module '@flowgrid/core' {
+// @tradeflow/core/sort
+declare module '@tradeflow/core' {
   interface ColumnDef<TData, TValue> {
     sortable?: boolean;
     comparator?: (a: TValue, b: TValue, ctx: ComparatorContext<TData>) => number;
@@ -252,7 +252,7 @@ export abstract class CellRendererElement<TData = unknown, TValue = unknown> ext
 
 A renderer declares `cellRenderer: 'my-depth-bar'` and pulls what it needs from context — no prop
 drilling, and it can hold its own state and lifecycle. Function renderers returning `TemplateResult`
-remain supported for trivial cases. `<fg-cell>` instantiates tag-name renderers through a cached
+remain supported for trivial cases. `<tf-cell>` instantiates tag-name renderers through a cached
 `static-html` template keyed by tag.
 
 ### Module contract
@@ -291,8 +291,8 @@ Events are typed CustomEvents on the host with a `GridEventMap` so `addEventList
 
 ### Theming
 
-CSS custom properties (`--fg-*`, evolved from the prototype's `--grid-*`) plus `::part()` on grid, instance,
-header-cell, row and cell. No colour literals in component styles. `@flowgrid/core/themes` ships light and
+CSS custom properties (`--tf-*`, evolved from the prototype's `--grid-*`) plus `::part()` on grid, instance,
+header-cell, row and cell. No colour literals in component styles. `@tradeflow/core/themes` ships light and
 dark.
 
 ---
@@ -364,7 +364,7 @@ a real dividend of the `DisplayRow` seam, since layout is a pure function of row
 
 - Real `IntersectionObserver`: scrolling right mounts instances ahead of the viewport and unmounts
   behind; placeholders preserve `scrollWidth`.
-- A price tick re-renders only the bound cells — assert via a render counter on `<fg-cell>` that neither
+- A price tick re-renders only the bound cells — assert via a render counter on `<tf-cell>` that neither
   projection nor layout ran.
 - A parent row updated once repaints in **every** instance that repeats it (the `layouts.md` requirement).
 - Import core alone and assert no tree/sort/filter/selection code is reachable and no expander renders.

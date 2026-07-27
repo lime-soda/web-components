@@ -137,15 +137,15 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
     const indent = depth * (this.options.indentSize ?? DEFAULT_INDENT);
 
     return {
-      classes: ['fg-tree-cell'],
-      attributes: { 'data-fg-depth': String(depth) },
+      classes: ['tf-tree-cell'],
+      attributes: { 'data-tf-depth': String(depth) },
       prefix: html`
         <span style="display:inline-block;width:${indent}px;flex:0 0 auto"></span>
         ${
           hasChildren
             ? html`<button
                 part="tree-expander"
-                class="fg-expander"
+                class="tf-expander"
                 aria-label=${isExpanded ? 'Collapse' : 'Expand'}
                 aria-expanded=${isExpanded}
                 tabindex="-1"
@@ -153,7 +153,7 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
                   event.stopPropagation();
                   this.toggleExpanded(ctx.row.rowId);
                 }}
-                style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:10px;line-height:1;color:var(--fg-text-muted,#666);transition:transform 150ms ease-out;transform:rotate(${
+                style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:10px;line-height:1;color:var(--tf-text-muted,#666);transition:transform 150ms ease-out;transform:rotate(${
                   isExpanded ? 90 : 0
                 }deg)"
               >
@@ -298,7 +298,7 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
 
   private onExpansionChanged(ids: readonly string[]): void {
     this.context?.invalidate();
-    this.context?.dispatch('fg-expansion-changed', {
+    this.context?.dispatch('tf-expansion-changed', {
       ids,
       expanded: [...this.expanded],
     });

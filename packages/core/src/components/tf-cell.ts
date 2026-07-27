@@ -19,17 +19,17 @@ import { SignalWatcher } from '../reactive/index.js';
  * price tick cheap: the cell reads its row's signal during render, so a change
  * repaints this cell and touches nothing above it.
  */
-@customElement('fg-cell')
-export class FgCell extends SignalWatcher(LitElement) {
+@customElement('tf-cell')
+export class TfCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
       align-items: center;
       box-sizing: border-box;
       overflow: hidden;
-      padding: 0 var(--fg-cell-padding-x, 8px);
-      border-bottom: 1px solid var(--fg-border-subtle, #f0f0f0);
-      color: var(--fg-text, #101010);
+      padding: 0 var(--tf-cell-padding-x, 8px);
+      border-bottom: 1px solid var(--tf-border-subtle, #f0f0f0);
+      color: var(--tf-text, #101010);
       font-variant-numeric: tabular-nums;
     }
 
@@ -43,12 +43,12 @@ export class FgCell extends SignalWatcher(LitElement) {
      * checkbox cannot sit centred in a narrow column — 16px of padding leaves
      * nothing to centre a 13px control in.
      */
-    :host([data-fg-renderer]) {
+    :host([data-tf-renderer]) {
       padding: 0;
     }
 
     :host(:focus-visible) {
-      outline: 2px solid var(--fg-focus, #3b82f6);
+      outline: 2px solid var(--tf-focus, #3b82f6);
       outline-offset: -2px;
     }
 
@@ -104,7 +104,7 @@ export class FgCell extends SignalWatcher(LitElement) {
     const node = this.row?.node;
     if (!node || !this.column) return nothing;
 
-    // See fg-header-cell: keeps module-contributed decorations current.
+    // See tf-header-cell: keeps module-contributed decorations current.
     this.grid?.registry.version.get();
 
     const focused = this.isFocusedCell();
@@ -124,7 +124,7 @@ export class FgCell extends SignalWatcher(LitElement) {
     const hasRenderer = this.column.cellRenderer !== undefined;
     // Element renderers own their box; function renderers and plain values are
     // content and keep the cell's gutter.
-    this.toggleAttribute('data-fg-renderer', typeof this.column.cellRenderer === 'string');
+    this.toggleAttribute('data-tf-renderer', typeof this.column.cellRenderer === 'string');
 
     return html`
       ${decorations.map((d) => (d.prefix ? html`<span class="affix">${d.prefix}</span>` : nothing))}
@@ -235,6 +235,6 @@ function tagFor(tag: string) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'fg-cell': FgCell;
+    'tf-cell': TfCell;
   }
 }

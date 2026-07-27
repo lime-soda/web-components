@@ -1,15 +1,15 @@
 // Custom elements. Importing the package registers them.
-import './components/fg-grid.js';
-import './components/fg-instance.js';
-import './components/fg-row.js';
-import './components/fg-cell.js';
-import './components/fg-header-cell.js';
+import './components/tf-grid.js';
+import './components/tf-instance.js';
+import './components/tf-row.js';
+import './components/tf-cell.js';
+import './components/tf-header-cell.js';
 
-export { FgGrid } from './components/fg-grid.js';
-export { FgInstance } from './components/fg-instance.js';
-export { FgRow } from './components/fg-row.js';
-export { FgCell } from './components/fg-cell.js';
-export { FgHeaderCell } from './components/fg-header-cell.js';
+export { TfGrid } from './components/tf-grid.js';
+export { TfInstance } from './components/tf-instance.js';
+export { TfRow } from './components/tf-row.js';
+export { TfCell } from './components/tf-cell.js';
+export { TfHeaderCell } from './components/tf-header-cell.js';
 export { CellRendererElement } from './components/cell-renderer-element.js';
 
 // Contexts — how a custom cell renderer reaches its row and column.

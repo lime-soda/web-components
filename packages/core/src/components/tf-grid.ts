@@ -9,7 +9,7 @@ import { gridContext } from '../context/index.js';
 import { GridController, type GridOptions } from '../controller/grid-controller.js';
 import { SignalWatcher } from '../reactive/index.js';
 import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
-import './fg-instance.js';
+import './tf-instance.js';
 
 /**
  * The grid host.
@@ -18,17 +18,17 @@ import './fg-instance.js';
  * decides which instances are worth rendering. Everything below reads from the
  * context, so nothing is drilled down the tree.
  */
-@customElement('fg-grid')
-export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
+@customElement('tf-grid')
+export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
       height: 100%;
       overflow: hidden;
-      color: var(--fg-text, #101010);
-      background: var(--fg-surface, transparent);
-      font-family: var(--fg-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
-      font-size: var(--fg-font-size, 13px);
+      color: var(--tf-text, #101010);
+      background: var(--tf-surface, transparent);
+      font-family: var(--tf-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+      font-size: var(--tf-font-size, 13px);
       -webkit-font-smoothing: antialiased;
     }
 
@@ -42,7 +42,7 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
     .scroller[data-layout='flow'] {
       display: flex;
       align-items: flex-start;
-      gap: var(--fg-instance-gap, 16px);
+      gap: var(--tf-instance-gap, 16px);
       overflow-y: hidden;
     }
 
@@ -54,9 +54,9 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
     /* Offscreen instances keep their exact footprint so the scrollbar never jumps. */
     .placeholder {
       box-sizing: border-box;
-      background: var(--fg-bg, #ffffff);
-      border: 1px solid var(--fg-border, #d8d8d8);
-      border-radius: var(--fg-radius, 4px);
+      background: var(--tf-bg, #ffffff);
+      border: 1px solid var(--tf-border, #d8d8d8);
+      border-radius: var(--tf-radius, 4px);
     }
 
     .stack-spacer {
@@ -170,7 +170,7 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
         role="presentation"
         aria-label=${controller.options.ariaLabel ?? 'Data grid'}
         @keydown=${this.handleKeyDown}
-        style="--fg-row-height: ${viewport.rowHeight}px; --fg-header-height: ${viewport.headerHeight}px; --fg-instance-gap: ${viewport.instanceGap}px"
+        style="--tf-row-height: ${viewport.rowHeight}px; --tf-header-height: ${viewport.headerHeight}px; --tf-instance-gap: ${viewport.instanceGap}px"
         ${ref(this.scrollerRef)}
       >
         ${mode === 'stack' ? this.renderStack(layout) : this.renderFlow(layout)}
@@ -193,7 +193,7 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
         >
           ${
             this.visibleInstances.has(instance.id)
-              ? html`<fg-instance part="instance" .instance=${instance}></fg-instance>`
+              ? html`<tf-instance part="instance" .instance=${instance}></tf-instance>`
               : html`<div
                   class="placeholder"
                   style="width: ${instance.width}px; height: ${height}px;"
@@ -219,7 +219,7 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
     return html`
       <div class="stack-spacer" style="height: ${instance.offset}px"></div>
-      <fg-instance part="instance" .instance=${instance}></fg-instance>
+      <tf-instance part="instance" .instance=${instance}></tf-instance>
       <div class="stack-spacer" style="height: ${below}px"></div>
     `;
   }
@@ -288,7 +288,7 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
   }
 
   private emit(type: string, detail: unknown): void {
-    if (type === 'fg-scroll-to-row') {
+    if (type === 'tf-scroll-to-row') {
       this.scrollToRow((detail as { id: string }).id);
       return;
     }
@@ -315,6 +315,6 @@ export class FgGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'fg-grid': FgGrid;
+    'tf-grid': TfGrid;
   }
 }

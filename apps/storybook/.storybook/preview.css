@@ -7,7 +7,7 @@ body,
 }
 
 #storybook-root {
-  background: var(--fg-surface, #0a0a0a);
+  background: var(--tf-surface, #0a0a0a);
 }
 
 .demo {

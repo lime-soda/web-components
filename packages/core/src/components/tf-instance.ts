@@ -6,8 +6,8 @@ import { gridContext, instanceContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
 import type { LayoutInstance } from '../layout/types.js';
 import { SignalWatcher } from '../reactive/index.js';
-import './fg-header-cell.js';
-import './fg-row.js';
+import './tf-header-cell.js';
+import './tf-row.js';
 
 /**
  * One column of the flow layout: a header and the rows that fit beneath it.
@@ -16,21 +16,21 @@ import './fg-row.js';
  * readable — a trader looking at the fourth instance across still sees what each
  * column means.
  */
-@customElement('fg-instance')
-export class FgInstance extends SignalWatcher(LitElement) {
+@customElement('tf-instance')
+export class TfInstance extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
       box-sizing: border-box;
-      background: var(--fg-bg, #ffffff);
-      border: 1px solid var(--fg-border, #d8d8d8);
-      border-radius: var(--fg-radius, 4px);
+      background: var(--tf-bg, #ffffff);
+      border: 1px solid var(--tf-border, #d8d8d8);
+      border-radius: var(--tf-radius, 4px);
       overflow: hidden;
     }
 
     .grid {
       display: grid;
-      grid-auto-rows: var(--fg-row-height, 32px);
+      grid-auto-rows: var(--tf-row-height, 32px);
       width: 100%;
     }
 
@@ -76,13 +76,13 @@ export class FgInstance extends SignalWatcher(LitElement) {
             columns,
             (column) => column.colId,
             (column) =>
-              html`<fg-header-cell part="header-cell" .column=${column}></fg-header-cell>`,
+              html`<tf-header-cell part="header-cell" .column=${column}></tf-header-cell>`,
           )}
         </div>
         ${repeat(
           this.instance.rows,
           (row) => row.id,
-          (row) => html`<fg-row .row=${row}></fg-row>`,
+          (row) => html`<tf-row .row=${row}></tf-row>`,
         )}
       </div>
     `;
@@ -91,6 +91,6 @@ export class FgInstance extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'fg-instance': FgInstance;
+    'tf-instance': TfInstance;
   }
 }

@@ -1,4 +1,4 @@
-import { CellRendererElement } from '@flowgrid/core';
+import { CellRendererElement } from '@tradeflow/core';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import type { Bond } from './bond-data.js';

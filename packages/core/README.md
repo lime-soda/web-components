@@ -1,4 +1,4 @@
-# @flowgrid/core
+# @tradeflow/core
 
 A data grid web component that lays rows out **horizontally**.
 
@@ -29,15 +29,15 @@ far-right instance still says what you are looking at.
 ## Install
 
 ```sh
-npm install @flowgrid/core
+npm install @tradeflow/core
 ```
 
 ## Quick start
 
 ```ts
-import '@flowgrid/core';
-import '@flowgrid/core/themes/flowgrid.css';
-import type { ColumnDef, FgGrid, GridOptions } from '@flowgrid/core';
+import '@tradeflow/core';
+import '@tradeflow/core/themes/tradeflow.css';
+import type { ColumnDef, TfGrid, GridOptions } from '@tradeflow/core';
 
 interface Quote {
   id: string;
@@ -50,7 +50,7 @@ const columns: ColumnDef<Quote>[] = [
   { field: 'price', width: 100, valueFormatter: ({ value }) => value!.toFixed(3) },
 ];
 
-const grid = document.querySelector<FgGrid<Quote>>('fg-grid')!;
+const grid = document.querySelector<TfGrid<Quote>>('tf-grid')!;
 grid.gridOptions = { columns } satisfies GridOptions<Quote>;
 grid.rowData = quotes;
 
@@ -59,7 +59,7 @@ grid.api.applyTransaction({ update: [{ id: 'UKT30', instrument: 'UKT 4% 2030', p
 ```
 
 ```html
-<fg-grid style="height: 100%"></fg-grid>
+<tf-grid style="height: 100%"></tf-grid>
 ```
 
 That is the whole of core: columns, rows, and a layout. No sorting, no
@@ -74,7 +74,7 @@ The read path is rows → projection → layout, each step a memoised signal:
 RowStore ──► RowProjector ──► DisplayRow[] ──► LayoutEngine ──► Instance[] ──► DOM
    │              ▲                                                            │
    │      module projection stages                                 InstanceVirtualizer
-   └── per-row signals ─────────────────────────────────────────────────► <fg-cell>
+   └── per-row signals ─────────────────────────────────────────────────► <tf-cell>
 ```
 
 A price tick writes one row signal. The bound cells re-render; the projection and
@@ -92,18 +92,18 @@ frame: median frame 16.7 ms, zero dropped frames, 6 of 194 instances mounted.
 
 Every feature beyond the core is an additive module with its own entry point.
 
-| Import                      | Adds                                                        |
-| --------------------------- | ----------------------------------------------------------- |
-| `@flowgrid/core/tree`       | Hierarchy, expand/collapse, and the repeated group headings |
-| `@flowgrid/core/sort`       | Multi-column sort, comparators, header indicators           |
-| `@flowgrid/core/filter`     | Quick filter and per-column filters                         |
-| `@flowgrid/core/selection`  | Row and group selection, checkbox column                    |
-| `@flowgrid/core/cell-flash` | Directional flash on value change                           |
-| `@flowgrid/core/keyboard`   | Keyboard navigation and roving tabindex                     |
+| Import                       | Adds                                                        |
+| ---------------------------- | ----------------------------------------------------------- |
+| `@tradeflow/core/tree`       | Hierarchy, expand/collapse, and the repeated group headings |
+| `@tradeflow/core/sort`       | Multi-column sort, comparators, header indicators           |
+| `@tradeflow/core/filter`     | Quick filter and per-column filters                         |
+| `@tradeflow/core/selection`  | Row and group selection, checkbox column                    |
+| `@tradeflow/core/cell-flash` | Directional flash on value change                           |
+| `@tradeflow/core/keyboard`   | Keyboard navigation and roving tabindex                     |
 
 ```ts
-import { TreeModule } from '@flowgrid/core/tree';
-import { SelectionModule } from '@flowgrid/core/selection';
+import { TreeModule } from '@tradeflow/core/tree';
+import { SelectionModule } from '@tradeflow/core/selection';
 
 grid.gridOptions = {
   columns,
@@ -118,7 +118,7 @@ Importing a module also adds its options and api methods **to the types**. Witho
 the import, `api.expandAll()` does not exist and does not compile:
 
 ```ts
-import '@flowgrid/core/tree';
+import '@tradeflow/core/tree';
 
 grid.api.expandAll(); // ✅ typed, because tree is imported
 grid.api.setSortModel([/* … */]); // ❌ compile error without /sort
@@ -155,7 +155,7 @@ A column that needs its value type — for a comparator or a typed formatter —
 declares it, and still sits in the same array as its siblings:
 
 ```ts
-import type { ColumnDef, ColumnDefs } from '@flowgrid/core';
+import type { ColumnDef, ColumnDefs } from '@tradeflow/core';
 
 const price: ColumnDef<Quote, number> = {
   field: 'price',
@@ -172,7 +172,7 @@ Set `cellRenderer` to a custom element's tag name. The element reads its row and
 column from context — no props are drilled through:
 
 ```ts
-import { CellRendererElement } from '@flowgrid/core';
+import { CellRendererElement } from '@tradeflow/core';
 
 @customElement('depth-bar')
 class DepthBar extends CellRendererElement<Quote, number> {
@@ -190,22 +190,22 @@ its horizontal padding, so the renderer owns the full cell box.
 ## Theming
 
 Everything is a CSS custom property with an inline fallback, so the stylesheet is
-optional. Custom properties inherit through shadow roots — set them on `fg-grid`
+optional. Custom properties inherit through shadow roots — set them on `tf-grid`
 or any ancestor:
 
 ```css
-fg-grid {
-  --fg-row-height: 28px;
-  --fg-bg: #1a1a1a;
-  --fg-text: #e5e5e5;
-  --fg-border: #333;
-  --fg-selection-bg: rgb(59 130 246 / 18%);
-  --fg-flash-up: rgb(34 197 94 / 35%);
-  --fg-flash-down: rgb(239 68 68 / 35%);
+tf-grid {
+  --tf-row-height: 28px;
+  --tf-bg: #1a1a1a;
+  --tf-text: #e5e5e5;
+  --tf-border: #333;
+  --tf-selection-bg: rgb(59 130 246 / 18%);
+  --tf-flash-up: rgb(34 197 94 / 35%);
+  --tf-flash-down: rgb(239 68 68 / 35%);
 }
 ```
 
-`@flowgrid/core/themes/flowgrid.css` provides a light/dark pair. For structure
+`@tradeflow/core/themes/tradeflow.css` provides a light/dark pair. For structure
 rather than colour, the elements expose `::part()`: `scroller`, `instance`,
 `instance-grid`, `header-cell`, `header-label`, `header-slots`, `cell`,
 `cell-content`, `tree-expander`, `sort-indicator`, `selection-checkbox`.
@@ -232,9 +232,9 @@ grid.api.getState(); // aggregated module state, for persisting
 grid.api.setState(state);
 ```
 
-Events are typed `CustomEvent`s on the host: `fg-grid-ready`, `fg-data-changed`,
-plus `fg-sort-changed`, `fg-filter-changed`, `fg-selection-changed` and
-`fg-expansion-changed` from their modules.
+Events are typed `CustomEvent`s on the host: `tf-grid-ready`, `tf-data-changed`,
+plus `tf-sort-changed`, `tf-filter-changed`, `tf-selection-changed` and
+`tf-expansion-changed` from their modules.
 
 ## Writing a module
 
@@ -242,7 +242,7 @@ A module reaches the grid through hooks; it never renders a cell itself, so
 several modules can decorate the same cell without fighting:
 
 ```ts
-import type { GridModule } from '@flowgrid/core';
+import type { GridModule } from '@tradeflow/core';
 
 export class HighlightModule implements GridModule<Quote> {
   readonly id = 'highlight';

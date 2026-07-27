@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@flowgrid/storybook", "@flowgrid/bench"]
+  "ignore": ["@tradeflow/storybook", "@tradeflow/bench"]
 }

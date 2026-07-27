@@ -14,7 +14,7 @@ export type SelectionMode = 'single' | 'multi';
 /** What a checkbox should show. Derived, never stored. */
 export type SelectionState = 'checked' | 'indeterminate' | 'unchecked';
 
-const SELECTION_COL_ID = 'fg-selection';
+const SELECTION_COL_ID = 'tf-selection';
 
 export interface SelectionModuleOptions {
   mode?: SelectionMode;
@@ -217,7 +217,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
         width: this.options.checkboxColumnWidth ?? 28,
         sortable: false,
         filterable: false,
-        cellRenderer: 'fg-selection-checkbox',
+        cellRenderer: 'tf-selection-checkbox',
       },
     ];
   }
@@ -251,11 +251,11 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     }
 
     return {
-      classes: ['fg-row-selected'],
+      classes: ['tf-row-selected'],
       attributes: { 'aria-selected': 'true' },
-      cellClasses: ['fg-cell-selected'],
+      cellClasses: ['tf-cell-selected'],
       // A row is `display: contents`, so the highlight has to reach the cells.
-      cellAttributes: { style: 'background: var(--fg-selection-bg, rgba(59, 130, 246, 0.12))' },
+      cellAttributes: { style: 'background: var(--tf-selection-bg, rgba(59, 130, 246, 0.12))' },
       ...(this.options.clickToSelect
         ? {
             onActivate: (event: Event) => {
@@ -368,7 +368,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   private changed(): void {
     this.context?.requestRender();
-    this.context?.dispatch('fg-selection-changed', {
+    this.context?.dispatch('tf-selection-changed', {
       selected: this.getSelectedRows(),
       count: this.selected.size,
     });

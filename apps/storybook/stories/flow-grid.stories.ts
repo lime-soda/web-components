@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
-import type { ColumnDef, FgGrid, GridOptions } from '@flowgrid/core';
-import '@flowgrid/core';
-import { TreeModule } from '@flowgrid/core/tree';
-import { SortModule } from '@flowgrid/core/sort';
-import { FilterModule } from '@flowgrid/core/filter';
-import { SelectionModule } from '@flowgrid/core/selection';
-import { CellFlashModule } from '@flowgrid/core/cell-flash';
-import { KeyboardModule } from '@flowgrid/core/keyboard';
+import type { ColumnDef, TfGrid, GridOptions } from '@tradeflow/core';
+import '@tradeflow/core';
+import { TreeModule } from '@tradeflow/core/tree';
+import { SortModule } from '@tradeflow/core/sort';
+import { FilterModule } from '@tradeflow/core/filter';
+import { SelectionModule } from '@tradeflow/core/selection';
+import { CellFlashModule } from '@tradeflow/core/cell-flash';
+import { KeyboardModule } from '@tradeflow/core/keyboard';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 
@@ -89,7 +89,7 @@ export const BondMarket: StoryObj<Args> = {
     ticksPerFrame: 20,
   },
   render: (args) => {
-    const gridRef = createRef<FgGrid<Bond>>();
+    const gridRef = createRef<TfGrid<Bond>>();
     const data = generateBonds(args.groups, args.instruments);
     let frame: number | null = null;
 
@@ -174,12 +174,12 @@ export const BondMarket: StoryObj<Args> = {
           </span>
         </div>
         <div class="demo__grid">
-          <fg-grid
+          <tf-grid
             ${ref(gridRef)}
             .gridOptions=${options}
             .rowData=${data}
             style="height: 100%"
-          ></fg-grid>
+          ></tf-grid>
         </div>
       </div>
     `;
@@ -207,7 +207,7 @@ export const CoreOnly: StoryObj<Args> = {
           <span class="demo__stat">Core only — no modules imported</span>
         </div>
         <div class="demo__grid">
-          <fg-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></fg-grid>
+          <tf-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></tf-grid>
         </div>
       </div>
     `;
@@ -238,7 +238,7 @@ export const StackLayout: StoryObj<Args> = {
           <span class="demo__stat">Vertical layout — same data, same core</span>
         </div>
         <div class="demo__grid">
-          <fg-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></fg-grid>
+          <tf-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></tf-grid>
         </div>
       </div>
     `;

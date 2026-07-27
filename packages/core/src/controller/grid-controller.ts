@@ -41,7 +41,7 @@ const DEFAULTS = {
 /**
  * Everything a grid instance owns, independent of the DOM.
  *
- * `<fg-grid>` provides this on a context and reads from it at render time; keeping
+ * `<tf-grid>` provides this on a context and reads from it at render time; keeping
  * it a plain object rather than an element is what lets the whole data path be
  * exercised without a browser.
  */
@@ -147,12 +147,12 @@ export class GridController<TData = unknown> {
     const core: CoreGridApi<TData> = {
       applyTransaction: (transaction: RowTransaction<TData>): TransactionResult => {
         const result = this.pipeline.store.applyTransaction(transaction);
-        this.dispatcher('fg-data-changed', { result });
+        this.dispatcher('tf-data-changed', { result });
         return result;
       },
       setRowData: (data) => {
         const result = this.pipeline.store.setRowData(data);
-        this.dispatcher('fg-data-changed', { result });
+        this.dispatcher('tf-data-changed', { result });
         return result;
       },
       getRow: (id) => this.pipeline.store.getRow(id),
@@ -160,7 +160,7 @@ export class GridController<TData = unknown> {
       setColumnDefs: (columns) => this.setOptions({ columns }),
       getColumns: () => this.columns.get(),
       getLayout: () => this.pipeline.layout.get(),
-      scrollToRow: (id) => this.dispatcher('fg-scroll-to-row', { id }),
+      scrollToRow: (id) => this.dispatcher('tf-scroll-to-row', { id }),
       refresh: () => this.pipeline.projector.invalidate(),
       getModule: (id) => this.registry.get(id),
       getState: () => this.registry.getState(),

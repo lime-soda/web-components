@@ -178,7 +178,7 @@ describe('SelectionModule', () => {
     it('contributes a checkbox column in multi mode', () => {
       const { selection } = setup();
 
-      expect(selection.provideColumns().map((c) => c.colId)).toEqual(['fg-selection']);
+      expect(selection.provideColumns().map((c) => c.colId)).toEqual(['tf-selection']);
     });
 
     it('contributes none in single mode by default', () => {
@@ -203,7 +203,7 @@ describe('SelectionModule', () => {
   });
 
   describe('select-all header', () => {
-    const headerFor = (selection: SelectionModule<Quote>, colId = 'fg-selection') =>
+    const headerFor = (selection: SelectionModule<Quote>, colId = 'tf-selection') =>
       selection.headerSlot({
         column: { colId, headerName: '', width: 28, index: 0 },
       } as never);
@@ -282,7 +282,7 @@ describe('SelectionModule', () => {
       const decoration = selection.rowDecorator(info('r0'))!;
 
       expect(decoration.attributes?.['aria-selected']).toBe('true');
-      expect(decoration.cellAttributes?.['style']).toContain('--fg-selection-bg');
+      expect(decoration.cellAttributes?.['style']).toContain('--tf-selection-bg');
     });
 
     it('still decorates an unselected row, so the previous highlight is withdrawn', () => {
@@ -327,7 +327,7 @@ describe('SelectionModule', () => {
 
       selection.setRowSelected('r0', true);
 
-      expect(dispatch).toHaveBeenCalledWith('fg-selection-changed', {
+      expect(dispatch).toHaveBeenCalledWith('tf-selection-changed', {
         selected: ['r0'],
         count: 1,
       });

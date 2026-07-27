@@ -7,7 +7,7 @@ import type { GridController } from '../controller/grid-controller.js';
 import type { DisplayRow } from '../layout/types.js';
 import type { RowDecoration } from '../modules/types.js';
 import { SignalWatcher } from '../reactive/index.js';
-import './fg-cell.js';
+import './tf-cell.js';
 
 /**
  * One display row.
@@ -21,8 +21,8 @@ import './fg-cell.js';
  * (node, selection, store) with matching teardown in `disconnectedCallback`; here
  * the row context reads a signal and Lit handles the rest.
  */
-@customElement('fg-row')
-export class FgRow extends SignalWatcher(LitElement) {
+@customElement('tf-row')
+export class TfRow extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: contents;
@@ -89,17 +89,17 @@ export class FgRow extends SignalWatcher(LitElement) {
       grid.columns.get(),
       (column) => column.colId,
       (column) =>
-        html`<fg-cell
+        html`<tf-cell
           part="cell"
           role="gridcell"
           class=${cellClasses}
           style=${cellStyle}
           .column=${column}
-        ></fg-cell>`,
+        ></tf-cell>`,
     );
   }
 
-  /** See fg-cell: decorations must be withdrawn as well as applied. */
+  /** See tf-cell: decorations must be withdrawn as well as applied. */
   private applyDecorations(decorations: readonly RowDecoration[]): void {
     const classes = new Set(decorations.flatMap((d) => d.classes ?? []));
     const attributes = new Map<string, string>();
@@ -128,6 +128,6 @@ export class FgRow extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'fg-row': FgRow;
+    'tf-row': TfRow;
   }
 }

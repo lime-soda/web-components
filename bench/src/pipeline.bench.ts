@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { FlowLayoutEngine, GridPipeline, type ViewportMetrics } from '@flowgrid/core';
-import { TreeModule } from '@flowgrid/core/tree';
-import { SortModule } from '@flowgrid/core/sort';
-import { FilterModule } from '@flowgrid/core/filter';
-import { ModuleRegistry, resolveColumns } from '@flowgrid/core';
+import { FlowLayoutEngine, GridPipeline, type ViewportMetrics } from '@tradeflow/core';
+import { TreeModule } from '@tradeflow/core/tree';
+import { SortModule } from '@tradeflow/core/sort';
+import { FilterModule } from '@tradeflow/core/filter';
+import { ModuleRegistry, resolveColumns } from '@tradeflow/core';
 import { measure, report } from './report.js';
 
 /**

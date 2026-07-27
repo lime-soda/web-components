@@ -1,9 +1,9 @@
-import './fg-selection-checkbox.js';
+import './tf-selection-checkbox.js';
 import type { SelectionState } from './selection-module.js';
 
 export { SelectionModule } from './selection-module.js';
 export type { SelectionMode, SelectionModuleOptions, SelectionState } from './selection-module.js';
-export { FgSelectionCheckbox } from './fg-selection-checkbox.js';
+export { TfSelectionCheckbox } from './tf-selection-checkbox.js';
 
 declare module '../../api/types.js' {
   interface GridApi<TData> {

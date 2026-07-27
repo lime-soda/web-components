@@ -1,7 +1,7 @@
-# flowgrid
+# tradeflow
 
-[![CI](https://github.com/p-m-p/flowgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/p-m-p/flowgrid/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@flowgrid/core.svg)](https://www.npmjs.com/package/@flowgrid/core)
+[![CI](https://github.com/p-m-p/tradeflow/actions/workflows/ci.yml/badge.svg)](https://github.com/p-m-p/tradeflow/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@tradeflow/core.svg)](https://www.npmjs.com/package/@tradeflow/core)
 
 A horizontally-flowing data grid web component for trading platforms.
 
@@ -25,7 +25,7 @@ documentation.
 
 ```sh
 pnpm install
-pnpm --filter @flowgrid/core exec playwright install chromium
+pnpm --filter @tradeflow/core exec playwright install chromium
 
 pnpm test          # 360 tests: node for logic, Chromium for components
 pnpm typecheck

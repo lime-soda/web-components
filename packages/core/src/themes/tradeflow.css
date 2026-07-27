@@ -1,0 +1,83 @@
+/*
+ * Default theme.
+ *
+ * Every value the components read is a custom property with an inline fallback,
+ * so this file is optional — a grid renders without it. Import it to get a
+ * coherent light/dark pair, or define the same properties yourself on `tf-grid`
+ * (or any ancestor) to theme the grid from your own design tokens.
+ *
+ * Custom properties inherit through shadow roots, which is why theming works
+ * without any ::part() rules for colour. Parts are there for structural
+ * overrides: tf-grid exposes scroller, instance, instance-grid, header-cell,
+ * header-label, header-slots, cell and cell-content.
+ */
+
+:root,
+:host {
+  --tf-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --tf-font-size: 13px;
+  --tf-header-font-size: 13px;
+
+  --tf-row-height: 32px;
+  --tf-cell-padding-x: 8px;
+  --tf-instance-gap: 16px;
+  --tf-radius: 4px;
+
+  --tf-surface: transparent;
+  --tf-bg: #ffffff;
+  --tf-text: #101010;
+  --tf-text-muted: #666666;
+
+  --tf-header-bg: #f5f5f5;
+  --tf-header-text: #101010;
+
+  --tf-border: #d8d8d8;
+  --tf-border-subtle: #f0f0f0;
+
+  --tf-focus: #3b82f6;
+  --tf-selection-bg: rgba(59, 130, 246, 0.12);
+
+  /* Trading convention: green up, red down. Used by the cell-flash module. */
+  --tf-flash-up: rgba(34, 197, 94, 0.35);
+  --tf-flash-down: rgba(239, 68, 68, 0.35);
+  --tf-flash-duration: 600ms;
+}
+
+/*
+ * Dark by preference, with an explicit opt-in for applications that manage their
+ * own theme switch rather than following the OS.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tf-theme='light']),
+  :host(:not([data-tf-theme='light'])) {
+    --tf-surface: #0a0a0a;
+    --tf-bg: #1a1a1a;
+    --tf-text: #e5e5e5;
+    --tf-text-muted: #a3a3a3;
+
+    --tf-header-bg: #262626;
+    --tf-header-text: #e5e5e5;
+
+    --tf-border: #333333;
+    --tf-border-subtle: #2a2a2a;
+
+    --tf-focus: #60a5fa;
+    --tf-selection-bg: rgba(59, 130, 246, 0.18);
+  }
+}
+
+[data-tf-theme='dark'] {
+  --tf-surface: #0a0a0a;
+  --tf-bg: #1a1a1a;
+  --tf-text: #e5e5e5;
+  --tf-text-muted: #a3a3a3;
+
+  --tf-header-bg: #262626;
+  --tf-header-text: #e5e5e5;
+
+  --tf-border: #333333;
+  --tf-border-subtle: #2a2a2a;
+
+  --tf-focus: #60a5fa;
+  --tf-selection-bg: rgba(59, 130, 246, 0.18);
+}

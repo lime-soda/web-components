@@ -145,7 +145,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     const direction = this.getSortDirection(ctx.column.colId);
 
     return {
-      classes: ['fg-sortable'],
+      classes: ['tf-sortable'],
       attributes: {
         'aria-sort':
           direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none',
@@ -166,7 +166,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
 
     return html`<span
       part="sort-indicator"
-      style="font-size:10px;color:var(--fg-text-muted,#666);display:inline-flex;gap:2px;align-items:center"
+      style="font-size:10px;color:var(--tf-text-muted,#666);display:inline-flex;gap:2px;align-items:center"
       >${direction === 'asc' ? '▲' : '▼'}${
         showOrder ? html`<sub style="font-size:8px">${position + 1}</sub>` : ''
       }</span
@@ -226,7 +226,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
 
   private changed(): void {
     this.context?.invalidate();
-    this.context?.dispatch('fg-sort-changed', { model: this.getSortModel() });
+    this.context?.dispatch('tf-sort-changed', { model: this.getSortModel() });
   }
 }
 

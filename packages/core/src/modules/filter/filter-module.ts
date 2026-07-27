@@ -165,7 +165,7 @@ export class FilterModule<TData = unknown> implements GridModule<
         );
       }}
       style="width:70px;min-width:0;font:inherit;font-size:11px;padding:1px 4px;border-radius:3px;border:1px solid ${
-        active ? 'var(--fg-focus,#3b82f6)' : 'var(--fg-border,#d8d8d8)'
+        active ? 'var(--tf-focus,#3b82f6)' : 'var(--tf-border,#d8d8d8)'
       };background:transparent;color:inherit"
     />`;
   }
@@ -210,7 +210,7 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   private changed(): void {
     this.context?.invalidate();
-    this.context?.dispatch('fg-filter-changed', {
+    this.context?.dispatch('tf-filter-changed', {
       model: this.model,
       quickFilter: this.quickFilter,
     });

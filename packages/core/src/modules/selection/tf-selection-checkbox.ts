@@ -9,8 +9,8 @@ import { type SelectionModule, selectionCheckboxTemplate } from './selection-mod
  * A renderer element rather than a function so it reads its row from context and
  * repaints on its own when selection changes, instead of the whole row doing so.
  */
-@customElement('fg-selection-checkbox')
-export class FgSelectionCheckbox extends CellRendererElement {
+@customElement('tf-selection-checkbox')
+export class TfSelectionCheckbox extends CellRendererElement {
   static override styles = css`
     /*
      * Fills the cell and centres the control. The cell drops its own padding for
@@ -44,6 +44,6 @@ export class FgSelectionCheckbox extends CellRendererElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'fg-selection-checkbox': FgSelectionCheckbox;
+    'tf-selection-checkbox': TfSelectionCheckbox;
   }
 }
