@@ -1,5 +1,8 @@
 # flowgrid
 
+[![CI](https://github.com/p-m-p/flowgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/p-m-p/flowgrid/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@flowgrid/core.svg)](https://www.npmjs.com/package/@flowgrid/core)
+
 A horizontally-flowing data grid web component for trading platforms.
 
 Rows fill an instance to the viewport height, then flow into another instance
