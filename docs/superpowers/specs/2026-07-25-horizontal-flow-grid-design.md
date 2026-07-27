@@ -1,6 +1,6 @@
 # Horizontal-Flow Trading Grid — Package Design
 
-> Naming is a placeholder throughout: npm scope `@flowgrid`, element prefix `fg-`. Rename before first publish.
+> Naming was a placeholder while this was written; `@flowgrid` and the `fg-` element prefix were subsequently adopted as final.
 
 ## Context
 

@@ -10,9 +10,6 @@ than rows by scroll offset.
 See [`packages/core/README.md`](packages/core/README.md) for the package
 documentation.
 
-> **Naming is a placeholder.** The npm scope `@flowgrid` and the `fg-` element
-> prefix are stand-ins pending a decision, and want changing before first publish.
-
 ## Layout
 
 | Path             |                                                  |
