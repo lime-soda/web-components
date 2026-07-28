@@ -14,7 +14,7 @@ export type SelectionMode = 'single' | 'multi';
 /** What a checkbox should show. Derived, never stored. */
 export type SelectionState = 'checked' | 'indeterminate' | 'unchecked';
 
-const SELECTION_COL_ID = 'tf-selection';
+const SELECTION_COL_ID = 'flow-selection';
 
 export interface SelectionModuleOptions {
   mode?: SelectionMode;
@@ -205,19 +205,19 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   // -- Rendering --------------------------------------------------------------
 
   static readonly styles = css`
-    .tf-checkbox {
+    .flow-checkbox {
       cursor: pointer;
       margin: 0;
-      accent-color: var(--tf-focus, #3b82f6);
+      accent-color: var(--flow-focus, #3b82f6);
     }
 
-    .tf-checkbox:disabled {
+    .flow-checkbox:disabled {
       cursor: default;
-      opacity: var(--tf-disabled-opacity, 0.4);
+      opacity: var(--flow-disabled-opacity, 0.4);
     }
 
-    .tf-checkbox:focus-visible {
-      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
+    .flow-checkbox:focus-visible {
+      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
       outline-offset: 1px;
     }
   `;
@@ -237,7 +237,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
         width: this.options.checkboxColumnWidth ?? 28,
         sortable: false,
         filterable: false,
-        cellRenderer: 'tf-selection-checkbox',
+        cellRenderer: 'flow-selection-checkbox',
       },
     ];
   }
@@ -271,11 +271,11 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     }
 
     return {
-      classes: ['tf-row-selected'],
+      classes: ['flow-row-selected'],
       attributes: { 'aria-selected': 'true' },
       // A row is `display: contents` and has no box to paint, so the highlight
       // travels to the cells as a class the cell stylesheet styles.
-      cellClasses: ['tf-cell-selected'],
+      cellClasses: ['flow-cell-selected'],
       ...(this.options.clickToSelect
         ? {
             onActivate: (event: Event) => {
@@ -388,7 +388,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   private changed(): void {
     this.context?.requestRender();
-    this.context?.dispatch('tf-selection-changed', {
+    this.context?.dispatch('flow-selection-changed', {
       selected: this.getSelectedRows(),
       count: this.selected.size,
     });
@@ -412,5 +412,5 @@ export const selectionCheckboxTemplate = (
       event.stopPropagation();
       onChange((event.target as HTMLInputElement).checked, (event as MouseEvent).shiftKey);
     }}
-    class="tf-checkbox"
+    class="flow-checkbox"
   />`;

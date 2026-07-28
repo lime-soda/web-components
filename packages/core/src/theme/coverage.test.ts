@@ -7,7 +7,7 @@ import { THEME_TOKENS, customPropertyFor } from './tokens.js';
  * Keeps the theme schema honest against the source.
  *
  * A token list is only a contract if nothing can read a property that is not on
- * it. These tests walk the actual source, so adding `var(--tf-something-new)` to
+ * it. These tests walk the actual source, so adding `var(--flow-something-new)` to
  * a component without declaring the token fails here rather than quietly
  * producing an unthemeable value.
  */
@@ -35,31 +35,31 @@ const declaredProperties = new Set(THEME_TOKENS.map(customPropertyFor));
  * them. Each is either measured geometry or a per-cell value.
  */
 const INTERNAL = new Set([
-  '--tf-instance-width',
-  '--tf-instance-height',
-  '--tf-spacer-height',
-  '--tf-column-template',
-  '--tf-tree-depth',
+  '--flow-instance-width',
+  '--flow-instance-height',
+  '--flow-spacer-height',
+  '--flow-column-template',
+  '--flow-tree-depth',
 ]);
 
 /** Sub-token knobs a consumer may set but which are not part of the core schema. */
 const OPTIONAL = new Set([
-  '--tf-tree-expander-size',
-  '--tf-tree-expander-font-size',
-  '--tf-sort-indicator-font-size',
-  '--tf-sort-order-font-size',
-  '--tf-filter-input-width',
-  '--tf-filter-font-size',
-  '--tf-filter-padding',
-  '--tf-disabled-opacity',
+  '--flow-tree-expander-size',
+  '--flow-tree-expander-font-size',
+  '--flow-sort-indicator-font-size',
+  '--flow-sort-order-font-size',
+  '--flow-filter-input-width',
+  '--flow-filter-font-size',
+  '--flow-filter-padding',
+  '--flow-disabled-opacity',
 ]);
 
 const usages = new Map<string, string[]>();
 for (const file of files) {
   const source = readFileSync(file, 'utf8');
-  // `var(--tf-x)` in CSS, and `'--tf-x'` where a module reads one at runtime
+  // `var(--flow-x)` in CSS, and `'--flow-x'` where a module reads one at runtime
   // through getComputedStyle — the flash colours arrive that way.
-  for (const match of source.matchAll(/var\((--tf-[a-z0-9-]+)|'(--tf-[a-z0-9-]+)'/g)) {
+  for (const match of source.matchAll(/var\((--flow-[a-z0-9-]+)|'(--flow-[a-z0-9-]+)'/g)) {
     const property = (match[1] ?? match[2])!;
     usages.set(property, [...(usages.get(property) ?? []), file]);
   }
@@ -77,7 +77,7 @@ describe('theme coverage', () => {
 
   it('gives every declared token a default in the stylesheet', () => {
     // Otherwise a token would exist on the type but have nothing to override.
-    const stylesheet = readFileSync(join(SRC, 'themes/tradeflow.css'), 'utf8');
+    const stylesheet = readFileSync(join(SRC, 'themes/flow-grid.css'), 'utf8');
     const missing = THEME_TOKENS.map(customPropertyFor).filter(
       (property) => !stylesheet.includes(`${property}:`),
     );

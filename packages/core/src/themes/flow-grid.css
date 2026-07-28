@@ -1,0 +1,105 @@
+/*
+ * Default theme.
+ *
+ * Every value the components read is one of these custom properties, and each
+ * corresponds to a token on the `GridTheme` object — `--flow-row-height` is
+ * `theme.rowHeight`. A test scans the source for `var(--flow-…)` and fails on any
+ * property that is not a declared token, so the two cannot drift apart.
+ *
+ * This file is optional. Components carry inline fallbacks, so a grid renders
+ * without it; import it for a coherent light/dark pair, pass a `theme` object,
+ * or set the same properties yourself from your own design tokens.
+ *
+ * Custom properties inherit through shadow roots, which is why theming needs no
+ * ::part() rules for colour. Parts exist for structural overrides: scroller,
+ * instance, instance-grid, placeholder, header-cell, header-label, header-slots,
+ * cell, cell-content, tree-expander, sort-indicator, filter-input,
+ * selection-checkbox.
+ */
+
+:root,
+:host {
+  /* Typography */
+  --flow-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --flow-font-size: 13px;
+  --flow-header-font-size: 13px;
+  --flow-header-font-weight: 500;
+
+  /* Metrics */
+  --flow-row-height: 32px;
+  --flow-header-height: 32px;
+  --flow-cell-padding-x: 8px;
+  --flow-instance-gap: 16px;
+  --flow-radius: 4px;
+  --flow-tree-indent: 16px;
+
+  /* Surfaces */
+  --flow-surface: transparent;
+  --flow-background: #ffffff;
+  --flow-header-background: #f5f5f5;
+  --flow-placeholder-background: #ffffff;
+
+  /* Text */
+  --flow-text: #101010;
+  --flow-text-muted: #666666;
+  --flow-header-text: #101010;
+
+  /* Lines */
+  --flow-border: #d8d8d8;
+  --flow-border-subtle: #f0f0f0;
+
+  /* State */
+  --flow-focus: #3b82f6;
+  --flow-focus-width: 2px;
+  --flow-selection-background: rgb(59 130 246 / 12%);
+  --flow-hover-background: rgb(0 0 0 / 3%);
+
+  /* Cell flash. Trading convention: green up, red down. */
+  --flow-flash-up: rgb(34 197 94 / 35%);
+  --flow-flash-down: rgb(239 68 68 / 35%);
+  --flow-flash-neutral: rgb(148 163 184 / 35%);
+  --flow-flash-duration: 600ms;
+}
+
+/*
+ * Dark by preference, with an explicit opt-out for applications that manage
+ * their own theme switch rather than following the OS.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-flow-theme='light']),
+  :host(:not([data-flow-theme='light'])) {
+    --flow-surface: #0a0a0a;
+    --flow-background: #1a1a1a;
+    --flow-header-background: #262626;
+    --flow-placeholder-background: #1a1a1a;
+
+    --flow-text: #e5e5e5;
+    --flow-text-muted: #a3a3a3;
+    --flow-header-text: #e5e5e5;
+
+    --flow-border: #333333;
+    --flow-border-subtle: #2a2a2a;
+
+    --flow-focus: #60a5fa;
+    --flow-selection-background: rgb(59 130 246 / 18%);
+    --flow-hover-background: rgb(255 255 255 / 4%);
+  }
+}
+
+[data-flow-theme='dark'] {
+  --flow-surface: #0a0a0a;
+  --flow-background: #1a1a1a;
+  --flow-header-background: #262626;
+  --flow-placeholder-background: #1a1a1a;
+
+  --flow-text: #e5e5e5;
+  --flow-text-muted: #a3a3a3;
+  --flow-header-text: #e5e5e5;
+
+  --flow-border: #333333;
+  --flow-border-subtle: #2a2a2a;
+
+  --flow-focus: #60a5fa;
+  --flow-selection-background: rgb(59 130 246 / 18%);
+  --flow-hover-background: rgb(255 255 255 / 4%);
+}

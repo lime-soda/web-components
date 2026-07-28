@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import '../index.js';
 import type { ColumnDef } from '../columns/types.js';
 import type { GridOptions } from '../controller/grid-controller.js';
-import type { TfGrid } from '../components/tf-grid.js';
+import type { FlowGrid } from '../components/grid.js';
 import { TreeModule } from '../modules/tree/index.js';
 import { SortModule } from '../modules/sort/index.js';
 import { SelectionModule } from '../modules/selection/index.js';
@@ -36,12 +36,12 @@ const data: Row[] = [
 
 let host: HTMLDivElement | undefined;
 
-async function mount(overrides: Partial<GridOptions<Row>> = {}): Promise<TfGrid<Row>> {
+async function mount(overrides: Partial<GridOptions<Row>> = {}): Promise<FlowGrid<Row>> {
   host = document.createElement('div');
   host.style.cssText = 'width:800px;height:400px';
   document.body.append(host);
 
-  const grid = document.createElement('tf-grid') as TfGrid<Row>;
+  const grid = document.createElement('flow-grid') as FlowGrid<Row>;
   grid.gridOptions = {
     columns,
     rowHeight: 32,
@@ -62,9 +62,9 @@ async function mount(overrides: Partial<GridOptions<Row>> = {}): Promise<TfGrid<
   return grid;
 }
 
-const instance = (grid: TfGrid<Row>) => grid.shadowRoot!.querySelector('tf-instance')!;
-const rows = (grid: TfGrid<Row>) => [...instance(grid).shadowRoot!.querySelectorAll('tf-row')];
-const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('tf-cell')];
+const instance = (grid: FlowGrid<Row>) => grid.shadowRoot!.querySelector('flow-instance')!;
+const rows = (grid: FlowGrid<Row>) => [...instance(grid).shadowRoot!.querySelectorAll('flow-row')];
+const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('flow-cell')];
 
 /**
  * A cell by column id rather than position. The selection module prepends its
@@ -75,8 +75,8 @@ const cellFor = (row: Element, colId: string) =>
     (cell) => (cell as unknown as { column?: { colId: string } }).column?.colId === colId,
   )!;
 
-const headerFor = (grid: TfGrid<Row>, colId: string) =>
-  [...instance(grid).shadowRoot!.querySelectorAll('tf-header-cell')].find(
+const headerFor = (grid: FlowGrid<Row>, colId: string) =>
+  [...instance(grid).shadowRoot!.querySelectorAll('flow-header-cell')].find(
     (header) => (header as unknown as { column?: { colId: string } }).column?.colId === colId,
   )!;
 const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
@@ -92,8 +92,8 @@ describe('theming', () => {
     const grid = await mount({ theme });
     const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
 
-    expect(scroller.style.getPropertyValue('--tf-text')).toBe('rgb(0, 128, 0)');
-    expect(scroller.style.getPropertyValue('--tf-background')).toBe('rgb(240, 240, 240)');
+    expect(scroller.style.getPropertyValue('--flow-text')).toBe('rgb(0, 128, 0)');
+    expect(scroller.style.getPropertyValue('--flow-background')).toBe('rgb(240, 240, 240)');
   });
 
   it('inherits a token through every shadow root down to a cell', async () => {
@@ -104,7 +104,7 @@ describe('theming', () => {
 
   it('themes a header through the same tokens', async () => {
     const grid = await mount({ theme: { headerText: 'rgb(128, 0, 0)' } });
-    const header = instance(grid).shadowRoot!.querySelector('tf-header-cell')!;
+    const header = instance(grid).shadowRoot!.querySelector('flow-header-cell')!;
 
     expect(getComputedStyle(header).color).toBe('rgb(128, 0, 0)');
   });
@@ -123,7 +123,7 @@ describe('theming', () => {
   it('drives tree indent from a token rather than a computed pixel value', async () => {
     const grid = await mount({ theme: { treeIndent: '40px' } });
     const childIndent = cellFor(rows(grid)[1]!, 'name').shadowRoot!.querySelector(
-      '.tf-tree-indent',
+      '.flow-tree-indent',
     )!;
 
     // Depth 1 at 40px per level.
@@ -145,7 +145,7 @@ describe('theming', () => {
     const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
 
     // A partial theme is valid; unset tokens simply are not declared.
-    expect(scroller.style.getPropertyValue('--tf-border')).toBe('');
+    expect(scroller.style.getPropertyValue('--flow-border')).toBe('');
   });
 
   it('updates live when the theme is replaced', async () => {
@@ -168,7 +168,7 @@ describe('theming', () => {
     const grid = await mount({ rowHeight: 32, theme: { rowHeight: '999px' } });
     const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
 
-    expect(scroller.style.getPropertyValue('--tf-row-height')).toBe('32px');
+    expect(scroller.style.getPropertyValue('--flow-row-height')).toBe('32px');
   });
 
   describe('no inline styles', () => {
@@ -206,18 +206,18 @@ describe('theming', () => {
       )!;
 
       expect(indicator.getAttribute('style')).toBeNull();
-      expect(indicator.classList.contains('tf-sort-indicator')).toBe(true);
+      expect(indicator.classList.contains('flow-sort-indicator')).toBe(true);
     });
 
     it('styles the selection checkbox by class, not inline', async () => {
       const grid = await mount();
-      const checkbox = cellFor(rows(grid)[0]!, 'tf-selection').shadowRoot!.querySelector(
-        'tf-selection-checkbox',
+      const checkbox = cellFor(rows(grid)[0]!, 'flow-selection').shadowRoot!.querySelector(
+        'flow-selection-checkbox',
       )!;
       const input = checkbox.shadowRoot!.querySelector('input')!;
 
       expect(input.getAttribute('style')).toBeNull();
-      expect(input.classList.contains('tf-checkbox')).toBe(true);
+      expect(input.classList.contains('flow-checkbox')).toBe(true);
     });
   });
 });

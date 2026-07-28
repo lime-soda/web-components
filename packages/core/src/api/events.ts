@@ -2,9 +2,9 @@ import type { GridApi } from './types.js';
 import type { TransactionResult } from '../store/types.js';
 
 export const GRID_EVENTS = {
-  READY: 'tf-grid-ready',
-  DATA_CHANGED: 'tf-data-changed',
-  LAYOUT_CHANGED: 'tf-layout-changed',
+  READY: 'flow-grid-ready',
+  DATA_CHANGED: 'flow-data-changed',
+  LAYOUT_CHANGED: 'flow-layout-changed',
 } as const;
 
 export interface GridReadyDetail<TData = unknown> {

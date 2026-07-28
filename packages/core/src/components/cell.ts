@@ -20,17 +20,17 @@ import { SignalWatcher } from '../reactive/index.js';
  * price tick cheap: the cell reads its row's signal during render, so a change
  * repaints this cell and touches nothing above it.
  */
-@customElement('tf-cell')
-export class TfCell extends SignalWatcher(LitElement) {
+@customElement('flow-cell')
+export class FlowCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
       align-items: center;
       box-sizing: border-box;
       overflow: hidden;
-      padding: 0 var(--tf-cell-padding-x, 8px);
-      border-bottom: 1px solid var(--tf-border-subtle, #f0f0f0);
-      color: var(--tf-text, #101010);
+      padding: 0 var(--flow-cell-padding-x, 8px);
+      border-bottom: 1px solid var(--flow-border-subtle, #f0f0f0);
+      color: var(--flow-text, #101010);
       font-variant-numeric: tabular-nums;
     }
 
@@ -44,28 +44,28 @@ export class TfCell extends SignalWatcher(LitElement) {
      * checkbox cannot sit centred in a narrow column — 16px of padding leaves
      * nothing to centre a 13px control in.
      */
-    :host([data-tf-renderer]) {
+    :host([data-flow-renderer]) {
       padding: 0;
     }
 
     :host(:focus-visible) {
-      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--tf-focus-width, 2px));
+      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--flow-focus-width, 2px));
     }
 
     /* Applied by the selection module. A row is display:contents and has no box
        of its own, so the highlight is painted by its cells. */
-    :host(.tf-cell-selected) {
-      background: var(--tf-selection-background, rgb(59 130 246 / 12%));
+    :host(.flow-cell-selected) {
+      background: var(--flow-selection-background, rgb(59 130 246 / 12%));
     }
 
     /* Tracking a row across a monitor-wide grid is the whole reason this exists. */
-    :host(.tf-row-hover) {
-      background: var(--tf-hover-background, rgb(0 0 0 / 3%));
+    :host(.flow-row-hover) {
+      background: var(--flow-hover-background, rgb(0 0 0 / 3%));
     }
 
-    :host(.tf-row-hover.tf-cell-selected) {
-      background: var(--tf-selection-background, rgb(59 130 246 / 12%));
+    :host(.flow-row-hover.flow-cell-selected) {
+      background: var(--flow-selection-background, rgb(59 130 246 / 12%));
     }
 
     /* Plain values: single line, ellipsised, vertically centred by the host. */
@@ -120,7 +120,7 @@ export class TfCell extends SignalWatcher(LitElement) {
     const node = this.row?.node;
     if (!node || !this.column) return nothing;
 
-    // See tf-header-cell: keeps module-contributed decorations current.
+    // See flow-header-cell: keeps module-contributed decorations current.
     this.grid?.registry.version.get();
 
     const focused = this.isFocusedCell();
@@ -140,7 +140,7 @@ export class TfCell extends SignalWatcher(LitElement) {
     const hasRenderer = this.column.cellRenderer !== undefined;
     // Element renderers own their box; function renderers and plain values are
     // content and keep the cell's gutter.
-    this.toggleAttribute('data-tf-renderer', typeof this.column.cellRenderer === 'string');
+    this.toggleAttribute('data-flow-renderer', typeof this.column.cellRenderer === 'string');
 
     return html`
       ${decorations.map((d) => (d.prefix ? html`<span class="affix">${d.prefix}</span>` : nothing))}
@@ -277,6 +277,6 @@ function tagFor(tag: string) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tf-cell': TfCell;
+    'flow-cell': FlowCell;
   }
 }

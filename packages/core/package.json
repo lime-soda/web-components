@@ -1,5 +1,5 @@
 {
-  "name": "@tradeflow/core",
+  "name": "@flow-grid/core",
   "version": "0.1.0",
   "description": "Horizontal-flow data grid web component for trading platforms. Minimal core, additive modules.",
   "keywords": [
@@ -16,14 +16,14 @@
   ],
   "author": "Phil Parsons",
   "license": "MIT",
-  "homepage": "https://github.com/p-m-p/tradeflow#readme",
+  "homepage": "https://github.com/flow-grid-dev/flowgrid#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/p-m-p/tradeflow.git",
+    "url": "git+https://github.com/flow-grid-dev/flowgrid.git",
     "directory": "packages/core"
   },
   "bugs": {
-    "url": "https://github.com/p-m-p/tradeflow/issues"
+    "url": "https://github.com/flow-grid-dev/flowgrid/issues"
   },
   "type": "module",
   "sideEffects": false,

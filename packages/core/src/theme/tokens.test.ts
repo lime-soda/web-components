@@ -10,12 +10,12 @@ import {
 describe('theme tokens', () => {
   describe('customPropertyFor', () => {
     it('converts camelCase to a kebab-case custom property', () => {
-      expect(customPropertyFor('rowHeight')).toBe('--tf-row-height');
-      expect(customPropertyFor('selectionBackground')).toBe('--tf-selection-background');
+      expect(customPropertyFor('rowHeight')).toBe('--flow-row-height');
+      expect(customPropertyFor('selectionBackground')).toBe('--flow-selection-background');
     });
 
     it('leaves a single-word token alone', () => {
-      expect(customPropertyFor('surface')).toBe('--tf-surface');
+      expect(customPropertyFor('surface')).toBe('--flow-surface');
     });
 
     it('produces a unique property for every token', () => {
@@ -93,8 +93,8 @@ describe('theme tokens', () => {
   describe('themeToCustomProperties', () => {
     it('maps set tokens to custom properties', () => {
       expect(themeToCustomProperties({ rowHeight: '28px', text: '#eee' })).toEqual({
-        '--tf-row-height': '28px',
-        '--tf-text': '#eee',
+        '--flow-row-height': '28px',
+        '--flow-text': '#eee',
       });
     });
 

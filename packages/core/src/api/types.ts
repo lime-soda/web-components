@@ -12,7 +12,7 @@ import type { RowTransaction, TransactionResult } from '../store/types.js';
  *
  * @example
  * ```ts
- * declare module '@tradeflow/core' {
+ * declare module '@flow-grid/core' {
  *   interface GridApi<TData> {
  *     expandAll(): void;
  *   }

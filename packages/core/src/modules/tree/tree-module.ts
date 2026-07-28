@@ -13,7 +13,7 @@ export interface TreeModuleOptions<TData = unknown> extends TreeIndexOptions<TDa
    * deep in the tree stays reachable. On by default.
    */
   retainAncestors?: boolean;
-  /** Indent per depth level, in px. Defaults to 16 via --tf-tree-indent. */
+  /** Indent per depth level, in px. Defaults to 16 via --flow-tree-indent. */
   indentSize?: number;
 }
 
@@ -132,45 +132,45 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
    * Indent depth is the one genuinely per-cell value here, so it travels as a
    * custom property on the element and the width is computed in CSS. Everything
    * else is static and lives in this stylesheet, themeable through the same
-   * `--tf-*` properties as the rest of the grid.
+   * `--flow-*` properties as the rest of the grid.
    */
   static readonly styles = css`
-    .tf-tree-indent {
+    .flow-tree-indent {
       display: inline-block;
       flex: 0 0 auto;
       /* Set per cell by the decoration; falls back to no indent. */
-      width: calc(var(--tf-tree-depth, 0) * var(--tf-tree-indent, 16px));
+      width: calc(var(--flow-tree-depth, 0) * var(--flow-tree-indent, 16px));
     }
 
-    .tf-tree-spacer {
+    .flow-tree-spacer {
       display: inline-block;
       flex: 0 0 auto;
-      width: var(--tf-tree-expander-size, 18px);
+      width: var(--flow-tree-expander-size, 18px);
     }
 
-    .tf-expander {
+    .flow-expander {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      width: var(--tf-tree-expander-size, 18px);
+      width: var(--flow-tree-expander-size, 18px);
       padding: 0;
       background: none;
       border: none;
       cursor: pointer;
-      font-size: var(--tf-tree-expander-font-size, 10px);
+      font-size: var(--flow-tree-expander-font-size, 10px);
       line-height: 1;
-      color: var(--tf-text-muted, #666);
+      color: var(--flow-text-muted, #666);
       transition: transform 150ms ease-out;
       transform: rotate(0deg);
     }
 
-    .tf-expander[aria-expanded='true'] {
+    .flow-expander[aria-expanded='true'] {
       transform: rotate(90deg);
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .tf-expander {
+      .flow-expander {
         transition: none;
       }
     }
@@ -186,23 +186,23 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
     const isExpanded = this.expanded.has(ctx.row.rowId);
 
     return {
-      classes: ['tf-tree-cell'],
-      attributes: { 'data-tf-depth': String(depth) },
+      classes: ['flow-tree-cell'],
+      attributes: { 'data-flow-depth': String(depth) },
       // Depth drives the indent width through CSS rather than a computed pixel
-      // value, so a consumer can change --tf-tree-indent and every level follows.
+      // value, so a consumer can change --flow-tree-indent and every level follows.
       customProperties: {
-        '--tf-tree-depth': String(depth),
+        '--flow-tree-depth': String(depth),
         ...(this.options.indentSize === undefined
           ? {}
-          : { '--tf-tree-indent': `${this.options.indentSize}px` }),
+          : { '--flow-tree-indent': `${this.options.indentSize}px` }),
       },
       prefix: html`
-        <span class="tf-tree-indent"></span>
+        <span class="flow-tree-indent"></span>
         ${
           hasChildren
             ? html`<button
                 part="tree-expander"
-                class="tf-expander"
+                class="flow-expander"
                 aria-label=${isExpanded ? 'Collapse' : 'Expand'}
                 aria-expanded=${isExpanded}
                 tabindex="-1"
@@ -213,7 +213,7 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
               >
                 ▶
               </button>`
-            : html`<span class="tf-tree-spacer"></span>`
+            : html`<span class="flow-tree-spacer"></span>`
         }
       `,
     };
@@ -352,7 +352,7 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
 
   private onExpansionChanged(ids: readonly string[]): void {
     this.context?.invalidate();
-    this.context?.dispatch('tf-expansion-changed', {
+    this.context?.dispatch('flow-expansion-changed', {
       ids,
       expanded: [...this.expanded],
     });

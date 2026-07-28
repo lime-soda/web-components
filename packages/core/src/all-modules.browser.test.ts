@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import './index.js';
 import type { ColumnDef } from './columns/types.js';
 import type { GridOptions } from './controller/grid-controller.js';
-import type { TfGrid } from './components/tf-grid.js';
+import type { FlowGrid } from './components/grid.js';
 import { TreeModule } from './modules/tree/index.js';
 import { SortModule } from './modules/sort/index.js';
 import { FilterModule } from './modules/filter/index.js';
@@ -53,12 +53,12 @@ const allModules = () => [
   new KeyboardModule<Bond>(),
 ];
 
-async function mount(overrides: Partial<GridOptions<Bond>> = {}): Promise<TfGrid<Bond>> {
+async function mount(overrides: Partial<GridOptions<Bond>> = {}): Promise<FlowGrid<Bond>> {
   host = document.createElement('div');
   host.style.cssText = 'width:900px;height:400px';
   document.body.append(host);
 
-  const grid = document.createElement('tf-grid') as TfGrid<Bond>;
+  const grid = document.createElement('flow-grid') as FlowGrid<Bond>;
   grid.gridOptions = {
     columns,
     rowHeight: 32,
@@ -75,12 +75,12 @@ async function mount(overrides: Partial<GridOptions<Bond>> = {}): Promise<TfGrid
   return grid;
 }
 
-const instances = (grid: TfGrid<Bond>) => [
-  ...(grid.shadowRoot?.querySelectorAll('tf-instance') ?? []),
+const instances = (grid: FlowGrid<Bond>) => [
+  ...(grid.shadowRoot?.querySelectorAll('flow-instance') ?? []),
 ];
-const rowsOf = (grid: TfGrid<Bond>) =>
-  instances(grid).flatMap((instance) => [...instance.shadowRoot!.querySelectorAll('tf-row')]);
-const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('tf-cell')];
+const rowsOf = (grid: FlowGrid<Bond>) =>
+  instances(grid).flatMap((instance) => [...instance.shadowRoot!.querySelectorAll('flow-row')]);
+const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('flow-cell')];
 const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
 
 afterEach(() => {
@@ -105,7 +105,7 @@ describe('all v1 modules together', () => {
       const groupRow = rowsOf(grid)[0]!;
       const [selectionCell, instrumentCell] = cellsOf(groupRow);
 
-      expect(grid.api.getColumns()[0]!.colId).toBe('tf-selection');
+      expect(grid.api.getColumns()[0]!.colId).toBe('flow-selection');
       expect(selectionCell!.shadowRoot!.querySelector('[part="tree-expander"]')).toBeNull();
       expect(instrumentCell!.shadowRoot!.querySelector('[part="tree-expander"]')).not.toBeNull();
     });
@@ -115,7 +115,7 @@ describe('all v1 modules together', () => {
 
       for (const row of rowsOf(grid)) {
         const cell = cellsOf(row)[0]!;
-        const box = cell.shadowRoot!.querySelector('tf-selection-checkbox');
+        const box = cell.shadowRoot!.querySelector('flow-selection-checkbox');
         const input = box?.shadowRoot?.querySelector('input');
         expect(input, row.getAttribute('role') ?? '').toBeTruthy();
 
@@ -208,7 +208,7 @@ describe('all v1 modules together', () => {
       await settle();
 
       const focused = grid.controller!.focus.focused.get();
-      expect(focused?.colId).toBe('tf-selection');
+      expect(focused?.colId).toBe('flow-selection');
       expect(focused?.rowKey).toBe('g0-i0');
     });
 

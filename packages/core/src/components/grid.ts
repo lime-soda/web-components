@@ -11,7 +11,7 @@ import { gridContext } from '../context/index.js';
 import { GridController, type GridOptions } from '../controller/grid-controller.js';
 import { SignalWatcher } from '../reactive/index.js';
 import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
-import './tf-instance.js';
+import './instance.js';
 
 /**
  * The grid host.
@@ -20,17 +20,17 @@ import './tf-instance.js';
  * decides which instances are worth rendering. Everything below reads from the
  * context, so nothing is drilled down the tree.
  */
-@customElement('tf-grid')
-export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
+@customElement('flow-grid')
+export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
       height: 100%;
       overflow: hidden;
-      color: var(--tf-text, #101010);
-      background: var(--tf-surface, transparent);
-      font-family: var(--tf-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
-      font-size: var(--tf-font-size, 13px);
+      color: var(--flow-text, #101010);
+      background: var(--flow-surface, transparent);
+      font-family: var(--flow-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+      font-size: var(--flow-font-size, 13px);
       -webkit-font-smoothing: antialiased;
     }
 
@@ -44,15 +44,15 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
     .scroller[data-layout='flow'] {
       display: flex;
       align-items: flex-start;
-      gap: var(--tf-instance-gap, 16px);
+      gap: var(--flow-instance-gap, 16px);
       overflow-y: hidden;
     }
 
     .instance-slot {
       flex: 0 0 auto;
       box-sizing: border-box;
-      width: var(--tf-instance-width, auto);
-      height: var(--tf-instance-height, auto);
+      width: var(--flow-instance-width, auto);
+      height: var(--flow-instance-height, auto);
     }
 
     /* Offscreen instances keep their exact footprint so the scrollbar never jumps. */
@@ -60,14 +60,14 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
       box-sizing: border-box;
       width: 100%;
       height: 100%;
-      background: var(--tf-placeholder-background, var(--tf-background, #ffffff));
-      border: 1px solid var(--tf-border, #d8d8d8);
-      border-radius: var(--tf-radius, 4px);
+      background: var(--flow-placeholder-background, var(--flow-background, #ffffff));
+      border: 1px solid var(--flow-border, #d8d8d8);
+      border-radius: var(--flow-radius, 4px);
     }
 
     .stack-spacer {
       width: 100%;
-      height: var(--tf-spacer-height, 0);
+      height: var(--flow-spacer-height, 0);
     }
   `;
 
@@ -201,9 +201,9 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
     const viewport = controller.pipeline.viewport;
     return {
       ...themeToCustomProperties(controller.options.theme ?? {}),
-      '--tf-row-height': `${viewport.rowHeight}px`,
-      '--tf-header-height': `${viewport.headerHeight}px`,
-      '--tf-instance-gap': `${viewport.instanceGap}px`,
+      '--flow-row-height': `${viewport.rowHeight}px`,
+      '--flow-header-height': `${viewport.headerHeight}px`,
+      '--flow-instance-gap': `${viewport.instanceGap}px`,
     };
   }
 
@@ -218,14 +218,14 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
           class="instance-slot"
           data-instance-id=${instance.id}
           style=${styleMap({
-            '--tf-instance-width': `${instance.width}px`,
-            '--tf-instance-height': `${height}px`,
+            '--flow-instance-width': `${instance.width}px`,
+            '--flow-instance-height': `${height}px`,
           })}
           ${ref((element) => this.observeSlot(element))}
         >
           ${
             this.visibleInstances.has(instance.id)
-              ? html`<tf-instance part="instance" .instance=${instance}></tf-instance>`
+              ? html`<flow-instance part="instance" .instance=${instance}></flow-instance>`
               : html`<div class="placeholder" part="placeholder"></div>`
           }
         </div>
@@ -249,10 +249,10 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
     return html`
       <div
         class="stack-spacer"
-        style=${styleMap({ '--tf-spacer-height': `${instance.offset}px` })}
+        style=${styleMap({ '--flow-spacer-height': `${instance.offset}px` })}
       ></div>
-      <tf-instance part="instance" .instance=${instance}></tf-instance>
-      <div class="stack-spacer" style=${styleMap({ '--tf-spacer-height': `${below}px` })}></div>
+      <flow-instance part="instance" .instance=${instance}></flow-instance>
+      <div class="stack-spacer" style=${styleMap({ '--flow-spacer-height': `${below}px` })}></div>
     `;
   }
 
@@ -320,7 +320,7 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
   }
 
   private emit(type: string, detail: unknown): void {
-    if (type === 'tf-scroll-to-row') {
+    if (type === 'flow-scroll-to-row') {
       this.scrollToRow((detail as { id: string }).id);
       return;
     }
@@ -347,6 +347,6 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tf-grid': TfGrid;
+    'flow-grid': FlowGrid;
   }
 }

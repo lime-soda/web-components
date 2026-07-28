@@ -1,15 +1,15 @@
 // Custom elements. Importing the package registers them.
-import './components/tf-grid.js';
-import './components/tf-instance.js';
-import './components/tf-row.js';
-import './components/tf-cell.js';
-import './components/tf-header-cell.js';
+import './components/grid.js';
+import './components/instance.js';
+import './components/row.js';
+import './components/cell.js';
+import './components/header-cell.js';
 
-export { TfGrid } from './components/tf-grid.js';
-export { TfInstance } from './components/tf-instance.js';
-export { TfRow } from './components/tf-row.js';
-export { TfCell } from './components/tf-cell.js';
-export { TfHeaderCell } from './components/tf-header-cell.js';
+export { FlowGrid } from './components/grid.js';
+export { FlowInstance } from './components/instance.js';
+export { FlowRow } from './components/row.js';
+export { FlowCell } from './components/cell.js';
+export { FlowHeaderCell } from './components/header-cell.js';
 export { CellRendererElement } from './components/cell-renderer-element.js';
 
 // Theming: a validated token object, or the same tokens as CSS custom properties.

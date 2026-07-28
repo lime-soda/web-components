@@ -8,7 +8,7 @@ import type { GridController } from '../controller/grid-controller.js';
 import type { DisplayRow } from '../layout/types.js';
 import type { RowDecoration } from '../modules/types.js';
 import { SignalWatcher } from '../reactive/index.js';
-import './tf-cell.js';
+import './cell.js';
 
 /**
  * One display row.
@@ -22,8 +22,8 @@ import './tf-cell.js';
  * (node, selection, store) with matching teardown in `disconnectedCallback`; here
  * the row context reads a signal and Lit handles the rest.
  */
-@customElement('tf-row')
-export class TfRow extends SignalWatcher(LitElement) {
+@customElement('flow-row')
+export class FlowRow extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: contents;
@@ -73,8 +73,8 @@ export class TfRow extends SignalWatcher(LitElement) {
    */
   private readonly handleHover = (event: Event): void => {
     const hovered = event.type === 'mouseenter';
-    for (const cell of this.shadowRoot?.querySelectorAll('tf-cell') ?? []) {
-      cell.classList.toggle('tf-row-hover', hovered);
+    for (const cell of this.shadowRoot?.querySelectorAll('flow-cell') ?? []) {
+      cell.classList.toggle('flow-row-hover', hovered);
     }
   };
 
@@ -109,17 +109,17 @@ export class TfRow extends SignalWatcher(LitElement) {
       grid.columns.get(),
       (column) => column.colId,
       (column) =>
-        html`<tf-cell
+        html`<flow-cell
           part="cell"
           role="gridcell"
           class=${cellClasses}
           style=${styleMap(cellProperties)}
           .column=${column}
-        ></tf-cell>`,
+        ></flow-cell>`,
     );
   }
 
-  /** See tf-cell: decorations must be withdrawn as well as applied. */
+  /** See flow-cell: decorations must be withdrawn as well as applied. */
   private applyDecorations(decorations: readonly RowDecoration[]): void {
     const classes = new Set(decorations.flatMap((d) => d.classes ?? []));
     const attributes = new Map<string, string>();
@@ -148,6 +148,6 @@ export class TfRow extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tf-row': TfRow;
+    'flow-row': FlowRow;
   }
 }

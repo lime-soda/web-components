@@ -145,7 +145,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     const direction = this.getSortDirection(ctx.column.colId);
 
     return {
-      classes: ['tf-sortable'],
+      classes: ['flow-sortable'],
       attributes: {
         'aria-sort':
           direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none',
@@ -158,17 +158,17 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
   }
 
   static readonly styles = css`
-    .tf-sort-indicator {
+    .flow-sort-indicator {
       display: inline-flex;
       align-items: center;
       gap: 2px;
       flex: 0 0 auto;
-      font-size: var(--tf-sort-indicator-font-size, 10px);
-      color: var(--tf-text-muted, #666);
+      font-size: var(--flow-sort-indicator-font-size, 10px);
+      color: var(--flow-text-muted, #666);
     }
 
-    .tf-sort-order {
-      font-size: var(--tf-sort-order-font-size, 8px);
+    .flow-sort-order {
+      font-size: var(--flow-sort-order-font-size, 8px);
     }
   `;
 
@@ -181,9 +181,9 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     const position = this.model.findIndex((entry) => entry.colId === ctx.column.colId);
     const showOrder = this.model.length > 1;
 
-    return html`<span class="tf-sort-indicator" part="sort-indicator"
+    return html`<span class="flow-sort-indicator" part="sort-indicator"
       >${direction === 'asc' ? '\u25B2' : '\u25BC'}${
-        showOrder ? html`<sub class="tf-sort-order">${position + 1}</sub>` : ''
+        showOrder ? html`<sub class="flow-sort-order">${position + 1}</sub>` : ''
       }</span
     >`;
   }
@@ -241,7 +241,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
 
   private changed(): void {
     this.context?.invalidate();
-    this.context?.dispatch('tf-sort-changed', { model: this.getSortModel() });
+    this.context?.dispatch('flow-sort-changed', { model: this.getSortModel() });
   }
 }
 

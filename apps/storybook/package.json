@@ -1,5 +1,5 @@
 {
-  "name": "@tradeflow/storybook",
+  "name": "@flow-grid/storybook",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tradeflow/core": "workspace:*",
+    "@flow-grid/core": "workspace:*",
     "lit": "^3.3.1"
   },
   "devDependencies": {

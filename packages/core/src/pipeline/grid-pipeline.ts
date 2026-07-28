@@ -22,7 +22,7 @@ const NO_VIEWPORT: ViewportMetrics = {
 /**
  * Composes the read path: rows → projection → layout, all as memoised signals.
  *
- * Reading `layout` is the only thing `<tf-grid>` does at render time. Because each
+ * Reading `layout` is the only thing `<flow-grid>` does at render time. Because each
  * step is a computed, work happens strictly on demand and strictly when an actual
  * dependency changed — a value tick invalidates neither the projection nor the
  * layout, so both are skipped and only the affected cells re-render.

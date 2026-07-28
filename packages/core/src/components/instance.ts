@@ -7,8 +7,8 @@ import { gridContext, instanceContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
 import type { LayoutInstance } from '../layout/types.js';
 import { SignalWatcher } from '../reactive/index.js';
-import './tf-header-cell.js';
-import './tf-row.js';
+import './header-cell.js';
+import './row.js';
 
 /**
  * One column of the flow layout: a header and the rows that fit beneath it.
@@ -17,23 +17,23 @@ import './tf-row.js';
  * readable — a trader looking at the fourth instance across still sees what each
  * column means.
  */
-@customElement('tf-instance')
-export class TfInstance extends SignalWatcher(LitElement) {
+@customElement('flow-instance')
+export class FlowInstance extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
       box-sizing: border-box;
-      background: var(--tf-background, #ffffff);
-      border: 1px solid var(--tf-border, #d8d8d8);
-      border-radius: var(--tf-radius, 4px);
+      background: var(--flow-background, #ffffff);
+      border: 1px solid var(--flow-border, #d8d8d8);
+      border-radius: var(--flow-radius, 4px);
       overflow: hidden;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: var(--tf-column-template);
-      grid-template-rows: var(--tf-header-height, 32px);
-      grid-auto-rows: var(--tf-row-height, 32px);
+      grid-template-columns: var(--flow-column-template);
+      grid-template-rows: var(--flow-header-height, 32px);
+      grid-auto-rows: var(--flow-row-height, 32px);
       width: 100%;
     }
 
@@ -73,20 +73,20 @@ export class TfInstance extends SignalWatcher(LitElement) {
       <div
         class="grid"
         part="instance-grid"
-        style=${styleMap({ '--tf-column-template': template })}
+        style=${styleMap({ '--flow-column-template': template })}
       >
         <div class="header" role="row">
           ${repeat(
             columns,
             (column) => column.colId,
             (column) =>
-              html`<tf-header-cell part="header-cell" .column=${column}></tf-header-cell>`,
+              html`<flow-header-cell part="header-cell" .column=${column}></flow-header-cell>`,
           )}
         </div>
         ${repeat(
           this.instance.rows,
           (row) => row.id,
-          (row) => html`<tf-row .row=${row}></tf-row>`,
+          (row) => html`<flow-row .row=${row}></flow-row>`,
         )}
       </div>
     `;
@@ -95,6 +95,6 @@ export class TfInstance extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tf-instance': TfInstance;
+    'flow-instance': FlowInstance;
   }
 }

@@ -39,14 +39,14 @@ export class RowContextValue<TData = unknown> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- contexts are structurally typed at the consumer
-export const gridContext = createContext<GridController<any> | undefined>(Symbol('tf-grid'));
+export const gridContext = createContext<GridController<any> | undefined>(Symbol('flow-grid'));
 
-export const instanceContext = createContext<LayoutInstance | undefined>(Symbol('tf-instance'));
+export const instanceContext = createContext<LayoutInstance | undefined>(Symbol('flow-instance'));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see gridContext
-export const rowContext = createContext<RowContextValue<any> | undefined>(Symbol('tf-row'));
+export const rowContext = createContext<RowContextValue<any> | undefined>(Symbol('flow-row'));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see gridContext
 export const columnContext = createContext<ResolvedColumn<any, any> | undefined>(
-  Symbol('tf-column'),
+  Symbol('flow-column'),
 );

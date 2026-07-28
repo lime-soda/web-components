@@ -312,7 +312,7 @@ describe('SortModule', () => {
 
       sort.toggleSort('price');
 
-      expect(dispatch).toHaveBeenCalledWith('tf-sort-changed', {
+      expect(dispatch).toHaveBeenCalledWith('flow-sort-changed', {
         model: [{ colId: 'price', direction: 'asc' }],
       });
     });

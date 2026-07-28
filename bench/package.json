@@ -1,5 +1,5 @@
 {
-  "name": "@tradeflow/bench",
+  "name": "@flow-grid/bench",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tradeflow/core": "workspace:*"
+    "@flow-grid/core": "workspace:*"
   },
   "devDependencies": {
     "@vitest/browser": "^3.2.4",

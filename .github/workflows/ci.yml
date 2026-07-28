@@ -27,7 +27,7 @@ jobs:
       # Component tests drive a real Chromium: the flow layout depends on real
       # measurement and a real IntersectionObserver, so there is nothing useful to
       # assert in jsdom.
-      - run: pnpm --filter @tradeflow/core exec playwright install --with-deps chromium
+      - run: pnpm --filter @flow-grid/core exec playwright install --with-deps chromium
 
       - run: pnpm typecheck
       - run: pnpm format:check

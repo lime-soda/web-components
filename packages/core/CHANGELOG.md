@@ -1,4 +1,4 @@
-# @tradeflow/core
+# @flow-grid/core
 
 ## 0.1.0
 

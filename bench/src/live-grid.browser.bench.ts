@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import '@tradeflow/core';
-import type { ColumnDef, TfGrid, GridOptions } from '@tradeflow/core';
-import { TreeModule } from '@tradeflow/core/tree';
-import { SortModule } from '@tradeflow/core/sort';
-import { FilterModule } from '@tradeflow/core/filter';
-import { SelectionModule } from '@tradeflow/core/selection';
-import { CellFlashModule } from '@tradeflow/core/cell-flash';
+import '@flow-grid/core';
+import type { ColumnDef, FlowGrid, GridOptions } from '@flow-grid/core';
+import { TreeModule } from '@flow-grid/core/tree';
+import { SortModule } from '@flow-grid/core/sort';
+import { FilterModule } from '@flow-grid/core/filter';
+import { SelectionModule } from '@flow-grid/core/selection';
+import { CellFlashModule } from '@flow-grid/core/cell-flash';
 
 /**
  * The benchmarks that need a real browser: sustained frame timing under a live
@@ -56,13 +56,13 @@ const generate = (): Bond[] => {
 
 let host: HTMLDivElement | undefined;
 
-async function mount(): Promise<{ grid: TfGrid<Bond>; data: Bond[] }> {
+async function mount(): Promise<{ grid: FlowGrid<Bond>; data: Bond[] }> {
   host = document.createElement('div');
   host.style.cssText = 'width:1600px;height:800px';
   document.body.append(host);
 
   const data = generate();
-  const grid = document.createElement('tf-grid') as TfGrid<Bond>;
+  const grid = document.createElement('flow-grid') as FlowGrid<Bond>;
   const options: GridOptions<Bond> = {
     columns,
     rowHeight: 28,
@@ -211,7 +211,7 @@ describe('live grid benchmarks', () => {
 
   it('mounts only a fraction of the instances at any scroll position', async () => {
     const { grid } = await mount();
-    const mounted = grid.shadowRoot!.querySelectorAll('tf-instance').length;
+    const mounted = grid.shadowRoot!.querySelectorAll('flow-instance').length;
     const total = grid.api.getLayout().instances.length;
 
     // eslint-disable-next-line no-console -- a benchmark's output is its purpose

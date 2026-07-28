@@ -22,7 +22,7 @@ importers:
 
   apps/storybook:
     dependencies:
-      '@tradeflow/core':
+      '@flow-grid/core':
         specifier: workspace:*
         version: link:../../packages/core
       lit:
@@ -47,7 +47,7 @@ importers:
 
   bench:
     dependencies:
-      '@tradeflow/core':
+      '@flow-grid/core':
         specifier: workspace:*
         version: link:../packages/core
     devDependencies:

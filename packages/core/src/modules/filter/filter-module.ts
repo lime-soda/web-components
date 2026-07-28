@@ -137,25 +137,25 @@ export class FilterModule<TData = unknown> implements GridModule<
   // -- Header -----------------------------------------------------------------
 
   static readonly styles = css`
-    .tf-filter-input {
-      width: var(--tf-filter-input-width, 70px);
+    .flow-filter-input {
+      width: var(--flow-filter-input-width, 70px);
       min-width: 0;
       font: inherit;
-      font-size: var(--tf-filter-font-size, 11px);
-      padding: var(--tf-filter-padding, 1px 4px);
-      border-radius: var(--tf-radius, 3px);
-      border: 1px solid var(--tf-border, #d8d8d8);
+      font-size: var(--flow-filter-font-size, 11px);
+      padding: var(--flow-filter-padding, 1px 4px);
+      border-radius: var(--flow-radius, 3px);
+      border: 1px solid var(--flow-border, #d8d8d8);
       background: transparent;
       color: inherit;
     }
 
     /* An active filter is worth seeing at a glance across a wide monitor. */
-    .tf-filter-input[data-tf-active] {
-      border-color: var(--tf-focus, #3b82f6);
+    .flow-filter-input[data-flow-active] {
+      border-color: var(--flow-focus, #3b82f6);
     }
 
-    .tf-filter-input:focus-visible {
-      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
+    .flow-filter-input:focus-visible {
+      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
       outline-offset: -1px;
     }
   `;
@@ -171,13 +171,13 @@ export class FilterModule<TData = unknown> implements GridModule<
     const value = current && 'value' in current ? String(current.value ?? '') : '';
 
     return html`<input
-      class="tf-filter-input"
+      class="flow-filter-input"
       part="filter-input"
       type="search"
       aria-label=${`Filter ${ctx.column.headerName}`}
       .value=${value}
       placeholder="Filter"
-      ?data-tf-active=${current !== undefined}
+      ?data-flow-active=${current !== undefined}
       @click=${(event: Event) => event.stopPropagation()}
       @keydown=${(event: Event) => event.stopPropagation()}
       @input=${(event: Event) => {
@@ -234,7 +234,7 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   private changed(): void {
     this.context?.invalidate();
-    this.context?.dispatch('tf-filter-changed', {
+    this.context?.dispatch('flow-filter-changed', {
       model: this.model,
       quickFilter: this.quickFilter,
     });

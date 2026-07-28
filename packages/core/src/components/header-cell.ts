@@ -14,22 +14,22 @@ import { SignalWatcher } from '../reactive/index.js';
  * arrive as module header slots, so a grid with neither module installed has a
  * header with no affordances rather than dead ones.
  */
-@customElement('tf-header-cell')
-export class TfHeaderCell extends SignalWatcher(LitElement) {
+@customElement('flow-header-cell')
+export class FlowHeaderCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
       align-items: center;
       gap: 8px;
       box-sizing: border-box;
-      padding: 0 var(--tf-cell-padding-x, 8px);
+      padding: 0 var(--flow-cell-padding-x, 8px);
       height: 100%;
-      background: var(--tf-header-background, #f5f5f5);
-      border-bottom: 2px solid var(--tf-border, #d8d8d8);
-      border-right: 1px solid var(--tf-border-subtle, #f0f0f0);
-      color: var(--tf-header-text, #101010);
-      font-weight: var(--tf-header-font-weight, 500);
-      font-size: var(--tf-header-font-size, 13px);
+      background: var(--flow-header-background, #f5f5f5);
+      border-bottom: 2px solid var(--flow-border, #d8d8d8);
+      border-right: 1px solid var(--flow-border-subtle, #f0f0f0);
+      color: var(--flow-header-text, #101010);
+      font-weight: var(--flow-header-font-weight, 500);
+      font-size: var(--flow-header-font-size, 13px);
       overflow: hidden;
       position: sticky;
       top: 0;
@@ -41,12 +41,12 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
     }
 
     :host(:focus-visible) {
-      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--tf-focus-width, 2px));
+      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--flow-focus-width, 2px));
     }
 
     /* No label to sit beside, so whatever a module contributed is centred. */
-    :host([data-tf-unnamed]) {
+    :host([data-flow-unnamed]) {
       justify-content: center;
       padding: 0;
     }
@@ -69,8 +69,8 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
     }
 
     .label.activatable:focus-visible {
-      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--tf-focus-width, 2px));
+      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--flow-focus-width, 2px));
     }
 
     .slots {
@@ -130,7 +130,7 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
     // so its slot content centres in the header instead of being pushed aside by
     // an empty flex:1 span.
     const unnamed = this.column.headerName === '';
-    this.toggleAttribute('data-tf-unnamed', unnamed);
+    this.toggleAttribute('data-flow-unnamed', unnamed);
 
     return html`
       ${
@@ -159,6 +159,6 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tf-header-cell': TfHeaderCell;
+    'flow-header-cell': FlowHeaderCell;
   }
 }

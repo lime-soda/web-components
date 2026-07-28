@@ -313,7 +313,7 @@ describe('FilterModule', () => {
       filter.setQuickFilter('x');
 
       expect(dispatch).toHaveBeenCalledWith(
-        'tf-filter-changed',
+        'flow-filter-changed',
         expect.objectContaining({ quickFilter: 'x' }),
       );
     });

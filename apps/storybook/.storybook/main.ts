@@ -9,7 +9,7 @@ const config: StorybookConfig = {
   },
   viteFinal: (config) => ({
     ...config,
-    // Resolve @tradeflow/core to source, so a change in the package shows up here
+    // Resolve @flow-grid/core to source, so a change in the package shows up here
     // without a build step.
     resolve: {
       ...config.resolve,
