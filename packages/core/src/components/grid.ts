@@ -10,6 +10,7 @@ import type { GridApi } from '../api/types.js';
 import { gridContext } from '../context/index.js';
 import { GridController, type GridOptions } from '../controller/grid-controller.js';
 import { SignalWatcher } from '../reactive/index.js';
+import type { DisplayRow, LayoutInstance } from '../layout/types.js';
 import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
 import './instance.js';
 
@@ -144,6 +145,16 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
   /** Width the body's scrollbar occupies. Zero with overlay scrollbars. */
   @state()
   private accessor scrollbarWidth = 0;
+
+  /**
+   * The pinned group band's instance, reused while its rows are unchanged.
+   *
+   * A fresh object literal per render would reassign the property on every
+   * update — a resize, a tick, any repaint — and re-render the whole band each
+   * time, which reads as a flicker.
+   */
+  private stickyInstance: LayoutInstance | undefined;
+  private stickyKey = '';
 
   private readonly scrollerRef = createRef<HTMLElement>();
   private virtualizer?: InstanceVirtualizer;
@@ -321,6 +332,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     // group is.
     const stickyRows = layout.stickyRows ?? [];
     const rowHeight = this.controller?.pipeline.viewport.rowHeight ?? 32;
+    const stickyInstance = this.stickyInstanceFor(instance, stickyRows);
 
     return html`
       ${
@@ -330,7 +342,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
               class="stack-sticky"
               part="instance-sticky"
               parts="rows"
-              .instance=${{ ...instance, id: `${instance.id}-sticky`, rows: stickyRows }}
+              .instance=${stickyInstance}
               style=${styleMap({
                 '--flow-sticky-height': `${stickyRows.length * rowHeight}px`,
               })}
@@ -343,6 +355,24 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       <flow-instance part="instance" parts="rows" .instance=${instance}></flow-instance>
       <div class="stack-spacer" style=${styleMap({ '--flow-spacer-height': `${below}px` })}></div>
     `;
+  }
+
+  /**
+   * The band's instance, rebuilt only when the pinned rows themselves change.
+   *
+   * Keyed on the row ids: the layout object is replaced on every relayout, but
+   * the group being pinned usually is not.
+   */
+  private stickyInstanceFor(
+    instance: LayoutInstance,
+    stickyRows: readonly DisplayRow[],
+  ): LayoutInstance {
+    const key = stickyRows.map((row) => row.rowId).join('\u0000');
+    if (this.stickyInstance === undefined || key !== this.stickyKey) {
+      this.stickyKey = key;
+      this.stickyInstance = { ...instance, id: `${instance.id}-sticky`, rows: stickyRows };
+    }
+    return this.stickyInstance;
   }
 
   /**

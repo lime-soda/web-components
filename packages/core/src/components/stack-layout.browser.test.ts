@@ -344,11 +344,59 @@ describe('stack layout', () => {
         .join(' ');
     };
 
-    it('pins nothing while the heading itself is in view', async () => {
-      // A heading is not in its own ancestor chain, so no duplicate appears.
+    it('pins the group from the outset, exactly over its real heading', async () => {
+      // Deliberate: hiding the band while the real heading is visible is what
+      // made it blink at every boundary. Instead it is always present and, at
+      // the top, sits exactly over the heading it duplicates — so it cannot be
+      // told apart from it.
       const grid = await mountTree();
 
-      expect(stickyOf(grid)).toBeNull();
+      expect(stickyText(grid)).toContain('Group One');
+
+      const band = (stickyOf(grid) as HTMLElement).getBoundingClientRect();
+      const heading = bodyRows(grid)[0]!
+        .shadowRoot!.querySelector('flow-cell')!
+        .getBoundingClientRect();
+      expect(Math.abs(band.top - heading.top)).toBeLessThan(1.5);
+    });
+
+    it('never blinks out while passing from one group to the next', async () => {
+      // The band vanished for one row's worth of scroll at every boundary,
+      // because a heading arriving at the top is not in its own ancestor chain.
+      const grid = await mountTree();
+      const scroller = scrollerOf(grid);
+
+      // Step through the boundary a row at a time, watching for a gap.
+      const seen: string[] = [];
+      for (let top = 3000; top <= 3600; top += 16) {
+        scroller.scrollTop = top;
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        await grid.updateComplete;
+        seen.push(stickyText(grid).includes('Group') ? 'pinned' : 'gap');
+      }
+
+      expect(seen).not.toContain('gap');
+    });
+
+    it('rebuilds the band only when the pinned rows change', async () => {
+      // A fresh instance object per render re-rendered the band on every
+      // repaint — a resize, a tick — which reads as a flicker.
+      const grid = await mountTree();
+      await scrollTo(grid, 1500);
+      const band = stickyOf(grid)!;
+      const instanceBefore = (band as unknown as { instance: unknown }).instance;
+
+      // Force repaints that leave the pinned group alone.
+      grid.api.applyTransaction({
+        update: [{ id: 'g1-c0', parentId: 'g1', name: 'One 0', price: 999 }],
+      });
+      await grid.updateComplete;
+      host!.style.width = '640px';
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await grid.updateComplete;
+
+      expect(stickyOf(grid)).toBe(band);
+      expect((band as unknown as { instance: unknown }).instance).toBe(instanceBefore);
     });
 
     it('pins the group once its heading has scrolled out of view', async () => {

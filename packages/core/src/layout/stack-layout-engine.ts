@@ -54,9 +54,14 @@ export class StackLayoutEngine implements LayoutEngine {
             },
           ];
 
-    // A row that is itself a heading is not in its own ancestor chain, so a
-    // heading at the top of the viewport correctly pins nothing.
-    const stickyRows = rows[topVisible]?.repeatOnBreak ?? [];
+    // The chain applying at the top of the viewport.
+    //
+    // A heading is not in its own ancestor chain, so a heading arriving at the
+    // top would pin nothing — and the band would blink out for exactly one row's
+    // worth of scroll on every group boundary. Falling through to the next row
+    // covers that: its chain ends in the heading that just arrived, so the band
+    // switches from one group to the next with no gap between them.
+    const stickyRows = rows[topVisible]?.repeatOnBreak ?? rows[topVisible + 1]?.repeatOnBreak ?? [];
 
     return {
       instances,
