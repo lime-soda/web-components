@@ -381,6 +381,115 @@ describe('stack layout', () => {
     });
   });
 
+  describe('column sizing', () => {
+    const templateOf = (grid: FlowGrid<Row>) =>
+      getComputedStyle(headerOf(grid).shadowRoot!.querySelector('.grid') as HTMLElement)
+        .gridTemplateColumns;
+
+    it('flexes a column that declares no width, filling the container', async () => {
+      const grid = await mount({ columns: [{ field: 'name' }, { field: 'price', width: 120 }] });
+
+      const box = headerOf(grid).getBoundingClientRect();
+      expect(Math.round(box.width)).toBe(scrollerOf(grid).clientWidth);
+
+      // name takes the leftover; price stays pinned.
+      const [nameTrack, priceTrack] = templateOf(grid).split(' ');
+      expect(Number.parseFloat(priceTrack!)).toBe(120);
+      expect(Number.parseFloat(nameTrack!)).toBeGreaterThan(120);
+    });
+
+    it('divides the leftover by the declared shares', async () => {
+      const grid = await mount({
+        columns: [
+          { field: 'name', flex: 3 },
+          { colId: 'other', flex: 1 },
+        ],
+      });
+
+      const [first, second] = templateOf(grid)
+        .split(' ')
+        .map((track) => Number.parseFloat(track));
+
+      expect(first! / second!).toBeCloseTo(3, 1);
+    });
+
+    it('honours a floor on a flexible column', async () => {
+      const grid = await mount(
+        {
+          columns: [
+            { field: 'name', minWidth: 500 },
+            { field: 'price', minWidth: 500 },
+          ],
+        },
+        rows(50),
+      );
+
+      // Together they exceed the 600px container, so both hold their floor and
+      // the grid scrolls rather than crushing them.
+      for (const track of templateOf(grid).split(' ')) {
+        expect(Number.parseFloat(track)).toBeGreaterThanOrEqual(500);
+      }
+      expect(scrollerOf(grid).scrollWidth).toBeGreaterThan(scrollerOf(grid).clientWidth);
+    });
+
+    it('matches the columns exactly when every one is fixed', async () => {
+      // No dead space beside the last column: the box is the sum of the columns.
+      const grid = await mount({
+        columns: [
+          { field: 'name', width: 150 },
+          { field: 'price', width: 100 },
+        ],
+      });
+
+      // clientWidth, so the instance's own 1px border is not counted as a column.
+      expect((headerOf(grid) as HTMLElement).clientWidth).toBe(250);
+      expect(scrollerOf(grid).clientWidth).toBeGreaterThan(250);
+    });
+
+    it('keeps the body the same width as the header either way', async () => {
+      const fixed = await mount({
+        columns: [
+          { field: 'name', width: 150 },
+          { field: 'price', width: 100 },
+        ],
+      });
+      expect(Math.round(bodyOf(fixed).getBoundingClientRect().width)).toBe(
+        Math.round(headerOf(fixed).getBoundingClientRect().width),
+      );
+      host!.remove();
+
+      const flexible = await mount({ columns: [{ field: 'name' }, { field: 'price' }] });
+      expect(Math.round(bodyOf(flexible).getBoundingClientRect().width)).toBe(
+        Math.round(headerOf(flexible).getBoundingClientRect().width),
+      );
+    });
+
+    it('leaves the flow layout on fixed pixel tracks', async () => {
+      // A flow instance is a fixed-width block; there is no leftover for a
+      // fraction to divide, so a flexible column falls back to its width.
+      host = document.createElement('div');
+      host.style.cssText = 'width:800px;height:400px';
+      document.body.append(host);
+
+      const grid = document.createElement('flow-grid') as FlowGrid<Row>;
+      grid.gridOptions = { columns: [{ field: 'name' }, { field: 'price' }], rowHeight: 32 };
+      grid.rowData = rows(50);
+      host.append(grid);
+      await grid.updateComplete;
+      await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null, {
+        description: 'an instance to mount',
+      });
+
+      const instance = grid.shadowRoot!.querySelector('flow-instance')!;
+      const template = getComputedStyle(
+        instance.shadowRoot!.querySelector('.grid') as HTMLElement,
+      ).gridTemplateColumns;
+
+      expect(template).not.toContain('fr');
+      expect(instance.hasAttribute('data-flexes')).toBe(false);
+    });
+  });
+
   describe('the flow layout is unaffected', () => {
     it('still gives every instance its own header', async () => {
       host = document.createElement('div');

@@ -55,8 +55,20 @@ export interface ColumnDef<TData = unknown, TValue = unknown> {
   /** Property name, or a dot path such as `quote.bid.price`. */
   field?: string;
   headerName?: string;
+  /** Fixed width in px. Mutually exclusive with `flex`; `width` wins if both are set. */
   width?: number;
+  /** Lower bound. Applies to a fixed width, and to a flexible column's track. */
   minWidth?: number;
+  /**
+   * Share of the leftover space, as a CSS `fr`.
+   *
+   * Only the stack layout can honour this: a flow instance is a fixed-width block
+   * whose width is the sum of its columns, so there is no leftover for a fraction
+   * to divide. A flexible column falls back to `width` there.
+   *
+   * A column with neither `width` nor `flex` is flexible with a share of 1, so a
+   * grid of undeclared columns fills its container evenly.
+   */
   flex?: number;
   /** Names of entries in `columnTypes` to merge in beneath this definition. */
   type?: string | readonly string[];
@@ -75,7 +87,18 @@ export interface ResolvedColumn<TData = unknown, TValue = unknown> extends Omit<
 > {
   readonly colId: string;
   readonly headerName: string;
+  /**
+   * Width in px.
+   *
+   * Always concrete, because the flow layout engine sums these to size an
+   * instance. For a flexible column this is the fallback used where `fr` cannot
+   * resolve.
+   */
   readonly width: number;
+  /** How the column is sized when the layout can offer leftover space. */
+  readonly sizing: 'fixed' | 'flex';
+  /** Share of the leftover space. Only meaningful when `sizing` is `flex`. */
+  readonly flex: number;
   readonly index: number;
 }
 

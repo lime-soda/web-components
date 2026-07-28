@@ -26,6 +26,12 @@ export function resolveColumns<TData = unknown>(
   return defs.map((def, index) => {
     const merged = mergeDefinition(def, options);
     const colId = uniqueId(baseId(merged, index), seen);
+
+    // A declared width pins the column. Otherwise it flexes — including when
+    // nothing at all was declared, so a grid of bare columns fills its container
+    // rather than leaving a gap beside the last one.
+    const sizing: 'fixed' | 'flex' = merged.width !== undefined ? 'fixed' : 'flex';
+    const flex = sizing === 'flex' ? (merged.flex ?? 1) : 0;
     const width = Math.max(merged.width ?? DEFAULT_WIDTH, merged.minWidth ?? 0);
 
     return {
@@ -33,6 +39,8 @@ export function resolveColumns<TData = unknown>(
       colId,
       index,
       width,
+      sizing,
+      flex,
       headerName: merged.headerName ?? humanise(lastSegment(merged.field)),
     } as ResolvedColumn<TData>;
   });

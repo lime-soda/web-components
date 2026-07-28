@@ -243,8 +243,15 @@ export const StackLayout: StoryObj<Args> = {
   args: { ...BondMarket.args! },
   render: (args) => {
     const data = generateBonds(args.groups, args.instruments);
+    // Instrument flexes to fill the width; the numeric columns stay pinned.
+    // Omitting `width` is what makes a column flexible.
+    const stackColumns = columns.map((column) => {
+      if (column.field !== 'instrument') return column;
+      const { width: _width, ...flexible } = column;
+      return { ...flexible, minWidth: 240 };
+    });
     const options: GridOptions<Bond> = {
-      columns,
+      columns: stackColumns,
       layout: 'stack',
       rowHeight: args.rowHeight,
       headerHeight: args.rowHeight,

@@ -45,8 +45,14 @@ export class FlowInstance extends SignalWatcher(LitElement) {
     :host([parts='header']),
     :host([parts='rows']) {
       width: max-content;
-      min-width: 100%;
       overflow: visible;
+    }
+
+    /* Something flexible to absorb it, so the box fills the container. */
+    :host([parts='header'][data-flexes]),
+    :host([parts='rows'][data-flexes]) {
+      width: auto;
+      min-width: 100%;
     }
 
     /*
@@ -113,9 +119,27 @@ export class FlowInstance extends SignalWatcher(LitElement) {
     if (!grid || !this.instance) return nothing;
 
     const columns = grid.columns.get();
+    // A flow instance is a fixed-width block whose width is the sum of its
+    // columns, so there is no leftover space for a fraction to divide; only the
+    // stack layout can honour flex.
+    const canFlex = (grid.options.layout ?? 'flow') === 'stack';
+    const flexes = canFlex && columns.some((column) => column.sizing === 'flex');
+
     // Column widths are data, not style: they come from the column definitions
     // and change with them, so they travel as a property the stylesheet uses.
-    const template = columns.map((column) => `${column.width}px`).join(' ');
+    const template = columns
+      .map((column) => {
+        if (!canFlex || column.sizing === 'fixed') return `${column.width}px`;
+        const track = `${column.flex}fr`;
+        // A flexible column still respects its floor.
+        return column.minWidth === undefined ? track : `minmax(${column.minWidth}px, ${track})`;
+      })
+      .join(' ');
+
+    // Only a grid with something flexible should stretch to its container. With
+    // every column fixed, the box matches the columns exactly rather than leaving
+    // dead space beside the last one.
+    this.toggleAttribute('data-flexes', flexes);
 
     const showHeader = this.parts !== 'rows';
     const showRows = this.parts !== 'header';

@@ -35,7 +35,16 @@ const setup = (data: Bond[], options: Partial<TreeModuleOptions<Bond>> = {}) => 
   tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId, ...options });
   registry = new ModuleRegistry<Bond>({
     pipeline,
-    getColumns: () => [{ colId: 'instrument', headerName: 'Instrument', width: 100, index: 0 }],
+    getColumns: () => [
+      {
+        colId: 'instrument',
+        headerName: 'Instrument',
+        width: 100,
+        sizing: 'fixed',
+        flex: 0,
+        index: 0,
+      },
+    ],
     dispatch: () => {},
   });
   registry.register(tree);
