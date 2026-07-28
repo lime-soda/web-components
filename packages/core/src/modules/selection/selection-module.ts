@@ -89,6 +89,13 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
         }
       }),
     );
+
+    // Membership is recorded as a side effect of reading the index, so it must
+    // be read on every projection rather than only when a checkbox happens to
+    // ask. Otherwise a grid collapsed before anything consulted selection would
+    // never have learned what its groups contain.
+    context.addTeardown(context.pipeline.projector.subscribe(() => this.leafIndex()));
+    this.leafIndex();
   }
 
   private get mode(): SelectionMode {
@@ -342,7 +349,9 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     if (ctx.column.colId !== SELECTION_COL_ID || this.mode === 'single') return null;
 
     const leaves = this.allSelectableLeaves();
-    const selectedCount = leaves.filter((rowId) => this.selected.has(rowId)).length;
+    // Coverage, not membership of the set: a leaf may be selected through an
+    // ancestor recorded while its group was collapsed.
+    const selectedCount = leaves.filter((rowId) => this.isCovered(rowId)).length;
     const state: SelectionState =
       leaves.length === 0 || selectedCount === 0
         ? 'unchecked'
@@ -409,10 +418,17 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     return this.leafIndex().get(rowId) ?? [];
   }
 
+  /**
+   * Every selectable leaf in the grid, resolved through remembered membership.
+   *
+   * The projected leaves are not enough: with groups collapsed each group *is* a
+   * projected leaf, so the header would count groups rather than instruments and
+   * report a selection of instruments as nothing at all.
+   */
   private allSelectableLeaves(): readonly string[] {
     const ids = new Set<string>();
-    for (const leaves of this.leafIndex().values()) {
-      for (const leaf of leaves) ids.add(leaf);
+    for (const rowId of this.leafIndex().keys()) {
+      for (const leaf of this.membershipOf(rowId)) ids.add(leaf);
     }
     return [...ids];
   }

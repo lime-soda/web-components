@@ -164,14 +164,59 @@ describe('group selection', () => {
   });
 
   describe('collapsed groups', () => {
-    it('records the group when its children are not projected', () => {
-      // Nothing else exists to record: the children are not in the projection.
+    it('selects the children of a collapsed group it has seen before', () => {
       const { selection, tree } = setup();
       tree.collapseAll();
 
       selection.setRowSelected('g1', true);
 
-      expect(selected(selection)).toEqual(['g1']);
+      expect(selected(selection)).toEqual(['g1-a', 'g1-b', 'g1-c']);
+      expect(selection.getRowState('g1')).toBe('checked');
+    });
+
+    it('records the group itself when its children have never been projected', () => {
+      // Collapsed from the outset, so there is nothing else that could be
+      // recorded. The group is the most specific answer available.
+      const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
+      pipeline.store.setRowData(data);
+      const selection = new SelectionModule<Bond>();
+      const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
+      const registry = new ModuleRegistry<Bond>({
+        pipeline,
+        getColumns: () => resolveColumns<Bond>([{ field: 'instrument' }]),
+        dispatch: () => {},
+      });
+      registry.register(tree);
+      registry.register(selection);
+      registry.start();
+      pipeline.projector.rows.get();
+
+      selection.setRowSelected('g1', true);
+
+      expect(selection.getSelectedRows()).toEqual(['g1']);
+      expect(selection.getRowState('g1')).toBe('checked');
+    });
+
+    it('resolves that group to its children once they are first revealed', () => {
+      const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
+      pipeline.store.setRowData(data);
+      const selection = new SelectionModule<Bond>();
+      const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
+      const registry = new ModuleRegistry<Bond>({
+        pipeline,
+        getColumns: () => resolveColumns<Bond>([{ field: 'instrument' }]),
+        dispatch: () => {},
+      });
+      registry.register(tree);
+      registry.register(selection);
+      registry.start();
+      pipeline.projector.rows.get();
+      selection.setRowSelected('g1', true);
+
+      tree.expandAll();
+      pipeline.projector.rows.get();
+
+      expect([...selection.getSelectedRows()].sort()).toEqual(['g1-a', 'g1-b', 'g1-c']);
       expect(selection.getRowState('g1')).toBe('checked');
     });
 
@@ -283,6 +328,59 @@ describe('group selection', () => {
 
       expect(selection.getRowState('mid')).toBe('indeterminate');
       expect(selection.getRowState('root')).toBe('indeterminate');
+    });
+  });
+
+  describe('the header while collapsed', () => {
+    const headerState = (selection: SelectionModule<Bond>) => {
+      const slot = selection.headerSlot({
+        column: { colId: 'flow-selection', headerName: '', width: 28, index: 0 },
+      } as never);
+      // The template's bound properties carry the tri-state.
+      const values = (slot as unknown as { values: unknown[] }).values;
+      return { checked: values[0] as boolean, indeterminate: values[1] as boolean };
+    };
+
+    it('shows indeterminate when only some groups are selected', () => {
+      // With groups collapsed each group is itself a projected leaf, so counting
+      // projected leaves reported a selection of instruments as nothing at all.
+      const { selection, tree, pipeline } = setup();
+      selection.setRowSelected('g1', true);
+      pipeline.projector.rows.get();
+
+      tree.collapseAll();
+      pipeline.projector.rows.get();
+
+      expect(headerState(selection)).toEqual({ checked: false, indeterminate: true });
+    });
+
+    it('shows checked when every group is selected', () => {
+      const { selection, tree, pipeline } = setup();
+      selection.selectAll();
+      pipeline.projector.rows.get();
+
+      tree.collapseAll();
+      pipeline.projector.rows.get();
+
+      expect(headerState(selection)).toEqual({ checked: true, indeterminate: false });
+    });
+
+    it('shows unchecked when nothing is selected', () => {
+      const { selection, tree, pipeline } = setup();
+      tree.collapseAll();
+      pipeline.projector.rows.get();
+
+      expect(headerState(selection)).toEqual({ checked: false, indeterminate: false });
+    });
+
+    it('selects every instrument when ticked while collapsed', () => {
+      const { selection, tree, pipeline } = setup();
+      tree.collapseAll();
+      pipeline.projector.rows.get();
+
+      selection.selectAll();
+
+      expect(selected(selection)).toEqual(['g1-a', 'g1-b', 'g1-c', 'g2-a', 'g2-b']);
     });
   });
 
