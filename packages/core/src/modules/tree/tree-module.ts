@@ -207,9 +207,9 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
                 aria-expanded=${isExpanded}
                 tabindex="-1"
                 @click=${(event: Event) => {
-                event.stopPropagation();
-                this.toggleExpanded(ctx.row.rowId);
-              }}
+                  event.stopPropagation();
+                  this.toggleExpanded(ctx.row.rowId);
+                }}
               >
                 ▶
               </button>`
