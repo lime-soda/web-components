@@ -164,15 +164,94 @@ describe('group selection', () => {
   });
 
   describe('collapsed groups', () => {
-    it('selects nothing for a group whose children are not projected', () => {
-      // A collapsed group has no visible children to stand for. Selecting the
-      // hidden ones would put rows in a basket the trader cannot see.
+    it('records the group when its children are not projected', () => {
+      // Nothing else exists to record: the children are not in the projection.
       const { selection, tree } = setup();
       tree.collapseAll();
 
       selection.setRowSelected('g1', true);
 
       expect(selected(selection)).toEqual(['g1']);
+      expect(selection.getRowState('g1')).toBe('checked');
+    });
+
+    it('keeps the selection when the group is expanded again', () => {
+      // The reported bug: the group showed as selected, then on expanding both
+      // it and its children read as unselected — the selection silently lost.
+      const { selection, tree, pipeline } = setup();
+      tree.collapseAll();
+      selection.setRowSelected('g1', true);
+
+      tree.expandAll();
+      pipeline.projector.rows.get();
+
+      expect(selection.getRowState('g1')).toBe('checked');
+      expect(selected(selection)).toEqual(['g1-a', 'g1-b', 'g1-c']);
+    });
+
+    it('marks the revealed children as selected', () => {
+      const { selection, tree, pipeline } = setup();
+      tree.collapseAll();
+      selection.setRowSelected('g1', true);
+
+      tree.expandAll();
+      pipeline.projector.rows.get();
+
+      for (const child of ['g1-a', 'g1-b', 'g1-c']) {
+        expect(selection.getRowState(child), child).toBe('checked');
+      }
+    });
+
+    it('leaves other groups alone through the round trip', () => {
+      const { selection, tree, pipeline } = setup();
+      tree.collapseAll();
+      selection.setRowSelected('g1', true);
+
+      tree.expandAll();
+      pipeline.projector.rows.get();
+
+      expect(selection.getRowState('g2')).toBe('unchecked');
+      expect(selected(selection)).not.toContain('g2-a');
+    });
+
+    it('lets a child be deselected after the group was selected while collapsed', () => {
+      // The group covers its children, so removing one has to break the group
+      // apart and keep the siblings rather than letting the row spring back.
+      const { selection, tree, pipeline } = setup();
+      tree.collapseAll();
+      selection.setRowSelected('g1', true);
+      tree.expandAll();
+      pipeline.projector.rows.get();
+
+      selection.setRowSelected('g1-b', false);
+
+      expect(selected(selection)).toEqual(['g1-a', 'g1-c']);
+      expect(selection.getRowState('g1')).toBe('indeterminate');
+      expect(selection.getRowState('g1-b')).toBe('unchecked');
+    });
+
+    it('collapsing again keeps the group reading as selected', () => {
+      const { selection, tree, pipeline } = setup();
+      selection.setRowSelected('g1', true);
+      pipeline.projector.rows.get();
+
+      tree.collapseAll();
+      pipeline.projector.rows.get();
+
+      expect(selection.getRowState('g1')).toBe('checked');
+    });
+
+    it('a partly selected group still reads as indeterminate once collapsed', () => {
+      const { selection, tree, pipeline } = setup();
+      selection.setRowSelected('g1-a', true);
+      pipeline.projector.rows.get();
+
+      tree.collapseAll();
+      pipeline.projector.rows.get();
+
+      // Its children are hidden, but one of them is selected, so neither
+      // checked nor unchecked would be honest.
+      expect(selection.getRowState('g1')).toBe('indeterminate');
     });
   });
 

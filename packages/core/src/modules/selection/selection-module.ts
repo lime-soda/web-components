@@ -61,11 +61,34 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   private cachedRows?: readonly DisplayRow[];
   private cachedLeaves?: Map<string, readonly string[]>;
+  private cachedAncestors?: Map<string, readonly string[]>;
+
+  /**
+   * Group membership seen at any point, kept across projections.
+   *
+   * A collapsed group's children are absent from the projection, so without this
+   * a group selected while expanded would read as unselected the moment it was
+   * collapsed — the same lie as the reverse case, in the other direction.
+   * Pruned when rows leave the store.
+   */
+  private readonly rememberedLeaves = new Map<string, readonly string[]>();
 
   constructor(private readonly options: SelectionModuleOptions = {}) {}
 
   init(context: ModuleContext<TData>): void {
     this.context = context;
+
+    context.addTeardown(
+      context.pipeline.store.subscribe((result) => {
+        if (!result.structural) return;
+        // A remembered group whose rows have gone would otherwise keep a stale
+        // membership alive for the life of the grid.
+        for (const rowId of result.removed) {
+          this.rememberedLeaves.delete(rowId);
+          this.selected.delete(rowId);
+        }
+      }),
+    );
   }
 
   private get mode(): SelectionMode {
@@ -84,6 +107,41 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   }
 
   /**
+   * Whether a row is selected in its own right or through an ancestor.
+   *
+   * Selecting a collapsed group can only record the group: its children are not
+   * projected, so there is nothing else to record. Expanding then reveals rows
+   * that were never named, and without this they would read as unselected and
+   * the selection would appear to vanish.
+   */
+  private isCovered(rowId: string): boolean {
+    if (this.selected.has(rowId)) return true;
+    for (const ancestor of this.ancestorsOf(rowId)) {
+      if (this.selected.has(ancestor)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * The leaves a row stands for, falling back to what was seen before.
+   *
+   * A collapsed group looks like a leaf in the projection; if it was ever seen
+   * expanded, its real membership is the honest answer.
+   */
+  private membershipOf(rowId: string): readonly string[] {
+    const projected = this.selectableLeavesOf(rowId);
+    const isOwnLeafOnly = projected.length === 1 && projected[0] === rowId;
+    if (!isOwnLeafOnly) return projected;
+    return this.rememberedLeaves.get(rowId) ?? projected;
+  }
+
+  /** Ancestors of a projected row, nearest last. Empty for a root. */
+  private ancestorsOf(rowId: string): readonly string[] {
+    this.leafIndex();
+    return this.cachedAncestors?.get(rowId) ?? [];
+  }
+
+  /**
    * What this row's checkbox should show.
    *
    * A parent reads as indeterminate while only some of its children are
@@ -91,46 +149,83 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    * basket needs to see.
    */
   getRowState(rowId: string): SelectionState {
-    const leaves = this.selectableLeavesOf(rowId);
+    const leaves = this.membershipOf(rowId);
     if (leaves.length === 0) return 'unchecked';
 
     let selectedCount = 0;
     for (const leaf of leaves) {
-      if (this.selected.has(leaf)) selectedCount += 1;
+      if (this.isCovered(leaf)) selectedCount += 1;
     }
 
     if (selectedCount === 0) return 'unchecked';
     return selectedCount === leaves.length ? 'checked' : 'indeterminate';
   }
 
-  /** The selected leaf rows — the instruments, not the headings above them. */
+  /**
+   * The selected leaf rows — the instruments, not the headings above them.
+   *
+   * A group recorded while collapsed resolves to its children once they are
+   * known; while they are not, the group itself is the most specific answer
+   * available.
+   */
   getSelectedRows(): readonly string[] {
-    return [...this.selected];
+    const resolved = new Set<string>();
+    for (const id of this.selected) {
+      const leaves = this.membershipOf(id);
+      if (leaves.length === 0) resolved.add(id);
+      else for (const leaf of leaves) resolved.add(leaf);
+    }
+    return [...resolved];
   }
 
   getSelectedCount(): number {
-    return this.selected.size;
+    return this.getSelectedRows().length;
   }
 
   setRowSelected(rowId: string, selected: boolean): void {
-    const leaves = this.selectableLeavesOf(rowId);
+    const leaves = this.membershipOf(rowId);
     if (leaves.length === 0) return;
 
     if (selected && this.mode === 'single') this.selected.clear();
 
-    let changed = false;
-    for (const leaf of leaves) {
-      if (selected ? this.selected.has(leaf) : !this.selected.has(leaf)) continue;
-      if (selected) this.selected.add(leaf);
-      else this.selected.delete(leaf);
-      changed = true;
-      // Single mode selects one leaf even when handed a parent.
-      if (selected && this.mode === 'single') break;
+    const before = [...this.selected].sort().join('\u0000');
+
+    if (selected) {
+      for (const leaf of leaves) {
+        this.selected.add(leaf);
+        // Single mode selects one leaf even when handed a parent.
+        if (this.mode === 'single') break;
+      }
+    } else {
+      for (const leaf of leaves) this.selected.delete(leaf);
+      // The row may be selected only through an ancestor recorded while its
+      // children were hidden. Deselecting one child has to break that ancestor
+      // apart, keeping its siblings, or the row would spring straight back.
+      this.uncover(rowId);
     }
 
-    if (!changed) return;
+    if ([...this.selected].sort().join('\u0000') === before) return;
+
     this.lastToggled = rowId;
     this.changed();
+  }
+
+  /**
+   * Removes any selected ancestor covering a row, replacing it with its other
+   * leaves so only the intended row is deselected.
+   */
+  private uncover(rowId: string): void {
+    for (const ancestor of this.ancestorsOf(rowId)) {
+      if (!this.selected.has(ancestor)) continue;
+      this.selected.delete(ancestor);
+      for (const leaf of this.membershipOf(ancestor)) {
+        if (leaf !== rowId && !this.isDescendantOf(leaf, rowId)) this.selected.add(leaf);
+      }
+    }
+  }
+
+  private isDescendantOf(rowId: string, possibleAncestor: string): boolean {
+    return this.ancestorsOf(rowId).includes(possibleAncestor);
   }
 
   toggleRowSelected(rowId: string): void {
@@ -377,8 +472,30 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     const leaves = new Map<string, readonly string[]>();
     for (const [rowId, ids] of collected) leaves.set(rowId, [...ids]);
 
+    // The ancestor chain is already on the row, put there by whichever module
+    // flattened the hierarchy. Reading it here needs no notion of a parent.
+    const ancestors = new Map<string, readonly string[]>();
+    for (const row of rows) {
+      const chain = row.repeatOnBreak;
+      if (chain && chain.length > 0) {
+        ancestors.set(
+          row.rowId,
+          chain.map((ancestor) => ancestor.rowId),
+        );
+      }
+    }
+
+    for (const [rowId, ids] of leaves) {
+      // Only a row standing for others is worth remembering; a leaf stands for
+      // itself in every projection.
+      if (ids.length > 1 || (ids.length === 1 && ids[0] !== rowId)) {
+        this.rememberedLeaves.set(rowId, ids);
+      }
+    }
+
     this.cachedRows = rows;
     this.cachedLeaves = leaves;
+    this.cachedAncestors = ancestors;
     return leaves;
   }
 
