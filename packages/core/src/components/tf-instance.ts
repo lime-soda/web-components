@@ -2,6 +2,7 @@ import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { gridContext, instanceContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
 import type { LayoutInstance } from '../layout/types.js';
@@ -22,7 +23,7 @@ export class TfInstance extends SignalWatcher(LitElement) {
     :host {
       display: block;
       box-sizing: border-box;
-      background: var(--tf-bg, #ffffff);
+      background: var(--tf-background, #ffffff);
       border: 1px solid var(--tf-border, #d8d8d8);
       border-radius: var(--tf-radius, 4px);
       overflow: hidden;
@@ -30,6 +31,8 @@ export class TfInstance extends SignalWatcher(LitElement) {
 
     .grid {
       display: grid;
+      grid-template-columns: var(--tf-column-template);
+      grid-template-rows: var(--tf-header-height, 32px);
       grid-auto-rows: var(--tf-row-height, 32px);
       width: 100%;
     }
@@ -62,14 +65,15 @@ export class TfInstance extends SignalWatcher(LitElement) {
     if (!grid || !this.instance) return nothing;
 
     const columns = grid.columns.get();
+    // Column widths are data, not style: they come from the column definitions
+    // and change with them, so they travel as a property the stylesheet uses.
     const template = columns.map((column) => `${column.width}px`).join(' ');
-    const headerHeight = grid.pipeline.viewport.headerHeight;
 
     return html`
       <div
         class="grid"
         part="instance-grid"
-        style="grid-template-columns: ${template}; grid-template-rows: ${headerHeight}px;"
+        style=${styleMap({ '--tf-column-template': template })}
       >
         <div class="header" role="row">
           ${repeat(

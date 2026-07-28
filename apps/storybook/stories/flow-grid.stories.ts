@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
-import type { ColumnDef, TfGrid, GridOptions } from '@tradeflow/core';
+import type { ColumnDef, GridTheme, TfGrid, GridOptions } from '@tradeflow/core';
 import '@tradeflow/core';
 import { TreeModule } from '@tradeflow/core/tree';
 import { SortModule } from '@tradeflow/core/sort';
@@ -51,6 +51,29 @@ const columns: ColumnDef<Bond>[] = [
   },
 ];
 
+/**
+ * A desk theme, passed as a validated object rather than a stylesheet.
+ *
+ * Only declared tokens are accepted; a typo throws instead of being ignored.
+ */
+const deskTheme: GridTheme = {
+  surface: '#0a0a0a',
+  background: '#141414',
+  headerBackground: '#1f1f1f',
+  placeholderBackground: '#141414',
+  text: '#e5e5e5',
+  textMuted: '#8a8a8a',
+  headerText: '#f0f0f0',
+  border: '#2e2e2e',
+  borderSubtle: '#232323',
+  focus: '#60a5fa',
+  selectionBackground: 'rgb(96 165 250 / 16%)',
+  hoverBackground: 'rgb(255 255 255 / 4%)',
+  flashUp: 'rgb(34 197 94 / 38%)',
+  flashDown: 'rgb(239 68 68 / 38%)',
+  flashDuration: '600ms',
+};
+
 interface Args {
   groups: number;
   instruments: number;
@@ -98,6 +121,7 @@ export const BondMarket: StoryObj<Args> = {
       rowHeight: args.rowHeight,
       headerHeight: args.rowHeight,
       enableScrollJacking: args.enableScrollJacking,
+      theme: deskTheme,
       ariaLabel: `Bond market: ${args.instruments} instruments across ${args.groups} groups`,
       modules: [
         new TreeModule<Bond>({

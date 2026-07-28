@@ -2,6 +2,7 @@ import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { RowContextValue, gridContext, rowContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
 import type { DisplayRow } from '../layout/types.js';
@@ -45,18 +46,36 @@ export class TfRow extends SignalWatcher(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'row');
-    // Cells live in this element's shadow root, so their clicks reach the host.
-    // A `display: contents` element receives no clicks of its own.
+    // Cells live in this element's shadow root, so their events reach the host.
+    // A `display: contents` element receives none of its own.
     this.addEventListener('click', this.handleActivate);
+    this.addEventListener('mouseenter', this.handleHover);
+    this.addEventListener('mouseleave', this.handleHover);
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('click', this.handleActivate);
+    this.removeEventListener('mouseenter', this.handleHover);
+    this.removeEventListener('mouseleave', this.handleHover);
   }
 
   private readonly handleActivate = (event: Event): void => {
     for (const activate of this.activators) activate(event);
+  };
+
+  /**
+   * Highlights the whole row on hover.
+   *
+   * Done in script rather than `:hover` because the row is `display: contents`:
+   * its cells are the grid items and CSS has no way to say "my sibling is
+   * hovered". Tracking a row across a monitor-wide grid is the whole point.
+   */
+  private readonly handleHover = (event: Event): void => {
+    const hovered = event.type === 'mouseenter';
+    for (const cell of this.shadowRoot?.querySelectorAll('tf-cell') ?? []) {
+      cell.classList.toggle('tf-row-hover', hovered);
+    }
   };
 
   override willUpdate(changed: Map<PropertyKey, unknown>): void {
@@ -78,12 +97,13 @@ export class TfRow extends SignalWatcher(LitElement) {
     const decorations = grid.registry.rowDecorations({ row: this.row, node });
     this.applyDecorations(decorations);
 
+    // Row-level decoration reaches the cells as classes and custom properties.
+    // A row is `display: contents` and paints nothing itself.
     const cellClasses = decorations.flatMap((d) => d.cellClasses ?? []).join(' ');
-    const cellAttributes = Object.assign(
+    const cellProperties = Object.assign(
       {},
-      ...decorations.map((d) => d.cellAttributes ?? {}),
+      ...decorations.map((d) => d.cellCustomProperties ?? {}),
     ) as Record<string, string>;
-    const cellStyle = cellAttributes['style'] ?? '';
 
     return repeat(
       grid.columns.get(),
@@ -93,7 +113,7 @@ export class TfRow extends SignalWatcher(LitElement) {
           part="cell"
           role="gridcell"
           class=${cellClasses}
-          style=${cellStyle}
+          style=${styleMap(cellProperties)}
           .column=${column}
         ></tf-cell>`,
     );

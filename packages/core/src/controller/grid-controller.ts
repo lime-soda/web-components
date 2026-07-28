@@ -10,6 +10,7 @@ import type { FocusController } from './focus-controller.js';
 import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
 import { StackLayoutEngine } from '../layout/stack-layout-engine.js';
 import type { LayoutResult, ViewportMetrics } from '../layout/types.js';
+import { type GridTheme, assertValidTheme } from '../theme/tokens.js';
 import { ModuleRegistry } from '../modules/module-registry.js';
 import type { GridModule } from '../modules/types.js';
 import { GridPipeline } from '../pipeline/grid-pipeline.js';
@@ -27,6 +28,14 @@ export interface GridOptions<TData = unknown> extends ColumnResolutionOptions<TD
   headerHeight?: number;
   instanceGap?: number;
   maxInstances?: number;
+  /**
+   * Theme tokens, applied as `--tf-*` custom properties on the grid.
+   *
+   * Validated on assignment: an unknown key or a value containing a declaration
+   * separator throws rather than being silently dropped. Anything left unset
+   * falls back to the stylesheet, so a partial theme is fine.
+   */
+  theme?: GridTheme;
   /** Turns vertical wheel gestures into horizontal scrolling. Flow layout only. */
   enableScrollJacking?: boolean;
   ariaLabel?: string;
@@ -56,6 +65,7 @@ export class GridController<TData = unknown> {
   private readonly dispatcher: (type: string, detail: unknown) => void;
 
   constructor(options: GridOptions<TData>, dispatch: (type: string, detail: unknown) => void) {
+    if (options.theme !== undefined) assertValidTheme(options.theme);
     this.dispatcher = dispatch;
     this.optionsSignal = signal(options);
     this.containerSignal = signal({ width: 0, height: 0 });
@@ -99,6 +109,7 @@ export class GridController<TData = unknown> {
   }
 
   setOptions(next: Partial<GridOptions<TData>>): void {
+    if (next.theme !== undefined) assertValidTheme(next.theme);
     const merged = { ...this.optionsSignal.get(), ...next };
     this.optionsSignal.set(merged);
     if (next.layout !== undefined) this.pipeline.setEngine(engineFor(next.layout));

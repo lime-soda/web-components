@@ -275,14 +275,14 @@ describe('SelectionModule', () => {
 
     it('marks a selected row and reaches its cells', () => {
       // A row is display:contents and has no box to paint, so the highlight has
-      // to be carried to the cells.
+      // to be carried to the cells — as a class, not an inline style.
       const { selection } = setup(rows(1));
       selection.setRowSelected('r0', true);
 
       const decoration = selection.rowDecorator(info('r0'))!;
 
       expect(decoration.attributes?.['aria-selected']).toBe('true');
-      expect(decoration.cellAttributes?.['style']).toContain('--tf-selection-bg');
+      expect(decoration.cellClasses).toContain('tf-cell-selected');
     });
 
     it('still decorates an unselected row, so the previous highlight is withdrawn', () => {
@@ -291,7 +291,7 @@ describe('SelectionModule', () => {
       const decoration = selection.rowDecorator(info('r0'))!;
 
       expect(decoration.attributes?.['aria-selected']).toBe('false');
-      expect(decoration.cellAttributes).toBeUndefined();
+      expect(decoration.cellClasses).toBeUndefined();
     });
 
     it('adds no click handler unless clickToSelect is on', () => {

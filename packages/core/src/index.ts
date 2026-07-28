@@ -12,6 +12,16 @@ export { TfCell } from './components/tf-cell.js';
 export { TfHeaderCell } from './components/tf-header-cell.js';
 export { CellRendererElement } from './components/cell-renderer-element.js';
 
+// Theming: a validated token object, or the same tokens as CSS custom properties.
+export {
+  THEME_TOKENS,
+  customPropertyFor,
+  validateTheme,
+  assertValidTheme,
+  themeToCustomProperties,
+} from './theme/index.js';
+export type { GridTheme, ThemeToken, ThemeValidationIssue } from './theme/index.js';
+
 // Contexts — how a custom cell renderer reaches its row and column.
 export {
   gridContext,

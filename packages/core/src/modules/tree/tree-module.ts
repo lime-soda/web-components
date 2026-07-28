@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { css, html } from 'lit';
 import type { DisplayRow } from '../../layout/types.js';
 import type { ProjectionStage } from '../../projection/types.js';
 import type { CellContext, CellDecoration, GridModule, ModuleContext } from '../types.js';
@@ -13,11 +13,9 @@ export interface TreeModuleOptions<TData = unknown> extends TreeIndexOptions<TDa
    * deep in the tree stays reachable. On by default.
    */
   retainAncestors?: boolean;
-  /** Indent per depth level, in px. */
+  /** Indent per depth level, in px. Defaults to 16 via --tf-tree-indent. */
   indentSize?: number;
 }
-
-const DEFAULT_INDENT = 16;
 
 /**
  * Hierarchical data: grouping, expansion, and the sticky ancestors that let the
@@ -128,19 +126,78 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
     return (columns.find((column) => column.providedBy === undefined) ?? columns[0])?.colId;
   }
 
+  /**
+   * Styles for the expander and indent.
+   *
+   * Indent depth is the one genuinely per-cell value here, so it travels as a
+   * custom property on the element and the width is computed in CSS. Everything
+   * else is static and lives in this stylesheet, themeable through the same
+   * `--tf-*` properties as the rest of the grid.
+   */
+  static readonly styles = css`
+    .tf-tree-indent {
+      display: inline-block;
+      flex: 0 0 auto;
+      /* Set per cell by the decoration; falls back to no indent. */
+      width: calc(var(--tf-tree-depth, 0) * var(--tf-tree-indent, 16px));
+    }
+
+    .tf-tree-spacer {
+      display: inline-block;
+      flex: 0 0 auto;
+      width: var(--tf-tree-expander-size, 18px);
+    }
+
+    .tf-expander {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: var(--tf-tree-expander-size, 18px);
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: var(--tf-tree-expander-font-size, 10px);
+      line-height: 1;
+      color: var(--tf-text-muted, #666);
+      transition: transform 150ms ease-out;
+      transform: rotate(0deg);
+    }
+
+    .tf-expander[aria-expanded='true'] {
+      transform: rotate(90deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tf-expander {
+        transition: none;
+      }
+    }
+  `;
+
+  readonly styles = TreeModule.styles;
+
   cellDecorator(ctx: CellContext<TData>): CellDecoration | null {
     if (ctx.column.colId !== this.treeColumnId()) return null;
 
     const depth = (ctx.row.meta?.['depth'] as number | undefined) ?? 0;
     const hasChildren = (ctx.row.meta?.['hasChildren'] as boolean | undefined) ?? false;
     const isExpanded = this.expanded.has(ctx.row.rowId);
-    const indent = depth * (this.options.indentSize ?? DEFAULT_INDENT);
 
     return {
       classes: ['tf-tree-cell'],
       attributes: { 'data-tf-depth': String(depth) },
+      // Depth drives the indent width through CSS rather than a computed pixel
+      // value, so a consumer can change --tf-tree-indent and every level follows.
+      customProperties: {
+        '--tf-tree-depth': String(depth),
+        ...(this.options.indentSize === undefined
+          ? {}
+          : { '--tf-tree-indent': `${this.options.indentSize}px` }),
+      },
       prefix: html`
-        <span style="display:inline-block;width:${indent}px;flex:0 0 auto"></span>
+        <span class="tf-tree-indent"></span>
         ${
           hasChildren
             ? html`<button
@@ -150,16 +207,13 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
                 aria-expanded=${isExpanded}
                 tabindex="-1"
                 @click=${(event: Event) => {
-                  event.stopPropagation();
-                  this.toggleExpanded(ctx.row.rowId);
-                }}
-                style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:10px;line-height:1;color:var(--tf-text-muted,#666);transition:transform 150ms ease-out;transform:rotate(${
-                  isExpanded ? 90 : 0
-                }deg)"
+                event.stopPropagation();
+                this.toggleExpanded(ctx.row.rowId);
+              }}
               >
                 ▶
               </button>`
-            : html`<span style="display:inline-block;width:18px;flex:0 0 auto"></span>`
+            : html`<span class="tf-tree-spacer"></span>`
         }
       `,
     };

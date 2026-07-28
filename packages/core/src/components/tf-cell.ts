@@ -1,6 +1,7 @@
 import { consume, provide } from '@lit/context';
 import { instanceContext } from '../context/index.js';
 import { LitElement, css, html, nothing } from 'lit';
+import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
 import { customElement, property } from 'lit/decorators.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 import { formatCellValue, getCellValue } from '../columns/resolve-columns.js';
@@ -48,8 +49,23 @@ export class TfCell extends SignalWatcher(LitElement) {
     }
 
     :host(:focus-visible) {
-      outline: 2px solid var(--tf-focus, #3b82f6);
-      outline-offset: -2px;
+      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--tf-focus-width, 2px));
+    }
+
+    /* Applied by the selection module. A row is display:contents and has no box
+       of its own, so the highlight is painted by its cells. */
+    :host(.tf-cell-selected) {
+      background: var(--tf-selection-background, rgb(59 130 246 / 12%));
+    }
+
+    /* Tracking a row across a monitor-wide grid is the whole reason this exists. */
+    :host(.tf-row-hover) {
+      background: var(--tf-hover-background, rgb(0 0 0 / 3%));
+    }
+
+    :host(.tf-row-hover.tf-cell-selected) {
+      background: var(--tf-selection-background, rgb(59 130 246 / 12%));
     }
 
     /* Plain values: single line, ellipsised, vertically centred by the host. */
@@ -153,7 +169,13 @@ export class TfCell extends SignalWatcher(LitElement) {
 
   private appliedClasses = new Set<string>();
   private appliedAttributes = new Set<string>();
+  private appliedProperties = new Set<string>();
   private pendingEffects: ((cell: HTMLElement) => void)[] = [];
+
+  override firstUpdated(): void {
+    // Module markup renders in this shadow root, where page CSS cannot reach it.
+    adoptModuleStyles(this.shadowRoot, this.grid?.registry.moduleStyles() ?? []);
+  }
 
   override updated(): void {
     // Run after the DOM settles, so a module measuring or animating sees the
@@ -187,11 +209,26 @@ export class TfCell extends SignalWatcher(LitElement) {
   private applyDecorations(decorations: readonly CellDecoration[]): void {
     const classes = new Set<string>();
     const attributes = new Map<string, string>();
+    const properties = new Map<string, string>();
 
     for (const decoration of decorations) {
       for (const className of decoration.classes ?? []) classes.add(className);
       for (const [name, value] of Object.entries(decoration.attributes ?? {})) {
+        // `style` would reintroduce inline declarations through the back door;
+        // per-cell values belong in customProperties.
+        if (name === 'style') {
+          throw new Error(
+            'A module set a `style` attribute on a cell. Use `customProperties` for ' +
+              'per-cell values and a module stylesheet for everything else.',
+          );
+        }
         attributes.set(name, value);
+      }
+      for (const [name, value] of Object.entries(decoration.customProperties ?? {})) {
+        if (!name.startsWith('--')) {
+          throw new Error(`Custom property "${name}" must start with "--".`);
+        }
+        properties.set(name, value);
       }
     }
 
@@ -201,9 +238,13 @@ export class TfCell extends SignalWatcher(LitElement) {
     for (const name of this.appliedAttributes) {
       if (!attributes.has(name)) this.removeAttribute(name);
     }
+    for (const name of this.appliedProperties) {
+      if (!properties.has(name)) this.style.removeProperty(name);
+    }
 
     for (const className of classes) this.classList.add(className);
     for (const [name, value] of attributes) this.setAttribute(name, value);
+    for (const [name, value] of properties) this.style.setProperty(name, value);
 
     this.pendingEffects = decorations
       .map((decoration) => decoration.onRendered)
@@ -211,6 +252,7 @@ export class TfCell extends SignalWatcher(LitElement) {
 
     this.appliedClasses = classes;
     this.appliedAttributes = new Set(attributes.keys());
+    this.appliedProperties = new Set(properties.keys());
   }
 }
 

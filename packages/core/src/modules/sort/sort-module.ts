@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { getCellValue } from '../../columns/resolve-columns.js';
 import type { ResolvedColumn } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
@@ -157,6 +157,23 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     };
   }
 
+  static readonly styles = css`
+    .tf-sort-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      flex: 0 0 auto;
+      font-size: var(--tf-sort-indicator-font-size, 10px);
+      color: var(--tf-text-muted, #666);
+    }
+
+    .tf-sort-order {
+      font-size: var(--tf-sort-order-font-size, 8px);
+    }
+  `;
+
+  readonly styles = SortModule.styles;
+
   headerSlot(ctx: HeaderSlotContext<TData>) {
     const direction = this.getSortDirection(ctx.column.colId);
     if (direction === null) return null;
@@ -164,11 +181,9 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     const position = this.model.findIndex((entry) => entry.colId === ctx.column.colId);
     const showOrder = this.model.length > 1;
 
-    return html`<span
-      part="sort-indicator"
-      style="font-size:10px;color:var(--tf-text-muted,#666);display:inline-flex;gap:2px;align-items:center"
-      >${direction === 'asc' ? '▲' : '▼'}${
-        showOrder ? html`<sub style="font-size:8px">${position + 1}</sub>` : ''
+    return html`<span class="tf-sort-indicator" part="sort-indicator"
+      >${direction === 'asc' ? '\u25B2' : '\u25BC'}${
+        showOrder ? html`<sub class="tf-sort-order">${position + 1}</sub>` : ''
       }</span
     >`;
   }

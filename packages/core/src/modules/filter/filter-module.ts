@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { formatCellValue, getCellValue } from '../../columns/resolve-columns.js';
 import type { ResolvedColumn } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
@@ -136,21 +136,48 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   // -- Header -----------------------------------------------------------------
 
+  static readonly styles = css`
+    .tf-filter-input {
+      width: var(--tf-filter-input-width, 70px);
+      min-width: 0;
+      font: inherit;
+      font-size: var(--tf-filter-font-size, 11px);
+      padding: var(--tf-filter-padding, 1px 4px);
+      border-radius: var(--tf-radius, 3px);
+      border: 1px solid var(--tf-border, #d8d8d8);
+      background: transparent;
+      color: inherit;
+    }
+
+    /* An active filter is worth seeing at a glance across a wide monitor. */
+    .tf-filter-input[data-tf-active] {
+      border-color: var(--tf-focus, #3b82f6);
+    }
+
+    .tf-filter-input:focus-visible {
+      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
+      outline-offset: -1px;
+    }
+  `;
+
+  readonly styles = FilterModule.styles;
+
   headerSlot(ctx: HeaderSlotContext<TData>) {
     if ((this.options.headerUi ?? false) === false) return null;
     if (ctx.column.filterable === false) return null;
     if (!ctx.column.field && !ctx.column.valueGetter) return null;
 
-    const active = this.model[ctx.column.colId] !== undefined;
     const current = this.model[ctx.column.colId];
     const value = current && 'value' in current ? String(current.value ?? '') : '';
 
     return html`<input
+      class="tf-filter-input"
       part="filter-input"
       type="search"
       aria-label=${`Filter ${ctx.column.headerName}`}
       .value=${value}
       placeholder="Filter"
+      ?data-tf-active=${current !== undefined}
       @click=${(event: Event) => event.stopPropagation()}
       @keydown=${(event: Event) => event.stopPropagation()}
       @input=${(event: Event) => {
@@ -164,9 +191,6 @@ export class FilterModule<TData = unknown> implements GridModule<
               : { type: 'text', operator: 'contains', value: text },
         );
       }}
-      style="width:70px;min-width:0;font:inherit;font-size:11px;padding:1px 4px;border-radius:3px;border:1px solid ${
-        active ? 'var(--tf-focus,#3b82f6)' : 'var(--tf-border,#d8d8d8)'
-      };background:transparent;color:inherit"
     />`;
   }
 

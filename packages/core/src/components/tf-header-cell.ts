@@ -1,5 +1,6 @@
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
+import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
 import { customElement, property } from 'lit/decorators.js';
 import type { ResolvedColumn } from '../columns/types.js';
 import { columnContext, gridContext } from '../context/index.js';
@@ -23,11 +24,11 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
       box-sizing: border-box;
       padding: 0 var(--tf-cell-padding-x, 8px);
       height: 100%;
-      background: var(--tf-header-bg, #f5f5f5);
+      background: var(--tf-header-background, #f5f5f5);
       border-bottom: 2px solid var(--tf-border, #d8d8d8);
       border-right: 1px solid var(--tf-border-subtle, #f0f0f0);
       color: var(--tf-header-text, #101010);
-      font-weight: 500;
+      font-weight: var(--tf-header-font-weight, 500);
       font-size: var(--tf-header-font-size, 13px);
       overflow: hidden;
       position: sticky;
@@ -40,8 +41,8 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
     }
 
     :host(:focus-visible) {
-      outline: 2px solid var(--tf-focus, #3b82f6);
-      outline-offset: -2px;
+      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--tf-focus-width, 2px));
     }
 
     /* No label to sit beside, so whatever a module contributed is centred. */
@@ -68,8 +69,8 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
     }
 
     .label.activatable:focus-visible {
-      outline: 2px solid var(--tf-focus, #3b82f6);
-      outline-offset: -2px;
+      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--tf-focus-width, 2px));
     }
 
     .slots {
@@ -96,6 +97,11 @@ export class TfHeaderCell extends SignalWatcher(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     this.setAttribute('role', 'columnheader');
+  }
+
+  override firstUpdated(): void {
+    // Sort indicators and filter inputs render here; their styles come with them.
+    adoptModuleStyles(this.shadowRoot, this.grid?.registry.moduleStyles() ?? []);
   }
 
   override render(): unknown {

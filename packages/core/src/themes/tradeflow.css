@@ -1,83 +1,105 @@
 /*
  * Default theme.
  *
- * Every value the components read is a custom property with an inline fallback,
- * so this file is optional — a grid renders without it. Import it to get a
- * coherent light/dark pair, or define the same properties yourself on `tf-grid`
- * (or any ancestor) to theme the grid from your own design tokens.
+ * Every value the components read is one of these custom properties, and each
+ * corresponds to a token on the `GridTheme` object — `--tf-row-height` is
+ * `theme.rowHeight`. A test scans the source for `var(--tf-…)` and fails on any
+ * property that is not a declared token, so the two cannot drift apart.
  *
- * Custom properties inherit through shadow roots, which is why theming works
- * without any ::part() rules for colour. Parts are there for structural
- * overrides: tf-grid exposes scroller, instance, instance-grid, header-cell,
- * header-label, header-slots, cell and cell-content.
+ * This file is optional. Components carry inline fallbacks, so a grid renders
+ * without it; import it for a coherent light/dark pair, pass a `theme` object,
+ * or set the same properties yourself from your own design tokens.
+ *
+ * Custom properties inherit through shadow roots, which is why theming needs no
+ * ::part() rules for colour. Parts exist for structural overrides: scroller,
+ * instance, instance-grid, placeholder, header-cell, header-label, header-slots,
+ * cell, cell-content, tree-expander, sort-indicator, filter-input,
+ * selection-checkbox.
  */
 
 :root,
 :host {
+  /* Typography */
   --tf-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --tf-font-size: 13px;
   --tf-header-font-size: 13px;
+  --tf-header-font-weight: 500;
 
+  /* Metrics */
   --tf-row-height: 32px;
+  --tf-header-height: 32px;
   --tf-cell-padding-x: 8px;
   --tf-instance-gap: 16px;
   --tf-radius: 4px;
+  --tf-tree-indent: 16px;
 
+  /* Surfaces */
   --tf-surface: transparent;
-  --tf-bg: #ffffff;
+  --tf-background: #ffffff;
+  --tf-header-background: #f5f5f5;
+  --tf-placeholder-background: #ffffff;
+
+  /* Text */
   --tf-text: #101010;
   --tf-text-muted: #666666;
-
-  --tf-header-bg: #f5f5f5;
   --tf-header-text: #101010;
 
+  /* Lines */
   --tf-border: #d8d8d8;
   --tf-border-subtle: #f0f0f0;
 
+  /* State */
   --tf-focus: #3b82f6;
-  --tf-selection-bg: rgba(59, 130, 246, 0.12);
+  --tf-focus-width: 2px;
+  --tf-selection-background: rgb(59 130 246 / 12%);
+  --tf-hover-background: rgb(0 0 0 / 3%);
 
-  /* Trading convention: green up, red down. Used by the cell-flash module. */
-  --tf-flash-up: rgba(34, 197, 94, 0.35);
-  --tf-flash-down: rgba(239, 68, 68, 0.35);
+  /* Cell flash. Trading convention: green up, red down. */
+  --tf-flash-up: rgb(34 197 94 / 35%);
+  --tf-flash-down: rgb(239 68 68 / 35%);
+  --tf-flash-neutral: rgb(148 163 184 / 35%);
   --tf-flash-duration: 600ms;
 }
 
 /*
- * Dark by preference, with an explicit opt-in for applications that manage their
- * own theme switch rather than following the OS.
+ * Dark by preference, with an explicit opt-out for applications that manage
+ * their own theme switch rather than following the OS.
  */
 @media (prefers-color-scheme: dark) {
   :root:not([data-tf-theme='light']),
   :host(:not([data-tf-theme='light'])) {
     --tf-surface: #0a0a0a;
-    --tf-bg: #1a1a1a;
+    --tf-background: #1a1a1a;
+    --tf-header-background: #262626;
+    --tf-placeholder-background: #1a1a1a;
+
     --tf-text: #e5e5e5;
     --tf-text-muted: #a3a3a3;
-
-    --tf-header-bg: #262626;
     --tf-header-text: #e5e5e5;
 
     --tf-border: #333333;
     --tf-border-subtle: #2a2a2a;
 
     --tf-focus: #60a5fa;
-    --tf-selection-bg: rgba(59, 130, 246, 0.18);
+    --tf-selection-background: rgb(59 130 246 / 18%);
+    --tf-hover-background: rgb(255 255 255 / 4%);
   }
 }
 
 [data-tf-theme='dark'] {
   --tf-surface: #0a0a0a;
-  --tf-bg: #1a1a1a;
+  --tf-background: #1a1a1a;
+  --tf-header-background: #262626;
+  --tf-placeholder-background: #1a1a1a;
+
   --tf-text: #e5e5e5;
   --tf-text-muted: #a3a3a3;
-
-  --tf-header-bg: #262626;
   --tf-header-text: #e5e5e5;
 
   --tf-border: #333333;
   --tf-border-subtle: #2a2a2a;
 
   --tf-focus: #60a5fa;
-  --tf-selection-bg: rgba(59, 130, 246, 0.18);
+  --tf-selection-background: rgb(59 130 246 / 18%);
+  --tf-hover-background: rgb(255 255 255 / 4%);
 }

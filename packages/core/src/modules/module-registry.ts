@@ -1,3 +1,4 @@
+import { type CSSResultGroup, type CSSResultOrNative, unsafeCSS } from 'lit';
 import type { ColumnDefs, ResolvedColumn } from '../columns/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
 import { FocusController } from '../controller/focus-controller.js';
@@ -122,6 +123,18 @@ export class ModuleRegistry<TData = unknown> {
     return this.collect((module) => module.headerDecorator?.(ctx));
   }
 
+  /**
+   * Every installed module's stylesheets, flattened.
+   *
+   * Components adopt these into their shadow roots so module-contributed markup
+   * is styled by CSS rather than inline declarations.
+   */
+  moduleStyles(): readonly CSSResultOrNative[] {
+    return this.orderedModules().flatMap((module) =>
+      module.styles === undefined ? [] : flattenStyles(module.styles),
+    );
+  }
+
   /** Offers a key to each module in order. Stops at the first that handles it. */
   handleKeyDown(event: KeyboardEvent): boolean {
     for (const module of this.orderedModules()) {
@@ -223,4 +236,11 @@ export class ModuleRegistry<TData = unknown> {
     }
     return results;
   }
+}
+
+/** Lit's CSSResultGroup is arbitrarily nested; adoptedStyleSheets wants a flat list. */
+function flattenStyles(styles: CSSResultGroup): CSSResultOrNative[] {
+  if (Array.isArray(styles)) return styles.flatMap(flattenStyles);
+  if (typeof styles === 'string') return [unsafeCSS(styles)];
+  return [styles as CSSResultOrNative];
 }

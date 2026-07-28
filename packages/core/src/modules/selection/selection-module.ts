@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { css, html } from 'lit';
 import type { ColumnDef } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
 import type {
@@ -204,6 +204,26 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   // -- Rendering --------------------------------------------------------------
 
+  static readonly styles = css`
+    .tf-checkbox {
+      cursor: pointer;
+      margin: 0;
+      accent-color: var(--tf-focus, #3b82f6);
+    }
+
+    .tf-checkbox:disabled {
+      cursor: default;
+      opacity: var(--tf-disabled-opacity, 0.4);
+    }
+
+    .tf-checkbox:focus-visible {
+      outline: var(--tf-focus-width, 2px) solid var(--tf-focus, #3b82f6);
+      outline-offset: 1px;
+    }
+  `;
+
+  readonly styles = SelectionModule.styles;
+
   provideColumns(): readonly ColumnDef<TData>[] {
     const wanted = this.options.checkboxColumn ?? this.mode === 'multi';
     if (!wanted) return [];
@@ -253,9 +273,9 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     return {
       classes: ['tf-row-selected'],
       attributes: { 'aria-selected': 'true' },
+      // A row is `display: contents` and has no box to paint, so the highlight
+      // travels to the cells as a class the cell stylesheet styles.
       cellClasses: ['tf-cell-selected'],
-      // A row is `display: contents`, so the highlight has to reach the cells.
-      cellAttributes: { style: 'background: var(--tf-selection-bg, rgba(59, 130, 246, 0.12))' },
       ...(this.options.clickToSelect
         ? {
             onActivate: (event: Event) => {
@@ -392,5 +412,5 @@ export const selectionCheckboxTemplate = (
       event.stopPropagation();
       onChange((event.target as HTMLInputElement).checked, (event as MouseEvent).shiftKey);
     }}
-    style="cursor:pointer;margin:0"
+    class="tf-checkbox"
   />`;

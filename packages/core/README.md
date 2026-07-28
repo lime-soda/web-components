@@ -189,26 +189,72 @@ its horizontal padding, so the renderer owns the full cell box.
 
 ## Theming
 
-Everything is a CSS custom property with an inline fallback, so the stylesheet is
-optional. Custom properties inherit through shadow roots — set them on `tf-grid`
-or any ancestor:
+Two ways in, both landing on the same custom properties.
+
+A typed theme object, validated on assignment:
+
+```ts
+import type { GridTheme } from '@tradeflow/core';
+
+const theme: GridTheme = {
+  rowHeight: '28px',
+  background: '#1a1a1a',
+  text: '#e5e5e5',
+  border: '#333',
+  selectionBackground: 'rgb(59 130 246 / 18%)',
+  flashUp: 'rgb(34 197 94 / 35%)',
+  flashDown: 'rgb(239 68 68 / 35%)',
+};
+
+grid.gridOptions = { columns, theme };
+```
+
+Only declared tokens are accepted — an unknown key throws rather than being
+silently dropped, so a typo in a saved workspace surfaces immediately. A partial
+theme is fine; anything unset falls back to the stylesheet.
+
+Or set the properties directly, on the grid or any ancestor. They inherit through
+every shadow root:
 
 ```css
 tf-grid {
   --tf-row-height: 28px;
-  --tf-bg: #1a1a1a;
+  --tf-background: #1a1a1a;
   --tf-text: #e5e5e5;
-  --tf-border: #333;
-  --tf-selection-bg: rgb(59 130 246 / 18%);
-  --tf-flash-up: rgb(34 197 94 / 35%);
-  --tf-flash-down: rgb(239 68 68 / 35%);
+  --tf-selection-background: rgb(59 130 246 / 18%);
 }
 ```
 
-`@tradeflow/core/themes/tradeflow.css` provides a light/dark pair. For structure
-rather than colour, the elements expose `::part()`: `scroller`, `instance`,
-`instance-grid`, `header-cell`, `header-label`, `header-slots`, `cell`,
-`cell-content`, `tree-expander`, `sort-indicator`, `selection-checkbox`.
+`@tradeflow/core/themes/tradeflow.css` provides a light/dark pair, honouring
+`prefers-color-scheme` with a `data-tf-theme="light|dark"` override.
+
+Every token maps to one property by the same rule — `selectionBackground` is
+`--tf-selection-background`:
+
+| Group      | Tokens                                                                        |
+| ---------- | ----------------------------------------------------------------------------- |
+| Typography | `font` `fontSize` `headerFontSize` `headerFontWeight`                         |
+| Metrics    | `rowHeight` `headerHeight` `cellPaddingX` `instanceGap` `radius` `treeIndent` |
+| Surfaces   | `surface` `background` `headerBackground` `placeholderBackground`             |
+| Text       | `text` `textMuted` `headerText`                                               |
+| Lines      | `border` `borderSubtle`                                                       |
+| State      | `focus` `focusWidth` `selectionBackground` `hoverBackground`                  |
+| Flash      | `flashUp` `flashDown` `flashNeutral` `flashDuration`                          |
+
+`rowHeight` is the one token the grid overrides: the layout engine has already
+used it to decide how many rows fit an instance, so CSS must lay them out at
+exactly that height. Set it through `gridOptions.rowHeight`.
+
+No component uses inline styles — a test walks the source and fails on any, so
+every rule is reachable from a stylesheet. Module-contributed markup is styled
+the same way: a module ships a `styles` stylesheet that is adopted into the
+shadow roots its markup renders in, which is why the tree expander answers to
+`--tf-text-muted` like everything else.
+
+For structure rather than colour, the elements expose `::part()`: `scroller`,
+`instance`, `instance-grid`, `placeholder`, `header-cell`, `header-label`,
+`header-slots`, `cell`, `cell-content`, `tree-expander`, `sort-indicator`,
+`filter-input`, `selection-checkbox`.
 
 ## Layouts
 

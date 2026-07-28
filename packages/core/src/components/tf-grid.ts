@@ -3,6 +3,8 @@ import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { themeToCustomProperties } from '../theme/tokens.js';
 import { GRID_EVENTS } from '../api/events.js';
 import type { GridApi } from '../api/types.js';
 import { gridContext } from '../context/index.js';
@@ -49,18 +51,23 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
     .instance-slot {
       flex: 0 0 auto;
       box-sizing: border-box;
+      width: var(--tf-instance-width, auto);
+      height: var(--tf-instance-height, auto);
     }
 
     /* Offscreen instances keep their exact footprint so the scrollbar never jumps. */
     .placeholder {
       box-sizing: border-box;
-      background: var(--tf-bg, #ffffff);
+      width: 100%;
+      height: 100%;
+      background: var(--tf-placeholder-background, var(--tf-background, #ffffff));
       border: 1px solid var(--tf-border, #d8d8d8);
       border-radius: var(--tf-radius, 4px);
     }
 
     .stack-spacer {
       width: 100%;
+      height: var(--tf-spacer-height, 0);
     }
   `;
 
@@ -170,12 +177,34 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
         role="presentation"
         aria-label=${controller.options.ariaLabel ?? 'Data grid'}
         @keydown=${this.handleKeyDown}
-        style="--tf-row-height: ${viewport.rowHeight}px; --tf-header-height: ${viewport.headerHeight}px; --tf-instance-gap: ${viewport.instanceGap}px"
+        style=${styleMap(this.scrollerProperties())}
         ${ref(this.scrollerRef)}
       >
         ${mode === 'stack' ? this.renderStack(layout) : this.renderFlow(layout)}
       </div>
     `;
+  }
+
+  /**
+   * Custom properties for the scroller: the consumer's theme, then the measured
+   * geometry.
+   *
+   * Geometry wins deliberately. `rowHeight` is what the layout engine used to
+   * decide how many rows fit an instance, so CSS must lay rows out at exactly
+   * that height or every instance quietly overflows — a theme cannot be allowed
+   * to disagree with the arithmetic. Everything else the theme owns outright.
+   */
+  private scrollerProperties(): Record<string, string> {
+    const controller = this.controller;
+    if (!controller) return {};
+
+    const viewport = controller.pipeline.viewport;
+    return {
+      ...themeToCustomProperties(controller.options.theme ?? {}),
+      '--tf-row-height': `${viewport.rowHeight}px`,
+      '--tf-header-height': `${viewport.headerHeight}px`,
+      '--tf-instance-gap': `${viewport.instanceGap}px`,
+    };
   }
 
   private renderFlow(layout: ReturnType<GridController<TData>['layout']['get']>): unknown {
@@ -188,16 +217,16 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
         <div
           class="instance-slot"
           data-instance-id=${instance.id}
-          style="width: ${instance.width}px; height: ${height}px;"
+          style=${styleMap({
+            '--tf-instance-width': `${instance.width}px`,
+            '--tf-instance-height': `${height}px`,
+          })}
           ${ref((element) => this.observeSlot(element))}
         >
           ${
             this.visibleInstances.has(instance.id)
               ? html`<tf-instance part="instance" .instance=${instance}></tf-instance>`
-              : html`<div
-                  class="placeholder"
-                  style="width: ${instance.width}px; height: ${height}px;"
-                ></div>`
+              : html`<div class="placeholder" part="placeholder"></div>`
           }
         </div>
       `,
@@ -218,9 +247,12 @@ export class TfGrid<TData = unknown> extends SignalWatcher(LitElement) {
     );
 
     return html`
-      <div class="stack-spacer" style="height: ${instance.offset}px"></div>
+      <div
+        class="stack-spacer"
+        style=${styleMap({ '--tf-spacer-height': `${instance.offset}px` })}
+      ></div>
       <tf-instance part="instance" .instance=${instance}></tf-instance>
-      <div class="stack-spacer" style="height: ${below}px"></div>
+      <div class="stack-spacer" style=${styleMap({ '--tf-spacer-height': `${below}px` })}></div>
     `;
   }
 
