@@ -113,10 +113,10 @@ describe('theming', () => {
   it('applies theme tokens as custom properties on the grid', async () => {
     const theme: GridTheme = { text: 'rgb(0, 128, 0)', background: 'rgb(240, 240, 240)' };
     const grid = await mount({ theme });
-    const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+    const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
-    expect(scroller.style.getPropertyValue('--flow-text')).toBe('rgb(0, 128, 0)');
-    expect(scroller.style.getPropertyValue('--flow-background')).toBe('rgb(240, 240, 240)');
+    expect(themed.style.getPropertyValue('--flow-text')).toBe('rgb(0, 128, 0)');
+    expect(themed.style.getPropertyValue('--flow-background')).toBe('rgb(240, 240, 240)');
   });
 
   it('inherits a token through every shadow root down to a cell', async () => {
@@ -165,10 +165,10 @@ describe('theming', () => {
 
   it('falls back to the component default for an unset token', async () => {
     const grid = await mount({ theme: { text: 'rgb(0, 128, 0)' } });
-    const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+    const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
     // A partial theme is valid; unset tokens simply are not declared.
-    expect(scroller.style.getPropertyValue('--flow-border')).toBe('');
+    expect(themed.style.getPropertyValue('--flow-border')).toBe('');
   });
 
   it('updates live when the theme is replaced', async () => {
@@ -189,9 +189,9 @@ describe('theming', () => {
     // The engine decided instance capacity from rowHeight; CSS must lay rows out
     // at exactly that height or every instance silently overflows.
     const grid = await mount({ rowHeight: 32, theme: { rowHeight: '999px' } });
-    const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+    const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
-    expect(scroller.style.getPropertyValue('--flow-row-height')).toBe('32px');
+    expect(themed.style.getPropertyValue('--flow-row-height')).toBe('32px');
   });
 
   describe('no inline styles', () => {

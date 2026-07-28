@@ -34,11 +34,42 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       -webkit-font-smoothing: antialiased;
     }
 
-    .scroller {
+    /* Chrome above, scrolling body below. Only the body scrolls. */
+    .viewport {
+      display: flex;
+      flex-direction: column;
       width: 100%;
       height: 100%;
+      box-sizing: border-box;
+    }
+
+    .scroller {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
       overflow: auto;
       box-sizing: border-box;
+    }
+
+    .viewport[data-layout='flow'] > .scroller {
+      height: 100%;
+    }
+
+    /*
+     * Static header. Clipped rather than scrolling, and nudged sideways to follow
+     * the body — a scroll container of its own would need its position driven
+     * anyway, and would add a second scrollbar.
+     */
+    .stack-chrome {
+      flex: 0 0 auto;
+      overflow: hidden;
+      /* Matches the width the body's scrollbar takes, so columns stay in line. */
+      padding-right: var(--flow-scrollbar-width, 0px);
+      box-sizing: border-box;
+    }
+
+    .stack-chrome-header {
+      transform: translateX(calc(-1 * var(--flow-scroll-left, 0px)));
     }
 
     .scroller[data-layout='flow'] {
@@ -71,17 +102,11 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     }
 
     /*
-     * Only the body scrolls. Sticky rather than fixed so the header still scrolls
-     * horizontally with the columns when the grid is wider than its container.
-     */
-    .stack-header {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-    }
-
-    /*
-     * Pinned group headings, directly beneath the column header.
+     * Pinned group headings, at the top of the body.
+     *
+     * These stay sticky, and correctly so: they are derived from the rows and
+     * scroll horizontally with them, so being inside the scroller is what keeps
+     * them aligned with no extra plumbing.
      *
      * The negative margin takes the band out of the flow so it overlays the rows
      * passing beneath rather than displacing them — otherwise every row would be
@@ -89,7 +114,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
      */
     .stack-sticky {
       position: sticky;
-      top: var(--flow-header-height, 32px);
+      top: 0;
       z-index: 1;
       margin-bottom: calc(-1 * var(--flow-sticky-height, 0px));
     }
@@ -106,6 +131,19 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
   @state()
   private accessor visibleInstances: ReadonlySet<string> = new Set();
+
+  /**
+   * Body scroll offset, so the static header can follow it sideways.
+   *
+   * Not named `scrollLeft`: that is an inherited DOM property, and shadowing it
+   * with a reactive accessor breaks the element outright.
+   */
+  @state()
+  private accessor bodyScrollLeft = 0;
+
+  /** Width the body's scrollbar occupies. Zero with overlay scrollbars. */
+  @state()
+  private accessor scrollbarWidth = 0;
 
   private readonly scrollerRef = createRef<HTMLElement>();
   private virtualizer?: InstanceVirtualizer;
@@ -149,6 +187,9 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       if (!entry) return;
       const { width, height } = entry.contentRect;
       this.controller?.setContainerSize(width, height);
+      // Overlay scrollbars report zero; classic ones report their width, which
+      // the static header must reserve or its columns sit proud of the body's.
+      this.scrollbarWidth = scroller.offsetWidth - scroller.clientWidth;
     });
     this.resizeObserver.observe(scroller);
 
@@ -194,17 +235,19 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     // Publishing the configured heights as custom properties is what keeps them
     // in step; leaving CSS on its own default silently overflows every instance.
     return html`
-      <div
-        class="scroller"
-        part="scroller"
-        data-layout=${mode}
-        role="presentation"
-        aria-label=${controller.options.ariaLabel ?? 'Data grid'}
-        @keydown=${this.handleKeyDown}
-        style=${styleMap(this.scrollerProperties())}
-        ${ref(this.scrollerRef)}
-      >
-        ${mode === 'stack' ? this.renderStack(layout) : this.renderFlow(layout)}
+      <div class="viewport" data-layout=${mode} style=${styleMap(this.scrollerProperties())}>
+        ${mode === 'stack' ? this.renderStackChrome(layout) : nothing}
+        <div
+          class="scroller"
+          part="scroller"
+          data-layout=${mode}
+          role="presentation"
+          aria-label=${controller.options.ariaLabel ?? 'Data grid'}
+          @keydown=${this.handleKeyDown}
+          ${ref(this.scrollerRef)}
+        >
+          ${mode === 'stack' ? this.renderStack(layout) : this.renderFlow(layout)}
+        </div>
       </div>
     `;
   }
@@ -228,6 +271,8 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       '--flow-row-height': `${viewport.rowHeight}px`,
       '--flow-header-height': `${viewport.headerHeight}px`,
       '--flow-instance-gap': `${viewport.instanceGap}px`,
+      '--flow-scroll-left': `${this.bodyScrollLeft}px`,
+      '--flow-scrollbar-width': `${this.scrollbarWidth}px`,
     };
   }
 
@@ -277,17 +322,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     const stickyRows = layout.stickyRows ?? [];
     const rowHeight = this.controller?.pipeline.viewport.rowHeight ?? 32;
 
-    // The header is a sibling of the windowed rows, not a band inside them.
-    // Inside, it would ride down with the spacer that positions the window and
-    // scroll away; here it sticks to the top of the scroller. Both bands read the
-    // same column template, so they stay aligned with nothing measured.
     return html`
-      <flow-instance
-        class="stack-header"
-        part="instance-header"
-        parts="header"
-        .instance=${instance}
-      ></flow-instance>
       ${
         stickyRows.length === 0
           ? nothing
@@ -307,6 +342,34 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       ></div>
       <flow-instance part="instance" parts="rows" .instance=${instance}></flow-instance>
       <div class="stack-spacer" style=${styleMap({ '--flow-spacer-height': `${below}px` })}></div>
+    `;
+  }
+
+  /**
+   * The stack layout's static chrome: the column header, outside the scroller.
+   *
+   * Outside rather than sticky inside it. Sticky would leave the browser
+   * repositioning the header on every scroll frame, and would keep it inside the
+   * very box it is meant to be independent of. Here it simply does not move, and
+   * only the body scrolls.
+   *
+   * The two costs of taking it out are handled explicitly: it is nudged
+   * horizontally to follow the body, and the chrome reserves the width of the
+   * body's scrollbar so the columns stay in line.
+   */
+  private renderStackChrome(layout: ReturnType<GridController<TData>['layout']['get']>): unknown {
+    const instance = layout.instances[0];
+    if (!instance) return nothing;
+
+    return html`
+      <div class="stack-chrome">
+        <flow-instance
+          class="stack-chrome-header"
+          part="instance-header"
+          parts="header"
+          .instance=${instance}
+        ></flow-instance>
+      </div>
     `;
   }
 
@@ -348,10 +411,12 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       this.removeScrollJacking();
     }
 
-    // The stack engine windows rows from the scroll position, so it needs to know.
+    // The stack engine windows rows from the scroll position, and the static
+    // header follows the horizontal one.
     const needsScrollTracking = (controller.options.layout ?? 'flow') === 'stack';
     if (needsScrollTracking && !this.scrollHandler) {
       this.scrollHandler = () => {
+        this.bodyScrollLeft = scroller.scrollLeft;
         controller.pipeline.setViewport({
           ...controller.pipeline.viewport,
           scrollOffset: scroller.scrollTop,

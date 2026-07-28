@@ -42,6 +42,10 @@ const INTERNAL = new Set([
   '--flow-tree-depth',
   // Height of the pinned group band, so it can be lifted out of the flow.
   '--flow-sticky-height',
+  // Body scroll offset and scrollbar width, so the static header can follow the
+  // body sideways and reserve the gutter it occupies.
+  '--flow-scroll-left',
+  '--flow-scrollbar-width',
 ]);
 
 /** Sub-token knobs a consumer may set but which are not part of the core schema. */

@@ -80,6 +80,9 @@ const scrollerOf = (grid: FlowGrid<Row>) =>
   grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
 const headerOf = (grid: FlowGrid<Row>) =>
   grid.shadowRoot!.querySelector('flow-instance[parts="header"]')!;
+const chromeOf = (grid: FlowGrid<Row>) => grid.shadowRoot!.querySelector('.stack-chrome')!;
+const viewportOf = (grid: FlowGrid<Row>) =>
+  grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 // The sticky group band is also parts="rows", so it must be excluded or it
 // matches first and every body assertion reads the wrong element.
 const bodyOf = (grid: FlowGrid<Row>) =>
@@ -112,29 +115,40 @@ afterEach(() => {
 
 describe('stack layout', () => {
   describe('the header', () => {
-    it('stays at the top of the scroller while the body scrolls', async () => {
+    it('does not move while the body scrolls', async () => {
       const grid = await mount();
-      const scrollerTop = scrollerOf(grid).getBoundingClientRect().top;
+      // Above the scrolling body, so it sits at the top of the grid itself.
+      const gridTop = viewportOf(grid).getBoundingClientRect().top;
       const headerTop = () => headerOf(grid).getBoundingClientRect().top;
 
-      expect(Math.round(headerTop())).toBe(Math.round(scrollerTop));
+      expect(Math.round(headerTop())).toBe(Math.round(gridTop));
 
       await scrollTo(grid, 2000);
-      expect(Math.round(headerTop())).toBe(Math.round(scrollerTop));
+      expect(Math.round(headerTop())).toBe(Math.round(gridTop));
 
       await scrollTo(grid, 10_000);
-      expect(Math.round(headerTop())).toBe(Math.round(scrollerTop));
+      expect(Math.round(headerTop())).toBe(Math.round(gridTop));
     });
 
-    it('is never scrolled above the visible area', async () => {
-      // The exact failure: the header's bottom went above the scroller's top.
+    it('sits above the body, which starts beneath it', async () => {
+      const grid = await mount();
+
+      const header = headerOf(grid).getBoundingClientRect();
+      const scroller = scrollerOf(grid).getBoundingClientRect();
+
+      expect(Math.round(header.bottom)).toBe(Math.round(scroller.top));
+    });
+
+    it('is never scrolled out of view', async () => {
+      // The original failure: the header's bottom went above the visible area.
       const grid = await mount();
       await scrollTo(grid, 5000);
 
-      const scroller = scrollerOf(grid).getBoundingClientRect();
+      const viewport = viewportOf(grid).getBoundingClientRect();
       const header = headerOf(grid).getBoundingClientRect();
 
-      expect(header.bottom).toBeGreaterThan(scroller.top);
+      expect(header.bottom).toBeGreaterThan(viewport.top);
+      expect(header.top).toBeLessThan(viewport.bottom);
       expect(header.height).toBeGreaterThan(0);
     });
 
@@ -171,8 +185,14 @@ describe('stack layout', () => {
       }
     });
 
-    it('scrolls horizontally with the body, since it pins only vertically', async () => {
-      const grid = await mount({ columns: [...columns, { field: 'price', width: 600 }] });
+    it('follows the body sideways, so the columns stay in line', async () => {
+      const grid = await mount({
+        columns: [
+          { field: 'name', width: 300 },
+          { field: 'price', width: 300 },
+          { colId: 'extra', headerName: 'Extra', width: 300 },
+        ],
+      });
       const scroller = scrollerOf(grid);
       const before = headerOf(grid).getBoundingClientRect().left;
 
@@ -181,18 +201,37 @@ describe('stack layout', () => {
         description: 'the header to follow a horizontal scroll',
       });
 
-      expect(headerOf(grid).getBoundingClientRect().left).toBeLessThan(before);
+      const headerCell = headerOf(grid).shadowRoot!.querySelectorAll('flow-header-cell')[0]!;
+      const bodyCell = bodyRows(grid)[0]!.shadowRoot!.querySelectorAll('flow-cell')[0]!;
+
+      expect(headerOf(grid).getBoundingClientRect().left).toBeCloseTo(before - 200, 0);
+      expect(
+        Math.abs(headerCell.getBoundingClientRect().left - bodyCell.getBoundingClientRect().left),
+      ).toBeLessThan(1.5);
     });
 
-    it('paints over the rows passing beneath it', async () => {
+    it('is static, outside the scrolling body', async () => {
+      // Not sticky: the browser should not be repositioning it every frame, and
+      // it should not live inside the box it is meant to be independent of.
       const grid = await mount();
       await scrollTo(grid, 2000);
 
       const header = headerOf(grid) as HTMLElement;
-      const styles = getComputedStyle(header);
+      expect(getComputedStyle(header).position).toBe('static');
+      expect(scrollerOf(grid).contains(header)).toBe(false);
+      expect(chromeOf(grid).contains(header)).toBe(true);
+    });
 
-      expect(styles.position).toBe('sticky');
-      expect(Number(styles.zIndex)).toBeGreaterThan(0);
+    it('reserves the width the body scrollbar takes', async () => {
+      // Zero with overlay scrollbars; with classic ones the header would
+      // otherwise sit proud of the body by the scrollbar's width.
+      const grid = await mount();
+      const scroller = scrollerOf(grid);
+      const gutter = scroller.offsetWidth - scroller.clientWidth;
+
+      const reserved = getComputedStyle(chromeOf(grid) as HTMLElement).paddingRight;
+
+      expect(Number.parseFloat(reserved)).toBe(gutter);
     });
   });
 
@@ -250,11 +289,11 @@ describe('stack layout', () => {
         },
         data,
       );
-      const scrollerTop = scrollerOf(grid).getBoundingClientRect().top;
+      const gridTop = viewportOf(grid).getBoundingClientRect().top;
 
       await scrollTo(grid, 3000);
 
-      expect(Math.round(headerOf(grid).getBoundingClientRect().top)).toBe(Math.round(scrollerTop));
+      expect(Math.round(headerOf(grid).getBoundingClientRect().top)).toBe(Math.round(gridTop));
     });
 
     it('still offers a sortable header while pinned', async () => {
@@ -338,7 +377,10 @@ describe('stack layout', () => {
       const headerBottom = headerOf(grid).getBoundingClientRect().bottom;
       const stickyTop = (stickyOf(grid) as HTMLElement).getBoundingClientRect().top;
 
+      // The header is static chrome above the body; the band pins to the body's
+      // top edge, which is immediately below it.
       expect(Math.abs(stickyTop - headerBottom)).toBeLessThan(2);
+      expect(scrollerOf(grid).contains(stickyOf(grid))).toBe(true);
     });
 
     it('overlays the rows rather than displacing them', async () => {
