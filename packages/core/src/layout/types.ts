@@ -62,6 +62,15 @@ export interface LayoutInstance {
 
 export interface LayoutResult {
   readonly instances: readonly LayoutInstance[];
+  /**
+   * Rows to pin beneath the header, for a layout that scrolls rows out of view.
+   *
+   * Taken from the topmost visible row's `repeatOnBreak` — the same ancestor
+   * chain the flow layout re-emits at an instance break. Core therefore pins
+   * group headings without knowing what a group is, and a grid with no tree
+   * module installed simply gets an empty list.
+   */
+  readonly stickyRows?: readonly DisplayRow[];
   readonly totalWidth: number;
   readonly totalHeight: number;
   /** True when {@link ViewportMetrics.maxInstances} stopped layout early. */

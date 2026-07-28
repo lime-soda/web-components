@@ -109,7 +109,7 @@ export const BondMarket: StoryObj<Args> = {
     rowHeight: 28,
     enableScrollJacking: true,
     expandByDefault: true,
-    ticksPerFrame: 20,
+    ticksPerFrame: 50,
   },
   render: (args) => {
     const gridRef = createRef<FlowGrid<Bond>>();

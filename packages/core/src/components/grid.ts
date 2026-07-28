@@ -69,6 +69,30 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       width: 100%;
       height: var(--flow-spacer-height, 0);
     }
+
+    /*
+     * Only the body scrolls. Sticky rather than fixed so the header still scrolls
+     * horizontally with the columns when the grid is wider than its container.
+     */
+    .stack-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    /*
+     * Pinned group headings, directly beneath the column header.
+     *
+     * The negative margin takes the band out of the flow so it overlays the rows
+     * passing beneath rather than displacing them — otherwise every row would be
+     * pushed down by the depth of the current group, and shift as that changed.
+     */
+    .stack-sticky {
+      position: sticky;
+      top: var(--flow-header-height, 32px);
+      z-index: 1;
+      margin-bottom: calc(-1 * var(--flow-sticky-height, 0px));
+    }
   `;
 
   @property({ attribute: false })
@@ -246,12 +270,42 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
         instance.rows.length * (this.controller?.options.rowHeight ?? 32),
     );
 
+    // Group headings for the rows currently in view, pinned under the column
+    // header. These are the topmost visible row's ancestors — the same chain the
+    // flow layout re-emits at a break — so core pins them without knowing what a
+    // group is.
+    const stickyRows = layout.stickyRows ?? [];
+    const rowHeight = this.controller?.pipeline.viewport.rowHeight ?? 32;
+
+    // The header is a sibling of the windowed rows, not a band inside them.
+    // Inside, it would ride down with the spacer that positions the window and
+    // scroll away; here it sticks to the top of the scroller. Both bands read the
+    // same column template, so they stay aligned with nothing measured.
     return html`
+      <flow-instance
+        class="stack-header"
+        part="instance-header"
+        parts="header"
+        .instance=${instance}
+      ></flow-instance>
+      ${
+        stickyRows.length === 0
+          ? nothing
+          : html`<flow-instance
+              class="stack-sticky"
+              part="instance-sticky"
+              parts="rows"
+              .instance=${{ ...instance, id: `${instance.id}-sticky`, rows: stickyRows }}
+              style=${styleMap({
+                '--flow-sticky-height': `${stickyRows.length * rowHeight}px`,
+              })}
+            ></flow-instance>`
+      }
       <div
         class="stack-spacer"
         style=${styleMap({ '--flow-spacer-height': `${instance.offset}px` })}
       ></div>
-      <flow-instance part="instance" .instance=${instance}></flow-instance>
+      <flow-instance part="instance" parts="rows" .instance=${instance}></flow-instance>
       <div class="stack-spacer" style=${styleMap({ '--flow-spacer-height': `${below}px` })}></div>
     `;
   }

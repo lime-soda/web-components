@@ -40,6 +40,8 @@ const INTERNAL = new Set([
   '--flow-spacer-height',
   '--flow-column-template',
   '--flow-tree-depth',
+  // Height of the pinned group band, so it can be lifted out of the flow.
+  '--flow-sticky-height',
 ]);
 
 /** Sub-token knobs a consumer may set but which are not part of the core schema. */

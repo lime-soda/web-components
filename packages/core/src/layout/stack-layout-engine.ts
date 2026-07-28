@@ -32,7 +32,10 @@ export class StackLayoutEngine implements LayoutEngine {
       contentHeight += row.height ?? viewport.rowHeight;
     }
 
-    const first = this.withOverscan(this.indexAt(offsets, scrollOffset), -overscan, rows.length);
+    // The row at the scroll position, before overscan pulls the window earlier.
+    // Its ancestors are what should stay pinned.
+    const topVisible = this.indexAt(offsets, scrollOffset);
+    const first = this.withOverscan(topVisible, -overscan, rows.length);
     const lastVisible = this.indexAt(offsets, scrollOffset + usable);
     const last = this.withOverscan(lastVisible + 1, overscan, rows.length);
 
@@ -51,11 +54,16 @@ export class StackLayoutEngine implements LayoutEngine {
             },
           ];
 
+    // A row that is itself a heading is not in its own ancestor chain, so a
+    // heading at the top of the viewport correctly pins nothing.
+    const stickyRows = rows[topVisible]?.repeatOnBreak ?? [];
+
     return {
       instances,
       totalWidth: rows.length === 0 ? 0 : viewport.instanceWidth,
       totalHeight: rows.length === 0 ? 0 : contentHeight + viewport.headerHeight,
       truncated: false,
+      stickyRows,
     };
   }
 

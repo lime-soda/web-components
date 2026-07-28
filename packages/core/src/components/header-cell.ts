@@ -31,9 +31,6 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
       font-weight: var(--flow-header-font-weight, 500);
       font-size: var(--flow-header-font-size, 13px);
       overflow: hidden;
-      position: sticky;
-      top: 0;
-      z-index: 1;
     }
 
     :host(:last-of-type) {
