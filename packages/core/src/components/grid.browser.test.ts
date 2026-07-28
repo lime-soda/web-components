@@ -25,6 +25,25 @@ const quotes = (count: number): Quote[] =>
 
 let host: HTMLDivElement | undefined;
 
+/**
+ * Waits for a condition, polling by frame.
+ *
+ * Mounting depends on ResizeObserver measuring the container and then an
+ * IntersectionObserver reporting which instances are near the viewport. Both are
+ * delivered asynchronously and neither guarantees a frame count, so waiting a
+ * fixed number of frames is a race that a loaded CI box loses.
+ */
+async function waitFor(
+  condition: () => boolean,
+  { timeout = 4000, description = 'condition' } = {},
+): Promise<void> {
+  const deadline = performance.now() + timeout;
+  while (!condition()) {
+    if (performance.now() > deadline) throw new Error(`Timed out waiting for ${description}.`);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+}
+
 /** Mounts a grid at a fixed size so instance capacity is deterministic. */
 async function mount(
   options: Partial<GridOptions<Quote>> = {},
@@ -41,8 +60,11 @@ async function mount(
   host.append(grid);
 
   await grid.updateComplete;
-  // One frame for ResizeObserver to report the container, then a second update.
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  // Settled means an instance has actually mounted, not merely that the layout
+  // produced slots — an empty grid would otherwise let tests pass vacuously.
+  await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null, {
+    description: 'the first instance to mount',
+  });
   await grid.updateComplete;
   return grid;
 }
@@ -101,16 +123,18 @@ describe('<flow-grid>', () => {
       expect(slots(grid)).toHaveLength(3);
 
       host!.style.height = '680px';
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      await grid.updateComplete;
+      await waitFor(() => slots(grid).length === 2, { description: 'the reflow to 2 instances' });
 
       expect(slots(grid)).toHaveLength(2);
     });
 
     it('gives every instance its own header, so far-right columns stay readable', async () => {
       const grid = await mount();
+      const mounted = [...instances(grid)];
 
-      for (const instance of instances(grid)) {
+      // Asserted, because iterating an empty list would pass regardless.
+      expect(mounted.length).toBeGreaterThan(0);
+      for (const instance of mounted) {
         expect(instance.shadowRoot?.querySelectorAll('flow-header-cell')).toHaveLength(2);
       }
     });
@@ -138,9 +162,12 @@ describe('<flow-grid>', () => {
       const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
       const widthBefore = scroller.scrollWidth;
 
+      const mountedBefore = [...instances(grid)].map((i) => i.parentElement);
       scroller.scrollLeft = 2000;
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      await grid.updateComplete;
+      await waitFor(
+        () => [...instances(grid)].some((i) => !mountedBefore.includes(i.parentElement)),
+        { description: 'the observer to mount a new instance after scrolling' },
+      );
 
       expect(scroller.scrollWidth).toBe(widthBefore);
     });
@@ -150,13 +177,15 @@ describe('<flow-grid>', () => {
       const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
       const firstId = slots(grid)[0]!.dataset['instanceId'];
 
-      scroller.scrollLeft = 4000;
-      await new Promise((resolve) => setTimeout(resolve, 150));
-      await grid.updateComplete;
+      const mountedIds = () =>
+        [...instances(grid)].map((i) => (i.parentElement as HTMLElement).dataset['instanceId']);
 
-      const mounted = [...instances(grid)].map(
-        (i) => (i.parentElement as HTMLElement).dataset['instanceId'],
-      );
+      scroller.scrollLeft = 4000;
+      await waitFor(() => mountedIds().length > 0 && !mountedIds().includes(firstId), {
+        description: 'the first instance to unmount after scrolling away',
+      });
+
+      const mounted = mountedIds();
       expect(mounted).not.toContain(firstId);
       expect(mounted.length).toBeGreaterThan(0);
     });

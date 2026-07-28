@@ -9,6 +9,25 @@ import { SelectionModule } from '../modules/selection/index.js';
 import type { GridTheme } from './tokens.js';
 
 /**
+ * Waits for a condition, polling by frame.
+ *
+ * Mounting depends on ResizeObserver measuring the container and then an
+ * IntersectionObserver reporting which instances are near the viewport. Both are
+ * delivered asynchronously and neither guarantees a frame count, so waiting a
+ * fixed number of frames is a race that a loaded CI box loses.
+ */
+async function waitFor(
+  condition: () => boolean,
+  { timeout = 4000, description = 'condition' } = {},
+): Promise<void> {
+  const deadline = performance.now() + timeout;
+  while (!condition()) {
+    if (performance.now() > deadline) throw new Error(`Timed out waiting for ${description}.`);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+}
+
+/**
  * Proves the theme reaches rendered pixels.
  *
  * Token-level tests confirm the mapping; these confirm that the resulting
@@ -57,7 +76,11 @@ async function mount(overrides: Partial<GridOptions<Row>> = {}): Promise<FlowGri
   host.append(grid);
 
   await grid.updateComplete;
-  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  // Settled means an instance has actually mounted, not merely that the layout
+  // produced slots — an empty grid would otherwise let tests pass vacuously.
+  await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null, {
+    description: 'the first instance to mount',
+  });
   await grid.updateComplete;
   return grid;
 }
