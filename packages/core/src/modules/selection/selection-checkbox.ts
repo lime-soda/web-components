@@ -1,5 +1,4 @@
 import { css, nothing } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { CellRendererElement } from '../../components/cell-renderer-element.js';
 import { type SelectionModule, selectionCheckboxTemplate } from './selection-module.js';
 
@@ -9,7 +8,6 @@ import { type SelectionModule, selectionCheckboxTemplate } from './selection-mod
  * A renderer element rather than a function so it reads its row from context and
  * repaints on its own when selection changes, instead of the whole row doing so.
  */
-@customElement('flow-selection-checkbox')
 export class FlowSelectionCheckbox extends CellRendererElement {
   static override styles = css`
     /*

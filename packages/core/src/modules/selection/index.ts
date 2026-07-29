@@ -1,4 +1,3 @@
-import './selection-checkbox.js';
 import type { SelectionState } from './selection-module.js';
 
 export { SelectionModule } from './selection-module.js';

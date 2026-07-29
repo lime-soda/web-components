@@ -1,9 +1,6 @@
-// Custom elements. Importing the package registers them.
-import './components/grid.js';
-import './components/instance.js';
-import './components/row.js';
-import './components/cell.js';
-import './components/header-cell.js';
+// Element classes. Importing them registers nothing — call `defineElements()`
+// or import `@flow-grid/core/define` for that.
+export { defineElements, defineElement, ELEMENTS } from './define-elements.js';
 
 export { FlowGrid } from './components/grid.js';
 export { FlowInstance } from './components/instance.js';

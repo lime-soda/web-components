@@ -1,6 +1,6 @@
 import { provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -12,7 +12,6 @@ import { GridController, type GridOptions } from '../controller/grid-controller.
 import { SignalWatcher } from '../reactive/index.js';
 import type { DisplayRow, LayoutInstance } from '../layout/types.js';
 import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
-import './instance.js';
 
 /**
  * The grid host.
@@ -21,7 +20,6 @@ import './instance.js';
  * decides which instances are worth rendering. Everything below reads from the
  * context, so nothing is drilled down the tree.
  */
-@customElement('flow-grid')
 export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {

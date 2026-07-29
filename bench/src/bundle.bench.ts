@@ -55,7 +55,7 @@ function bundle(modules: readonly ModuleName[]): string {
   const entry = join(sandbox, `app-${modules.join('-') || 'core'}.js`);
   writeFileSync(
     entry,
-    `import '@flow-grid/core';
+    `import '@flow-grid/core/define';
 ${imports}
 const grid = document.createElement('flow-grid');
 grid.gridOptions = { columns: [{ field: 'a' }], modules: [${uses}] };
@@ -102,13 +102,36 @@ afterAll(() => {
 });
 
 describe('bundle composition', () => {
-  it('registers the custom elements when the package is imported', () => {
-    // `sideEffects: false` made this fail silently: the import was dropped, so
-    // nothing defined the elements and the grid never rendered.
+  it('registers the elements through the define entry', () => {
     const code = bundle([]);
 
     expect(code).toContain('flow-grid');
+    expect(code).toContain('customElements');
     expect(code.length).toBeGreaterThan(10_000);
+  });
+
+  it('registers nothing when only the classes are imported', () => {
+    // Importing a class gives you the class. Registration is a separate,
+    // explicit act, so a consumer can subclass, test or substitute an element
+    // without one appearing in the registry as a side effect.
+    const entry = join(sandbox, 'classes-only.js');
+    writeFileSync(
+      entry,
+      `import { FlowGrid } from '@flow-grid/core';
+console.log(FlowGrid.name);
+`,
+    );
+    const { outputFiles } = buildSync({
+      entryPoints: [entry],
+      bundle: true,
+      minify: true,
+      format: 'esm',
+      write: false,
+      logLevel: 'error',
+      absWorkingDir: sandbox,
+    });
+
+    expect(outputFiles[0]!.text).not.toContain('customElements.define');
   });
 
   it('leaves every module out when none is imported', () => {

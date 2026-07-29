@@ -1,7 +1,7 @@
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
 import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import type { ResolvedColumn } from '../columns/types.js';
 import { columnContext, gridContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
@@ -14,7 +14,6 @@ import { SignalWatcher } from '../reactive/index.js';
  * arrive as module header slots, so a grid with neither module installed has a
  * header with no affordances rather than dead ones.
  */
-@customElement('flow-header-cell')
 export class FlowHeaderCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {

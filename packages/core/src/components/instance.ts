@@ -1,14 +1,12 @@
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { gridContext, instanceContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
 import type { LayoutInstance } from '../layout/types.js';
 import { SignalWatcher } from '../reactive/index.js';
-import './header-cell.js';
-import './row.js';
 
 /** Which bands of the instance to render. */
 export type InstanceParts = 'full' | 'header' | 'rows';
@@ -24,7 +22,6 @@ export type InstanceParts = 'full' | 'header' | 'rows';
  * spacer, so the header renders separately and stays put. Both bands share the
  * same column template, so they stay aligned without measuring anything.
  */
-@customElement('flow-instance')
 export class FlowInstance extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {

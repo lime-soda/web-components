@@ -1,6 +1,6 @@
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { RowContextValue, gridContext, rowContext } from '../context/index.js';
@@ -8,7 +8,6 @@ import type { GridController } from '../controller/grid-controller.js';
 import type { DisplayRow } from '../layout/types.js';
 import type { RowDecoration } from '../modules/types.js';
 import { SignalWatcher } from '../reactive/index.js';
-import './cell.js';
 
 /**
  * One display row.
@@ -22,7 +21,6 @@ import './cell.js';
  * (node, selection, store) with matching teardown in `disconnectedCallback`; here
  * the row context reads a signal and Lit handles the rest.
  */
-@customElement('flow-row')
 export class FlowRow extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {

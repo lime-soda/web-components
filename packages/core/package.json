@@ -27,14 +27,8 @@
   },
   "type": "module",
   "sideEffects": [
-    "./dist/index.js",
-    "./src/index.ts",
-    "./dist/components/*.js",
-    "./src/components/*.ts",
-    "./dist/modules/selection/index.js",
-    "./src/modules/selection/index.ts",
-    "./dist/modules/selection/selection-checkbox.js",
-    "./src/modules/selection/selection-checkbox.ts",
+    "./dist/define.js",
+    "./src/define.ts",
     "**/*.css"
   ],
   "publishConfig": {
@@ -52,6 +46,11 @@
       "types": "./dist/index.d.ts",
       "development": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./define": {
+      "types": "./dist/define.d.ts",
+      "development": "./src/define.ts",
+      "default": "./dist/define.js"
     },
     "./tree": {
       "types": "./dist/modules/tree/index.d.ts",

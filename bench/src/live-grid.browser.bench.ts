@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import '@flow-grid/core';
+import '@flow-grid/core/define';
 import type { ColumnDef, FlowGrid, GridOptions } from '@flow-grid/core';
 import { TreeModule } from '@flow-grid/core/tree';
 import { SortModule } from '@flow-grid/core/sort';

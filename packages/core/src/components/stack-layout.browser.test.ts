@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import '../index.js';
+import '../define.js';
 import type { ColumnDef } from '../columns/types.js';
 import type { GridOptions } from '../controller/grid-controller.js';
 import type { FlowGrid } from './grid.js';

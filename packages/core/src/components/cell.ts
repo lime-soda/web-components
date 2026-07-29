@@ -2,7 +2,7 @@ import { consume, provide } from '@lit/context';
 import { instanceContext } from '../context/index.js';
 import { LitElement, css, html, nothing } from 'lit';
 import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 import { formatCellValue, getCellValue } from '../columns/resolve-columns.js';
 import type { ResolvedColumn } from '../columns/types.js';
@@ -20,7 +20,6 @@ import { SignalWatcher } from '../reactive/index.js';
  * price tick cheap: the cell reads its row's signal during render, so a change
  * repaints this cell and touches nothing above it.
  */
-@customElement('flow-cell')
 export class FlowCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
@@ -190,6 +189,7 @@ export class FlowCell extends SignalWatcher(LitElement) {
       if (!this.matches(':focus')) this.focus({ preventScroll: false });
     }
   }
+
 
   private isFocusedCell(): boolean {
     const instanceId = this.instance?.id;
