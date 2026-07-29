@@ -114,6 +114,23 @@ grid.gridOptions = {
 };
 ```
 
+Each module is a separate entry point, so an app pays only for what it imports.
+Measured with esbuild, minified and gzipped:
+
+| Imports      | Wire size |
+| ------------ | --------- |
+| core only    | 26.4 kB   |
+| + keyboard   | +0.3 kB   |
+| + cell-flash | +0.7 kB   |
+| + sort       | +1.2 kB   |
+| + filter     | +1.4 kB   |
+| + tree       | +1.9 kB   |
+| + selection  | +2.1 kB   |
+| everything   | 33.3 kB   |
+
+A bundle-composition check in CI asserts that an unimported module leaves no
+trace in the output, so this cannot quietly regress.
+
 Importing a module also adds its options and api methods **to the types**. Without
 the import, `api.expandAll()` does not exist and does not compile:
 
