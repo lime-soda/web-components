@@ -81,6 +81,9 @@ interface Args {
   enableScrollJacking: boolean;
   expandByDefault: boolean;
   ticksPerFrame: number;
+  selectionMode: 'multi' | 'single';
+  groupSelectsChildren: boolean;
+  clickToSelect: boolean;
 }
 
 const meta: Meta<Args> = {
@@ -92,6 +95,22 @@ const meta: Meta<Args> = {
     ticksPerFrame: { control: { type: 'range', min: 1, max: 100, step: 1 } },
     enableScrollJacking: { control: 'boolean' },
     expandByDefault: { control: 'boolean' },
+    selectionMode: {
+      control: 'inline-radio',
+      options: ['multi', 'single'],
+      table: { category: 'Selection' },
+    },
+    groupSelectsChildren: {
+      control: 'boolean',
+      description:
+        'Ticking a category selects the instruments beneath it. Turn off to make a category selectable in its own right.',
+      table: { category: 'Selection' },
+    },
+    clickToSelect: {
+      control: 'boolean',
+      description: 'Select by clicking anywhere in the row, not only the checkbox.',
+      table: { category: 'Selection' },
+    },
   },
 };
 
@@ -113,6 +132,15 @@ export const BondMarket: StoryObj<Args> = {
   },
   render: (args) => {
     const gridRef = createRef<FlowGrid<Bond>>();
+    // Built from the controls, then updated from them on every change. Module
+    // options are not reachable through gridOptions, so they are set on the
+    // module itself — which is the point: no grid rebuild, and the current
+    // selection survives the change.
+    const selection = new SelectionModule<Bond>({
+      mode: args.selectionMode,
+      groupSelectsChildren: args.groupSelectsChildren,
+      clickToSelect: args.clickToSelect,
+    });
     const data = generateBonds(args.groups, args.instruments);
     let frame: number | null = null;
 
@@ -134,7 +162,7 @@ export const BondMarket: StoryObj<Args> = {
         new KeyboardModule<Bond>(),
         // Ticking a category selects the instruments beneath it, respecting the
         // current filter; the category shows indeterminate while only some are.
-        new SelectionModule<Bond>({ mode: 'multi' }),
+        selection,
       ],
     };
 

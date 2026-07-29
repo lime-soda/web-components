@@ -59,9 +59,9 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   private readonly selected = new Set<string>();
   private lastToggled: string | null = null;
 
-  private cachedRows?: readonly DisplayRow[];
-  private cachedLeaves?: Map<string, readonly string[]>;
-  private cachedAncestors?: Map<string, readonly string[]>;
+  private cachedRows: readonly DisplayRow[] | undefined;
+  private cachedLeaves: Map<string, readonly string[]> | undefined;
+  private cachedAncestors: Map<string, readonly string[]> | undefined;
 
   /**
    * Group membership seen at any point, kept across projections.
@@ -73,7 +73,24 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    */
   private readonly rememberedLeaves = new Map<string, readonly string[]>();
 
-  constructor(private readonly options: SelectionModuleOptions = {}) {}
+  constructor(private options: SelectionModuleOptions = {}) {}
+
+  /**
+   * Replaces some or all of this module's options.
+   *
+   * Options given to the constructor are otherwise fixed for the life of the
+   * grid: the grid's own options are reactive, but a module's are not reachable
+   * through them, and reassigning `modules` does not re-register anything. This
+   * is how a preference toggle reaches a module without rebuilding the grid.
+   */
+  setOptions(next: Partial<SelectionModuleOptions>): void {
+    this.options = { ...this.options, ...next };
+    // The leaf index is derived from the options, so it must not survive them.
+    this.cachedRows = undefined;
+    this.cachedLeaves = undefined;
+    this.cachedAncestors = undefined;
+    this.context?.invalidate();
+  }
 
   init(context: ModuleContext<TData>): void {
     this.context = context;
@@ -140,6 +157,11 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    */
   private membershipOf(rowId: string): readonly string[] {
     const projected = this.selectableLeavesOf(rowId);
+    // With groups standing alone, no row ever stands for another, so remembered
+    // membership is not just unnecessary — consulting it would resurrect the
+    // other mode's behaviour after a switch.
+    if (!this.groupSelectsChildren) return projected;
+
     const isOwnLeafOnly = projected.length === 1 && projected[0] === rowId;
     if (!isOwnLeafOnly) return projected;
     return this.rememberedLeaves.get(rowId) ?? projected;
@@ -504,11 +526,13 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
       }
     }
 
-    for (const [rowId, ids] of leaves) {
-      // Only a row standing for others is worth remembering; a leaf stands for
-      // itself in every projection.
-      if (ids.length > 1 || (ids.length === 1 && ids[0] !== rowId)) {
-        this.rememberedLeaves.set(rowId, ids);
+    if (this.groupSelectsChildren) {
+      for (const [rowId, ids] of leaves) {
+        // Only a row standing for others is worth remembering; a leaf stands for
+        // itself in every projection.
+        if (ids.length > 1 || (ids.length === 1 && ids[0] !== rowId)) {
+          this.rememberedLeaves.set(rowId, ids);
+        }
       }
     }
 

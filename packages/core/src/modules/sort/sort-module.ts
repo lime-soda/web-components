@@ -44,7 +44,20 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
   private context?: ModuleContext<TData>;
   private model: SortModelEntry[] = [];
 
-  constructor(private readonly options: SortModuleOptions = {}) {}
+  constructor(private options: SortModuleOptions = {}) {}
+
+  /**
+   * Replaces some or all of this module's options.
+   *
+   * Options given to the constructor are otherwise fixed for the life of the
+   * grid: the grid's own options are reactive, but a module's are not reachable
+   * through them, and reassigning `modules` does not re-register anything. This
+   * is how a preference toggle reaches a module without rebuilding the grid.
+   */
+  setOptions(next: Partial<SortModuleOptions>): void {
+    this.options = { ...this.options, ...next };
+    this.context?.invalidate();
+  }
 
   init(context: ModuleContext<TData>): void {
     this.context = context;

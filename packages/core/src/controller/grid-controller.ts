@@ -83,6 +83,9 @@ export class GridController<TData = unknown> {
 
     this.columns = computed(() => {
       const current = this.optionsSignal.get();
+      // Modules contribute columns, so a module changing its own options — the
+      // selection checkbox being turned off, say — has to reach this too.
+      this.registry.version.get();
       // Module columns lead: a selection checkbox belongs at the left edge, and a
       // consumer who wants otherwise can place it explicitly instead.
       const defs = [...this.registry.provideColumns(), ...current.columns];

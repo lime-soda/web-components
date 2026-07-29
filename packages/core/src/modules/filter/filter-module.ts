@@ -42,7 +42,20 @@ export class FilterModule<TData = unknown> implements GridModule<
   private model: FilterModel = {};
   private quickFilter = '';
 
-  constructor(private readonly options: FilterModuleOptions = {}) {}
+  constructor(private options: FilterModuleOptions = {}) {}
+
+  /**
+   * Replaces some or all of this module's options.
+   *
+   * Options given to the constructor are otherwise fixed for the life of the
+   * grid: the grid's own options are reactive, but a module's are not reachable
+   * through them, and reassigning `modules` does not re-register anything. This
+   * is how a preference toggle reaches a module without rebuilding the grid.
+   */
+  setOptions(next: Partial<FilterModuleOptions>): void {
+    this.options = { ...this.options, ...next };
+    this.context?.invalidate();
+  }
 
   init(context: ModuleContext<TData>): void {
     this.context = context;
