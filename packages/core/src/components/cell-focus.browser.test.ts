@@ -3,7 +3,7 @@ import { defineElements } from '../define-elements.js';
 import { SelectionModule } from '../modules/selection/index.js';
 import { KeyboardModule } from '../modules/keyboard/index.js';
 import type { FlowGrid } from './grid.js';
-import type { GridOptions } from '../api/types.js';
+import type { GridOptions } from '../controller/grid-controller.js';
 
 /**
  * Reaching a cell with the mouse, and acting on it with the keyboard.
@@ -39,7 +39,7 @@ async function waitFor(condition: () => boolean, timeout = 2000): Promise<void> 
   }
 }
 
-async function mount(): Promise<FlowGrid<Row>> {
+async function mount(selection: { checkboxColumn?: boolean } = {}): Promise<FlowGrid<Row>> {
   host = document.createElement('div');
   host.style.height = '400px';
   host.style.width = '600px';
@@ -53,7 +53,7 @@ async function mount(): Promise<FlowGrid<Row>> {
       { field: 'price', width: 100 },
     ],
     getRowId: (row) => row.id,
-    modules: [new SelectionModule<Row>({ mode: 'multi' }), new KeyboardModule<Row>()],
+    modules: [new SelectionModule<Row>({ mode: 'multi', ...selection }), new KeyboardModule<Row>()],
   } satisfies GridOptions<Row>;
   grid.rowData = data;
   host.append(grid);
@@ -64,10 +64,9 @@ async function mount(): Promise<FlowGrid<Row>> {
 
 const cells = (grid: FlowGrid<Row>): HTMLElement[] => {
   const instance = grid.shadowRoot?.querySelector('flow-instance');
-  return [...(instance?.shadowRoot?.querySelectorAll('flow-row') ?? [])].flatMap((row) => [
-    ...((row as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot?.querySelectorAll(
-      'flow-cell',
-    ) ?? []),
+  const rows = [...(instance?.shadowRoot?.querySelectorAll('flow-row') ?? [])];
+  return rows.flatMap((row) => [
+    ...((row as HTMLElement).shadowRoot?.querySelectorAll('flow-cell') ?? []),
   ]) as HTMLElement[];
 };
 
@@ -82,9 +81,9 @@ describe('focusing a cell with the mouse', () => {
     const cell = cells(grid)[5]!;
 
     cell.focus();
-    await waitFor(() => grid.controller.focus.focused.get() !== null);
+    await waitFor(() => grid.controller!.focus.focused.get() !== null);
 
-    expect(grid.controller.focus.focused.get()).not.toBeNull();
+    expect(grid.controller!.focus.focused.get()).not.toBeNull();
   });
 
   it('shows a focus ring, which :focus-visible would not have done', async () => {
@@ -115,6 +114,11 @@ describe('focusing a cell with the mouse', () => {
 });
 
 describe('selecting from the keyboard', () => {
+  /**
+   * Space and Enter belong to the checkbox cell when the grid has one: the
+   * checkbox is the thing being operated, and a key that selected from anywhere
+   * would fight whatever a value cell wants Enter for.
+   */
   const press = (grid: FlowGrid<Row>, key: string) => {
     const target = cells(grid).find((cell) => cell.hasAttribute('data-focused')) ?? grid;
     const event = new KeyboardEvent('keydown', {
@@ -127,10 +131,19 @@ describe('selecting from the keyboard', () => {
     return event;
   };
 
-  it('selects the focused row with Space', async () => {
+  /** Focuses the checkbox cell of the second row. */
+  const focusCheckbox = async (grid: FlowGrid<Row>) => {
+    const checkbox = cells(grid).find(
+      (cell) =>
+        (cell as unknown as { column?: { colId: string } }).column?.colId === 'flow-selection',
+    )!;
+    checkbox.focus();
+    await waitFor(() => grid.controller!.focus.focused.get() !== null);
+  };
+
+  it('selects the focused row from the checkbox cell with Space', async () => {
     const grid = await mount();
-    cells(grid)[2]!.focus();
-    await waitFor(() => grid.controller.focus.focused.get() !== null);
+    await focusCheckbox(grid);
 
     press(grid, ' ');
 
@@ -139,8 +152,7 @@ describe('selecting from the keyboard', () => {
 
   it('selects with Enter too', async () => {
     const grid = await mount();
-    cells(grid)[2]!.focus();
-    await waitFor(() => grid.controller.focus.focused.get() !== null);
+    await focusCheckbox(grid);
 
     press(grid, 'Enter');
 
@@ -149,8 +161,7 @@ describe('selecting from the keyboard', () => {
 
   it('toggles, so a second press deselects', async () => {
     const grid = await mount();
-    cells(grid)[2]!.focus();
-    await waitFor(() => grid.controller.focus.focused.get() !== null);
+    await focusCheckbox(grid);
 
     press(grid, ' ');
     press(grid, ' ');
@@ -160,20 +171,30 @@ describe('selecting from the keyboard', () => {
 
   it('stops Space scrolling the page', async () => {
     const grid = await mount();
-    cells(grid)[2]!.focus();
-    await waitFor(() => grid.controller.focus.focused.get() !== null);
+    await focusCheckbox(grid);
 
     const event = press(grid, ' ');
 
     expect(event.defaultPrevented).toBe(true);
   });
 
-  it('works from any column, not only the checkbox one', async () => {
+  it('does nothing from a value cell while the checkbox column exists', async () => {
     const grid = await mount();
-    // Third column of the second row: a value cell, nowhere near a checkbox.
     const valueCell = cells(grid)[5]!;
     valueCell.focus();
-    await waitFor(() => grid.controller.focus.focused.get() !== null);
+    await waitFor(() => grid.controller!.focus.focused.get() !== null);
+
+    press(grid, ' ');
+
+    expect(grid.api.getSelectedCount()).toBe(0);
+  });
+
+  it('answers from any cell when there is no checkbox column', async () => {
+    // Nothing to aim at, so refusing would leave the grid unselectable by
+    // keyboard entirely.
+    const grid = await mount({ checkboxColumn: false });
+    cells(grid)[2]!.focus();
+    await waitFor(() => grid.controller!.focus.focused.get() !== null);
 
     press(grid, ' ');
 

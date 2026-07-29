@@ -28,7 +28,7 @@ export class FlowInstance extends SignalWatcher(LitElement) {
       display: block;
       box-sizing: border-box;
       background: var(--flow-background, #ffffff);
-      border: 1px solid var(--flow-border, #d8d8d8);
+      border: var(--flow-instance-border-width, 1px) solid var(--flow-border, #d8d8d8);
       border-radius: var(--flow-radius, 4px);
       overflow: hidden;
     }

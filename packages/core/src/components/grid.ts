@@ -296,7 +296,11 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
           class="instance-slot"
           data-instance-id=${instance.id}
           style=${styleMap({
-            '--flow-instance-width': `${instance.width}px`,
+            // The layout engine sizes an instance to its columns, which is its
+            // *content*. The border is chrome around that, so it is added here
+            // — with it inside, the last column overflowed the padding box and
+            // was clipped, taking the focus ring's right edge with it.
+            '--flow-instance-width': `calc(${instance.width}px + 2 * var(--flow-instance-border-width, 1px))`,
             '--flow-instance-height': `${height}px`,
           })}
           ${ref((element) => this.observeSlot(element))}

@@ -337,11 +337,16 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   readonly styles = SelectionModule.styles;
 
+  /** Whether the module contributes its checkbox column. On unless refused. */
+  private get hasCheckboxColumn(): boolean {
+    return this.options.checkboxColumn ?? true;
+  }
+
   provideColumns(): readonly ColumnDef<TData>[] {
     // Deliberately not derived from `mode`. Tying the two meant switching to
     // single selection silently removed the column, which is a surprising way
     // for one option to change another.
-    if ((this.options.checkboxColumn ?? true) === false) return [];
+    if (!this.hasCheckboxColumn) return [];
 
     return [
       {
@@ -482,15 +487,18 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    * otherwise reach nothing, and a grid navigable entirely by keyboard had no
    * way to actually select anything.
    *
-   * Answered from any column rather than only the checkbox one: the row is
-   * what is being selected, and requiring the user to arrow back to the first
-   * column first would be a chore with no purpose.
+   * Scoped to the checkbox column when there is one: the checkbox is the thing
+   * being operated, and a key that selects from anywhere would fight whatever a
+   * value cell wants Enter for. With no checkbox column there is nothing to
+   * aim at, so any cell answers — otherwise a grid without checkboxes could not
+   * be selected from the keyboard at all.
    */
   onKeyDown(event: KeyboardEvent): boolean {
     if (event.key !== ' ' && event.key !== 'Enter') return false;
 
     const position = this.context?.focus.focused.get();
     if (!position) return false;
+    if (this.hasCheckboxColumn && position.colId !== SELECTION_COL_ID) return false;
 
     // The focused row is identified by its DisplayRow id, which repeats of an
     // ancestor do not share; the selection is keyed by rowId.

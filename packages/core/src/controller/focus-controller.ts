@@ -1,12 +1,16 @@
 import type { LayoutResult } from '../layout/types.js';
 import { type ReadableSignal, type WritableSignal, signal } from '../reactive/index.js';
 
+/** Which band of an instance focus is in. */
+export type FocusSection = 'header' | 'body';
+
 /** Which cell has focus. Identified by instance because repeated rows share a rowId. */
 export interface CellPosition {
   readonly instanceId: string;
-  /** The DisplayRow's unique id, not its rowId. */
+  /** The DisplayRow's unique id, not its rowId. Empty for a header. */
   readonly rowKey: string;
   readonly colId: string;
+  readonly section: FocusSection;
 }
 
 export type FocusEdge = 'rowStart' | 'rowEnd' | 'instanceStart' | 'instanceEnd';
@@ -22,6 +26,11 @@ export type FocusEdge = 'rowStart' | 'rowEnd' | 'instanceStart' | 'instanceEnd';
  * Movement follows the flow layout's reading order. Running off the bottom of an
  * instance continues at the top of the next one, because that is where the data
  * actually continues — not at the top of the same column.
+ *
+ * Headers are reachable, but only by moving backwards. Going down or forwards
+ * lands on data every time: a header is a thing you go *up* to when you want it,
+ * and stepping through one on the way to the next instance's rows would put a
+ * stop in the path of the common movement for the sake of the rare one.
  */
 export class FocusController {
   private readonly position: WritableSignal<CellPosition | null> = signal<CellPosition | null>(
@@ -43,9 +52,9 @@ export class FocusController {
    * Whether this cell is the grid's tab stop.
    *
    * Exactly one cell is tabbable at a time. Before anything has focus that is
-   * the first cell, which is how a user reaches the grid at all — without it the
-   * grid had no tab stop, so no key press ever arrived and navigation appeared
-   * not to exist.
+   * the first body cell, which is how a user reaches the grid at all — without
+   * it the grid had no tab stop, so no key press ever arrived and navigation
+   * appeared not to exist.
    */
   isTabbable(instanceId: string, rowKey: string, colId: string): boolean {
     if (this.position.get() !== null) return this.isFocused(instanceId, rowKey, colId);
@@ -61,14 +70,31 @@ export class FocusController {
     const current = this.position.get();
     return (
       current !== null &&
+      current.section === 'body' &&
       current.instanceId === instanceId &&
       current.rowKey === rowKey &&
       current.colId === colId
     );
   }
 
+  /** Whether the header cell of this column, in this instance, has focus. */
+  isHeaderFocused(instanceId: string, colId: string): boolean {
+    const current = this.position.get();
+    return (
+      current !== null &&
+      current.section === 'header' &&
+      current.instanceId === instanceId &&
+      current.colId === colId
+    );
+  }
+
   focus(position: CellPosition | null): void {
     this.position.set(position);
+  }
+
+  /** Focuses a header cell, the way clicking one would. */
+  focusHeader(instanceId: string, colId: string): void {
+    this.position.set({ instanceId, rowKey: '', colId, section: 'header' });
   }
 
   clear(): void {
@@ -81,29 +107,48 @@ export class FocusController {
     const column = this.getColumns()[0];
     const row = instance?.rows[0];
     if (!instance || !column || !row) return;
-    this.position.set({ instanceId: instance.id, rowKey: row.id, colId: column.colId });
+    this.position.set({
+      instanceId: instance.id,
+      rowKey: row.id,
+      colId: column.colId,
+      section: 'body',
+    });
   }
 
-  /** Moves by whole rows, continuing into the next instance at either end. */
+  /**
+   * Moves by whole rows, continuing into the next instance at either end.
+   *
+   * Upwards out of the first row enters this instance's header rather than the
+   * previous instance, because the header is what sits above these rows.
+   * Downwards never lands on a header at all.
+   */
   moveRow(delta: number): boolean {
     const located = this.locate();
     if (!located) return false;
 
-    const { instances, instanceIndex, rowIndex, colId } = located;
+    const { instances, instanceIndex, colId } = located;
+
+    if (located.section === 'header') {
+      // Down out of a header is into its own rows; up is out of the instance
+      // entirely, to the end of the one before it.
+      if (delta > 0) return this.commit(instanceIndex, 0, colId);
+
+      const previous = instanceIndex - 1;
+      const target = instances[previous];
+      if (!target) return false;
+      return this.commit(previous, target.rows.length - 1, colId);
+    }
+
     let nextInstance = instanceIndex;
-    let nextRow = rowIndex + delta;
+    let nextRow = located.rowIndex + delta;
 
     while (nextRow < 0 || nextRow >= (instances[nextInstance]?.rows.length ?? 0)) {
-      if (nextRow < 0) {
-        if (nextInstance === 0) return false;
-        nextInstance -= 1;
-        nextRow += instances[nextInstance]!.rows.length;
-      } else {
-        const length = instances[nextInstance]!.rows.length;
-        if (nextInstance === instances.length - 1) return false;
-        nextInstance += 1;
-        nextRow -= length;
-      }
+      if (nextRow < 0) return this.commitHeader(nextInstance, colId);
+
+      const length = instances[nextInstance]!.rows.length;
+      if (nextInstance === instances.length - 1) return false;
+      nextInstance += 1;
+      nextRow -= length;
     }
 
     return this.commit(nextInstance, nextRow, colId);
@@ -115,11 +160,14 @@ export class FocusController {
     if (!located) return false;
 
     const columns = this.getColumns();
-    const { instances, instanceIndex, rowIndex, colIndex } = located;
+    const { instances, instanceIndex, rowIndex, colIndex, section } = located;
     const next = colIndex + delta;
 
     if (next >= 0 && next < columns.length) {
-      return this.commit(instanceIndex, rowIndex, columns[next]!.colId);
+      const colId = columns[next]!.colId;
+      return section === 'header'
+        ? this.commitHeader(instanceIndex, colId)
+        : this.commit(instanceIndex, rowIndex, colId);
     }
 
     // Off the edge: carry into the neighbouring instance at the opposite edge,
@@ -129,9 +177,14 @@ export class FocusController {
     if (!target) return false;
 
     const wrappedColumn = next < 0 ? columns[columns.length - 1] : columns[0];
-    const wrappedRow = Math.min(rowIndex, target.rows.length - 1);
-    if (!wrappedColumn || wrappedRow < 0) return false;
+    if (!wrappedColumn) return false;
 
+    // A header stays a header across the join: moving sideways is not a way
+    // into or out of the data.
+    if (section === 'header') return this.commitHeader(nextInstance, wrappedColumn.colId);
+
+    const wrappedRow = Math.min(rowIndex, target.rows.length - 1);
+    if (wrappedRow < 0) return false;
     return this.commit(nextInstance, wrappedRow, wrappedColumn.colId);
   }
 
@@ -142,6 +195,12 @@ export class FocusController {
 
     const target = located.instances[located.instanceIndex + delta];
     if (!target) return false;
+
+    // Jumping never crosses between header and data: whichever band you set off
+    // from is the one you arrive in.
+    if (located.section === 'header') {
+      return this.commitHeader(located.instanceIndex + delta, located.colId);
+    }
 
     return this.commit(
       located.instanceIndex + delta,
@@ -155,13 +214,23 @@ export class FocusController {
     if (!located) return false;
 
     const columns = this.getColumns();
-    const { instances, instanceIndex, rowIndex, colId } = located;
+    const { instances, instanceIndex, rowIndex, colId, section } = located;
 
     switch (edge) {
-      case 'rowStart':
-        return this.commit(instanceIndex, rowIndex, columns[0]?.colId ?? colId);
-      case 'rowEnd':
-        return this.commit(instanceIndex, rowIndex, columns[columns.length - 1]?.colId ?? colId);
+      case 'rowStart': {
+        const target = columns[0]?.colId ?? colId;
+        return section === 'header'
+          ? this.commitHeader(instanceIndex, target)
+          : this.commit(instanceIndex, rowIndex, target);
+      }
+      case 'rowEnd': {
+        const target = columns[columns.length - 1]?.colId ?? colId;
+        return section === 'header'
+          ? this.commitHeader(instanceIndex, target)
+          : this.commit(instanceIndex, rowIndex, target);
+      }
+      // Jumping to either end of the grid lands on data, like every other
+      // forward movement.
       case 'instanceStart':
         return this.commit(0, 0, colId);
       case 'instanceEnd': {
@@ -176,7 +245,15 @@ export class FocusController {
     const row = instance?.rows[rowIndex];
     if (!instance || !row) return false;
 
-    this.position.set({ instanceId: instance.id, rowKey: row.id, colId });
+    this.position.set({ instanceId: instance.id, rowKey: row.id, colId, section: 'body' });
+    return true;
+  }
+
+  private commitHeader(instanceIndex: number, colId: string): boolean {
+    const instance = this.getLayout().instances[instanceIndex];
+    if (!instance) return false;
+
+    this.position.set({ instanceId: instance.id, rowKey: '', colId, section: 'header' });
     return true;
   }
 
@@ -187,6 +264,7 @@ export class FocusController {
         rowIndex: number;
         colIndex: number;
         colId: string;
+        section: FocusSection;
       }
     | undefined {
     const current = this.position.get();
@@ -196,12 +274,25 @@ export class FocusController {
     const instanceIndex = instances.findIndex((instance) => instance.id === current.instanceId);
     if (instanceIndex === -1) return undefined;
 
-    const rowIndex = instances[instanceIndex]!.rows.findIndex((row) => row.id === current.rowKey);
-    if (rowIndex === -1) return undefined;
-
     const colIndex = this.getColumns().findIndex((column) => column.colId === current.colId);
     if (colIndex === -1) return undefined;
 
-    return { instances, instanceIndex, rowIndex, colIndex, colId: current.colId };
+    if (current.section === 'header') {
+      // A header has no row of its own; -1 records that and is never used to
+      // index, because every header path commits through `commitHeader`.
+      return {
+        instances,
+        instanceIndex,
+        rowIndex: -1,
+        colIndex,
+        colId: current.colId,
+        section: 'header',
+      };
+    }
+
+    const rowIndex = instances[instanceIndex]!.rows.findIndex((row) => row.id === current.rowKey);
+    if (rowIndex === -1) return undefined;
+
+    return { instances, instanceIndex, rowIndex, colIndex, colId: current.colId, section: 'body' };
   }
 }

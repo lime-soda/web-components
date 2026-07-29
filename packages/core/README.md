@@ -205,10 +205,18 @@ unfocused cell.
 Exactly one cell is tabbable at a time, so the grid is a single tab stop. Tab
 into it and arrows move; click a cell and arrows move from there.
 
-With `SelectionModule` installed, **Space or Enter selects the focused row**,
-from any column rather than only the checkbox one — focus sits on the cell, not
-on the checkbox inside it, so the key press would otherwise reach nothing. Space
-does not scroll the page while the grid has focus.
+Arrow keys reach the **header** too, but only backwards: up from the first row
+enters that instance's header, and down or forwards always lands on data. A
+header is something you go up to when you want it, and stepping through one on
+the way to the next instance's rows would put a stop in the path of the common
+movement for the sake of the rare one. Sideways movement and instance jumps stay
+in whichever band they started in.
+
+With `SelectionModule` installed, **Space or Enter selects the focused row** from
+the checkbox cell — focus sits on the cell, not on the checkbox inside it, so the
+key press would otherwise reach nothing. With no checkbox column there is nothing
+to aim at, so any cell answers. Space does not scroll the page while the grid has
+focus.
 
 ## Selection
 

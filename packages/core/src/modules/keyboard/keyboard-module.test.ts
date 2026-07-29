@@ -155,6 +155,9 @@ describe('KeyboardModule', () => {
     const { registry } = setup();
     press(registry, 'ArrowDown');
 
+    // Up out of the first row now enters the header; only above that is there
+    // nothing left to move to.
+    expect(press(registry, 'ArrowUp')).toBe(true);
     expect(press(registry, 'ArrowUp')).toBe(false);
   });
 

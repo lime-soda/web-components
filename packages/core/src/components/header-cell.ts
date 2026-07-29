@@ -3,7 +3,8 @@ import { LitElement, css, html, nothing } from 'lit';
 import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
 import { property } from 'lit/decorators.js';
 import type { ResolvedColumn } from '../columns/types.js';
-import { columnContext, gridContext } from '../context/index.js';
+import type { LayoutInstance } from '../layout/types.js';
+import { columnContext, gridContext, instanceContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
 import { SignalWatcher } from '../reactive/index.js';
 
@@ -36,7 +37,12 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
       border-right: none;
     }
 
-    :host(:focus-visible) {
+    /*
+     * The grid's own focus, for the same reason as the body cell: a header
+     * reached with the mouse never matches :focus-visible and would show
+     * nothing at all.
+     */
+    :host([data-focused]) {
       outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
       outline-offset: calc(-1 * var(--flow-focus-width, 2px));
     }
@@ -83,6 +89,9 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
   @consume({ context: gridContext, subscribe: true })
   accessor grid: GridController | undefined;
 
+  @consume({ context: instanceContext, subscribe: true })
+  accessor instance: LayoutInstance | undefined;
+
   @provide({ context: columnContext })
   accessor providedColumn: ResolvedColumn | undefined;
 
@@ -98,6 +107,28 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
   override firstUpdated(): void {
     // Sort indicators and filter inputs render here; their styles come with them.
     adoptModuleStyles(this.shadowRoot, this.grid?.registry.moduleStyles() ?? []);
+    this.addEventListener('focus', this.handleFocus);
+  }
+
+  private readonly handleFocus = (): void => {
+    const instanceId = this.instance?.id;
+    if (instanceId === undefined || !this.grid) return;
+    if (this.grid.focus.isHeaderFocused(instanceId, this.column.colId)) return;
+    this.grid.focus.focusHeader(instanceId, this.column.colId);
+  };
+
+  override updated(): void {
+    // Follows the grid's focus into the DOM, so the browser scrolls the header
+    // into view and a screen reader announces it.
+    if (this.isFocusedHeader() && this.getRootNode() instanceof ShadowRoot) {
+      if (!this.matches(':focus')) this.focus({ preventScroll: false });
+    }
+  }
+
+  private isFocusedHeader(): boolean {
+    const instanceId = this.instance?.id;
+    if (instanceId === undefined || !this.grid || !this.column) return false;
+    return this.grid.focus.isHeaderFocused(instanceId, this.column.colId);
   }
 
   override render(): unknown {
@@ -108,6 +139,12 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
     // appears the moment the model changes rather than on the next unrelated
     // repaint.
     registry?.version.get();
+
+    const focused = this.isFocusedHeader();
+    this.toggleAttribute('data-focused', focused);
+    // A header is only reachable by arrowing up into it, so it is never the
+    // grid's tab stop; -1 keeps it focusable without adding a stop.
+    this.tabIndex = focused ? 0 : -1;
     const slots = registry?.headerSlots({ column: this.column }) ?? [];
     const decorations = registry?.headerDecorations({ column: this.column }) ?? [];
 

@@ -192,7 +192,7 @@ export class FlowCell extends SignalWatcher(LitElement) {
     const rowKey = this.row?.displayRow.id;
     if (instanceId === undefined || rowKey === undefined || !this.grid) return;
     if (this.grid.focus.isFocused(instanceId, rowKey, this.column.colId)) return;
-    this.grid.focus.focus({ instanceId, rowKey, colId: this.column.colId });
+    this.grid.focus.focus({ instanceId, rowKey, colId: this.column.colId, section: 'body' });
   };
 
   override updated(): void {

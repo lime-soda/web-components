@@ -58,6 +58,9 @@ const OPTIONAL = new Set([
   '--flow-filter-font-size',
   '--flow-filter-padding',
   '--flow-disabled-opacity',
+  // Border of an instance. Read when sizing the slot, so the columns inside
+  // fit the content box rather than being clipped by it.
+  '--flow-instance-border-width',
 ]);
 
 const usages = new Map<string, string[]>();
