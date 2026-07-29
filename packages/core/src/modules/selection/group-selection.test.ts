@@ -412,12 +412,54 @@ describe('group selection', () => {
       expect(selected(selection)).toEqual(['g1']);
     });
 
+    it('leaves the children unselected when the group is selected', () => {
+      // The whole point of the option, and it was broken: ancestor resolution
+      // applied regardless of mode, so every child of a selected group read as
+      // checked while the selection itself contained only the group.
+      const { selection } = setup({ groupSelectsChildren: false });
+
+      selection.setRowSelected('g1', true);
+
+      for (const child of ['g1-a', 'g1-b', 'g1-c']) {
+        expect(selection.getRowState(child), child).toBe('unchecked');
+      }
+      expect(selection.getSelectedCount()).toBe(1);
+    });
+
     it('leaves a group unaffected by its children', () => {
       const { selection } = setup({ groupSelectsChildren: false });
 
       selection.setRowSelected('g1-a', true);
 
       expect(selection.getRowState('g1')).toBe('unchecked');
+    });
+
+    it('never reports a group as indeterminate', () => {
+      // A group stands only for itself here, so it is either selected or not.
+      const { selection } = setup({ groupSelectsChildren: false });
+
+      selection.setRowSelected('g1-a', true);
+      selection.setRowSelected('g1-b', true);
+
+      expect(selection.getRowState('g1')).toBe('unchecked');
+    });
+
+    it('selects groups and rows alike with selectAll', () => {
+      const { selection } = setup({ groupSelectsChildren: false });
+
+      selection.selectAll();
+
+      expect(selected(selection)).toEqual(['g1', 'g1-a', 'g1-b', 'g1-c', 'g2', 'g2-a', 'g2-b']);
+    });
+
+    it('deselecting a child does not disturb the group', () => {
+      const { selection } = setup({ groupSelectsChildren: false });
+      selection.selectAll();
+
+      selection.setRowSelected('g1-a', false);
+
+      expect(selection.getRowState('g1')).toBe('checked');
+      expect(selection.getRowState('g1-a')).toBe('unchecked');
     });
   });
 

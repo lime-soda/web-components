@@ -144,6 +144,42 @@ grid.api.setSortModel([/* … */]); // ❌ compile error without /sort
 The same applies to column options — `comparator` arrives with `/sort`,
 `enableCellFlash` with `/cell-flash`.
 
+## Selection
+
+Ticking a group selects the instruments beneath it, and the group reflects them:
+checked when all are selected, indeterminate when only some. Only leaves are
+stored, so `getSelectedRows()` returns instruments rather than the headings above
+them — what you would send to a basket.
+
+It is scoped to the projection, so selecting a group under an active filter
+selects the children that survived the filter, not the ones hidden behind it.
+
+```ts
+new SelectionModule<Quote>({
+  mode: 'multi', // or 'single'
+  groupSelectsChildren: true, // default
+  checkboxColumn: true, // default in multi mode
+  checkboxColumnWidth: 28,
+  clickToSelect: false, // select by clicking anywhere in the row
+  isSelectable: (rowId, meta) => true,
+});
+```
+
+Set `groupSelectsChildren: false` to make a group row selectable **in its own
+right**, standing for nothing but itself. Its children are then unaffected by it
+and it is never indeterminate — the right choice when group rows are real
+records rather than headings:
+
+```ts
+new SelectionModule<Quote>({ groupSelectsChildren: false });
+
+grid.api.setRowSelected('some-group', true);
+grid.api.getSelectedRows(); // ['some-group'] — no children
+```
+
+`isSelectable` excludes rows entirely. A row excluded that way is skipped when
+its group is selected, and its group can still reach `checked` without it.
+
 ## Columns
 
 ```ts

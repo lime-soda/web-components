@@ -123,6 +123,9 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    */
   private isCovered(rowId: string): boolean {
     if (this.selected.has(rowId)) return true;
+    // Only a group that stands for its children can confer selection on them.
+    // With groups independent, a selected group says nothing about its rows.
+    if (!this.groupSelectsChildren) return false;
     for (const ancestor of this.ancestorsOf(rowId)) {
       if (this.selected.has(ancestor)) return true;
     }
