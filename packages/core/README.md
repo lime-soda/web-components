@@ -124,7 +124,7 @@ Every feature beyond the core is an additive module with its own entry point.
 | `@flow-grid/core/selection/group`     | Makes a group stand for the rows beneath it                 |
 | `@flow-grid/core/selection/row-range` | Shift-click spans over contiguous rows                      |
 | `@flow-grid/core/cell-flash`          | Directional flash on value change                           |
-| `@flow-grid/core/keyboard`            | Keyboard navigation and roving tabindex                     |
+| `@flow-grid/core/keyboard`            | Arrow navigation across instances, Home/End, Page keys      |
 
 ```ts
 import { TreeModule } from '@flow-grid/core/tree';
@@ -193,6 +193,22 @@ grid.api.refreshSort(); // re-order now, leaving the sort model alone
 
 Set `resortOnValueChange: true` for data that changes rarely, where an order
 drifting out of date is more surprising than one that moves.
+
+## Keyboard and focus
+
+The grid tracks focus itself rather than relying on the browser's, and paints
+the ring from its own state. `:focus-visible` is not enough: it deliberately
+does not match a mouse click, so a cell clicked into was genuinely focused —
+arrows moved from it, screen readers followed it — while looking exactly like an
+unfocused cell.
+
+Exactly one cell is tabbable at a time, so the grid is a single tab stop. Tab
+into it and arrows move; click a cell and arrows move from there.
+
+With `SelectionModule` installed, **Space or Enter selects the focused row**,
+from any column rather than only the checkbox one — focus sits on the cell, not
+on the checkbox inside it, so the key press would otherwise reach nothing. Space
+does not scroll the page while the grid has focus.
 
 ## Selection
 
