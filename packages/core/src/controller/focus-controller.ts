@@ -39,6 +39,24 @@ export class FocusController {
     return this.position;
   }
 
+  /**
+   * Whether this cell is the grid's tab stop.
+   *
+   * Exactly one cell is tabbable at a time. Before anything has focus that is
+   * the first cell, which is how a user reaches the grid at all — without it the
+   * grid had no tab stop, so no key press ever arrived and navigation appeared
+   * not to exist.
+   */
+  isTabbable(instanceId: string, rowKey: string, colId: string): boolean {
+    if (this.position.get() !== null) return this.isFocused(instanceId, rowKey, colId);
+
+    const instance = this.getLayout().instances[0];
+    const column = this.getColumns()[0];
+    return (
+      instance?.id === instanceId && instance.rows[0]?.id === rowKey && column?.colId === colId
+    );
+  }
+
   isFocused(instanceId: string, rowKey: string, colId: string): boolean {
     const current = this.position.get();
     return (

@@ -122,8 +122,7 @@ export class FlowCell extends SignalWatcher(LitElement) {
     // See flow-header-cell: keeps module-contributed decorations current.
     this.grid?.registry.version.get();
 
-    const focused = this.isFocusedCell();
-    this.tabIndex = focused ? 0 : -1;
+    this.tabIndex = this.isTabbableCell() ? 0 : -1;
 
     const value = getCellValue(this.column, node);
     const decorations =
@@ -174,7 +173,18 @@ export class FlowCell extends SignalWatcher(LitElement) {
   override firstUpdated(): void {
     // Module markup renders in this shadow root, where page CSS cannot reach it.
     adoptModuleStyles(this.shadowRoot, this.grid?.registry.moduleStyles() ?? []);
+    // Tabbing or clicking into a cell moves the grid's focus to it, so the two
+    // never disagree about where focus is.
+    this.addEventListener('focus', this.handleFocus);
   }
+
+  private readonly handleFocus = (): void => {
+    const instanceId = this.instance?.id;
+    const rowKey = this.row?.displayRow.id;
+    if (instanceId === undefined || rowKey === undefined || !this.grid) return;
+    if (this.grid.focus.isFocused(instanceId, rowKey, this.column.colId)) return;
+    this.grid.focus.focus({ instanceId, rowKey, colId: this.column.colId });
+  };
 
   override updated(): void {
     // Run after the DOM settles, so a module measuring or animating sees the
@@ -190,6 +200,13 @@ export class FlowCell extends SignalWatcher(LitElement) {
     }
   }
 
+  /** The grid's single tab stop, so a user can reach it with the keyboard. */
+  private isTabbableCell(): boolean {
+    const instanceId = this.instance?.id;
+    const rowKey = this.row?.displayRow.id;
+    if (instanceId === undefined || rowKey === undefined || !this.grid) return false;
+    return this.grid.focus.isTabbable(instanceId, rowKey, this.column.colId);
+  }
 
   private isFocusedCell(): boolean {
     const instanceId = this.instance?.id;
