@@ -28,6 +28,9 @@ const MARKERS = {
   sort: 'sort-indicator',
   filter: 'filter-input',
   selection: 'selection-checkbox',
+  // Module ids: string literals, so minification cannot rename them.
+  'selection/group': 'selection-group',
+  'selection/row-range': 'selection-row-range',
   keyboard: 'ArrowDown',
   'cell-flash': 'getDirection',
 } as const;
@@ -39,6 +42,8 @@ const ENTRIES: Record<ModuleName, string> = {
   sort: 'SortModule',
   filter: 'FilterModule',
   selection: 'SelectionModule',
+  'selection/group': 'GroupSelectionModule',
+  'selection/row-range': 'RowRangeModule',
   keyboard: 'KeyboardModule',
   'cell-flash': 'CellFlashModule',
 };
@@ -52,7 +57,9 @@ function bundle(modules: readonly ModuleName[]): string {
     .join('\n');
   const uses = modules.map((name) => `new ${ENTRIES[name]}({ getParentId: () => null })`).join(',');
 
-  const entry = join(sandbox, `app-${modules.join('-') || 'core'}.js`);
+  // Subpath names contain '/', which is not a filename.
+  const slug = modules.join('-').replaceAll('/', '_') || 'core';
+  const entry = join(sandbox, `app-${slug}.js`);
   writeFileSync(
     entry,
     `import '@flow-grid/core/define';

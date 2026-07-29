@@ -115,14 +115,16 @@ the package on one page will not throw.
 
 Every feature beyond the core is an additive module with its own entry point.
 
-| Import                       | Adds                                                        |
-| ---------------------------- | ----------------------------------------------------------- |
-| `@flow-grid/core/tree`       | Hierarchy, expand/collapse, and the repeated group headings |
-| `@flow-grid/core/sort`       | Multi-column sort, comparators, header indicators           |
-| `@flow-grid/core/filter`     | Quick filter and per-column filters                         |
-| `@flow-grid/core/selection`  | Row and group selection, checkbox column                    |
-| `@flow-grid/core/cell-flash` | Directional flash on value change                           |
-| `@flow-grid/core/keyboard`   | Keyboard navigation and roving tabindex                     |
+| Import                                | Adds                                                        |
+| ------------------------------------- | ----------------------------------------------------------- |
+| `@flow-grid/core/tree`                | Hierarchy, expand/collapse, and the repeated group headings |
+| `@flow-grid/core/sort`                | Multi-column sort, comparators, header indicators           |
+| `@flow-grid/core/filter`              | Quick filter and per-column filters                         |
+| `@flow-grid/core/selection`           | Row selection, checkbox column, click and modifier handling |
+| `@flow-grid/core/selection/group`     | Makes a group stand for the rows beneath it                 |
+| `@flow-grid/core/selection/row-range` | Shift-click spans over contiguous rows                      |
+| `@flow-grid/core/cell-flash`          | Directional flash on value change                           |
+| `@flow-grid/core/keyboard`            | Keyboard navigation and roving tabindex                     |
 
 ```ts
 import { TreeModule } from '@flow-grid/core/tree';
@@ -140,16 +142,18 @@ grid.gridOptions = {
 Each module is a separate entry point, so an app pays only for what it imports.
 Measured with esbuild, minified and gzipped:
 
-| Imports      | Wire size |
-| ------------ | --------- |
-| core only    | 26.4 kB   |
-| + keyboard   | +0.3 kB   |
-| + cell-flash | +0.7 kB   |
-| + sort       | +1.2 kB   |
-| + filter     | +1.4 kB   |
-| + tree       | +1.9 kB   |
-| + selection  | +2.1 kB   |
-| everything   | 33.3 kB   |
+| Imports               | Wire size |
+| --------------------- | --------- |
+| core only             | 26.3 kB   |
+| + keyboard            | +0.3 kB   |
+| + cell-flash          | +0.7 kB   |
+| + sort                | +1.2 kB   |
+| + filter              | +1.4 kB   |
+| + tree                | +1.9 kB   |
+| + selection           | +2.1 kB   |
+| + selection/group     | +0.9 kB   |
+| + selection/row-range | +0.2 kB   |
+| everything            | 33.8 kB   |
 
 A bundle-composition check in CI asserts that an unimported module leaves no
 trace in the output, so this cannot quietly regress.
@@ -192,18 +196,46 @@ drifting out of date is more surprising than one that moves.
 
 ## Selection
 
-Ticking a group selects the instruments beneath it, and the group reflects them:
-checked when all are selected, indeterminate when only some. Only leaves are
-stored, so `getSelectedRows()` returns instruments rather than the headings above
-them — what you would send to a basket.
+Selection is three modules, because most grids do not need all three.
 
-It is scoped to the projection, so selecting a group under an active filter
-selects the children that survived the filter, not the ones hidden behind it.
+`SelectionModule` on its own is **flat**: it holds a set of selected row ids,
+every row stands for itself, and nothing in it reads hierarchy. That is the
+whole model, and it is what a grid of instruments with no grouping should pay
+for.
+
+```ts
+import { SelectionModule } from '@flow-grid/core/selection';
+import { GroupSelectionModule } from '@flow-grid/core/selection/group';
+import { RowRangeModule } from '@flow-grid/core/selection/row-range';
+
+modules: [
+  new SelectionModule<Quote>({ mode: 'multi' }),
+  new GroupSelectionModule<Quote>(), // ticking a group ticks its rows
+  new RowRangeModule<Quote>(), // shift-click selects a span
+];
+```
+
+**`GroupSelectionModule`** makes a group stand for the rows beneath it. Ticking
+a category selects its instruments, a partly selected category reads as
+indeterminate, and `getSelectedRows()` returns instruments rather than the
+headings above them — what you would send to a basket. It is scoped to the
+projection, so selecting a group under an active filter selects the children
+that survived it, not the ones hidden behind it.
+
+It never mentions the tree module: it reads `meta.depth` and `repeatOnBreak` off
+the projection, which any module may supply.
+
+**`RowRangeModule`** adds shift-click spans, taken from the projection so they
+follow the rows as displayed. Without it, shift is simply an unmodified click.
+
+Both attach through published seams — a `SelectionMembership` and a
+`RangeHandler` — rather than by reaching into core selection, so removing a
+module restores the behaviour underneath rather than leaving the grid in a half
+state.
 
 ```ts
 new SelectionModule<Quote>({
   mode: 'multi', // or 'single'
-  groupSelectsChildren: true, // default
   checkboxColumn: true, // default, in either mode
   checkboxColumnWidth: 28,
   clickToSelect: false, // select by clicking anywhere in the row
@@ -223,13 +255,13 @@ with checkboxes behaves like radio buttons; multi selection without them relies
 on `clickToSelect`. The header select-all appears only in multi mode, since
 selecting everything is not something single selection can express.
 
-Set `groupSelectsChildren: false` to make a group row selectable **in its own
-right**, standing for nothing but itself. Its children are then unaffected by it
+Set `groupSelectsChildren: false` on **`GroupSelectionModule`** to make a group
+row selectable **in its own right**, standing for nothing but itself. Its children are then unaffected by it
 and it is never indeterminate — the right choice when group rows are real
 records rather than headings:
 
 ```ts
-new SelectionModule<Quote>({ groupSelectsChildren: false });
+new GroupSelectionModule<Quote>({ groupSelectsChildren: false });
 
 grid.api.setRowSelected('some-group', true);
 grid.api.getSelectedRows(); // ['some-group'] — no children

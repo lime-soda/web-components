@@ -72,6 +72,16 @@
       "development": "./src/modules/selection/index.ts",
       "default": "./dist/modules/selection/index.js"
     },
+    "./selection/group": {
+      "types": "./dist/modules/selection/group/index.d.ts",
+      "development": "./src/modules/selection/group/index.ts",
+      "default": "./dist/modules/selection/group/index.js"
+    },
+    "./selection/row-range": {
+      "types": "./dist/modules/selection/row-range/index.d.ts",
+      "development": "./src/modules/selection/row-range/index.ts",
+      "default": "./dist/modules/selection/row-range/index.js"
+    },
     "./keyboard": {
       "types": "./dist/modules/keyboard/index.d.ts",
       "development": "./src/modules/keyboard/index.ts",

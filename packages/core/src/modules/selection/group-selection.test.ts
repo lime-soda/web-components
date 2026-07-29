@@ -4,6 +4,7 @@ import { GridPipeline } from '../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../module-registry.js';
 import { TreeModule } from '../tree/tree-module.js';
 import { SelectionModule, type SelectionModuleOptions } from './selection-module.js';
+import { GroupSelectionModule } from './group/group-selection-module.js';
 
 interface Bond {
   id: string;
@@ -28,10 +29,17 @@ const data: Bond[] = [
   bond('g2-b', 'g2'),
 ];
 
-const setup = (options: SelectionModuleOptions = {}, rows = data) => {
+const setup = (
+  options: SelectionModuleOptions & { groupSelectsChildren?: boolean } = {},
+  rows = data,
+) => {
+  const { groupSelectsChildren, ...selectionOptions } = options;
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(rows);
-  const selection = new SelectionModule<Bond>(options);
+  const selection = new SelectionModule<Bond>(selectionOptions);
+  const group = new GroupSelectionModule<Bond>(
+    groupSelectsChildren === undefined ? {} : { groupSelectsChildren },
+  );
   const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true });
   const registry = new ModuleRegistry<Bond>({
     pipeline,
@@ -40,6 +48,7 @@ const setup = (options: SelectionModuleOptions = {}, rows = data) => {
   });
   registry.register(tree);
   registry.register(selection);
+  registry.register(group);
   registry.start();
   pipeline.projector.rows.get();
   return { pipeline, selection, tree };
@@ -180,6 +189,7 @@ describe('group selection', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData(data);
       const selection = new SelectionModule<Bond>();
+      const group = new GroupSelectionModule<Bond>();
       const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
       const registry = new ModuleRegistry<Bond>({
         pipeline,
@@ -188,6 +198,7 @@ describe('group selection', () => {
       });
       registry.register(tree);
       registry.register(selection);
+      registry.register(group);
       registry.start();
       pipeline.projector.rows.get();
 
@@ -201,6 +212,7 @@ describe('group selection', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData(data);
       const selection = new SelectionModule<Bond>();
+      const group = new GroupSelectionModule<Bond>();
       const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
       const registry = new ModuleRegistry<Bond>({
         pipeline,
@@ -209,6 +221,7 @@ describe('group selection', () => {
       });
       registry.register(tree);
       registry.register(selection);
+      registry.register(group);
       registry.start();
       pipeline.projector.rows.get();
       selection.setRowSelected('g1', true);
@@ -486,12 +499,14 @@ describe('group selection', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData([bond('a'), bond('b')]);
       const selection = new SelectionModule<Bond>();
+      const group = new GroupSelectionModule<Bond>();
       const registry = new ModuleRegistry<Bond>({
         pipeline,
         getColumns: () => [],
         dispatch: () => {},
       });
       registry.register(selection);
+      registry.register(group);
       registry.start();
       pipeline.projector.rows.get();
 

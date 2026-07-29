@@ -146,34 +146,6 @@ describe('SelectionModule', () => {
     });
   });
 
-  describe('range selection', () => {
-    it('selects the span between the last toggled row and the target', () => {
-      const { selection } = setup(rows(5));
-      selection.setRowSelected('r1', true);
-
-      selection.selectRange('r3');
-
-      expect(selection.getSelectedRows()).toEqual(['r1', 'r2', 'r3']);
-    });
-
-    it('works backwards', () => {
-      const { selection } = setup(rows(5));
-      selection.setRowSelected('r3', true);
-
-      selection.selectRange('r1');
-
-      expect([...selection.getSelectedRows()].sort()).toEqual(['r1', 'r2', 'r3']);
-    });
-
-    it('falls back to a single selection with no anchor', () => {
-      const { selection } = setup(rows(3));
-
-      selection.selectRange('r1');
-
-      expect(selection.getSelectedRows()).toEqual(['r1']);
-    });
-  });
-
   describe('columns', () => {
     it('contributes a checkbox column in multi mode', () => {
       const { selection } = setup();

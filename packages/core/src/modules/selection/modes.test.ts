@@ -3,6 +3,7 @@ import { resolveColumns } from '../../columns/resolve-columns.js';
 import { GridPipeline } from '../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../module-registry.js';
 import { SelectionModule, type SelectionModuleOptions } from './selection-module.js';
+import { RowRangeModule } from './row-range/row-range-module.js';
 
 /**
  * Mode, checkboxes and click-to-select are three independent choices.
@@ -29,6 +30,9 @@ const setup = (options: SelectionModuleOptions = {}) => {
     dispatch: () => {},
   });
   registry.register(selection);
+  // Shift-extended spans are a separate module; the modifier tests below
+  // exercise the whole gesture, so it has to be installed.
+  registry.register(new RowRangeModule<Row>());
   registry.start();
   pipeline.projector.rows.get();
   return { selection, pipeline };

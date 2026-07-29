@@ -1,6 +1,7 @@
 import { css, html } from 'lit';
 import { defineElement } from '../../define-elements.js';
 import { FlowSelectionCheckbox } from './selection-checkbox.js';
+import { FlatMembership, type RangeHandler, type SelectionMembership } from './membership.js';
 import type { ColumnDef } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
 import type {
@@ -42,54 +43,47 @@ export interface SelectionModuleOptions {
    * only one row at a time.
    */
   selectionWithoutKeys?: boolean;
-  /**
-   * Selecting a parent selects its descendants, and the parent's own state is
-   * derived from them. On by default.
-   *
-   * Turning it off makes a parent an independently selectable row, which suits a
-   * grid whose group rows are real records rather than headings.
-   */
-  groupSelectsChildren?: boolean;
   /** Rows that may never be selected. */
   isSelectable?: (rowId: string, meta: Readonly<Record<string, unknown>>) => boolean;
 }
 
 /**
- * Row selection, for the basket workflows the horizontal layout is built around.
+ * Row selection: a set of selected row ids, and the affordances for changing it.
+ *
+ * Deliberately flat. Every row stands for itself, the set holds exactly what was
+ * selected, and nothing here reads `meta.depth` or `repeatOnBreak`. A grid that
+ * groups rows installs `GroupSelectionModule`, which supplies a
+ * {@link SelectionMembership} making a group stand for the rows beneath it; a
+ * grid that wants shift-click spans installs `RowRangeModule`, which supplies a
+ * {@link RangeHandler}. Both are seams rather than flags, so the cost of each
+ * falls only on the grids that ask for it.
  *
  * Contributes its own checkbox column rather than making the application compose
  * one — the prototype required callers to build `createSelectionColumn(plugin)`
  * and prepend it by hand, which meant selection could not be added or removed
  * without editing the column definitions too.
- *
- * Group selection is hierarchy-blind. It reads `meta.depth` off the projection,
- * which any module may supply, and never mentions the tree module. With no tree
- * installed every row is its own leaf and the behaviour collapses to the flat
- * case at no cost. Because the projection is already filtered, selecting a group
- * selects its *visible* children — filter first, then tick the group, and only
- * what survived the filter is selected.
  */
 export class SelectionModule<TData = unknown> implements GridModule<TData, string[]> {
   readonly id = 'selection';
 
   private context?: ModuleContext<TData>;
-  /** Only leaves are stored. A parent's state is computed from these. */
   private readonly selected = new Set<string>();
-  private lastToggled: string | null = null;
-
-  private cachedRows: readonly DisplayRow[] | undefined;
-  private cachedLeaves: Map<string, readonly string[]> | undefined;
-  private cachedAncestors: Map<string, readonly string[]> | undefined;
 
   /**
-   * Group membership seen at any point, kept across projections.
+   * The last row acted on, from which a range extends.
    *
-   * A collapsed group's children are absent from the projection, so without this
-   * a group selected while expanded would read as unselected the moment it was
-   * collapsed — the same lie as the reverse case, in the other direction.
-   * Pruned when rows leave the store.
+   * Held here rather than in the range module because it is simply the last row
+   * touched — every path that changes the selection knows it, and a range
+   * module installed later would have no way to have been watching.
    */
-  private readonly rememberedLeaves = new Map<string, readonly string[]>();
+  private anchor: string | null = null;
+
+  private membership: SelectionMembership = new FlatMembership(
+    () => this.projectedRows(),
+    (rowId, meta) => this.canSelect(rowId, meta),
+  );
+
+  private range: RangeHandler | undefined;
 
   constructor(private options: SelectionModuleOptions = {}) {}
 
@@ -103,10 +97,6 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    */
   setOptions(next: Partial<SelectionModuleOptions>): void {
     this.options = { ...this.options, ...next };
-    // The leaf index is derived from the options, so it must not survive them.
-    this.cachedRows = undefined;
-    this.cachedLeaves = undefined;
-    this.cachedAncestors = undefined;
     this.context?.invalidate();
   }
 
@@ -120,95 +110,79 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     context.addTeardown(
       context.pipeline.store.subscribe((result) => {
         if (!result.structural) return;
-        // A remembered group whose rows have gone would otherwise keep a stale
-        // membership alive for the life of the grid.
-        for (const rowId of result.removed) {
-          this.rememberedLeaves.delete(rowId);
-          this.selected.delete(rowId);
-        }
+        for (const rowId of result.removed) this.selected.delete(rowId);
       }),
     );
+  }
 
-    // Membership is recorded as a side effect of reading the index, so it must
-    // be read on every projection rather than only when a checkbox happens to
-    // ask. Otherwise a grid collapsed before anything consulted selection would
-    // never have learned what its groups contain.
-    context.addTeardown(context.pipeline.projector.subscribe(() => this.leafIndex()));
-    this.leafIndex();
+  // -- Extension seams --------------------------------------------------------
+
+  /**
+   * Replaces what a row id stands for.
+   *
+   * Installed by a module that understands hierarchy. Returns a function that
+   * restores flat membership, so removing the module restores the behaviour
+   * rather than leaving the grid half-grouped.
+   */
+  setMembership(membership: SelectionMembership): () => void {
+    const previous = this.membership;
+    this.membership = membership;
+    this.context?.invalidate();
+    return () => {
+      if (this.membership !== membership) return;
+      this.membership = previous;
+      this.context?.invalidate();
+    };
+  }
+
+  /** Installs the handler for shift-extended spans. Returns a remover. */
+  setRangeHandler(handler: RangeHandler): () => void {
+    this.range = handler;
+    return () => {
+      if (this.range === handler) this.range = undefined;
+    };
+  }
+
+  /** The row a range extends from: the last one acted on. */
+  getAnchor(): string | null {
+    return this.anchor;
+  }
+
+  /** True when row clicks select, which a range module needs in order to agree. */
+  get clickSelects(): boolean {
+    return this.options.clickToSelect ?? false;
+  }
+
+  get selectionMode(): SelectionMode {
+    return this.mode;
   }
 
   private get mode(): SelectionMode {
     return this.options.mode ?? 'multi';
   }
 
-  private get groupSelectsChildren(): boolean {
-    return this.options.groupSelectsChildren ?? true;
-  }
-
   // -- Public API -------------------------------------------------------------
 
-  /** True only when every selectable leaf beneath the row is selected. */
+  /** True only when every id the row stands for is selected. */
   isSelected(rowId: string): boolean {
     return this.getRowState(rowId) === 'checked';
   }
 
   /**
-   * Whether a row is selected in its own right or through an ancestor.
-   *
-   * Selecting a collapsed group can only record the group: its children are not
-   * projected, so there is nothing else to record. Expanding then reveals rows
-   * that were never named, and without this they would read as unselected and
-   * the selection would appear to vanish.
-   */
-  private isCovered(rowId: string): boolean {
-    if (this.selected.has(rowId)) return true;
-    // Only a group that stands for its children can confer selection on them.
-    // With groups independent, a selected group says nothing about its rows.
-    if (!this.groupSelectsChildren) return false;
-    for (const ancestor of this.ancestorsOf(rowId)) {
-      if (this.selected.has(ancestor)) return true;
-    }
-    return false;
-  }
-
-  /**
-   * The leaves a row stands for, falling back to what was seen before.
-   *
-   * A collapsed group looks like a leaf in the projection; if it was ever seen
-   * expanded, its real membership is the honest answer.
-   */
-  private membershipOf(rowId: string): readonly string[] {
-    const projected = this.selectableLeavesOf(rowId);
-    // With groups standing alone, no row ever stands for another, so remembered
-    // membership is not just unnecessary — consulting it would resurrect the
-    // other mode's behaviour after a switch.
-    if (!this.groupSelectsChildren) return projected;
-
-    const isOwnLeafOnly = projected.length === 1 && projected[0] === rowId;
-    if (!isOwnLeafOnly) return projected;
-    return this.rememberedLeaves.get(rowId) ?? projected;
-  }
-
-  /** Ancestors of a projected row, nearest last. Empty for a root. */
-  private ancestorsOf(rowId: string): readonly string[] {
-    this.leafIndex();
-    return this.cachedAncestors?.get(rowId) ?? [];
-  }
-
-  /**
    * What this row's checkbox should show.
    *
-   * A parent reads as indeterminate while only some of its children are
-   * selected, which is the only honest answer and the one a trader building a
-   * basket needs to see.
+   * Flat, a row is checked or it is not. With group membership installed a
+   * parent reads as indeterminate while only some of its children are selected,
+   * which is the only honest answer and the one a trader building a basket
+   * needs to see.
    */
   getRowState(rowId: string): SelectionState {
-    const leaves = this.membershipOf(rowId);
+    const leaves = this.membership.leavesOf(rowId);
     if (leaves.length === 0) return 'unchecked';
 
     let selectedCount = 0;
     for (const leaf of leaves) {
-      if (this.isCovered(leaf)) selectedCount += 1;
+      if (this.membership.covers(leaf, this.selected)) selectedCount += 1;
     }
 
     if (selectedCount === 0) return 'unchecked';
@@ -216,16 +190,15 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   }
 
   /**
-   * The selected leaf rows — the instruments, not the headings above them.
+   * The selected rows.
    *
-   * A group recorded while collapsed resolves to its children once they are
-   * known; while they are not, the group itself is the most specific answer
-   * available.
+   * With group membership installed these are the leaves — the instruments,
+   * not the headings above them, which is what you would send to a basket.
    */
   getSelectedRows(): readonly string[] {
     const resolved = new Set<string>();
     for (const id of this.selected) {
-      const leaves = this.membershipOf(id);
+      const leaves = this.membership.leavesOf(id);
       if (leaves.length === 0) resolved.add(id);
       else for (const leaf of leaves) resolved.add(leaf);
     }
@@ -237,12 +210,12 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   }
 
   setRowSelected(rowId: string, selected: boolean): void {
-    const leaves = this.membershipOf(rowId);
+    const leaves = this.membership.leavesOf(rowId);
     if (leaves.length === 0) return;
 
     if (selected && this.mode === 'single') this.selected.clear();
 
-    const before = [...this.selected].sort().join('\u0000');
+    const before = this.snapshot();
 
     if (selected) {
       for (const leaf of leaves) {
@@ -252,34 +225,44 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
       }
     } else {
       for (const leaf of leaves) this.selected.delete(leaf);
-      // The row may be selected only through an ancestor recorded while its
-      // children were hidden. Deselecting one child has to break that ancestor
-      // apart, keeping its siblings, or the row would spring straight back.
-      this.uncover(rowId);
+      // The row may be selected through something else — an ancestor recorded
+      // while its children were hidden. That has to be broken apart, or the row
+      // would spring straight back.
+      this.membership.withdraw(rowId, this.selected);
     }
 
-    if ([...this.selected].sort().join('\u0000') === before) return;
+    if (this.snapshot() === before) return;
 
-    this.lastToggled = rowId;
+    this.anchor = rowId;
     this.changed();
   }
 
   /**
-   * Removes any selected ancestor covering a row, replacing it with its other
-   * leaves so only the intended row is deselected.
+   * Selects or deselects several rows as one change.
+   *
+   * One change event and one repaint rather than one per row, which is what
+   * makes a range module cheap: it names the span and core applies it.
    */
-  private uncover(rowId: string): void {
-    for (const ancestor of this.ancestorsOf(rowId)) {
-      if (!this.selected.has(ancestor)) continue;
-      this.selected.delete(ancestor);
-      for (const leaf of this.membershipOf(ancestor)) {
-        if (leaf !== rowId && !this.isDescendantOf(leaf, rowId)) this.selected.add(leaf);
+  setRowsSelected(rowIds: readonly string[], selected: boolean): void {
+    if (rowIds.length === 0) return;
+    if (this.mode === 'single') {
+      const last = rowIds[rowIds.length - 1];
+      if (last !== undefined) this.setRowSelected(last, selected);
+      return;
+    }
+
+    const before = this.snapshot();
+    for (const rowId of rowIds) {
+      const leaves = this.membership.leavesOf(rowId);
+      if (selected) for (const leaf of leaves) this.selected.add(leaf);
+      else {
+        for (const leaf of leaves) this.selected.delete(leaf);
+        this.membership.withdraw(rowId, this.selected);
       }
     }
-  }
 
-  private isDescendantOf(rowId: string, possibleAncestor: string): boolean {
-    return this.ancestorsOf(rowId).includes(possibleAncestor);
+    if (this.snapshot() === before) return;
+    this.changed();
   }
 
   toggleRowSelected(rowId: string): void {
@@ -296,35 +279,14 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    */
   selectAll(): void {
     if (this.mode === 'single') return;
-    for (const rowId of this.allSelectableLeaves()) this.selected.add(rowId);
+    for (const rowId of this.membership.allLeaves()) this.selected.add(rowId);
     this.changed();
   }
 
   clearSelection(): void {
     if (this.selected.size === 0) return;
     this.selected.clear();
-    this.lastToggled = null;
-    this.changed();
-  }
-
-  /** Selects the span between the last toggled row and this one. */
-  selectRange(toRowId: string): void {
-    if (this.mode === 'single' || this.lastToggled === null) {
-      this.setRowSelected(toRowId, true);
-      return;
-    }
-
-    const rows = this.projectedRows();
-    const from = rows.findIndex((row) => row.rowId === this.lastToggled);
-    const to = rows.findIndex((row) => row.rowId === toRowId);
-    if (from === -1 || to === -1) {
-      this.setRowSelected(toRowId, true);
-      return;
-    }
-
-    for (const row of rows.slice(Math.min(from, to), Math.max(from, to) + 1)) {
-      for (const leaf of this.selectableLeavesOf(row.rowId)) this.selected.add(leaf);
-    }
+    this.anchor = null;
     this.changed();
   }
 
@@ -345,6 +307,8 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
       getSelectedRows: () => this.getSelectedRows(),
       getSelectedCount: () => this.getSelectedCount(),
       setRowSelected: (rowId: string, selected: boolean) => this.setRowSelected(rowId, selected),
+      setRowsSelected: (rowIds: readonly string[], selected: boolean) =>
+        this.setRowsSelected(rowIds, selected),
       toggleRowSelected: (rowId: string) => this.toggleRowSelected(rowId),
       selectAll: () => this.selectAll(),
       clearSelection: () => this.clearSelection(),
@@ -402,10 +366,12 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   headerSlot(ctx: HeaderSlotContext<TData>) {
     if (ctx.column.colId !== SELECTION_COL_ID || this.mode === 'single') return null;
 
-    const leaves = this.allSelectableLeaves();
-    // Coverage, not membership of the set: a leaf may be selected through an
-    // ancestor recorded while its group was collapsed.
-    const selectedCount = leaves.filter((rowId) => this.isCovered(rowId)).length;
+    const leaves = this.membership.allLeaves();
+    // Coverage, not membership of the set: with a hierarchy installed, a leaf
+    // may be selected through an ancestor recorded while its group was collapsed.
+    const selectedCount = leaves.filter((rowId) =>
+      this.membership.covers(rowId, this.selected),
+    ).length;
     const state: SelectionState =
       leaves.length === 0 || selectedCount === 0
         ? 'unchecked'
@@ -433,18 +399,21 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    *
    * `selectionWithoutKeys` restores the accumulating plain click, because a
    * touch device has no modifier keys and would otherwise reach one row at a time.
+   *
+   * Shift falls through to a plain click unless a range module is installed —
+   * the span is that module's to define.
    */
   private activate(rowId: string, event: MouseEvent): void {
     const additive = event.ctrlKey || event.metaKey || (this.options.selectionWithoutKeys ?? false);
 
-    if (event.shiftKey && this.mode === 'multi' && this.lastToggled !== null) {
+    if (event.shiftKey && this.mode === 'multi' && this.range && this.anchor !== null) {
       // The span replaces what came before unless the click asked to keep it,
       // but the anchor has to outlive the clearing — selecting the clicked row
       // first would move the anchor onto it and collapse the span to one row.
-      const anchor = this.lastToggled;
+      const anchor = this.anchor;
       if (!additive) this.selected.clear();
-      this.lastToggled = anchor;
-      this.selectRange(rowId);
+      this.anchor = anchor;
+      this.range(rowId);
       return;
     }
 
@@ -458,7 +427,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   /** Selects one row and nothing else, in a single change. */
   private replaceSelection(rowId: string): void {
-    const membership = this.membershipOf(rowId);
+    const membership = this.membership.leavesOf(rowId);
     const alreadyOnlyThisRow =
       membership.length > 0 &&
       this.selected.size === membership.length &&
@@ -501,7 +470,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   /** Exposed for the checkbox renderer, which lives in the same module. */
   handleCheckbox(rowId: string, checked: boolean, shiftKey: boolean): void {
-    if (checked && shiftKey) this.selectRange(rowId);
+    if (checked && shiftKey && this.range) this.range(rowId);
     else this.setRowSelected(rowId, checked);
   }
 
@@ -511,122 +480,17 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   /** Whether a row's checkbox should be interactive at all. */
   isRowSelectable(rowId: string): boolean {
-    return this.selectableLeavesOf(rowId).length > 0;
+    return this.membership.leavesOf(rowId).length > 0;
   }
 
-  // -- Leaves -----------------------------------------------------------------
-
-  /**
-   * The selectable leaf rows a given row stands for.
-   *
-   * A leaf stands for itself. A parent stands for its descendants, which is what
-   * makes ticking a group select the instruments beneath it.
-   */
-  private selectableLeavesOf(rowId: string): readonly string[] {
-    return this.leafIndex().get(rowId) ?? [];
-  }
-
-  /**
-   * Every selectable leaf in the grid, resolved through remembered membership.
-   *
-   * The projected leaves are not enough: with groups collapsed each group *is* a
-   * projected leaf, so the header would count groups rather than instruments and
-   * report a selection of instruments as nothing at all.
-   */
-  private allSelectableLeaves(): readonly string[] {
-    const ids = new Set<string>();
-    for (const rowId of this.leafIndex().keys()) {
-      for (const leaf of this.membershipOf(rowId)) ids.add(leaf);
-    }
-    return [...ids];
-  }
-
-  /**
-   * Maps every projected row to the selectable leaves beneath it.
-   *
-   * Built from `meta.depth` alone, in one pass over the projection, and cached
-   * against the projection's identity — the projection is a memoised signal, so
-   * an unchanged one is the same array and the index survives ticks untouched.
-   */
-  private leafIndex(): Map<string, readonly string[]> {
-    const rows = this.projectedRows();
-    if (this.cachedRows === rows && this.cachedLeaves) return this.cachedLeaves;
-
-    const collected = new Map<string, Set<string>>();
-    const ensure = (rowId: string): Set<string> => {
-      let set = collected.get(rowId);
-      if (!set) {
-        set = new Set();
-        collected.set(rowId, set);
-      }
-      return set;
-    };
-
-    if (this.groupSelectsChildren) {
-      const depths = rows.map((row) => (row.meta?.['depth'] as number | undefined) ?? 0);
-      const open: { rowId: string; depth: number }[] = [];
-
-      for (const [index, row] of rows.entries()) {
-        const depth = depths[index] ?? 0;
-        while (open.length > 0 && (open[open.length - 1]?.depth ?? 0) >= depth) open.pop();
-
-        const own = ensure(row.rowId);
-
-        // A leaf is a row the next one does not sit beneath. Deciding this from
-        // the neighbour's depth — rather than provisionally treating every row as
-        // a leaf and correcting later — is what stops an intermediate group being
-        // counted as a leaf of its own ancestor.
-        const isLeaf = index === rows.length - 1 || (depths[index + 1] ?? 0) <= depth;
-
-        if (isLeaf && this.canSelect(row.rowId, row.meta ?? {})) {
-          own.add(row.rowId);
-          for (const ancestor of open) ensure(ancestor.rowId).add(row.rowId);
-        }
-
-        open.push({ rowId: row.rowId, depth });
-      }
-    } else {
-      // Every row stands only for itself, groups included.
-      for (const row of rows) {
-        const own = ensure(row.rowId);
-        if (this.canSelect(row.rowId, row.meta ?? {})) own.add(row.rowId);
-      }
-    }
-
-    const leaves = new Map<string, readonly string[]>();
-    for (const [rowId, ids] of collected) leaves.set(rowId, [...ids]);
-
-    // The ancestor chain is already on the row, put there by whichever module
-    // flattened the hierarchy. Reading it here needs no notion of a parent.
-    const ancestors = new Map<string, readonly string[]>();
-    for (const row of rows) {
-      const chain = row.repeatOnBreak;
-      if (chain && chain.length > 0) {
-        ancestors.set(
-          row.rowId,
-          chain.map((ancestor) => ancestor.rowId),
-        );
-      }
-    }
-
-    if (this.groupSelectsChildren) {
-      for (const [rowId, ids] of leaves) {
-        // Only a row standing for others is worth remembering; a leaf stands for
-        // itself in every projection.
-        if (ids.length > 1 || (ids.length === 1 && ids[0] !== rowId)) {
-          this.rememberedLeaves.set(rowId, ids);
-        }
-      }
-    }
-
-    this.cachedRows = rows;
-    this.cachedLeaves = leaves;
-    this.cachedAncestors = ancestors;
-    return leaves;
-  }
-
-  private projectedRows(): readonly DisplayRow[] {
+  /** The projection, which membership implementations are defined against. */
+  projectedRows(): readonly DisplayRow[] {
     return this.context?.pipeline.projector.rows.get() ?? [];
+  }
+
+  /** Order-independent snapshot, for deciding whether anything actually moved. */
+  private snapshot(): string {
+    return [...this.selected].sort().join(' ');
   }
 
   private changed(): void {
@@ -638,7 +502,6 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   }
 }
 
-/** Rendered by the module's checkbox column and its header. */
 export const selectionCheckboxTemplate = (
   state: SelectionState,
   disabled: boolean,

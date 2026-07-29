@@ -8,6 +8,8 @@ import { TreeModule } from '@flow-grid/core/tree';
 import { SortModule } from '@flow-grid/core/sort';
 import { FilterModule } from '@flow-grid/core/filter';
 import { SelectionModule } from '@flow-grid/core/selection';
+import { GroupSelectionModule } from '@flow-grid/core/selection/group';
+import { RowRangeModule } from '@flow-grid/core/selection/row-range';
 import { CellFlashModule } from '@flow-grid/core/cell-flash';
 import { KeyboardModule } from '@flow-grid/core/keyboard';
 import { type Bond, generateBonds, tick } from './bond-data.js';
@@ -98,6 +100,13 @@ interface Args {
  */
 const bondMarketSelection = new SelectionModule<Bond>({ mode: 'multi' });
 
+/**
+ * Hierarchy and spans are separate modules now, so the bond market installs
+ * all three. Held outside `render` for the same reason as the others.
+ */
+const bondMarketGroupSelection = new GroupSelectionModule<Bond>();
+const bondMarketRowRange = new RowRangeModule<Bond>();
+
 /** Held outside `render` for the same reason as the selection module. */
 const bondMarketSort = new SortModule<Bond>();
 
@@ -174,9 +183,10 @@ export const BondMarket: StoryObj<Args> = {
     selection.setOptions({
       mode: args.selectionMode,
       checkboxColumn: args.checkboxColumn,
-      groupSelectsChildren: args.groupSelectsChildren,
       clickToSelect: args.clickToSelect,
     });
+    // Group behaviour belongs to the module that supplies it.
+    bondMarketGroupSelection.setOptions({ groupSelectsChildren: args.groupSelectsChildren });
     const data = generateBonds(args.groups, args.instruments);
     let frame: number | null = null;
 
@@ -196,9 +206,13 @@ export const BondMarket: StoryObj<Args> = {
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
         new KeyboardModule<Bond>(),
-        // Ticking a category selects the instruments beneath it, respecting the
-        // current filter; the category shows indeterminate while only some are.
+        // Row selection is flat on its own. The group module is what makes
+        // ticking a category select the instruments beneath it, respecting the
+        // current filter and showing indeterminate while only some are; the
+        // row-range module is what makes shift-click select a span.
         selection,
+        bondMarketGroupSelection,
+        bondMarketRowRange,
       ],
     };
 
