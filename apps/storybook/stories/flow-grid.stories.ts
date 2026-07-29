@@ -3,6 +3,7 @@ import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 import type { ColumnDef, GridTheme, FlowGrid, GridOptions } from '@flow-grid/core';
 import '@flow-grid/core';
+import '@flow-grid/core/define';
 import { TreeModule } from '@flow-grid/core/tree';
 import { SortModule } from '@flow-grid/core/sort';
 import { FilterModule } from '@flow-grid/core/filter';
@@ -82,9 +83,19 @@ interface Args {
   expandByDefault: boolean;
   ticksPerFrame: number;
   selectionMode: 'multi' | 'single';
+  checkboxColumn: boolean;
   groupSelectsChildren: boolean;
   clickToSelect: boolean;
 }
+
+/**
+ * The selection module for the bond market story.
+ *
+ * Held outside `render` so the controls can drive it: the grid registers the
+ * modules it is given once, so an instance created per render would never be
+ * the one in use.
+ */
+const bondMarketSelection = new SelectionModule<Bond>({ mode: 'multi' });
 
 const meta: Meta<Args> = {
   title: 'Flow grid/Bond market',
@@ -98,6 +109,12 @@ const meta: Meta<Args> = {
     selectionMode: {
       control: 'inline-radio',
       options: ['multi', 'single'],
+      table: { category: 'Selection' },
+    },
+    checkboxColumn: {
+      control: 'boolean',
+      description:
+        'Show the leading checkbox column. Independent of the mode: single selection with checkboxes behaves like radio buttons, and the header select-all never appears in single mode.',
       table: { category: 'Selection' },
     },
     groupSelectsChildren: {
@@ -129,15 +146,21 @@ export const BondMarket: StoryObj<Args> = {
     enableScrollJacking: true,
     expandByDefault: true,
     ticksPerFrame: 50,
+    selectionMode: 'multi',
+    checkboxColumn: true,
+    groupSelectsChildren: true,
+    clickToSelect: false,
   },
   render: (args) => {
     const gridRef = createRef<FlowGrid<Bond>>();
-    // Built from the controls, then updated from them on every change. Module
-    // options are not reachable through gridOptions, so they are set on the
-    // module itself — which is the point: no grid rebuild, and the current
-    // selection survives the change.
-    const selection = new SelectionModule<Bond>({
+
+    // Reused across renders. Storybook re-runs render on every control change,
+    // and a fresh module would never be registered — the grid keeps the modules
+    // it started with — so the controls would appear to do nothing.
+    const selection = bondMarketSelection;
+    selection.setOptions({
       mode: args.selectionMode,
+      checkboxColumn: args.checkboxColumn,
       groupSelectsChildren: args.groupSelectsChildren,
       clickToSelect: args.clickToSelect,
     });
