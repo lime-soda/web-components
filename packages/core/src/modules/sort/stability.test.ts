@@ -96,6 +96,36 @@ describe('sort under a live feed', () => {
     expect(order(pipeline)).toEqual(['b', 'a']);
   });
 
+  it('sorts on a header click, which is not a value change', () => {
+    // The point of the default is that ticks are ignored, not that the sort
+    // stops working — a click has to re-order against current values.
+    const { pipeline, sort } = setup();
+    expect(order(pipeline)).toEqual(['a', 'b', 'c']);
+
+    tickAToTheTop(pipeline);
+    expect(order(pipeline)).toEqual(['a', 'b', 'c']);
+
+    const column = resolveColumns<Quote>(columns).find((c) => c.colId === 'price')!;
+    sort.headerDecorator({ column } as never)?.onActivate?.(new Event('click'));
+
+    // Cycles asc → desc, and 'a' leads only if the click sorted on the value it
+    // ticked to rather than the one it had when the order was last computed.
+    expect(order(pipeline)).toEqual(['a', 'c', 'b']);
+    expect(sort.getSortModel()).toEqual([{ colId: 'price', direction: 'desc' }]);
+  });
+
+  it('keeps cycling direction on repeated header clicks', () => {
+    const { pipeline, sort } = setup();
+    const column = resolveColumns<Quote>(columns).find((c) => c.colId === 'price')!;
+    const click = () => sort.headerDecorator({ column } as never)?.onActivate?.(new Event('click'));
+
+    click(); // asc was already set by setup, so this moves on to desc
+    expect(order(pipeline)).toEqual(['c', 'b', 'a']);
+
+    click();
+    expect(sort.getSortModel()).toEqual([]);
+  });
+
   it('re-sorts when the sort model changes', () => {
     const { pipeline, sort } = setup();
     tickAToTheTop(pipeline);
