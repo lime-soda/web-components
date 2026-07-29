@@ -184,9 +184,16 @@ new SelectionModule<Quote>({
   checkboxColumn: true, // default, in either mode
   checkboxColumnWidth: 28,
   clickToSelect: false, // select by clicking anywhere in the row
+  selectionWithoutKeys: false, // plain click adds instead of replacing, for touch
   isSelectable: (rowId, meta) => true,
 });
 ```
+
+With `clickToSelect`, row clicks follow the desktop conventions: a plain click
+replaces the selection, Ctrl or Cmd adds to it, and Shift extends from the last
+row clicked. Checkbox clicks always accumulate, modifier or not — that is what
+a checkbox is for. Set `selectionWithoutKeys` for touch devices, where there are
+no modifier keys and a plain click has to accumulate to be useful.
 
 `mode`, `checkboxColumn` and `clickToSelect` are independent. Single selection
 with checkboxes behaves like radio buttons; multi selection without them relies

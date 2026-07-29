@@ -42,8 +42,25 @@ const headerSlot = (selection: SelectionModule<Row>) =>
 const hasCheckboxColumn = (selection: SelectionModule<Row>) =>
   selection.provideColumns().some((column) => column.colId === 'flow-selection');
 
-const activation = (selection: SelectionModule<Row>) =>
-  selection.rowDecorator({ row: { id: 'a', rowId: 'a' }, node: undefined } as never)?.onActivate;
+const activation = (selection: SelectionModule<Row>, rowId = 'a') =>
+  selection.rowDecorator({ row: { id: rowId, rowId }, node: undefined } as never)?.onActivate;
+
+/** A row click carrying the given modifiers. */
+const clickRow = (
+  selection: SelectionModule<Row>,
+  rowId: string,
+  modifiers: { ctrlKey?: boolean; metaKey?: boolean; shiftKey?: boolean } = {},
+) => {
+  activation(
+    selection,
+    rowId,
+  )?.({
+    ctrlKey: false,
+    metaKey: false,
+    shiftKey: false,
+    ...modifiers,
+  } as unknown as Event);
+};
 
 describe('selection modes', () => {
   describe('the checkbox column', () => {
@@ -108,6 +125,119 @@ describe('selection modes', () => {
 
       selection.toggleRowSelected('a');
       selection.toggleRowSelected('b');
+
+      expect(selection.getSelectedRows()).toEqual(['b']);
+    });
+  });
+
+  describe('row click modifiers', () => {
+    /**
+     * The conventions every desktop grid shares: plain click replaces, Ctrl or
+     * Cmd adds, Shift extends. A row click is not a checkbox click.
+     */
+    const clickable = () => setup({ mode: 'multi', clickToSelect: true }).selection;
+
+    it('replaces the selection on a plain click', () => {
+      const selection = clickable();
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'b');
+
+      expect(selection.getSelectedRows()).toEqual(['b']);
+    });
+
+    it('adds to the selection on ctrl+click', () => {
+      const selection = clickable();
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'b', { ctrlKey: true });
+
+      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+    });
+
+    it('treats cmd+click as ctrl+click, for macOS', () => {
+      const selection = clickable();
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'b', { metaKey: true });
+
+      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+    });
+
+    it('deselects a selected row on ctrl+click, leaving the rest alone', () => {
+      const selection = clickable();
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'b', { ctrlKey: true });
+      clickRow(selection, 'a', { ctrlKey: true });
+
+      expect(selection.getSelectedRows()).toEqual(['b']);
+    });
+
+    it('keeps a plain click on an already-selected row selected', () => {
+      // Rather than toggling it off: the click means "just this one", and it
+      // already is that one.
+      const selection = clickable();
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'a');
+
+      expect(selection.getSelectedRows()).toEqual(['a']);
+    });
+
+    it('adds on a plain click when selectionWithoutKeys is set, for touch', () => {
+      const { selection } = setup({
+        mode: 'multi',
+        clickToSelect: true,
+        selectionWithoutKeys: true,
+      });
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'b');
+
+      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+      clickRow(selection, 'a');
+      expect(selection.getSelectedRows()).toEqual(['b']);
+    });
+
+    it('extends from the anchor on shift+click', () => {
+      const { selection, pipeline } = setup({ mode: 'multi', clickToSelect: true });
+      pipeline.store.setRowData([
+        { id: 'a', name: 'A' },
+        { id: 'b', name: 'B' },
+        { id: 'c', name: 'C' },
+      ]);
+      pipeline.projector.rows.get();
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'c', { shiftKey: true });
+
+      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b', 'c']);
+    });
+
+    it('keeps the anchor when a shift+click replaces an earlier span', () => {
+      // Clearing the old span must not move the anchor onto the clicked row,
+      // which would collapse the selection to that row alone.
+      const { selection, pipeline } = setup({ mode: 'multi', clickToSelect: true });
+      pipeline.store.setRowData([
+        { id: 'a', name: 'A' },
+        { id: 'b', name: 'B' },
+        { id: 'c', name: 'C' },
+      ]);
+      pipeline.projector.rows.get();
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'c', { shiftKey: true });
+      clickRow(selection, 'b', { shiftKey: true });
+
+      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+    });
+
+    it('replaces on a plain click in single mode too', () => {
+      const { selection } = setup({ mode: 'single', clickToSelect: true });
+
+      clickRow(selection, 'a');
+      clickRow(selection, 'b');
 
       expect(selection.getSelectedRows()).toEqual(['b']);
     });

@@ -31,8 +31,17 @@ export interface SelectionModuleOptions {
   checkboxColumn?: boolean;
   /** Width of that column in px. Defaults to 28. */
   checkboxColumnWidth?: number;
-  /** Select a row by clicking anywhere in it. Off by default. */
+  /** Select a row by clicking anywhere in it. Off by default. Works in either mode. */
   clickToSelect?: boolean;
+
+  /**
+   * Make a plain row click add to the selection instead of replacing it, so
+   * several rows can be selected without Ctrl or Cmd. Off by default.
+   *
+   * For touch devices, which have no modifier keys and could otherwise reach
+   * only one row at a time.
+   */
+  selectionWithoutKeys?: boolean;
   /**
    * Selecting a parent selects its descendants, and the parent's own state is
    * derived from them. On by default.
@@ -410,6 +419,56 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     });
   }
 
+  /**
+   * Row click, with the modifier conventions of the desktop.
+   *
+   * A plain click replaces the selection rather than adding to it, which is
+   * what a click means in a file manager, a spreadsheet or any other grid. It
+   * is deliberately not the checkbox behaviour: a checkbox accumulates because
+   * that is the only thing it can do, whereas a row click has modifiers to say
+   * so, and without a plain click that clears there is no way to say "just this
+   * one" short of clearing by hand.
+   *
+   * Cmd is read alongside Ctrl, so the gesture is the platform's own on macOS.
+   *
+   * `selectionWithoutKeys` restores the accumulating plain click, because a
+   * touch device has no modifier keys and would otherwise reach one row at a time.
+   */
+  private activate(rowId: string, event: MouseEvent): void {
+    const additive = event.ctrlKey || event.metaKey || (this.options.selectionWithoutKeys ?? false);
+
+    if (event.shiftKey && this.mode === 'multi' && this.lastToggled !== null) {
+      // The span replaces what came before unless the click asked to keep it,
+      // but the anchor has to outlive the clearing — selecting the clicked row
+      // first would move the anchor onto it and collapse the span to one row.
+      const anchor = this.lastToggled;
+      if (!additive) this.selected.clear();
+      this.lastToggled = anchor;
+      this.selectRange(rowId);
+      return;
+    }
+
+    if (additive) {
+      this.toggleRowSelected(rowId);
+      return;
+    }
+
+    this.replaceSelection(rowId);
+  }
+
+  /** Selects one row and nothing else, in a single change. */
+  private replaceSelection(rowId: string): void {
+    const membership = this.membershipOf(rowId);
+    const alreadyOnlyThisRow =
+      membership.length > 0 &&
+      this.selected.size === membership.length &&
+      membership.every((leaf) => this.selected.has(leaf));
+    if (alreadyOnlyThisRow) return;
+
+    this.selected.clear();
+    this.setRowSelected(rowId, true);
+  }
+
   rowDecorator(ctx: RowContextInfo<TData>): RowDecoration | null {
     const state = this.getRowState(ctx.row.rowId);
     const selected = state === 'checked';
@@ -418,12 +477,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     // clicking could deselect but never select — the option looked broken
     // because the rows that needed the handler most were the ones without it.
     const activation = this.options.clickToSelect
-      ? {
-          onActivate: (event: Event) => {
-            if ((event as MouseEvent).shiftKey) this.selectRange(ctx.row.rowId);
-            else this.toggleRowSelected(ctx.row.rowId);
-          },
-        }
+      ? { onActivate: (event: Event) => this.activate(ctx.row.rowId, event as MouseEvent) }
       : {};
 
     if (!selected) {
