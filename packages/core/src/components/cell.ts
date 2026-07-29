@@ -47,7 +47,15 @@ export class FlowCell extends SignalWatcher(LitElement) {
       padding: 0;
     }
 
-    :host(:focus-visible) {
+    /*
+     * The grid's own focus, not the browser's :focus-visible.
+     *
+     * :focus-visible deliberately does not match a mouse click, so a cell
+     * clicked into was focused — arrow keys moved from it, screen readers
+     * followed it — while showing nothing at all. The grid tracks focus itself
+     * and says so here, so clicking and tabbing look the same.
+     */
+    :host([data-focused]) {
       outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
       outline-offset: calc(-1 * var(--flow-focus-width, 2px));
     }
@@ -123,6 +131,7 @@ export class FlowCell extends SignalWatcher(LitElement) {
     this.grid?.registry.version.get();
 
     this.tabIndex = this.isTabbableCell() ? 0 : -1;
+    this.toggleAttribute('data-focused', this.isFocusedCell());
 
     const value = getCellValue(this.column, node);
     const decorations =

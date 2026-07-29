@@ -474,6 +474,34 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     else this.setRowSelected(rowId, checked);
   }
 
+  /**
+   * Space or Enter selects the focused row.
+   *
+   * The keyboard counterpart to clicking a checkbox. A focused cell is not the
+   * checkbox inside it — focus sits on the cell — so the key press would
+   * otherwise reach nothing, and a grid navigable entirely by keyboard had no
+   * way to actually select anything.
+   *
+   * Answered from any column rather than only the checkbox one: the row is
+   * what is being selected, and requiring the user to arrow back to the first
+   * column first would be a chore with no purpose.
+   */
+  onKeyDown(event: KeyboardEvent): boolean {
+    if (event.key !== ' ' && event.key !== 'Enter') return false;
+
+    const position = this.context?.focus.focused.get();
+    if (!position) return false;
+
+    // The focused row is identified by its DisplayRow id, which repeats of an
+    // ancestor do not share; the selection is keyed by rowId.
+    const rowId = this.projectedRows().find((row) => row.id === position.rowKey)?.rowId;
+    if (rowId === undefined || !this.isRowSelectable(rowId)) return false;
+
+    this.toggleRowSelected(rowId);
+    // Returning true is what stops Space scrolling the page.
+    return true;
+  }
+
   canSelect(rowId: string, meta: Readonly<Record<string, unknown>> = {}): boolean {
     return this.options.isSelectable?.(rowId, meta) ?? true;
   }
