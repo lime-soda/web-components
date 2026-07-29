@@ -85,6 +85,7 @@ interface Args {
   expandByDefault: boolean;
   ticksPerFrame: number;
   resortOnValueChange: boolean;
+  skipGroupRows: boolean;
   selectionMode: 'multi' | 'single';
   checkboxColumn: boolean;
   groupSelectsChildren: boolean;
@@ -109,6 +110,7 @@ const bondMarketRowRange = new RowRangeModule<Bond>();
 
 /** Held outside `render` for the same reason as the selection module. */
 const bondMarketSort = new SortModule<Bond>();
+const bondMarketKeyboard = new KeyboardModule<Bond>();
 
 const meta: Meta<Args> = {
   title: 'Flow grid/Bond market',
@@ -119,6 +121,12 @@ const meta: Meta<Args> = {
     ticksPerFrame: { control: { type: 'range', min: 1, max: 100, step: 1 } },
     enableScrollJacking: { control: 'boolean' },
     expandByDefault: { control: 'boolean' },
+    skipGroupRows: {
+      control: 'boolean',
+      description:
+        "Arrow past category headings instead of landing on them. The predicate is the story's, not the module's — it reads meta.hasChildren, a convention the tree module owns.",
+      table: { category: 'Keyboard' },
+    },
     resortOnValueChange: {
       control: 'boolean',
       description:
@@ -166,6 +174,7 @@ export const BondMarket: StoryObj<Args> = {
     expandByDefault: true,
     ticksPerFrame: 50,
     resortOnValueChange: false,
+    skipGroupRows: false,
     selectionMode: 'multi',
     checkboxColumn: true,
     groupSelectsChildren: true,
@@ -178,6 +187,10 @@ export const BondMarket: StoryObj<Args> = {
     // and a fresh module would never be registered — the grid keeps the modules
     // it started with — so the controls would appear to do nothing.
     bondMarketSort.setOptions({ resortOnValueChange: args.resortOnValueChange });
+    // The predicate is the application's: the module has no idea what a group is.
+    bondMarketKeyboard.setOptions({
+      skipRow: args.skipGroupRows ? ({ meta }) => meta['hasChildren'] === true : undefined,
+    });
 
     const selection = bondMarketSelection;
     selection.setOptions({
@@ -205,7 +218,7 @@ export const BondMarket: StoryObj<Args> = {
         bondMarketSort,
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
-        new KeyboardModule<Bond>(),
+        bondMarketKeyboard,
         // Row selection is flat on its own. The group module is what makes
         // ticking a category select the instruments beneath it, respecting the
         // current filter and showing indeterminate while only some are; the

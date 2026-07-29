@@ -212,6 +212,26 @@ the way to the next instance's rows would put a stop in the path of the common
 movement for the sake of the rare one. Sideways movement and instance jumps stay
 in whichever band they started in.
 
+Arrow keys can pass over rows entirely — group headings, separators, whatever a
+particular grid treats as scenery:
+
+```ts
+new KeyboardModule<Quote>({
+  skipRow: ({ meta }) => meta['hasChildren'] === true,
+});
+```
+
+The predicate always comes from the consumer. There is deliberately no
+`skipGroupRows` flag: the module would have to read `meta.hasChildren` or
+`meta.depth` to implement one, and those are conventions belonging to whichever
+module built the hierarchy. Keeping the predicate outside is what lets the
+keyboard module stay a mapping from keys onto movement.
+
+It applies to movement between rows — arrows, page keys, instance jumps — and
+not along one, since that never changes row. Headers are never offered to it. If
+everything ahead is skipped the movement is refused and focus stays put, rather
+than being left partway through the rows it rejected.
+
 With `SelectionModule` installed, **Space or Enter selects the focused row** from
 the checkbox cell — focus sits on the cell, not on the checkbox inside it, so the
 key press would otherwise reach nothing. With no checkbox column there is nothing
