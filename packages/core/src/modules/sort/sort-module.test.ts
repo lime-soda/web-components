@@ -4,7 +4,7 @@ import type { ColumnDef } from '../../columns/types.js';
 import { GridPipeline } from '../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../module-registry.js';
 import { TreeModule } from '../tree/tree-module.js';
-import { SortModule, compareValues } from './sort-module.js';
+import { SortModule, type SortModuleOptions, compareValues } from './sort-module.js';
 import './index.js';
 
 interface Quote {
@@ -27,10 +27,15 @@ const columns: ColumnDef<Quote>[] = [
   { field: 'price', width: 100 },
 ];
 
-const setup = (data: Quote[], defs = columns, extraModules: never[] = []) => {
+const setup = (
+  data: Quote[],
+  defs = columns,
+  extraModules: never[] = [],
+  options: SortModuleOptions = {},
+) => {
   const pipeline = new GridPipeline<Quote>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
-  const sort = new SortModule<Quote>();
+  const sort = new SortModule<Quote>(options);
   const dispatch = vi.fn();
   const registry = new ModuleRegistry<Quote>({
     pipeline,
@@ -207,6 +212,11 @@ describe('SortModule', () => {
   });
 
   describe('dependsOn', () => {
+    // These describe what the stage declares once it has been asked to follow
+    // values. Off by default, it deliberately declares nothing — see
+    // stability.test.ts.
+    const tracking = { resortOnValueChange: true };
+
     const dependencies = (sort: SortModule<Quote>, pipeline: GridPipeline<Quote>) => {
       const stage = (
         pipeline.projector as unknown as { stages: { id: string; dependsOn: unknown }[] }
@@ -221,7 +231,7 @@ describe('SortModule', () => {
     });
 
     it('declares only the active sort field', () => {
-      const { sort, pipeline } = setup([quote('a', 'A', 1)]);
+      const { sort, pipeline } = setup([quote('a', 'A', 1)], columns, [], tracking);
 
       sort.setSortModel([{ colId: 'price', direction: 'asc' }]);
 
@@ -232,6 +242,8 @@ describe('SortModule', () => {
       const { sort, pipeline } = setup(
         [quote('a', 'A', 1)],
         [{ colId: 'derived', valueGetter: ({ data }) => data.price }],
+        [],
+        tracking,
       );
 
       sort.setSortModel([{ colId: 'derived', direction: 'asc' }]);
@@ -253,7 +265,12 @@ describe('SortModule', () => {
     });
 
     it('re-sorts when the sorted field ticks', () => {
-      const { sort, pipeline } = setup([quote('a', 'A', 1), quote('b', 'B', 2)]);
+      const { sort, pipeline } = setup(
+        [quote('a', 'A', 1), quote('b', 'B', 2)],
+        columns,
+        [],
+        tracking,
+      );
       sort.setSortModel([{ colId: 'price', direction: 'asc' }]);
       expect(order(pipeline)).toEqual(['a', 'b']);
 

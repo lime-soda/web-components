@@ -152,7 +152,7 @@ describe('selection modes', () => {
       clickRow(selection, 'a');
       clickRow(selection, 'b', { ctrlKey: true });
 
-      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+      expect([...selection.getSelectedRows()].sort()).toEqual(['a', 'b']);
     });
 
     it('treats cmd+click as ctrl+click, for macOS', () => {
@@ -161,7 +161,7 @@ describe('selection modes', () => {
       clickRow(selection, 'a');
       clickRow(selection, 'b', { metaKey: true });
 
-      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+      expect([...selection.getSelectedRows()].sort()).toEqual(['a', 'b']);
     });
 
     it('deselects a selected row on ctrl+click, leaving the rest alone', () => {
@@ -195,7 +195,7 @@ describe('selection modes', () => {
       clickRow(selection, 'a');
       clickRow(selection, 'b');
 
-      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+      expect([...selection.getSelectedRows()].sort()).toEqual(['a', 'b']);
       clickRow(selection, 'a');
       expect(selection.getSelectedRows()).toEqual(['b']);
     });
@@ -212,7 +212,7 @@ describe('selection modes', () => {
       clickRow(selection, 'a');
       clickRow(selection, 'c', { shiftKey: true });
 
-      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b', 'c']);
+      expect([...selection.getSelectedRows()].sort()).toEqual(['a', 'b', 'c']);
     });
 
     it('keeps the anchor when a shift+click replaces an earlier span', () => {
@@ -230,7 +230,7 @@ describe('selection modes', () => {
       clickRow(selection, 'c', { shiftKey: true });
       clickRow(selection, 'b', { shiftKey: true });
 
-      expect(selection.getSelectedRows().sort()).toEqual(['a', 'b']);
+      expect([...selection.getSelectedRows()].sort()).toEqual(['a', 'b']);
     });
 
     it('replaces on a plain click in single mode too', () => {

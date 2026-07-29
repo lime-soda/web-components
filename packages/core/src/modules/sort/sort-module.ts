@@ -18,6 +18,24 @@ export interface SortModuleOptions {
   multiSort?: boolean;
   /** Directions cycled through on repeated activation. */
   cycle?: readonly (SortDirection | null)[];
+
+  /**
+   * Re-sort when a value in a sorted column changes. **Off by default.**
+   *
+   * On a live feed this is the difference between a readable grid and an
+   * unusable one: sort by price, and every tick moves rows past the pointer, so
+   * the row being reached for is somewhere else by the time the click lands.
+   * The sort therefore holds its order while values tick, and rows update in
+   * place.
+   *
+   * The order is still recomputed whenever the set of rows changes, when the
+   * sort model changes, and on `api.refreshSort()` — so it reflects current
+   * values at each of those points rather than drifting indefinitely.
+   *
+   * Turn it on for a grid over data that changes rarely, where a stale order is
+   * more surprising than a moving one.
+   */
+  resortOnValueChange?: boolean;
 }
 
 export interface ComparatorParams<TData = unknown> {
@@ -77,13 +95,17 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
       phase: 'sort',
 
       /**
-       * Only the fields the active sort columns actually read. A price tick
-       * re-runs the sort when sorting by price, and is ignored entirely when
-       * sorting by instrument — which is the difference between a grid that
-       * keeps up with a live feed and one that does not.
+       * Only the fields the active sort columns actually read, and only when
+       * the grid was asked to re-sort as values change.
+       *
+       * Declaring no dependency is what keeps the order still under a live
+       * feed: the projection is not invalidated by a tick, so the rows keep
+       * their positions and only their cells repaint. A structural change or a
+       * new sort model still re-runs the stage, against current values.
        */
       get dependsOn(): ReadonlySet<string> | '*' | undefined {
         if (self.model.length === 0) return undefined;
+        if (!(self.options.resortOnValueChange ?? false)) return undefined;
 
         const fields = new Set<string>();
         for (const entry of self.model) {
@@ -141,11 +163,24 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     this.setSortModel(state ?? []);
   }
 
+  /**
+   * Re-sorts against current values, without changing the sort model.
+   *
+   * The manual counterpart to `resortOnValueChange`: a grid that holds its
+   * order while prices tick still needs a way to say "re-order now", whether
+   * that is a toolbar button or a timer between bursts of activity.
+   */
+  refreshSort(): void {
+    if (this.model.length === 0) return;
+    this.context?.invalidate();
+  }
+
   apiExtension(): Record<string, unknown> {
     return {
       getSortModel: () => this.getSortModel(),
       setSortModel: (model: readonly SortModelEntry[]) => this.setSortModel(model),
       clearSort: () => this.clearSort(),
+      refreshSort: () => this.refreshSort(),
     };
   }
 

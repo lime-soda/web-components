@@ -167,6 +167,29 @@ grid.api.setSortModel([/* … */]); // ❌ compile error without /sort
 The same applies to column options — `comparator` arrives with `/sort`,
 `enableCellFlash` with `/cell-flash`.
 
+## Sorting under a live feed
+
+Sorting re-orders when the set of rows changes, when the sort model changes, and
+on `api.refreshSort()` — **not** as values tick.
+
+That is deliberate. Sort by price on a live feed and a grid that re-sorts on
+every tick streams rows past the pointer: the row being reached for is somewhere
+else by the time the click lands, and nothing can be read while it moves. Rows
+therefore hold their positions and their cells repaint in place. The projection
+is not invalidated at all, so a tick costs no more sorted than unsorted.
+
+The order is recomputed against current values at each of those points, so it is
+never far behind, and an application can offer a re-sort explicitly:
+
+```ts
+new SortModule<Quote>({ resortOnValueChange: false }); // the default
+
+grid.api.refreshSort(); // re-order now, leaving the sort model alone
+```
+
+Set `resortOnValueChange: true` for data that changes rarely, where an order
+drifting out of date is more surprising than one that moves.
+
 ## Selection
 
 Ticking a group selects the instruments beneath it, and the group reflects them:

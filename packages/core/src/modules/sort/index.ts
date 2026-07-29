@@ -27,6 +27,8 @@ declare module '../../api/types.js' {
     getSortModel(): readonly SortModelEntry[];
     setSortModel(model: readonly SortModelEntry[]): void;
     clearSort(): void;
+    /** Re-sorts against current values, leaving the sort model as it is. */
+    refreshSort(): void;
   }
 }
 

@@ -82,6 +82,7 @@ interface Args {
   enableScrollJacking: boolean;
   expandByDefault: boolean;
   ticksPerFrame: number;
+  resortOnValueChange: boolean;
   selectionMode: 'multi' | 'single';
   checkboxColumn: boolean;
   groupSelectsChildren: boolean;
@@ -97,6 +98,9 @@ interface Args {
  */
 const bondMarketSelection = new SelectionModule<Bond>({ mode: 'multi' });
 
+/** Held outside `render` for the same reason as the selection module. */
+const bondMarketSort = new SortModule<Bond>();
+
 const meta: Meta<Args> = {
   title: 'Flow grid/Bond market',
   argTypes: {
@@ -106,6 +110,12 @@ const meta: Meta<Args> = {
     ticksPerFrame: { control: { type: 'range', min: 1, max: 100, step: 1 } },
     enableScrollJacking: { control: 'boolean' },
     expandByDefault: { control: 'boolean' },
+    resortOnValueChange: {
+      control: 'boolean',
+      description:
+        'Re-sort as prices tick. Sort by price and turn this on to see why it is off by default: rows stream past the pointer and the one you are reaching for has moved by the time you click.',
+      table: { category: 'Sort' },
+    },
     selectionMode: {
       control: 'inline-radio',
       options: ['multi', 'single'],
@@ -146,6 +156,7 @@ export const BondMarket: StoryObj<Args> = {
     enableScrollJacking: true,
     expandByDefault: true,
     ticksPerFrame: 50,
+    resortOnValueChange: false,
     selectionMode: 'multi',
     checkboxColumn: true,
     groupSelectsChildren: true,
@@ -157,6 +168,8 @@ export const BondMarket: StoryObj<Args> = {
     // Reused across renders. Storybook re-runs render on every control change,
     // and a fresh module would never be registered — the grid keeps the modules
     // it started with — so the controls would appear to do nothing.
+    bondMarketSort.setOptions({ resortOnValueChange: args.resortOnValueChange });
+
     const selection = bondMarketSelection;
     selection.setOptions({
       mode: args.selectionMode,
@@ -179,7 +192,7 @@ export const BondMarket: StoryObj<Args> = {
           getParentId: (bond) => bond.parentId,
           defaultExpanded: args.expandByDefault ? (bond) => bond.parentId === null : false,
         }),
-        new SortModule<Bond>(),
+        bondMarketSort,
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
         new KeyboardModule<Bond>(),
