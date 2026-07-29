@@ -1,4 +1,6 @@
 import { css, html } from 'lit';
+import { defineElement } from '../../define-elements.js';
+import { FlowSelectionCheckbox } from './selection-checkbox.js';
 import type { ColumnDef } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
 import type {
@@ -18,7 +20,14 @@ const SELECTION_COL_ID = 'flow-selection';
 
 export interface SelectionModuleOptions {
   mode?: SelectionMode;
-  /** Add a leading checkbox column. On by default in multi mode. */
+  /**
+   * Add a leading checkbox column. On by default, in either mode.
+   *
+   * Independent of `mode`: single selection with checkboxes behaves like radio
+   * buttons, and multi selection without them relies on `clickToSelect`. In
+   * single mode no select-all appears in the header, because there is nothing
+   * for it to mean.
+   */
   checkboxColumn?: boolean;
   /** Width of that column in px. Defaults to 28. */
   checkboxColumnWidth?: number;
@@ -94,6 +103,10 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   init(context: ModuleContext<TData>): void {
     this.context = context;
+    // The module's checkbox column names this element, so the module is what
+    // must ensure it exists — rather than an import side effect that would
+    // register it even for a grid with no selection.
+    defineElement('flow-selection-checkbox', FlowSelectionCheckbox);
 
     context.addTeardown(
       context.pipeline.store.subscribe((result) => {
@@ -352,8 +365,10 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   readonly styles = SelectionModule.styles;
 
   provideColumns(): readonly ColumnDef<TData>[] {
-    const wanted = this.options.checkboxColumn ?? this.mode === 'multi';
-    if (!wanted) return [];
+    // Deliberately not derived from `mode`. Tying the two meant switching to
+    // single selection silently removed the column, which is a surprising way
+    // for one option to change another.
+    if ((this.options.checkboxColumn ?? true) === false) return [];
 
     return [
       {
@@ -369,7 +384,12 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     ];
   }
 
-  /** Select-all for the header of the module's own column. Tri-state. */
+  /**
+   * Select-all for the header of the module's own column. Tri-state.
+   *
+   * Never in single mode: selecting everything is not a thing single selection
+   * can express, so the header stays empty even though the column is there.
+   */
   headerSlot(ctx: HeaderSlotContext<TData>) {
     if (ctx.column.colId !== SELECTION_COL_ID || this.mode === 'single') return null;
 
@@ -392,11 +412,27 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   rowDecorator(ctx: RowContextInfo<TData>): RowDecoration | null {
     const state = this.getRowState(ctx.row.rowId);
+    const selected = state === 'checked';
 
-    if (state !== 'checked') {
+    // Attached whatever the state. Putting it only on selected rows meant
+    // clicking could deselect but never select — the option looked broken
+    // because the rows that needed the handler most were the ones without it.
+    const activation = this.options.clickToSelect
+      ? {
+          onActivate: (event: Event) => {
+            if ((event as MouseEvent).shiftKey) this.selectRange(ctx.row.rowId);
+            else this.toggleRowSelected(ctx.row.rowId);
+          },
+        }
+      : {};
+
+    if (!selected) {
       // Still returns a decoration so the previous one is withdrawn and the
       // aria state stays truthful for unselected rows.
-      return { attributes: { 'aria-selected': state === 'indeterminate' ? 'mixed' : 'false' } };
+      return {
+        attributes: { 'aria-selected': state === 'indeterminate' ? 'mixed' : 'false' },
+        ...activation,
+      };
     }
 
     return {
@@ -405,14 +441,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
       // A row is `display: contents` and has no box to paint, so the highlight
       // travels to the cells as a class the cell stylesheet styles.
       cellClasses: ['flow-cell-selected'],
-      ...(this.options.clickToSelect
-        ? {
-            onActivate: (event: Event) => {
-              if ((event as MouseEvent).shiftKey) this.selectRange(ctx.row.rowId);
-              else this.toggleRowSelected(ctx.row.rowId);
-            },
-          }
-        : {}),
+      ...activation,
     };
   }
 

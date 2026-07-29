@@ -181,10 +181,10 @@ describe('SelectionModule', () => {
       expect(selection.provideColumns().map((c) => c.colId)).toEqual(['flow-selection']);
     });
 
-    it('contributes none in single mode by default', () => {
+    it('contributes one in single mode too, since the column is not tied to the mode', () => {
       const { selection } = setup([], { mode: 'single' });
 
-      expect(selection.provideColumns()).toEqual([]);
+      expect(selection.provideColumns().map((c) => c.colId)).toEqual(['flow-selection']);
     });
 
     it('contributes one in single mode when asked', () => {
