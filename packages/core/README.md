@@ -35,7 +35,7 @@ npm install @flow-grid/core
 ## Quick start
 
 ```ts
-import '@flow-grid/core';
+import '@flow-grid/core/define';
 import '@flow-grid/core/themes/flow-grid.css';
 import type { ColumnDef, FlowGrid, GridOptions } from '@flow-grid/core';
 
@@ -87,6 +87,29 @@ The package's tests assert this directly rather than describing it: after a tick
 
 Measured in Chromium, 5,000 rows with six modules installed, 20 updates per
 frame: median frame 16.7 ms, zero dropped frames, 6 of 194 instances mounted.
+
+## Registering the elements
+
+`@flow-grid/core/define` registers `<flow-grid>` and the elements it renders
+with. It is the only entry point with a side effect, and importing it once
+anywhere in the application is enough.
+
+Importing from `@flow-grid/core` gives you classes and nothing else — no
+registration, and no sibling elements dragged in behind the one you asked for.
+That is what makes it possible to subclass an element, render one in a test, or
+swap an implementation through an import map without a grid appearing in the
+registry as a consequence:
+
+```ts
+import { ELEMENTS, defineElement, defineElements } from '@flow-grid/core';
+
+defineElements(); // everything, the same as importing /define
+
+defineElement('flow-cell', class extends ELEMENTS['flow-cell'] {}); // or your own
+```
+
+Registration is idempotent and the first name registered wins, so two copies of
+the package on one page will not throw.
 
 ## Modules
 
@@ -158,12 +181,17 @@ selects the children that survived the filter, not the ones hidden behind it.
 new SelectionModule<Quote>({
   mode: 'multi', // or 'single'
   groupSelectsChildren: true, // default
-  checkboxColumn: true, // default in multi mode
+  checkboxColumn: true, // default, in either mode
   checkboxColumnWidth: 28,
   clickToSelect: false, // select by clicking anywhere in the row
   isSelectable: (rowId, meta) => true,
 });
 ```
+
+`mode`, `checkboxColumn` and `clickToSelect` are independent. Single selection
+with checkboxes behaves like radio buttons; multi selection without them relies
+on `clickToSelect`. The header select-all appears only in multi mode, since
+selecting everything is not something single selection can express.
 
 Set `groupSelectsChildren: false` to make a group row selectable **in its own
 right**, standing for nothing but itself. Its children are then unaffected by it
