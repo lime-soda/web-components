@@ -38,7 +38,9 @@ const setup = (
   pipeline.store.setRowData(rows);
   const selection = new SelectionModule<Bond>(selectionOptions);
   const group = new GroupSelectionModule<Bond>(
-    groupSelectsChildren === undefined ? {} : { groupSelectsChildren },
+    groupSelectsChildren === undefined
+      ? {}
+      : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) },
   );
   const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true });
   const registry = new ModuleRegistry<Bond>({

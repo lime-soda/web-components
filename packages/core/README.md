@@ -299,17 +299,34 @@ with checkboxes behaves like radio buttons; multi selection without them relies
 on `clickToSelect`. The header select-all appears only in multi mode, since
 selecting everything is not something single selection can express.
 
-Set `groupSelectsChildren: false` on **`GroupSelectionModule`** to make a group
-row selectable **in its own right**, standing for nothing but itself. Its children are then unaffected by it
-and it is never indeterminate — the right choice when group rows are real
-records rather than headings:
+A group row can stand for three different things, set by `scope`:
+
+| `scope`                        | Ticking a category selects            |
+| ------------------------------ | ------------------------------------- |
+| `self`                         | the category row alone                |
+| `children`                     | every instrument in it, hidden or not |
+| `filteredChildren` _(default)_ | only those the filter left visible    |
 
 ```ts
-new GroupSelectionModule<Quote>({ groupSelectsChildren: false });
+new GroupSelectionModule<Quote>({ scope: 'filteredChildren' }); // the default
 
-grid.api.setRowSelected('some-group', true);
-grid.api.getSelectedRows(); // ['some-group'] — no children
+// Reaching hidden rows needs the hierarchy from the data, because rows the
+// filter removed are not in the projection at all.
+new GroupSelectionModule<Quote>({
+  scope: 'children',
+  getParentId: (quote) => quote.groupId,
+});
 ```
+
+`filteredChildren` is the default because it is the conservative one: it can only
+ever select rows the user can see, so a filtered view cannot quietly put hidden
+instruments in a basket. `children` is the choice when ticking a category is
+meant to mean the category itself, whatever happens to be on screen.
+
+`self` makes a group row selectable **in its own right**, standing for nothing
+but itself. Its children are then unaffected by it and it is never
+indeterminate — the right choice when group rows are real records rather than
+headings.
 
 `isSelectable` excludes rows entirely. A row excluded that way is skipped when
 its group is selected, and its group can still reach `checked` without it.

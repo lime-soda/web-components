@@ -34,7 +34,9 @@ const setup = (options: Record<string, unknown> = {}) => {
   pipeline.store.setRowData(data);
   const selection = new SelectionModule<Row>(selectionOptions);
   const group = new GroupSelectionModule<Row>(
-    groupSelectsChildren === undefined ? {} : { groupSelectsChildren },
+    groupSelectsChildren === undefined
+      ? {}
+      : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) },
   );
   const tree = new TreeModule<Row>({ getParentId: (d) => d.parentId, defaultExpanded: true });
   const registry = new ModuleRegistry<Row>({
@@ -56,7 +58,7 @@ describe('module options are reactive', () => {
     selection.setRowSelected('g', true);
     expect(selection.getSelectedRows()).toEqual(['a', 'b']);
 
-    group.setOptions({ groupSelectsChildren: false });
+    group.setOptions({ scope: 'self' });
     selection.clearSelection();
     selection.setRowSelected('g', true);
 
@@ -69,7 +71,7 @@ describe('module options are reactive', () => {
     selection.setRowSelected('g', true);
     expect(selection.getSelectedRows()).toEqual(['g']);
 
-    group.setOptions({ groupSelectsChildren: true });
+    group.setOptions({ scope: 'filteredChildren' });
     selection.clearSelection();
     selection.setRowSelected('g', true);
 
@@ -83,7 +85,7 @@ describe('module options are reactive', () => {
     // switch are legitimately still selected after it.
     const { selection, group } = setup();
 
-    group.setOptions({ groupSelectsChildren: false });
+    group.setOptions({ scope: 'self' });
 
     expect(selection.getRowState('g')).toBe('unchecked');
     selection.setRowSelected('g', true);
@@ -95,7 +97,7 @@ describe('module options are reactive', () => {
     const { selection, group } = setup();
     selection.setRowSelected('a', true);
 
-    group.setOptions({ groupSelectsChildren: false });
+    group.setOptions({ scope: 'self' });
 
     expect(selection.getRowState('a')).toBe('checked');
   });

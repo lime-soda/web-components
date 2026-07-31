@@ -88,7 +88,7 @@ interface Args {
   skipGroupRows: boolean;
   selectionMode: 'multi' | 'single';
   checkboxColumn: boolean;
-  groupSelectsChildren: boolean;
+  groupSelectionScope: 'self' | 'children' | 'filteredChildren';
   clickToSelect: boolean;
 }
 
@@ -105,7 +105,11 @@ const bondMarketSelection = new SelectionModule<Bond>({ mode: 'multi' });
  * Hierarchy and spans are separate modules now, so the bond market installs
  * all three. Held outside `render` for the same reason as the others.
  */
-const bondMarketGroupSelection = new GroupSelectionModule<Bond>();
+const bondMarketGroupSelection = new GroupSelectionModule<Bond>({
+  // `children` has to reach instruments the filter has hidden, and those are
+  // not in the projection at all — so the hierarchy comes from the data.
+  getParentId: (bond) => bond.parentId,
+});
 const bondMarketRowRange = new RowRangeModule<Bond>();
 
 /** Held outside `render` for the same reason as the selection module. */
@@ -144,10 +148,11 @@ const meta: Meta<Args> = {
         'Show the leading checkbox column. Independent of the mode: single selection with checkboxes behaves like radio buttons, and the header select-all never appears in single mode.',
       table: { category: 'Selection' },
     },
-    groupSelectsChildren: {
-      control: 'boolean',
+    groupSelectionScope: {
+      control: 'inline-radio',
+      options: ['self', 'children', 'filteredChildren'],
       description:
-        'Ticking a category selects the instruments beneath it. Turn off to make a category selectable in its own right.',
+        'What ticking a category means: itself alone, every instrument beneath it, or only those the quick filter left visible. Type in the filter first — the last two are identical without one.',
       table: { category: 'Selection' },
     },
     clickToSelect: {
@@ -177,7 +182,7 @@ export const BondMarket: StoryObj<Args> = {
     skipGroupRows: false,
     selectionMode: 'multi',
     checkboxColumn: true,
-    groupSelectsChildren: true,
+    groupSelectionScope: 'filteredChildren',
     clickToSelect: false,
   },
   render: (args) => {
@@ -199,7 +204,7 @@ export const BondMarket: StoryObj<Args> = {
       clickToSelect: args.clickToSelect,
     });
     // Group behaviour belongs to the module that supplies it.
-    bondMarketGroupSelection.setOptions({ groupSelectsChildren: args.groupSelectsChildren });
+    bondMarketGroupSelection.setOptions({ scope: args.groupSelectionScope });
     const data = generateBonds(args.groups, args.instruments);
     let frame: number | null = null;
 
