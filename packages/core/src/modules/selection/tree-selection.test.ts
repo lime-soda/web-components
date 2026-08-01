@@ -37,11 +37,12 @@ const setup = (
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(rows);
   const selection = new SelectionModule<Bond>(selectionOptions);
-  const group = new TreeSelectionModule<Bond>(
-    groupSelectsChildren === undefined
+  const group = new TreeSelectionModule<Bond>({
+    getParentId: (row) => row.parentId,
+    ...(groupSelectsChildren === undefined
       ? {}
-      : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) },
-  );
+      : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) }),
+  });
   const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true });
   const registry = new ModuleRegistry<Bond>({
     pipeline,
@@ -185,13 +186,13 @@ describe('group selection', () => {
       expect(selection.getRowState('g1')).toBe('checked');
     });
 
-    it('records the group itself when its children have never been projected', () => {
-      // Collapsed from the outset, so there is nothing else that could be
-      // recorded. The group is the most specific answer available.
+    it('selects the children of a group never opened, which the data knows about', () => {
+      // Collapsed from the outset, so nothing has ever drawn its children. The
+      // hierarchy comes from the data, so that makes no difference.
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData(data);
       const selection = new SelectionModule<Bond>();
-      const group = new TreeSelectionModule<Bond>();
+      const group = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
       const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
       const registry = new ModuleRegistry<Bond>({
         pipeline,
@@ -206,15 +207,17 @@ describe('group selection', () => {
 
       selection.setRowSelected('g1', true);
 
-      expect(selection.getSelectedRows()).toEqual(['g1']);
+      expect(selection.getSelectedRows()).toEqual(['g1-a', 'g1-b', 'g1-c']);
       expect(selection.getRowState('g1')).toBe('checked');
+      // Never the category's own id, which is not an instrument.
+      expect(selection.getSelectedRows()).not.toContain('g1');
     });
 
     it('resolves that group to its children once they are first revealed', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData(data);
       const selection = new SelectionModule<Bond>();
-      const group = new TreeSelectionModule<Bond>();
+      const group = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
       const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
       const registry = new ModuleRegistry<Bond>({
         pipeline,
@@ -501,7 +504,7 @@ describe('group selection', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData([bond('a'), bond('b')]);
       const selection = new SelectionModule<Bond>();
-      const group = new TreeSelectionModule<Bond>();
+      const group = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
       const registry = new ModuleRegistry<Bond>({
         pipeline,
         getColumns: () => [],

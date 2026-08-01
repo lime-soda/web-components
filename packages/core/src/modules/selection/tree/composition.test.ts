@@ -30,7 +30,7 @@ const setup = (withGroup: boolean) => {
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
   const selection = new SelectionModule<Bond>();
-  const group = new TreeSelectionModule<Bond>();
+  const group = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
   const registry = new ModuleRegistry<Bond>({
     pipeline,
     getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
@@ -99,7 +99,7 @@ describe('selection with the group module', () => {
   });
 
   it('declares its dependency, so the registry can order and check it', () => {
-    const group = new TreeSelectionModule<Bond>();
+    const group = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
 
     expect(group.dependsOn).toEqual(['selection']);
   });
@@ -111,7 +111,7 @@ describe('selection with the group module', () => {
       getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
       dispatch: vi.fn(),
     });
-    registry.register(new TreeSelectionModule<Bond>());
+    registry.register(new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId }));
 
     expect(() => registry.start()).toThrow(/selection/);
   });

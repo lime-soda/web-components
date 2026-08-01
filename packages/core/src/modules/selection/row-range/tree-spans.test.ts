@@ -47,7 +47,7 @@ const setup = (expanded = true) => {
   });
   registry.register(tree);
   registry.register(selection);
-  registry.register(new TreeSelectionModule<Bond>());
+  registry.register(new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId }));
   registry.register(range);
   registry.start();
   pipeline.projector.rows.get();
@@ -110,10 +110,19 @@ describe('a span meeting a group', () => {
     ]);
   });
 
-  it('names the group itself when its contents have never been seen', () => {
-    // Nothing else can stand for them: the children have never been projected,
-    // so the heading is the most specific answer there is.
-    expect(spanFrom('g0', 'g1', false)).toEqual(['g0', 'g1']);
+  it('takes the contents of groups never opened, which the data knows about', () => {
+    // The hierarchy comes from the data, so a group that has never been drawn
+    // open still stands for what is inside it.
+    expect(spanFrom('g0', 'g1', false)).toEqual([
+      'g0-i0',
+      'g0-i1',
+      'g0-i2',
+      'g0-i3',
+      'g1-i0',
+      'g1-i1',
+      'g1-i2',
+      'g1-i3',
+    ]);
   });
 
   it('leaves the group indeterminate after a partial span', () => {

@@ -96,7 +96,7 @@ describe('group selection scope', () => {
       new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true }),
     );
     registry.register(selection);
-    registry.register(new TreeSelectionModule<Bond>());
+    registry.register(new TreeSelectionModule<Bond>({ getParentId: (b) => b.parentId }));
     registry.register(filter);
     registry.start();
     pipeline.projector.rows.get();
@@ -137,30 +137,6 @@ describe('group selection scope', () => {
 
       // Deselecting one visible child leaves the rest, hidden ones included.
       expect([...selection.getSelectedRows()].sort()).toEqual(['drop-1', 'drop-2', 'keep-2']);
-    });
-
-    it('selects nothing beyond the row itself without getParentId', () => {
-      // The hierarchy comes from the consumer; with no way to read it, a group
-      // can only stand for itself.
-      const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
-      pipeline.store.setRowData(data);
-      const selection = new SelectionModule<Bond>();
-      const registry = new ModuleRegistry<Bond>({
-        pipeline,
-        getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
-        dispatch: vi.fn(),
-      });
-      registry.register(
-        new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true }),
-      );
-      registry.register(selection);
-      registry.register(new TreeSelectionModule<Bond>({ scope: 'children' }));
-      registry.start();
-      pipeline.projector.rows.get();
-
-      selection.setRowSelected('g', true);
-
-      expect(selection.getSelectedRows()).toEqual(['g']);
     });
 
     it('survives a cycle in the supplied parents', () => {
@@ -212,7 +188,7 @@ describe('group selection scope', () => {
      * itself, so clicking it reported the category's own id as an instrument.
      */
 
-    const build = (withHierarchy: boolean) => {
+    const build = () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData(data);
       const selection = new SelectionModule<Bond>();
@@ -227,11 +203,7 @@ describe('group selection scope', () => {
         new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: false }),
       );
       registry.register(selection);
-      registry.register(
-        new TreeSelectionModule<Bond>(
-          withHierarchy ? { getParentId: (bond) => bond.parentId } : {},
-        ),
-      );
+      registry.register(new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId }));
       registry.register(filter);
       registry.start();
       pipeline.projector.rows.get();
@@ -239,7 +211,7 @@ describe('group selection scope', () => {
     };
 
     it('selects the instruments of a group never opened', () => {
-      const { selection } = build(true);
+      const { selection } = build();
 
       selection.setRowSelected('g', true);
 
@@ -252,7 +224,7 @@ describe('group selection scope', () => {
     });
 
     it('still respects the filter while collapsed', () => {
-      const { selection, filter, pipeline } = build(true);
+      const { selection, filter, pipeline } = build();
       hideSome(filter, pipeline);
 
       selection.setRowSelected('g', true);
@@ -262,22 +234,12 @@ describe('group selection scope', () => {
     });
 
     it('reports the group as checked, not as its own instrument', () => {
-      const { selection } = build(true);
+      const { selection } = build();
 
       selection.setRowSelected('g', true);
 
       expect(selection.getRowState('g')).toBe('checked');
       expect(selection.getSelectedRows()).not.toContain('g');
-    });
-
-    it('falls back to naming the group without a hierarchy to read', () => {
-      // Unchanged behaviour when the consumer supplies nothing: the projection
-      // genuinely does not contain the children, so there is nothing to name.
-      const { selection } = build(false);
-
-      selection.setRowSelected('g', true);
-
-      expect(selection.getSelectedRows()).toEqual(['g']);
     });
   });
 

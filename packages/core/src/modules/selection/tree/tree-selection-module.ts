@@ -4,48 +4,57 @@ import type { GridModule, ModuleContext } from '../../types.js';
 import type { SelectionMembership } from '../membership.js';
 import type { SelectionModule } from '../selection-module.js';
 
-/** What a group row stands for when it is selected. */
+/** What a parent row stands for when it is selected. */
 export type TreeSelectionScope =
   /**
-   * The group row alone, standing for nothing but itself. Suits a grid whose
-   * group rows are real records rather than headings — the module is still
-   * worth having, because it is what makes a group selectable at all under a
-   * hierarchy.
+   * The row alone, standing for nothing but itself — the same answer core
+   * selection gives on its own. Useful as a runtime toggle when parents are
+   * real records rather than headings; installing nothing at all is the same
+   * thing said statically.
    */
   | 'self'
   /**
    * Every descendant in the data, including rows the current filter has hidden.
    * Ticking a category means the category, whatever happens to be on screen.
-   *
-   * Requires `getParentId`: hidden rows are absent from the projection
-   * entirely, so the hierarchy has to be read from the data itself.
    */
   | 'children'
   /**
-   * The descendants currently projected — filtered, sorted, and with collapsed
-   * groups standing for their contents. Ticking a category selects what the
-   * filter left of it, which is what a trader building a basket from a filtered
-   * book means by it.
+   * Every descendant that passed the filter, drawn or not. Ticking a category
+   * selects what the filter left of it, which is what a trader building a
+   * basket from a filtered book means by it.
    */
   | 'filteredChildren';
 
 export interface TreeSelectionModuleOptions<TData = unknown> {
   /**
-   * What a group row stands for. Defaults to `filteredChildren`.
+   * A row's parent. Returning `null` marks a root.
    *
-   * The default is the conservative one: it can only ever select rows the user
-   * can see, so a filtered view cannot quietly put hidden rows in a basket.
+   * Required, and the module's only source of hierarchy. Reading it from the
+   * projection instead was possible but wrong in a way that looked right: the
+   * projection hides rows the filter excluded *and* rows a collapsed parent is
+   * not drawing, and only the first were excluded by anything. A parent
+   * collapsed before it had ever been opened therefore stood only for itself.
+   *
+   * Coming from the consumer for the same reason as everything else here: only
+   * the application knows how its rows relate.
    */
-  scope?: TreeSelectionScope;
+  getParentId: (data: TData, rowId: string) => string | null | undefined;
 
   /**
-   * A row's parent, for `children`.
+   * What a parent stands for. Defaults to `filteredChildren`.
    *
-   * Comes from the consumer for the same reason the rest of this module reads
-   * the projection rather than the tree module: only the application knows how
-   * its rows relate. Returning `null` marks a root.
+   * The conservative one: it can only ever select rows the user could reach by
+   * clearing the filter, so a filtered view cannot quietly put excluded rows in
+   * a basket.
    */
-  getParentId?: ((data: TData, rowId: string) => string | null | undefined) | undefined;
+  scope?: TreeSelectionScope;
+}
+
+interface StoreHierarchy {
+  readonly parents: ReadonlyMap<string, string>;
+  readonly children: ReadonlyMap<string, readonly string[]>;
+  /** Rows nothing else names as its parent. */
+  readonly leafIds: readonly string[];
 }
 
 /**
@@ -63,13 +72,12 @@ export interface TreeSelectionModuleOptions<TData = unknown> {
  * selected, remembered and reported like any other row. Rows produced by
  * *grouping* are synthetic: they stand for an aggregate that was never in the
  * store, have no id to remember, and their membership follows from the grouping
- * key rather than from a parent. That is a different module, and naming this
- * one after the data it actually understands is what keeps the two from being
- * quietly conflated.
+ * key rather than from a parent. That is a different module.
  *
- * Blind about *where* the hierarchy came from: it reads `meta.depth` and
- * `repeatOnBreak` off the projection, or `getParentId` off the data, and never
- * mentions the tree module. It pairs with `TreeModule` but does not require it.
+ * The hierarchy is read from the data and never from the screen. What is *on*
+ * the screen decides only two things: whether a row passed the filter, and what
+ * `meta` an `isSelectable` predicate is shown. It does not require `TreeModule`,
+ * though it pairs with it.
  */
 export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
   readonly id = 'selection-tree';
@@ -77,10 +85,6 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
 
   private context?: ModuleContext<TData>;
   private selection?: SelectionModule<TData>;
-
-  private cachedRows: readonly DisplayRow[] | undefined;
-  private cachedLeaves: Map<string, readonly string[]> | undefined;
-  private cachedAncestors: Map<string, readonly string[]> | undefined;
 
   /**
    * The rows that passed the filter, as opposed to the rows on screen.
@@ -91,29 +95,18 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
   private filtered: ReadonlySet<string> | undefined;
 
   private cachedStoreRows: readonly RowNode<TData>[] | undefined;
-  private cachedStore:
-    | {
-        parents: Map<string, string>;
-        children: Map<string, string[]>;
-        allLeaves: readonly string[];
-      }
-    | undefined;
+  private cachedHierarchy: StoreHierarchy | undefined;
 
-  /**
-   * Group membership seen at any point, kept across projections.
-   *
-   * A collapsed group's children are absent from the projection, so without
-   * this a group selected while expanded would read as unselected the moment it
-   * was collapsed. Pruned when rows leave the store.
-   */
-  private readonly rememberedLeaves = new Map<string, readonly string[]>();
+  private cachedProjection: readonly DisplayRow[] | undefined;
+  private cachedMeta: Map<string, Readonly<Record<string, unknown>>> | undefined;
 
-  constructor(private options: TreeSelectionModuleOptions<TData> = {}) {}
+  constructor(private options: TreeSelectionModuleOptions<TData>) {}
 
   setOptions(next: Partial<TreeSelectionModuleOptions<TData>>): void {
     this.options = { ...this.options, ...next };
-    // The leaf index is derived from the options, so it must not survive them.
-    this.invalidateIndex();
+    // The hierarchy is derived from the options, so it must not survive them.
+    this.cachedStoreRows = undefined;
+    this.cachedHierarchy = undefined;
     this.context?.invalidate();
   }
 
@@ -125,14 +118,7 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
     if (!selection) return;
     this.selection = selection;
 
-    context.addTeardown(selection.setMembership(this.membership(selection)));
-
-    context.addTeardown(
-      context.pipeline.store.subscribe((result) => {
-        if (!result.structural) return;
-        for (const rowId of result.removed) this.rememberedLeaves.delete(rowId);
-      }),
-    );
+    context.addTeardown(selection.setMembership(this.membership()));
 
     // A pass-through in the sort phase, which runs after filtering and before
     // anything collapses: its input is exactly the rows that passed the filter,
@@ -142,17 +128,10 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
       id: 'selection-tree-filtered',
       phase: 'sort',
       run: (rows) => {
-        if (this.options.getParentId) this.filtered = new Set(rows.map((row) => row.id));
+        this.filtered = new Set(rows.map((row) => row.id));
         return rows;
       },
     });
-
-    // Membership is recorded as a side effect of reading the index, so it must
-    // be read on every projection rather than only when a checkbox happens to
-    // ask. Otherwise a grid collapsed before anything consulted selection would
-    // never have learned what its groups contain.
-    context.addTeardown(context.pipeline.projector.subscribe(() => this.leafIndex()));
-    this.leafIndex();
   }
 
   private get scope(): TreeSelectionScope {
@@ -164,53 +143,46 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
     return this.scope !== 'self';
   }
 
-  private membership(selection: SelectionModule<TData>): SelectionMembership {
+  private membership(): SelectionMembership {
     return {
-      leavesOf: (rowId) => this.membershipOf(rowId),
-      allLeaves: () => this.allSelectableLeaves(),
-      covers: (rowId, selected) => this.isCovered(rowId, selected),
+      leavesOf: (rowId) => this.leavesOf(rowId),
+      allLeaves: () => this.allLeaves(),
+      covers: (rowId, selected) => this.covers(rowId, selected),
       withdraw: (rowId, selected) => this.withdraw(rowId, selected),
-    } satisfies SelectionMembership & ThisType<typeof selection>;
+    };
   }
 
   // -- Membership -------------------------------------------------------------
 
-  /**
-   * The leaves a row stands for, falling back to what was seen before.
-   *
-   * A collapsed group looks like a leaf in the projection; if it was ever seen
-   * expanded, its real membership is the honest answer.
-   */
-  private membershipOf(rowId: string): readonly string[] {
-    if (this.scope === 'children') return this.storeLeavesOf(rowId);
-    if (this.scope === 'filteredChildren' && this.hasDataHierarchy) {
-      return this.filteredLeavesOf(rowId);
+  private leavesOf(rowId: string): readonly string[] {
+    if (!this.standsForChildren) return this.selectable(rowId) ? [rowId] : [];
+
+    const leaves = this.descendantLeavesOf(rowId);
+    return this.scope === 'children' ? leaves : this.keepFiltered(leaves);
+  }
+
+  private allLeaves(): readonly string[] {
+    if (!this.standsForChildren) {
+      // Every row stands for itself, so select-all reaches what is on screen.
+      const rows = this.selection?.projectedRows() ?? [];
+      return rows.map((row) => row.rowId).filter((rowId) => this.selectable(rowId));
     }
 
-    const projected = this.selectableLeavesOf(rowId);
-    // With groups standing alone, no row ever stands for another, so remembered
-    // membership is not just unnecessary — consulting it would resurrect the
-    // other mode's behaviour after a switch.
-    if (!this.standsForChildren) return projected;
-
-    const isOwnLeafOnly = projected.length === 1 && projected[0] === rowId;
-    if (!isOwnLeafOnly) return projected;
-    return this.rememberedLeaves.get(rowId) ?? projected;
+    const leaves = this.hierarchy().leafIds.filter((rowId) => this.selectable(rowId));
+    return this.scope === 'children' ? leaves : this.keepFiltered(leaves);
   }
 
   /**
    * Whether a row is selected in its own right or through an ancestor.
    *
-   * Selecting a collapsed group can only record the group: its children are not
-   * projected, so there is nothing else to record. Expanding then reveals rows
-   * that were never named, and without this they would read as unselected and
-   * the selection would appear to vanish.
+   * Selecting a parent records the leaves beneath it, so this is normally the
+   * first branch. The walk upwards matters when the set was restored from
+   * outside — `setState` with a parent id in it, say.
    */
-  private isCovered(rowId: string, selected: ReadonlySet<string>): boolean {
+  private covers(rowId: string, selected: ReadonlySet<string>): boolean {
     if (selected.has(rowId)) return true;
-    // Only a group that stands for its children can confer selection on them.
-    // With groups independent, a selected group says nothing about its rows.
     if (!this.standsForChildren) return false;
+
     for (const ancestor of this.ancestorsOf(rowId)) {
       if (selected.has(ancestor)) return true;
     }
@@ -223,10 +195,11 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
    */
   private withdraw(rowId: string, selected: Set<string>): void {
     if (!this.standsForChildren) return;
+
     for (const ancestor of this.ancestorsOf(rowId)) {
       if (!selected.has(ancestor)) continue;
       selected.delete(ancestor);
-      for (const leaf of this.membershipOf(ancestor)) {
+      for (const leaf of this.leavesOf(ancestor)) {
         if (leaf !== rowId && !this.isDescendantOf(leaf, rowId)) selected.add(leaf);
       }
     }
@@ -234,115 +207,6 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
 
   private isDescendantOf(rowId: string, possibleAncestor: string): boolean {
     return this.ancestorsOf(rowId).includes(possibleAncestor);
-  }
-
-  /** Ancestors of a row, nearest last. Empty for a root. */
-  private ancestorsOf(rowId: string): readonly string[] {
-    // Under `children` the chain has to come from the data too: a row hidden by
-    // the filter has no projected chain, and would otherwise look like a root.
-    if (this.hasDataHierarchy && this.standsForChildren) return this.storeAncestorsOf(rowId);
-
-    this.leafIndex();
-    return this.cachedAncestors?.get(rowId) ?? [];
-  }
-
-  /**
-   * The selectable leaf rows a given row stands for.
-   *
-   * A leaf stands for itself. A parent stands for its descendants, which is what
-   * makes ticking a group select the instruments beneath it.
-   */
-  private selectableLeavesOf(rowId: string): readonly string[] {
-    return this.leafIndex().get(rowId) ?? [];
-  }
-
-  /**
-   * Every selectable leaf in the grid, resolved through remembered membership.
-   *
-   * The projected leaves are not enough: with groups collapsed each group *is* a
-   * projected leaf, so the header would count groups rather than instruments and
-   * report a selection of instruments as nothing at all.
-   */
-  private allSelectableLeaves(): readonly string[] {
-    if (this.scope === 'children') return this.storeIndex().allLeaves;
-    if (this.scope === 'filteredChildren' && this.hasDataHierarchy) {
-      return this.keepFiltered(this.storeIndex().allLeaves);
-    }
-
-    const ids = new Set<string>();
-    for (const rowId of this.leafIndex().keys()) {
-      for (const leaf of this.membershipOf(rowId)) ids.add(leaf);
-    }
-    return [...ids];
-  }
-
-  private canSelect(rowId: string, meta: Readonly<Record<string, unknown>>): boolean {
-    return this.selection?.canSelect(rowId, meta) ?? true;
-  }
-
-  // -- The data's own hierarchy, for `children` -------------------------------
-
-  /**
-   * Parents and leaves as the *data* has them, ignoring the projection.
-   *
-   * `children` has to reach rows the filter removed, and those are not in the
-   * projection at all — there is nothing there to read a depth or an ancestor
-   * chain from. So the relationship comes from `getParentId` over the store.
-   *
-   * Cached against the store's row array, which is itself memoised on the
-   * structural version: an unchanged store is the same array, so this survives
-   * ticks untouched exactly as the projected index does.
-   */
-  private storeIndex(): {
-    parents: Map<string, string>;
-    children: Map<string, string[]>;
-    allLeaves: readonly string[];
-  } {
-    const rows = this.context?.pipeline.store.rows.get() ?? [];
-    if (this.cachedStoreRows === rows && this.cachedStore) return this.cachedStore;
-
-    const parents = new Map<string, string>();
-    const children = new Map<string, string[]>();
-    const getParentId = this.options.getParentId;
-
-    if (getParentId) {
-      for (const row of rows) {
-        const parentId = getParentId(row.data, row.id);
-        if (parentId === null || parentId === undefined) continue;
-        parents.set(row.id, parentId);
-        const siblings = children.get(parentId);
-        if (siblings) siblings.push(row.id);
-        else children.set(parentId, [row.id]);
-      }
-    }
-
-    // A leaf is a row nothing else names as its parent.
-    const allLeaves = rows
-      .filter((row) => !children.has(row.id) && this.canSelect(row.id, {}))
-      .map((row) => row.id);
-
-    const index = { parents, children, allLeaves };
-    this.cachedStoreRows = rows;
-    this.cachedStore = index;
-    return index;
-  }
-
-  /** Whether the consumer told us how rows relate, independently of the screen. */
-  private get hasDataHierarchy(): boolean {
-    return this.options.getParentId !== undefined;
-  }
-
-  /**
-   * Descendants that passed the filter, whether or not they are drawn.
-   *
-   * A collapsed group's children are absent from the projection but were never
-   * excluded by anything — so with the hierarchy in hand they still count.
-   * Reading membership off the projection conflated the two, and a group
-   * collapsed before it was ever opened stood only for itself: clicking it
-   * reported the category's own id as though it were an instrument.
-   */
-  private filteredLeavesOf(rowId: string): readonly string[] {
-    return this.keepFiltered(this.storeLeavesOf(rowId));
   }
 
   private keepFiltered(ids: readonly string[]): readonly string[] {
@@ -353,132 +217,107 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
     return ids.filter((id) => filtered.has(id));
   }
 
-  /** Every selectable leaf beneath a row in the data. A leaf stands for itself. */
-  private storeLeavesOf(rowId: string): readonly string[] {
-    const { children } = this.storeIndex();
-    if (!children.has(rowId)) return this.canSelect(rowId, {}) ? [rowId] : [];
+  // -- The data's own hierarchy ------------------------------------------------
 
+  /**
+   * Parents and children as the data has them.
+   *
+   * Cached against the store's row array, which is memoised on the structural
+   * version: an unchanged store is the same array, so this survives ticks
+   * untouched.
+   */
+  private hierarchy(): StoreHierarchy {
+    const rows = this.context?.pipeline.store.rows.get() ?? [];
+    if (this.cachedStoreRows === rows && this.cachedHierarchy) return this.cachedHierarchy;
+
+    const parents = new Map<string, string>();
+    const children = new Map<string, string[]>();
+
+    for (const row of rows) {
+      const parentId = this.options.getParentId(row.data, row.id);
+      if (parentId === null || parentId === undefined) continue;
+      parents.set(row.id, parentId);
+      const siblings = children.get(parentId);
+      if (siblings) siblings.push(row.id);
+      else children.set(parentId, [row.id]);
+    }
+
+    const hierarchy: StoreHierarchy = {
+      parents,
+      children,
+      leafIds: rows.filter((row) => !children.has(row.id)).map((row) => row.id),
+    };
+    this.cachedStoreRows = rows;
+    this.cachedHierarchy = hierarchy;
+    return hierarchy;
+  }
+
+  /**
+   * Every selectable leaf beneath a row, in the order the data has them. A leaf
+   * stands for itself.
+   *
+   * Depth-first and in order, so `getSelectedRows()` comes back in an order a
+   * reader can follow rather than in whatever order a traversal happened to
+   * pop.
+   */
+  private descendantLeavesOf(rowId: string): readonly string[] {
+    const { children } = this.hierarchy();
     const leaves: string[] = [];
-    const stack = [...(children.get(rowId) ?? [])];
-    const seen = new Set<string>([rowId]);
+    // A cycle in consumer-supplied parents would otherwise never terminate.
+    const seen = new Set<string>();
 
-    while (stack.length > 0) {
-      const id = stack.pop()!;
-      // A cycle in consumer-supplied parents would otherwise never terminate.
-      if (seen.has(id)) continue;
+    const walk = (id: string): void => {
+      if (seen.has(id)) return;
       seen.add(id);
 
       const below = children.get(id);
-      if (below) stack.push(...below);
-      else if (this.canSelect(id, {})) leaves.push(id);
-    }
+      if (!below) {
+        if (this.selectable(id)) leaves.push(id);
+        return;
+      }
+      for (const child of below) walk(child);
+    };
+
+    walk(rowId);
     return leaves;
   }
 
-  private storeAncestorsOf(rowId: string): readonly string[] {
-    const { parents } = this.storeIndex();
+  /** Ancestors of a row, nearest last. Empty for a root. */
+  private ancestorsOf(rowId: string): readonly string[] {
+    const { parents } = this.hierarchy();
     const chain: string[] = [];
     const seen = new Set<string>([rowId]);
 
     let current = parents.get(rowId);
     while (current !== undefined && !seen.has(current)) {
       seen.add(current);
-      // Nearest last, matching the projected chain's order.
       chain.unshift(current);
       current = parents.get(current);
     }
     return chain;
   }
 
-  private invalidateIndex(): void {
-    this.cachedStoreRows = undefined;
-    this.cachedStore = undefined;
-    this.cachedRows = undefined;
-    this.cachedLeaves = undefined;
-    this.cachedAncestors = undefined;
+  // -- Selectability -----------------------------------------------------------
+
+  private selectable(rowId: string): boolean {
+    return this.selection?.canSelect(rowId, this.metaFor(rowId)) ?? true;
   }
 
   /**
-   * Maps every projected row to the selectable leaves beneath it.
+   * The projected `meta` for a row, for an `isSelectable` predicate to read.
    *
-   * Built from `meta.depth` alone, in one pass over the projection, and cached
-   * against the projection's identity — the projection is a memoised signal, so
-   * an unchanged one is the same array and the index survives ticks untouched.
+   * Only rows on screen have any: one hidden behind a collapsed parent is still
+   * a real row with a real place in the hierarchy, but nothing has decorated it,
+   * so a predicate sees an empty object rather than a stale one.
    */
-  private leafIndex(): Map<string, readonly string[]> {
+  private metaFor(rowId: string): Readonly<Record<string, unknown>> {
     const rows = this.selection?.projectedRows() ?? [];
-    if (this.cachedRows === rows && this.cachedLeaves) return this.cachedLeaves;
-
-    const collected = new Map<string, Set<string>>();
-    const ensure = (rowId: string): Set<string> => {
-      let set = collected.get(rowId);
-      if (!set) {
-        set = new Set();
-        collected.set(rowId, set);
-      }
-      return set;
-    };
-
-    if (this.standsForChildren) {
-      const depths = rows.map((row) => (row.meta?.['depth'] as number | undefined) ?? 0);
-      const open: { rowId: string; depth: number }[] = [];
-
-      for (const [index, row] of rows.entries()) {
-        const depth = depths[index] ?? 0;
-        while (open.length > 0 && (open[open.length - 1]?.depth ?? 0) >= depth) open.pop();
-
-        const own = ensure(row.rowId);
-
-        // A leaf is a row the next one does not sit beneath. Deciding this from
-        // the neighbour's depth — rather than provisionally treating every row as
-        // a leaf and correcting later — is what stops an intermediate group being
-        // counted as a leaf of its own ancestor.
-        const isLeaf = index === rows.length - 1 || (depths[index + 1] ?? 0) <= depth;
-
-        if (isLeaf && this.canSelect(row.rowId, row.meta ?? {})) {
-          own.add(row.rowId);
-          for (const ancestor of open) ensure(ancestor.rowId).add(row.rowId);
-        }
-
-        open.push({ rowId: row.rowId, depth });
-      }
-    } else {
-      // Every row stands only for itself, groups included.
-      for (const row of rows) {
-        const own = ensure(row.rowId);
-        if (this.canSelect(row.rowId, row.meta ?? {})) own.add(row.rowId);
-      }
+    if (this.cachedProjection !== rows || !this.cachedMeta) {
+      const meta = new Map<string, Readonly<Record<string, unknown>>>();
+      for (const row of rows) meta.set(row.rowId, row.meta ?? {});
+      this.cachedProjection = rows;
+      this.cachedMeta = meta;
     }
-
-    const leaves = new Map<string, readonly string[]>();
-    for (const [rowId, ids] of collected) leaves.set(rowId, [...ids]);
-
-    // The ancestor chain is already on the row, put there by whichever module
-    // flattened the hierarchy. Reading it here needs no notion of a parent.
-    const ancestors = new Map<string, readonly string[]>();
-    for (const row of rows) {
-      const chain = row.repeatOnBreak;
-      if (chain && chain.length > 0) {
-        ancestors.set(
-          row.rowId,
-          chain.map((ancestor) => ancestor.rowId),
-        );
-      }
-    }
-
-    if (this.standsForChildren) {
-      for (const [rowId, ids] of leaves) {
-        // Only a row standing for others is worth remembering; a leaf stands for
-        // itself in every projection.
-        if (ids.length > 1 || (ids.length === 1 && ids[0] !== rowId)) {
-          this.rememberedLeaves.set(rowId, ids);
-        }
-      }
-    }
-
-    this.cachedRows = rows;
-    this.cachedLeaves = leaves;
-    this.cachedAncestors = ancestors;
-    return leaves;
+    return this.cachedMeta.get(rowId) ?? {};
   }
 }

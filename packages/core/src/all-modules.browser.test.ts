@@ -71,7 +71,7 @@ const allModules = () => [
   new SortModule<Bond>(),
   new FilterModule<Bond>(),
   new SelectionModule<Bond>({ mode: 'multi' }),
-  new TreeSelectionModule<Bond>(),
+  new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId }),
   new RowRangeModule<Bond>(),
   new CellFlashModule<Bond>(),
   new KeyboardModule<Bond>(),

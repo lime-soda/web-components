@@ -33,11 +33,12 @@ const setup = (options: Record<string, unknown> = {}) => {
   const pipeline = new GridPipeline<Row>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
   const selection = new SelectionModule<Row>(selectionOptions);
-  const group = new TreeSelectionModule<Row>(
-    groupSelectsChildren === undefined
+  const group = new TreeSelectionModule<Row>({
+    getParentId: (row) => row.parentId,
+    ...(groupSelectsChildren === undefined
       ? {}
-      : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) },
-  );
+      : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) }),
+  });
   const tree = new TreeModule<Row>({ getParentId: (d) => d.parentId, defaultExpanded: true });
   const registry = new ModuleRegistry<Row>({
     pipeline,
