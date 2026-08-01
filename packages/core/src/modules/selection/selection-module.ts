@@ -534,7 +534,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   /** Order-independent snapshot, for deciding whether anything actually moved. */
   private snapshot(): string {
-    return [...this.selected].sort().join(' ');
+    return [...this.selected].sort().join('\u0000');
   }
 
   private changed(): void {
