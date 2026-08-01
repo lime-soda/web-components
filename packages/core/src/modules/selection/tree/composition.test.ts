@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { resolveColumns } from '../../../columns/resolve-columns.js';
 import { GridPipeline } from '../../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../../module-registry.js';
+import type { ModuleContext } from '../../types.js';
 import { TreeModule } from '../../tree/tree-module.js';
 import { SelectionModule } from '../selection-module.js';
 import { TreeSelectionModule } from './tree-selection-module.js';
@@ -127,5 +128,85 @@ describe('selection with the group module', () => {
 
     // Back to the group standing only for itself.
     expect(selection.getSelectedRows()).toEqual(['g']);
+  });
+
+  describe('the exclusive seams', () => {
+    /**
+     * Two modules with different ideas of what a row id stands for are not
+     * composable — one of them is simply wrong about every row. The grid says
+     * so at registration rather than behaving like whichever registered last.
+     */
+    const claimant = (id: string) => ({
+      id,
+      dependsOn: ['selection'],
+      init(context: ModuleContext<Bond>) {
+        const selection = context.getModule<SelectionModule<Bond>>('selection')!;
+        context.addTeardown(
+          selection.claimMembership(id, {
+            leavesOf: (rowId) => [rowId],
+            allLeaves: () => [],
+            covers: (rowId, selected) => selected.has(rowId),
+            withdraw: () => {},
+          }),
+        );
+      },
+    });
+
+    it('refuses a second claim on membership', () => {
+      const { registry } = setup(true);
+
+      expect(() => registry.register(claimant('impostor'))).toThrow(
+        /already claimed by "selection-tree"/,
+      );
+    });
+
+    it('names both modules, so the clash can be acted on', () => {
+      const { registry } = setup(true);
+
+      expect(() => registry.register(claimant('impostor'))).toThrow(/"impostor"/);
+    });
+
+    it('lets the holder re-claim what it already has', () => {
+      const { selection } = setup(true);
+
+      expect(() =>
+        selection.claimMembership('selection-tree', {
+          leavesOf: (rowId) => [rowId],
+          allLeaves: () => [],
+          covers: (rowId, held) => held.has(rowId),
+          withdraw: () => {},
+        }),
+      ).not.toThrow();
+    });
+
+    it('frees the claim when the holder releases it', () => {
+      const { selection } = setup(true);
+      const release = selection.claimMembership('selection-tree', {
+        leavesOf: (rowId) => [rowId],
+        allLeaves: () => [],
+        covers: (rowId, held) => held.has(rowId),
+        withdraw: () => {},
+      });
+
+      release();
+
+      expect(() =>
+        selection.claimMembership('somebody-else', {
+          leavesOf: (rowId) => [rowId],
+          allLeaves: () => [],
+          covers: (rowId, held) => held.has(rowId),
+          withdraw: () => {},
+        }),
+      ).not.toThrow();
+    });
+
+    it('refuses a second claim on range handling too', () => {
+      const { selection } = setup(true);
+      selection.claimRangeHandler('first', () => {});
+
+      expect(() => selection.claimRangeHandler('second', () => {})).toThrow(
+        /selection range handling/,
+      );
+    });
   });
 });

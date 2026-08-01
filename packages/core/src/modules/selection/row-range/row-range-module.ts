@@ -38,7 +38,9 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
     if (!selection) return;
     this.selection = selection;
 
-    context.addTeardown(selection.setRangeHandler((toRowId) => this.selectRange(toRowId)));
+    context.addTeardown(
+      selection.claimRangeHandler(this.id, (toRowId) => this.selectRange(toRowId)),
+    );
   }
 
   /**

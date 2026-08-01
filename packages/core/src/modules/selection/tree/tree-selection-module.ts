@@ -118,7 +118,7 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
     if (!selection) return;
     this.selection = selection;
 
-    context.addTeardown(selection.setMembership(this.membership()));
+    context.addTeardown(selection.claimMembership(this.id, this.membership()));
 
     // A pass-through in the sort phase, which runs after filtering and before
     // anything collapses: its input is exactly the rows that passed the filter,

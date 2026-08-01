@@ -290,6 +290,13 @@ Both attach through published seams — a `SelectionMembership` and a
 module restores the behaviour underneath rather than leaving the grid in a half
 state.
 
+Each seam takes **one** claimant, and a second is an error at registration
+rather than a quiet replacement. Two modules with different ideas of what a row
+id stands for are not composable — one of them would be wrong about every row —
+so a grid that installs both is told, instead of behaving like whichever
+registered last. Core answers both questions itself when nothing has claimed
+them: every row stands for itself, and shift is an unmodified click.
+
 ```ts
 new SelectionModule<Quote>({
   mode: 'multi', // or 'single'

@@ -85,6 +85,10 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   private range: RangeHandler | undefined;
 
+  /** Which module holds each exclusive seam, so a second claim can be refused. */
+  private membershipClaim: string | undefined;
+  private rangeClaim: string | undefined;
+
   constructor(private options: SelectionModuleOptions = {}) {}
 
   /**
@@ -118,29 +122,61 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   // -- Extension seams --------------------------------------------------------
 
   /**
-   * Replaces what a row id stands for.
+   * Claims the right to say what a row id stands for.
    *
-   * Installed by a module that understands hierarchy. Returns a function that
-   * restores flat membership, so removing the module restores the behaviour
+   * Core answers this itself — every row stands for itself — and a module that
+   * understands hierarchy claims it to answer differently. Returns a function
+   * that gives the claim back, so removing the module restores flat selection
    * rather than leaving the grid half-grouped.
+   *
+   * Exactly one claimant, and a second is an error rather than a quiet
+   * replacement. Two modules with different ideas of what an id stands for are
+   * not composable — one of them would simply be wrong about every row — so the
+   * grid says so at registration instead of behaving according to whichever was
+   * registered last.
    */
-  setMembership(membership: SelectionMembership): () => void {
+  claimMembership(claimedBy: string, membership: SelectionMembership): () => void {
+    this.assertUnclaimed('membership', this.membershipClaim, claimedBy);
+
     const previous = this.membership;
     this.membership = membership;
+    this.membershipClaim = claimedBy;
     this.context?.invalidate();
+
     return () => {
       if (this.membership !== membership) return;
       this.membership = previous;
+      this.membershipClaim = undefined;
       this.context?.invalidate();
     };
   }
 
-  /** Installs the handler for shift-extended spans. Returns a remover. */
-  setRangeHandler(handler: RangeHandler): () => void {
+  /**
+   * Claims the right to extend a selection into a span. Returns a release.
+   *
+   * Exclusive for the same reason as membership: two answers to "what does
+   * shift-click mean" is not a richer grid, it is an undefined one.
+   */
+  claimRangeHandler(claimedBy: string, handler: RangeHandler): () => void {
+    this.assertUnclaimed('range handling', this.rangeClaim, claimedBy);
+
     this.range = handler;
+    this.rangeClaim = claimedBy;
+
     return () => {
-      if (this.range === handler) this.range = undefined;
+      if (this.range !== handler) return;
+      this.range = undefined;
+      this.rangeClaim = undefined;
     };
+  }
+
+  /** A module may re-claim what it already holds; another may not take it. */
+  private assertUnclaimed(what: string, holder: string | undefined, claimedBy: string): void {
+    if (holder === undefined || holder === claimedBy) return;
+    throw new Error(
+      `Module "${claimedBy}" claims selection ${what}, which is already claimed by ` +
+        `"${holder}". These modules cannot be installed together.`,
+    );
   }
 
   /** The row a range extends from: the last one acted on. */
