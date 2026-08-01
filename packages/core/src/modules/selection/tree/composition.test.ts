@@ -4,7 +4,7 @@ import { GridPipeline } from '../../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../../module-registry.js';
 import { TreeModule } from '../../tree/tree-module.js';
 import { SelectionModule } from '../selection-module.js';
-import { GroupSelectionModule } from './group-selection-module.js';
+import { TreeSelectionModule } from './tree-selection-module.js';
 
 /**
  * The seam between flat selection and hierarchy.
@@ -30,7 +30,7 @@ const setup = (withGroup: boolean) => {
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
   const selection = new SelectionModule<Bond>();
-  const group = new GroupSelectionModule<Bond>();
+  const group = new TreeSelectionModule<Bond>();
   const registry = new ModuleRegistry<Bond>({
     pipeline,
     getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
@@ -99,7 +99,7 @@ describe('selection with the group module', () => {
   });
 
   it('declares its dependency, so the registry can order and check it', () => {
-    const group = new GroupSelectionModule<Bond>();
+    const group = new TreeSelectionModule<Bond>();
 
     expect(group.dependsOn).toEqual(['selection']);
   });
@@ -111,7 +111,7 @@ describe('selection with the group module', () => {
       getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
       dispatch: vi.fn(),
     });
-    registry.register(new GroupSelectionModule<Bond>());
+    registry.register(new TreeSelectionModule<Bond>());
 
     expect(() => registry.start()).toThrow(/selection/);
   });

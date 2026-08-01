@@ -121,7 +121,7 @@ Every feature beyond the core is an additive module with its own entry point.
 | `@flow-grid/core/sort`                | Multi-column sort, comparators, header indicators           |
 | `@flow-grid/core/filter`              | Quick filter and per-column filters                         |
 | `@flow-grid/core/selection`           | Row selection, checkbox column, click and modifier handling |
-| `@flow-grid/core/selection/group`     | Makes a group stand for the rows beneath it                 |
+| `@flow-grid/core/selection/tree`      | Makes a parent stand for the rows beneath it, for tree data |
 | `@flow-grid/core/selection/row-range` | Shift-click spans over contiguous rows                      |
 | `@flow-grid/core/cell-flash`          | Directional flash on value change                           |
 | `@flow-grid/core/keyboard`            | Arrow navigation across instances, Home/End, Page keys      |
@@ -144,16 +144,16 @@ Measured with esbuild, minified and gzipped:
 
 | Imports               | Wire size |
 | --------------------- | --------- |
-| core only             | 26.3 kB   |
-| + keyboard            | +0.3 kB   |
+| core only             | 26.9 kB   |
+| + keyboard            | +0.6 kB   |
 | + cell-flash          | +0.7 kB   |
 | + sort                | +1.2 kB   |
 | + filter              | +1.4 kB   |
 | + tree                | +1.9 kB   |
 | + selection           | +2.1 kB   |
-| + selection/group     | +0.9 kB   |
+| + selection/tree      | +0.9 kB   |
 | + selection/row-range | +0.2 kB   |
-| everything            | 33.8 kB   |
+| everything            | 35.4 kB   |
 
 A bundle-composition check in CI asserts that an unimported module leaves no
 trace in the output, so this cannot quietly regress.
@@ -249,25 +249,34 @@ for.
 
 ```ts
 import { SelectionModule } from '@flow-grid/core/selection';
-import { GroupSelectionModule } from '@flow-grid/core/selection/group';
+import { TreeSelectionModule } from '@flow-grid/core/selection/tree';
 import { RowRangeModule } from '@flow-grid/core/selection/row-range';
 
 modules: [
   new SelectionModule<Quote>({ mode: 'multi' }),
-  new GroupSelectionModule<Quote>(), // ticking a group ticks its rows
+  new TreeSelectionModule<Quote>(), // ticking a group ticks its rows
   new RowRangeModule<Quote>(), // shift-click selects a span
 ];
 ```
 
-**`GroupSelectionModule`** makes a group stand for the rows beneath it. Ticking
+**`TreeSelectionModule`** makes a parent stand for the rows beneath it. Ticking
 a category selects its instruments, a partly selected category reads as
 indeterminate, and `getSelectedRows()` returns instruments rather than the
 headings above them — what you would send to a basket. It is scoped to the
 projection, so selecting a group under an active filter selects the children
 that survived it, not the ones hidden behind it.
 
-It never mentions the tree module: it reads `meta.depth` and `repeatOnBreak` off
-the projection, which any module may supply.
+It is named for **tree data** and not for grouped rows, because the two are not
+the same shape. In tree data every row is a record in the store with an id of
+its own, the parent included — which is why `getParentId` maps a record to
+another record, and why a parent can be selected, remembered and reported like
+any other row. Rows produced by _grouping_ are synthetic: they stand for an
+aggregate that was never in the store and take their membership from a grouping
+key rather than a parent. That will be a separate module.
+
+It does not require `TreeModule`, though it pairs with it: the hierarchy comes
+from `meta.depth` and `repeatOnBreak` on the projection, which any module may
+supply, or from `getParentId` on the data.
 
 **`RowRangeModule`** adds shift-click spans, taken from the projection so they
 follow the rows as displayed. Without it, shift is simply an unmodified click.
@@ -319,7 +328,7 @@ A group row can stand for three different things, set by `scope`:
 | `filteredChildren` _(default)_ | only those the filter left visible    |
 
 ```ts
-new GroupSelectionModule<Quote>({
+new TreeSelectionModule<Quote>({
   scope: 'filteredChildren', // the default
   getParentId: (quote) => quote.groupId,
 });

@@ -8,7 +8,7 @@ import { TreeModule } from '@flow-grid/core/tree';
 import { SortModule } from '@flow-grid/core/sort';
 import { FilterModule } from '@flow-grid/core/filter';
 import { SelectionModule } from '@flow-grid/core/selection';
-import { GroupSelectionModule } from '@flow-grid/core/selection/group';
+import { TreeSelectionModule } from '@flow-grid/core/selection/tree';
 import { RowRangeModule } from '@flow-grid/core/selection/row-range';
 import { CellFlashModule } from '@flow-grid/core/cell-flash';
 import { KeyboardModule } from '@flow-grid/core/keyboard';
@@ -105,7 +105,7 @@ const bondMarketSelection = new SelectionModule<Bond>({ mode: 'multi' });
  * Hierarchy and spans are separate modules now, so the bond market installs
  * all three. Held outside `render` for the same reason as the others.
  */
-const bondMarketGroupSelection = new GroupSelectionModule<Bond>({
+const bondMarketTreeSelection = new TreeSelectionModule<Bond>({
   // `children` has to reach instruments the filter has hidden, and those are
   // not in the projection at all — so the hierarchy comes from the data.
   getParentId: (bond) => bond.parentId,
@@ -204,7 +204,7 @@ export const BondMarket: StoryObj<Args> = {
       clickToSelect: args.clickToSelect,
     });
     // Group behaviour belongs to the module that supplies it.
-    bondMarketGroupSelection.setOptions({ scope: args.groupSelectionScope });
+    bondMarketTreeSelection.setOptions({ scope: args.groupSelectionScope });
     const data = generateBonds(args.groups, args.instruments);
     let frame: number | null = null;
 
@@ -229,7 +229,7 @@ export const BondMarket: StoryObj<Args> = {
         // current filter and showing indeterminate while only some are; the
         // row-range module is what makes shift-click select a span.
         selection,
-        bondMarketGroupSelection,
+        bondMarketTreeSelection,
         bondMarketRowRange,
       ],
     };

@@ -4,7 +4,7 @@
 
 Tell a collapsed group apart from a filtered one
 
-`GroupSelectionModule` read membership off the projection, which hides two
+`TreeSelectionModule` read membership off the projection, which hides two
 unrelated things: rows the filter excluded, and rows a collapsed group is not
 drawing. Only the first were ever excluded by anything.
 

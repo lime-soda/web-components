@@ -72,10 +72,10 @@
       "development": "./src/modules/selection/index.ts",
       "default": "./dist/modules/selection/index.js"
     },
-    "./selection/group": {
-      "types": "./dist/modules/selection/group/index.d.ts",
-      "development": "./src/modules/selection/group/index.ts",
-      "default": "./dist/modules/selection/group/index.js"
+    "./selection/tree": {
+      "types": "./dist/modules/selection/tree/index.d.ts",
+      "development": "./src/modules/selection/tree/index.ts",
+      "default": "./dist/modules/selection/tree/index.js"
     },
     "./selection/row-range": {
       "types": "./dist/modules/selection/row-range/index.d.ts",

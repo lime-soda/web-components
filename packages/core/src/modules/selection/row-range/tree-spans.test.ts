@@ -3,7 +3,7 @@ import { resolveColumns } from '../../../columns/resolve-columns.js';
 import { GridPipeline } from '../../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../../module-registry.js';
 import { TreeModule } from '../../tree/tree-module.js';
-import { GroupSelectionModule } from '../group/group-selection-module.js';
+import { TreeSelectionModule } from '../tree/tree-selection-module.js';
 import { SelectionModule } from '../selection-module.js';
 import { RowRangeModule } from './row-range-module.js';
 
@@ -47,7 +47,7 @@ const setup = (expanded = true) => {
   });
   registry.register(tree);
   registry.register(selection);
-  registry.register(new GroupSelectionModule<Bond>());
+  registry.register(new TreeSelectionModule<Bond>());
   registry.register(range);
   registry.start();
   pipeline.projector.rows.get();

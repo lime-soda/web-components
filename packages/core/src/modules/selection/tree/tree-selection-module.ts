@@ -5,7 +5,7 @@ import type { SelectionMembership } from '../membership.js';
 import type { SelectionModule } from '../selection-module.js';
 
 /** What a group row stands for when it is selected. */
-export type GroupSelectionScope =
+export type TreeSelectionScope =
   /**
    * The group row alone, standing for nothing but itself. Suits a grid whose
    * group rows are real records rather than headings — the module is still
@@ -29,14 +29,14 @@ export type GroupSelectionScope =
    */
   | 'filteredChildren';
 
-export interface GroupSelectionModuleOptions<TData = unknown> {
+export interface TreeSelectionModuleOptions<TData = unknown> {
   /**
    * What a group row stands for. Defaults to `filteredChildren`.
    *
    * The default is the conservative one: it can only ever select rows the user
    * can see, so a filtered view cannot quietly put hidden rows in a basket.
    */
-  scope?: GroupSelectionScope;
+  scope?: TreeSelectionScope;
 
   /**
    * A row's parent, for `children`.
@@ -49,22 +49,30 @@ export interface GroupSelectionModuleOptions<TData = unknown> {
 }
 
 /**
- * Makes selection understand hierarchy.
+ * Makes selection understand **tree data**.
  *
  * Core selection holds a flat set of row ids. This supplies it with a
- * {@link SelectionMembership} in which a group stands for the rows beneath it,
+ * {@link SelectionMembership} in which a parent stands for the rows beneath it,
  * so ticking a category selects its instruments, a partly selected category
  * reads as indeterminate, and `getSelectedRows()` returns instruments rather
  * than the headings above them.
  *
- * Hierarchy-blind about *where* the hierarchy came from. It reads `meta.depth`
- * and `repeatOnBreak` off the projection, which any module may supply, and
- * never mentions the tree module. Because the projection is already filtered,
- * selecting a group selects its *visible* children — filter first, then tick
- * the group, and only what survived the filter is selected.
+ * Tree data, specifically, and not grouped rows. Every row here is a record in
+ * the store with an id of its own — the parent is one of them, which is why
+ * `getParentId` maps a record to another record and why a parent can be
+ * selected, remembered and reported like any other row. Rows produced by
+ * *grouping* are synthetic: they stand for an aggregate that was never in the
+ * store, have no id to remember, and their membership follows from the grouping
+ * key rather than from a parent. That is a different module, and naming this
+ * one after the data it actually understands is what keeps the two from being
+ * quietly conflated.
+ *
+ * Blind about *where* the hierarchy came from: it reads `meta.depth` and
+ * `repeatOnBreak` off the projection, or `getParentId` off the data, and never
+ * mentions the tree module. It pairs with `TreeModule` but does not require it.
  */
-export class GroupSelectionModule<TData = unknown> implements GridModule<TData> {
-  readonly id = 'selection-group';
+export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
+  readonly id = 'selection-tree';
   readonly dependsOn = ['selection'];
 
   private context?: ModuleContext<TData>;
@@ -100,9 +108,9 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
    */
   private readonly rememberedLeaves = new Map<string, readonly string[]>();
 
-  constructor(private options: GroupSelectionModuleOptions<TData> = {}) {}
+  constructor(private options: TreeSelectionModuleOptions<TData> = {}) {}
 
-  setOptions(next: Partial<GroupSelectionModuleOptions<TData>>): void {
+  setOptions(next: Partial<TreeSelectionModuleOptions<TData>>): void {
     this.options = { ...this.options, ...next };
     // The leaf index is derived from the options, so it must not survive them.
     this.invalidateIndex();
@@ -131,7 +139,7 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
     // still flat. That is the difference between "excluded" and "not drawn",
     // which the projection alone cannot tell apart.
     context.addStage({
-      id: 'selection-group-filtered',
+      id: 'selection-tree-filtered',
       phase: 'sort',
       run: (rows) => {
         if (this.options.getParentId) this.filtered = new Set(rows.map((row) => row.id));
@@ -147,11 +155,11 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
     this.leafIndex();
   }
 
-  private get scope(): GroupSelectionScope {
+  private get scope(): TreeSelectionScope {
     return this.options.scope ?? 'filteredChildren';
   }
 
-  /** Whether a group stands for anything beyond itself. */
+  /** Whether a parent stands for anything beyond itself. */
   private get standsForChildren(): boolean {
     return this.scope !== 'self';
   }

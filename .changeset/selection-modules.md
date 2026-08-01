@@ -9,8 +9,8 @@ every row stands for itself. Hierarchy and spans arrive as separate modules
 through two published seams, so a grid pays only for what it uses.
 
 - Group selection — ticking a category selecting its instruments, indeterminate
-  state, membership surviving collapse — moves to `GroupSelectionModule` from
-  `@flow-grid/core/selection/group`, and `groupSelectsChildren` moves to its
+  state, membership surviving collapse — moves to `TreeSelectionModule` from
+  `@flow-grid/core/selection/tree`, and `groupSelectsChildren` moves to its
   options.
 - Shift-click spans move to `RowRangeModule` from
   `@flow-grid/core/selection/row-range`. Without it, shift is a plain click.

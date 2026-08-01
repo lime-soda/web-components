@@ -4,7 +4,7 @@
 
 Give group selection three scopes instead of a boolean
 
-`GroupSelectionModule`'s `groupSelectsChildren` boolean becomes `scope`, which
+`TreeSelectionModule`'s `groupSelectsChildren` boolean becomes `scope`, which
 says what a group row actually stands for:
 
 - `self` — the group row alone, standing for nothing but itself.

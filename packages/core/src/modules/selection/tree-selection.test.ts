@@ -4,7 +4,7 @@ import { GridPipeline } from '../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../module-registry.js';
 import { TreeModule } from '../tree/tree-module.js';
 import { SelectionModule, type SelectionModuleOptions } from './selection-module.js';
-import { GroupSelectionModule } from './group/group-selection-module.js';
+import { TreeSelectionModule } from './tree/tree-selection-module.js';
 
 interface Bond {
   id: string;
@@ -37,7 +37,7 @@ const setup = (
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(rows);
   const selection = new SelectionModule<Bond>(selectionOptions);
-  const group = new GroupSelectionModule<Bond>(
+  const group = new TreeSelectionModule<Bond>(
     groupSelectsChildren === undefined
       ? {}
       : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) },
@@ -191,7 +191,7 @@ describe('group selection', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData(data);
       const selection = new SelectionModule<Bond>();
-      const group = new GroupSelectionModule<Bond>();
+      const group = new TreeSelectionModule<Bond>();
       const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
       const registry = new ModuleRegistry<Bond>({
         pipeline,
@@ -214,7 +214,7 @@ describe('group selection', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData(data);
       const selection = new SelectionModule<Bond>();
-      const group = new GroupSelectionModule<Bond>();
+      const group = new TreeSelectionModule<Bond>();
       const tree = new TreeModule<Bond>({ getParentId: (d) => d.parentId });
       const registry = new ModuleRegistry<Bond>({
         pipeline,
@@ -501,7 +501,7 @@ describe('group selection', () => {
       const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
       pipeline.store.setRowData([bond('a'), bond('b')]);
       const selection = new SelectionModule<Bond>();
-      const group = new GroupSelectionModule<Bond>();
+      const group = new TreeSelectionModule<Bond>();
       const registry = new ModuleRegistry<Bond>({
         pipeline,
         getColumns: () => [],

@@ -5,7 +5,7 @@ import { FilterModule } from '../../filter/filter-module.js';
 import { ModuleRegistry } from '../../module-registry.js';
 import { TreeModule } from '../../tree/tree-module.js';
 import { SelectionModule } from '../selection-module.js';
-import { GroupSelectionModule, type GroupSelectionScope } from './group-selection-module.js';
+import { TreeSelectionModule, type TreeSelectionScope } from './tree-selection-module.js';
 
 /**
  * What a group row stands for.
@@ -29,12 +29,12 @@ const data: Bond[] = [
   { id: 'drop-2', parentId: 'g', name: 'drop two' },
 ];
 
-const setup = (scope: GroupSelectionScope) => {
+const setup = (scope: TreeSelectionScope) => {
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
 
   const selection = new SelectionModule<Bond>();
-  const group = new GroupSelectionModule<Bond>({
+  const group = new TreeSelectionModule<Bond>({
     scope,
     getParentId: (bond) => bond.parentId,
   });
@@ -62,7 +62,7 @@ const hideSome = (filter: FilterModule<Bond>, pipeline: GridPipeline<Bond>) => {
   pipeline.projector.rows.get();
 };
 
-const selectGroup = (scope: GroupSelectionScope) => {
+const selectGroup = (scope: TreeSelectionScope) => {
   const { selection, filter, pipeline } = setup(scope);
   hideSome(filter, pipeline);
   selection.setRowSelected('g', true);
@@ -96,7 +96,7 @@ describe('group selection scope', () => {
       new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true }),
     );
     registry.register(selection);
-    registry.register(new GroupSelectionModule<Bond>());
+    registry.register(new TreeSelectionModule<Bond>());
     registry.register(filter);
     registry.start();
     pipeline.projector.rows.get();
@@ -154,7 +154,7 @@ describe('group selection scope', () => {
         new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true }),
       );
       registry.register(selection);
-      registry.register(new GroupSelectionModule<Bond>({ scope: 'children' }));
+      registry.register(new TreeSelectionModule<Bond>({ scope: 'children' }));
       registry.start();
       pipeline.projector.rows.get();
 
@@ -177,7 +177,7 @@ describe('group selection scope', () => {
       });
       registry.register(selection);
       registry.register(
-        new GroupSelectionModule<Bond>({ scope: 'children', getParentId: (b) => b.parentId }),
+        new TreeSelectionModule<Bond>({ scope: 'children', getParentId: (b) => b.parentId }),
       );
       registry.start();
       pipeline.projector.rows.get();
@@ -228,7 +228,7 @@ describe('group selection scope', () => {
       );
       registry.register(selection);
       registry.register(
-        new GroupSelectionModule<Bond>(
+        new TreeSelectionModule<Bond>(
           withHierarchy ? { getParentId: (bond) => bond.parentId } : {},
         ),
       );
@@ -278,6 +278,98 @@ describe('group selection scope', () => {
       selection.setRowSelected('g', true);
 
       expect(selection.getSelectedRows()).toEqual(['g']);
+    });
+  });
+
+  describe('more than two levels', () => {
+    /**
+     * `getParentId` names one link, and the module walks the chain — so depth
+     * is not something it has to be told about.
+     */
+    interface Node {
+      id: string;
+      parentId: string | null;
+      name: string;
+    }
+
+    // region → country → instrument
+    const deep: Node[] = [
+      { id: 'europe', parentId: null, name: 'Europe' },
+      { id: 'uk', parentId: 'europe', name: 'UK' },
+      { id: 'uk-1', parentId: 'uk', name: 'UKT 2030' },
+      { id: 'uk-2', parentId: 'uk', name: 'UKT 2041' },
+      { id: 'de', parentId: 'europe', name: 'Germany' },
+      { id: 'de-1', parentId: 'de', name: 'DBR 2032' },
+      { id: 'asia', parentId: null, name: 'Asia' },
+      { id: 'jp', parentId: 'asia', name: 'Japan' },
+      { id: 'jp-1', parentId: 'jp', name: 'JGB 2035' },
+    ];
+
+    const build = (scope: TreeSelectionScope = 'filteredChildren') => {
+      const pipeline = new GridPipeline<Node>({ getRowId: (d) => d.id });
+      pipeline.store.setRowData(deep);
+      const selection = new SelectionModule<Node>();
+      const registry = new ModuleRegistry<Node>({
+        pipeline,
+        getColumns: () => resolveColumns<Node>([{ field: 'name' }]),
+        dispatch: vi.fn(),
+      });
+      registry.register(
+        new TreeModule<Node>({ getParentId: (d) => d.parentId, defaultExpanded: true }),
+      );
+      registry.register(selection);
+      registry.register(
+        new TreeSelectionModule<Node>({ scope, getParentId: (node) => node.parentId }),
+      );
+      registry.start();
+      pipeline.projector.rows.get();
+      return { selection, pipeline };
+    };
+
+    it('selects every leaf beneath a top-level row, two levels down', () => {
+      const { selection } = build();
+
+      selection.setRowSelected('europe', true);
+
+      // The leaves, not the countries in between.
+      expect([...selection.getSelectedRows()].sort()).toEqual(['de-1', 'uk-1', 'uk-2']);
+    });
+
+    it('selects a middle level without reaching its siblings', () => {
+      const { selection } = build();
+
+      selection.setRowSelected('uk', true);
+
+      expect([...selection.getSelectedRows()].sort()).toEqual(['uk-1', 'uk-2']);
+    });
+
+    it('reports every level above a leaf as indeterminate', () => {
+      const { selection } = build();
+
+      selection.setRowSelected('uk-1', true);
+
+      expect(selection.getRowState('uk')).toBe('indeterminate');
+      expect(selection.getRowState('europe')).toBe('indeterminate');
+      expect(selection.getRowState('asia')).toBe('unchecked');
+    });
+
+    it('completes the chain when the last leaf is selected', () => {
+      const { selection } = build();
+
+      selection.setRowSelected('uk-1', true);
+      selection.setRowSelected('uk-2', true);
+
+      expect(selection.getRowState('uk')).toBe('checked');
+      expect(selection.getRowState('europe')).toBe('indeterminate');
+    });
+
+    it('withdraws through two levels when a leaf is deselected', () => {
+      const { selection } = build();
+      selection.setRowSelected('europe', true);
+
+      selection.setRowSelected('uk-1', false);
+
+      expect([...selection.getSelectedRows()].sort()).toEqual(['de-1', 'uk-2']);
     });
   });
 });

@@ -8,7 +8,7 @@ import { TreeModule } from './modules/tree/index.js';
 import { SortModule } from './modules/sort/index.js';
 import { FilterModule } from './modules/filter/index.js';
 import { SelectionModule } from './modules/selection/index.js';
-import { GroupSelectionModule } from './modules/selection/group/index.js';
+import { TreeSelectionModule } from './modules/selection/tree/index.js';
 import { RowRangeModule } from './modules/selection/row-range/index.js';
 import { CellFlashModule } from './modules/cell-flash/index.js';
 import { KeyboardModule } from './modules/keyboard/index.js';
@@ -71,7 +71,7 @@ const allModules = () => [
   new SortModule<Bond>(),
   new FilterModule<Bond>(),
   new SelectionModule<Bond>({ mode: 'multi' }),
-  new GroupSelectionModule<Bond>(),
+  new TreeSelectionModule<Bond>(),
   new RowRangeModule<Bond>(),
   new CellFlashModule<Bond>(),
   new KeyboardModule<Bond>(),

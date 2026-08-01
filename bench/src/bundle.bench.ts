@@ -29,7 +29,7 @@ const MARKERS = {
   filter: 'filter-input',
   selection: 'selection-checkbox',
   // Module ids: string literals, so minification cannot rename them.
-  'selection/group': 'selection-group',
+  'selection/tree': 'selection-tree',
   'selection/row-range': 'selection-row-range',
   keyboard: 'ArrowDown',
   'cell-flash': 'getDirection',
@@ -42,7 +42,7 @@ const ENTRIES: Record<ModuleName, string> = {
   sort: 'SortModule',
   filter: 'FilterModule',
   selection: 'SelectionModule',
-  'selection/group': 'GroupSelectionModule',
+  'selection/tree': 'TreeSelectionModule',
   'selection/row-range': 'RowRangeModule',
   keyboard: 'KeyboardModule',
   'cell-flash': 'CellFlashModule',

@@ -4,7 +4,7 @@ import { GridPipeline } from '../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../module-registry.js';
 import { TreeModule } from '../tree/tree-module.js';
 import { SelectionModule } from './selection-module.js';
-import { GroupSelectionModule } from './group/group-selection-module.js';
+import { TreeSelectionModule } from './tree/tree-selection-module.js';
 
 /**
  * Module options are reactive.
@@ -33,7 +33,7 @@ const setup = (options: Record<string, unknown> = {}) => {
   const pipeline = new GridPipeline<Row>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
   const selection = new SelectionModule<Row>(selectionOptions);
-  const group = new GroupSelectionModule<Row>(
+  const group = new TreeSelectionModule<Row>(
     groupSelectsChildren === undefined
       ? {}
       : { scope: groupSelectsChildren ? ('filteredChildren' as const) : ('self' as const) },
