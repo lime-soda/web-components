@@ -272,6 +272,11 @@ the projection, which any module may supply.
 **`RowRangeModule`** adds shift-click spans, taken from the projection so they
 follow the rows as displayed. Without it, shift is simply an unmodified click.
 
+A span covers rows, so crossing into a group selects the rows it crossed and no
+more. A group is only taken whole when the span covers all of it — which is the
+same set as clicking its heading — or when it is collapsed, since then the
+heading is the only representation its contents have.
+
 Both attach through published seams — a `SelectionMembership` and a
 `RangeHandler` — rather than by reaching into core selection, so removing a
 module restores the behaviour underneath rather than leaving the grid in a half
