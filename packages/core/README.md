@@ -275,8 +275,7 @@ aggregate that was never in the store and take their membership from a grouping
 key rather than a parent. That will be a separate module.
 
 It does not require `TreeModule`, though it pairs with it: the hierarchy comes
-from `meta.depth` and `repeatOnBreak` on the projection, which any module may
-supply, or from `getParentId` on the data.
+from `getParentId` on the data, never from the screen.
 
 **`RowRangeModule`** adds shift-click spans, taken from the projection so they
 follow the rows as displayed. Without it, shift is simply an unmodified click.
@@ -334,16 +333,19 @@ new TreeSelectionModule<Quote>({
 });
 ```
 
-**Supply `getParentId` whichever scope you use.** Without it, membership is read
-off the projection, and the projection hides two different things: rows the
-filter excluded, and rows a _collapsed_ group is not drawing. The second kind
-were never excluded by anything. A group collapsed before it had ever been
-opened therefore stood only for itself, and clicking it reported the category's
-own id as though it were an instrument.
+`getParentId` is required, and is the module's only source of hierarchy. It was
+briefly optional, with membership read off the projection when it was missing —
+but the projection hides two different things: rows the filter excluded, and
+rows a _collapsed_ parent is not drawing. Only the first were excluded by
+anything, so a parent collapsed before it had ever been opened stood only for
+itself, and clicking it reported the category's own id as though it were an
+instrument.
 
-With `getParentId` the hierarchy is read from the data, so `filteredChildren`
-means what it says — descendants that passed the filter, drawn or not — and
-`children` can reach rows the filter removed.
+Reading the data instead makes that whole class of question disappear, and
+`filteredChildren` means what it says: descendants that passed the filter, drawn
+or not. The projection is still consulted for the two things it genuinely owns —
+whether a row passed the filter, and the `meta` an `isSelectable` predicate
+sees.
 
 `filteredChildren` is the default because it is the conservative one: it can only
 ever select rows the user can see, so a filtered view cannot quietly put hidden
