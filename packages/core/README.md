@@ -290,12 +290,30 @@ Both attach through published seams — a `SelectionMembership` and a
 module restores the behaviour underneath rather than leaving the grid in a half
 state.
 
-Each seam takes **one** claimant, and a second is an error at registration
-rather than a quiet replacement. Two modules with different ideas of what a row
-id stands for are not composable — one of them would be wrong about every row —
-so a grid that installs both is told, instead of behaving like whichever
-registered last. Core answers both questions itself when nothing has claimed
-them: every row stands for itself, and shift is an unmodified click.
+Neither module installs anything. Each **declares** what it can do —
+`provideSelectionMembership()`, `provideSelectionRange()` — and selection finds
+the module that provides it:
+
+```ts
+class TreeSelectionModule {
+  provideSelectionMembership(): SelectionMembership {
+    /* a parent stands for the rows beneath it */
+  }
+}
+```
+
+So the result does not depend on registration order, no module reaches into
+another, and two modules providing the same thing is a single, obvious error at
+registration:
+
+```
+Modules "selection-tree" and "selection-group" both provide selection
+membership. A row id can only stand for one thing, so these modules cannot be
+installed together.
+```
+
+Core answers both questions itself when nothing provides them: every row stands
+for itself, and shift is an unmodified click.
 
 ```ts
 new SelectionModule<Quote>({

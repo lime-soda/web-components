@@ -177,6 +177,7 @@ export class ModuleRegistry<TData = unknown> {
       requestRender: () => this.requestRender(),
       getColumns: () => this.options.getColumns(),
       getModule: (id) => this.get(id),
+      getModules: () => [...this.modules.values()],
       dispatch: (type, detail) => this.options.dispatch(type, detail),
       addTeardown: (fn) => void teardowns.push(fn),
     };

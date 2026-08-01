@@ -1,7 +1,15 @@
 import { css, html } from 'lit';
 import { defineElement } from '../../define-elements.js';
 import { FlowSelectionCheckbox } from './selection-checkbox.js';
-import { FlatMembership, type RangeHandler, type SelectionMembership } from './membership.js';
+import {
+  FlatMembership,
+  type RangeHandler,
+  type SelectionMembership,
+  type SelectionMembershipProvider,
+  type SelectionRangeProvider,
+  providesMembership,
+  providesRange,
+} from './membership.js';
 import type { ColumnDef } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
 import type {
@@ -78,16 +86,16 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    */
   private anchor: string | null = null;
 
-  private membership: SelectionMembership = new FlatMembership(
+  /** Core's own answer, used when no module provides one. */
+  private readonly flat: SelectionMembership = new FlatMembership(
     () => this.projectedRows(),
     (rowId, meta) => this.canSelect(rowId, meta),
   );
 
-  private range: RangeHandler | undefined;
-
-  /** Which module holds each exclusive seam, so a second claim can be refused. */
-  private membershipClaim: string | undefined;
-  private rangeClaim: string | undefined;
+  private membershipProvider: SelectionMembershipProvider | undefined;
+  private rangeProvider: SelectionRangeProvider | undefined;
+  private resolvedMembership: SelectionMembership | undefined;
+  private resolvedRange: RangeHandler | undefined;
 
   constructor(private options: SelectionModuleOptions = {}) {}
 
@@ -106,6 +114,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   init(context: ModuleContext<TData>): void {
     this.context = context;
+    this.resolveProviders(context);
     // The module's checkbox column names this element, so the module is what
     // must ensure it exists — rather than an import side effect that would
     // register it even for a grid with no selection.
@@ -119,64 +128,64 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     );
   }
 
+  /**
+   * Forgets the providers found at init.
+   *
+   * Their modules are going away with this one, so anything still holding a
+   * reference to this module gets core's own answers back rather than a
+   * membership belonging to a module that no longer exists.
+   */
+  destroy(): void {
+    this.membershipProvider = undefined;
+    this.rangeProvider = undefined;
+    this.resolvedMembership = undefined;
+    this.resolvedRange = undefined;
+  }
+
   // -- Extension seams --------------------------------------------------------
 
   /**
-   * Claims the right to say what a row id stands for.
+   * What a row id stands for, and how a shift-click extends a selection.
    *
-   * Core answers this itself — every row stands for itself — and a module that
-   * understands hierarchy claims it to answer differently. Returns a function
-   * that gives the claim back, so removing the module restores flat selection
-   * rather than leaving the grid half-grouped.
+   * Resolved from whichever modules declare them rather than installed by
+   * those modules reaching in here. Core answers both itself when nothing
+   * provides them: every row stands for itself, and shift is an unmodified
+   * click.
    *
-   * Exactly one claimant, and a second is an error rather than a quiet
-   * replacement. Two modules with different ideas of what an id stands for are
-   * not composable — one of them would simply be wrong about every row — so the
-   * grid says so at registration instead of behaving according to whichever was
-   * registered last.
+   * Resolved lazily because a provider needs its own `init` to have run before
+   * it can answer — but *counted* during init, so two modules claiming the same
+   * job is a registration error rather than a surprise on first click.
    */
-  claimMembership(claimedBy: string, membership: SelectionMembership): () => void {
-    this.assertUnclaimed('membership', this.membershipClaim, claimedBy);
+  private get membership(): SelectionMembership {
+    this.resolvedMembership ??= this.membershipProvider?.provideSelectionMembership() ?? this.flat;
+    return this.resolvedMembership;
+  }
 
-    const previous = this.membership;
-    this.membership = membership;
-    this.membershipClaim = claimedBy;
-    this.context?.invalidate();
-
-    return () => {
-      if (this.membership !== membership) return;
-      this.membership = previous;
-      this.membershipClaim = undefined;
-      this.context?.invalidate();
-    };
+  private get range(): RangeHandler | undefined {
+    if (!this.rangeProvider) return undefined;
+    this.resolvedRange ??= this.rangeProvider.provideSelectionRange();
+    return this.resolvedRange;
   }
 
   /**
-   * Claims the right to extend a selection into a span. Returns a release.
+   * Finds the modules providing each seam, and refuses a second.
    *
-   * Exclusive for the same reason as membership: two answers to "what does
-   * shift-click mean" is not a richer grid, it is an undefined one.
+   * Two modules with different ideas of what a row id stands for are not
+   * composable — one of them would be wrong about every row — so the grid says
+   * so at registration instead of behaving like whichever came last.
    */
-  claimRangeHandler(claimedBy: string, handler: RangeHandler): () => void {
-    this.assertUnclaimed('range handling', this.rangeClaim, claimedBy);
+  private resolveProviders(context: ModuleContext<TData>): void {
+    const modules = context.getModules().filter((module) => module !== this);
 
-    this.range = handler;
-    this.rangeClaim = claimedBy;
+    const membership = modules.filter(providesMembership);
+    const range = modules.filter(providesRange);
+    assertAtMostOne('membership', membership);
+    assertAtMostOne('range handling', range);
 
-    return () => {
-      if (this.range !== handler) return;
-      this.range = undefined;
-      this.rangeClaim = undefined;
-    };
-  }
-
-  /** A module may re-claim what it already holds; another may not take it. */
-  private assertUnclaimed(what: string, holder: string | undefined, claimedBy: string): void {
-    if (holder === undefined || holder === claimedBy) return;
-    throw new Error(
-      `Module "${claimedBy}" claims selection ${what}, which is already claimed by ` +
-        `"${holder}". These modules cannot be installed together.`,
-    );
+    this.membershipProvider = membership[0];
+    this.rangeProvider = range[0];
+    this.resolvedMembership = undefined;
+    this.resolvedRange = undefined;
   }
 
   /** The row a range extends from: the last one acted on. */
@@ -600,3 +609,13 @@ export const selectionCheckboxTemplate = (
     }}
     class="flow-checkbox"
   />`;
+
+/** One module may do a job; two cannot, and saying so early is the whole point. */
+function assertAtMostOne(what: string, providers: readonly { readonly id: string }[]): void {
+  if (providers.length <= 1) return;
+  const names = providers.map((provider) => `"${provider.id}"`).join(' and ');
+  throw new Error(
+    `Modules ${names} both provide selection ${what}. A row id can only stand for ` +
+      `one thing, so these modules cannot be installed together.`,
+  );
+}

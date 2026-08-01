@@ -2,19 +2,21 @@
 '@flow-grid/core': minor
 ---
 
-Make the selection seams exclusive claims
+Let modules declare selection behaviour instead of installing it
 
-`setMembership` and `setRangeHandler` were setters: a module reached into core
-selection and replaced its behaviour, and a second module doing the same
-silently won. Nothing broke while one module claimed each, but a grouping
-selection module would want membership for a different definition entirely, and
-a grid installing both would have behaved like whichever registered last.
+`SelectionModule` exposed setters that other modules called to replace its
+behaviour, passing their own id along so a clash could be reported. That put the
+wiring in the wrong place: a module reached into another module, the outcome
+depended on registration order, and the id was a string that had to agree with
+the module it named.
 
-They are now `claimMembership(claimedBy, ...)` and
-`claimRangeHandler(claimedBy, ...)`. A second claimant throws, naming both
-modules; the holder may re-claim what it already holds, and releasing frees it
-for someone else. Two modules with different ideas of what a row id stands for
-are not composable, so the grid says so at registration.
+Behaviour is now a property of the module. `TreeSelectionModule` implements
+`provideSelectionMembership()` and `RowRangeModule` implements
+`provideSelectionRange()`; core selection looks for the module that provides
+each, and refuses to start when two provide the same one, naming both.
 
-Core still answers both questions when nothing has claimed them, so plain row
+`ModuleContext` gains `getModules()`, which is what makes finding a capability
+possible without knowing an id in advance.
+
+Core still answers both questions when nothing provides them, so plain row
 selection remains a single module.

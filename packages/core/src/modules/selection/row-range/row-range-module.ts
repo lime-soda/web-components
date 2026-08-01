@@ -1,5 +1,6 @@
 import type { DisplayRow } from '../../../layout/types.js';
 import type { GridModule, ModuleContext } from '../../types.js';
+import type { RangeHandler } from '../membership.js';
 import type { SelectionModule } from '../selection-module.js';
 
 /**
@@ -37,10 +38,6 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
     // rather than a real possibility.
     if (!selection) return;
     this.selection = selection;
-
-    context.addTeardown(
-      selection.claimRangeHandler(this.id, (toRowId) => this.selectRange(toRowId)),
-    );
   }
 
   /**
@@ -74,6 +71,11 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
       if (!hasChildrenOnScreen) span.push(row.rowId);
     }
     return span;
+  }
+
+  /** How a shift-click extends the selection, for core selection to find. */
+  provideSelectionRange(): RangeHandler {
+    return (toRowId) => this.selectRange(toRowId);
   }
 
   /**

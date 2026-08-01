@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { resolveColumns } from '../../../columns/resolve-columns.js';
 import { GridPipeline } from '../../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../../module-registry.js';
-import type { ModuleContext } from '../../types.js';
+import type { GridModule } from '../../types.js';
+import type { SelectionMembership } from '../membership.js';
 import { TreeModule } from '../../tree/tree-module.js';
 import { SelectionModule } from '../selection-module.js';
 import { TreeSelectionModule } from './tree-selection-module.js';
@@ -130,83 +131,62 @@ describe('selection with the group module', () => {
     expect(selection.getSelectedRows()).toEqual(['g']);
   });
 
-  describe('the exclusive seams', () => {
+  describe('one provider per job', () => {
     /**
      * Two modules with different ideas of what a row id stands for are not
-     * composable — one of them is simply wrong about every row. The grid says
-     * so at registration rather than behaving like whichever registered last.
+     * composable — one would be wrong about every row. Each declares what it
+     * provides and selection finds it, so the clash is visible at registration
+     * rather than decided by whichever registered last.
      */
-    const claimant = (id: string) => ({
+    const rival = (id: string) => ({
       id,
-      dependsOn: ['selection'],
-      init(context: ModuleContext<Bond>) {
-        const selection = context.getModule<SelectionModule<Bond>>('selection')!;
-        context.addTeardown(
-          selection.claimMembership(id, {
-            leavesOf: (rowId) => [rowId],
-            allLeaves: () => [],
-            covers: (rowId, selected) => selected.has(rowId),
-            withdraw: () => {},
-          }),
-        );
-      },
-    });
-
-    it('refuses a second claim on membership', () => {
-      const { registry } = setup(true);
-
-      expect(() => registry.register(claimant('impostor'))).toThrow(
-        /already claimed by "selection-tree"/,
-      );
-    });
-
-    it('names both modules, so the clash can be acted on', () => {
-      const { registry } = setup(true);
-
-      expect(() => registry.register(claimant('impostor'))).toThrow(/"impostor"/);
-    });
-
-    it('lets the holder re-claim what it already has', () => {
-      const { selection } = setup(true);
-
-      expect(() =>
-        selection.claimMembership('selection-tree', {
-          leavesOf: (rowId) => [rowId],
-          allLeaves: () => [],
-          covers: (rowId, held) => held.has(rowId),
-          withdraw: () => {},
-        }),
-      ).not.toThrow();
-    });
-
-    it('frees the claim when the holder releases it', () => {
-      const { selection } = setup(true);
-      const release = selection.claimMembership('selection-tree', {
-        leavesOf: (rowId) => [rowId],
+      provideSelectionMembership: (): SelectionMembership => ({
+        leavesOf: (rowId: string) => [rowId],
         allLeaves: () => [],
-        covers: (rowId, held) => held.has(rowId),
+        covers: (rowId: string, selected: ReadonlySet<string>) => selected.has(rowId),
         withdraw: () => {},
-      });
-
-      release();
-
-      expect(() =>
-        selection.claimMembership('somebody-else', {
-          leavesOf: (rowId) => [rowId],
-          allLeaves: () => [],
-          covers: (rowId, held) => held.has(rowId),
-          withdraw: () => {},
-        }),
-      ).not.toThrow();
+      }),
     });
 
-    it('refuses a second claim on range handling too', () => {
-      const { selection } = setup(true);
-      selection.claimRangeHandler('first', () => {});
+    const registryWith = (...modules: GridModule<Bond>[]) => {
+      const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
+      pipeline.store.setRowData(data);
+      const registry = new ModuleRegistry<Bond>({
+        pipeline,
+        getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
+        dispatch: vi.fn(),
+      });
+      for (const module of modules) registry.register(module);
+      return registry;
+    };
 
-      expect(() => selection.claimRangeHandler('second', () => {})).toThrow(
-        /selection range handling/,
+    it('refuses two membership providers, naming both', () => {
+      const registry = registryWith(
+        new SelectionModule<Bond>(),
+        new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId }),
+        rival('selection-group') as unknown as GridModule<Bond>,
       );
+
+      expect(() => registry.start()).toThrow(/"selection-tree" and "selection-group"/);
+    });
+
+    it('is happy with exactly one', () => {
+      const registry = registryWith(
+        new SelectionModule<Bond>(),
+        new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId }),
+      );
+
+      expect(() => registry.start()).not.toThrow();
+    });
+
+    it('is happy with none, and answers flat', () => {
+      const selection = new SelectionModule<Bond>();
+      const registry = registryWith(selection);
+      registry.start();
+
+      selection.setRowSelected('g', true);
+
+      expect(selection.getSelectedRows()).toEqual(['g']);
     });
   });
 });

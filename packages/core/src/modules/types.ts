@@ -23,6 +23,16 @@ export interface ModuleContext<TData = unknown> {
   /** Resolved columns, including any contributed by modules. */
   getColumns(): readonly ResolvedColumn<TData>[];
   getModule<T extends GridModule<TData>>(id: string): T | undefined;
+  /**
+   * Every registered module, for finding the ones that provide a capability
+   * rather than the one with a known id.
+   *
+   * A module declares what it can do; whoever needs that capability looks for
+   * it. The alternative — modules reaching into each other to install
+   * behaviour — makes the result depend on registration order and leaves no
+   * single place to notice two modules claiming the same job.
+   */
+  getModules(): readonly GridModule<TData>[];
   dispatch(type: string, detail: unknown): void;
   addTeardown(fn: () => void): void;
 }

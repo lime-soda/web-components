@@ -118,8 +118,6 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
     if (!selection) return;
     this.selection = selection;
 
-    context.addTeardown(selection.claimMembership(this.id, this.membership()));
-
     // A pass-through in the sort phase, which runs after filtering and before
     // anything collapses: its input is exactly the rows that passed the filter,
     // still flat. That is the difference between "excluded" and "not drawn",
@@ -143,7 +141,13 @@ export class TreeSelectionModule<TData = unknown> implements GridModule<TData> {
     return this.scope !== 'self';
   }
 
-  private membership(): SelectionMembership {
+  /**
+   * What a row id stands for, for core selection to find.
+   *
+   * Declared rather than installed: this module says what it can do, and
+   * selection looks for it. Nothing here reaches into another module.
+   */
+  provideSelectionMembership(): SelectionMembership {
     return {
       leavesOf: (rowId) => this.leavesOf(rowId),
       allLeaves: () => this.allLeaves(),

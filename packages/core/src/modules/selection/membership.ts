@@ -113,3 +113,30 @@ export class FlatMembership implements SelectionMembership {
  * last row acted on — but has no notion of the span between two rows.
  */
 export type RangeHandler = (toRowId: string) => void;
+
+/**
+ * A module that decides what a row id stands for.
+ *
+ * Declared rather than installed: core selection looks for the module that
+ * provides this, instead of a module reaching in to replace what core does.
+ * That keeps the result independent of registration order, and gives one place
+ * to notice two modules claiming the same job.
+ */
+export interface SelectionMembershipProvider {
+  provideSelectionMembership(): SelectionMembership;
+}
+
+/** A module that decides how a shift-click extends the selection. */
+export interface SelectionRangeProvider {
+  provideSelectionRange(): RangeHandler;
+}
+
+/**
+ * Generic so the narrowed type still extends what was passed in — otherwise
+ * `filter` falls back to its untyped overload and the result loses the module.
+ */
+export const providesMembership = <T>(module: T): module is T & SelectionMembershipProvider =>
+  typeof (module as Partial<SelectionMembershipProvider>).provideSelectionMembership === 'function';
+
+export const providesRange = <T>(module: T): module is T & SelectionRangeProvider =>
+  typeof (module as Partial<SelectionRangeProvider>).provideSelectionRange === 'function';
