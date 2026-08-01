@@ -203,4 +203,81 @@ describe('group selection scope', () => {
       'keep-2',
     ]);
   });
+
+  describe('collapsed is not filtered', () => {
+    /**
+     * A collapsed group's children are absent from the projection but were
+     * never excluded by anything. Reading membership off the screen conflated
+     * the two: a group collapsed before it had ever been opened stood only for
+     * itself, so clicking it reported the category's own id as an instrument.
+     */
+
+    const build = (withHierarchy: boolean) => {
+      const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
+      pipeline.store.setRowData(data);
+      const selection = new SelectionModule<Bond>();
+      const filter = new FilterModule<Bond>();
+      const registry = new ModuleRegistry<Bond>({
+        pipeline,
+        getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
+        dispatch: vi.fn(),
+      });
+      // Never expanded: nothing has ever seen what is inside.
+      registry.register(
+        new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: false }),
+      );
+      registry.register(selection);
+      registry.register(
+        new GroupSelectionModule<Bond>(
+          withHierarchy ? { getParentId: (bond) => bond.parentId } : {},
+        ),
+      );
+      registry.register(filter);
+      registry.start();
+      pipeline.projector.rows.get();
+      return { selection, filter, pipeline };
+    };
+
+    it('selects the instruments of a group never opened', () => {
+      const { selection } = build(true);
+
+      selection.setRowSelected('g', true);
+
+      expect([...selection.getSelectedRows()].sort()).toEqual([
+        'drop-1',
+        'drop-2',
+        'keep-1',
+        'keep-2',
+      ]);
+    });
+
+    it('still respects the filter while collapsed', () => {
+      const { selection, filter, pipeline } = build(true);
+      hideSome(filter, pipeline);
+
+      selection.setRowSelected('g', true);
+
+      // Hidden by the filter stays out; hidden by the collapse does not.
+      expect([...selection.getSelectedRows()].sort()).toEqual(['keep-1', 'keep-2']);
+    });
+
+    it('reports the group as checked, not as its own instrument', () => {
+      const { selection } = build(true);
+
+      selection.setRowSelected('g', true);
+
+      expect(selection.getRowState('g')).toBe('checked');
+      expect(selection.getSelectedRows()).not.toContain('g');
+    });
+
+    it('falls back to naming the group without a hierarchy to read', () => {
+      // Unchanged behaviour when the consumer supplies nothing: the projection
+      // genuinely does not contain the children, so there is nothing to name.
+      const { selection } = build(false);
+
+      selection.setRowSelected('g', true);
+
+      expect(selection.getSelectedRows()).toEqual(['g']);
+    });
+  });
 });

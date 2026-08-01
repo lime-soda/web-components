@@ -74,6 +74,14 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
   private cachedLeaves: Map<string, readonly string[]> | undefined;
   private cachedAncestors: Map<string, readonly string[]> | undefined;
 
+  /**
+   * The rows that passed the filter, as opposed to the rows on screen.
+   *
+   * `undefined` until the projection has run once, which is not the same as
+   * empty — an empty set is a filter that matched nothing.
+   */
+  private filtered: ReadonlySet<string> | undefined;
+
   private cachedStoreRows: readonly RowNode<TData>[] | undefined;
   private cachedStore:
     | {
@@ -118,6 +126,19 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
       }),
     );
 
+    // A pass-through in the sort phase, which runs after filtering and before
+    // anything collapses: its input is exactly the rows that passed the filter,
+    // still flat. That is the difference between "excluded" and "not drawn",
+    // which the projection alone cannot tell apart.
+    context.addStage({
+      id: 'selection-group-filtered',
+      phase: 'sort',
+      run: (rows) => {
+        if (this.options.getParentId) this.filtered = new Set(rows.map((row) => row.id));
+        return rows;
+      },
+    });
+
     // Membership is recorded as a side effect of reading the index, so it must
     // be read on every projection rather than only when a checkbox happens to
     // ask. Otherwise a grid collapsed before anything consulted selection would
@@ -154,6 +175,9 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
    */
   private membershipOf(rowId: string): readonly string[] {
     if (this.scope === 'children') return this.storeLeavesOf(rowId);
+    if (this.scope === 'filteredChildren' && this.hasDataHierarchy) {
+      return this.filteredLeavesOf(rowId);
+    }
 
     const projected = this.selectableLeavesOf(rowId);
     // With groups standing alone, no row ever stands for another, so remembered
@@ -208,7 +232,7 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
   private ancestorsOf(rowId: string): readonly string[] {
     // Under `children` the chain has to come from the data too: a row hidden by
     // the filter has no projected chain, and would otherwise look like a root.
-    if (this.scope === 'children') return this.storeAncestorsOf(rowId);
+    if (this.hasDataHierarchy && this.standsForChildren) return this.storeAncestorsOf(rowId);
 
     this.leafIndex();
     return this.cachedAncestors?.get(rowId) ?? [];
@@ -233,6 +257,9 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
    */
   private allSelectableLeaves(): readonly string[] {
     if (this.scope === 'children') return this.storeIndex().allLeaves;
+    if (this.scope === 'filteredChildren' && this.hasDataHierarchy) {
+      return this.keepFiltered(this.storeIndex().allLeaves);
+    }
 
     const ids = new Set<string>();
     for (const rowId of this.leafIndex().keys()) {
@@ -290,6 +317,32 @@ export class GroupSelectionModule<TData = unknown> implements GridModule<TData> 
     this.cachedStoreRows = rows;
     this.cachedStore = index;
     return index;
+  }
+
+  /** Whether the consumer told us how rows relate, independently of the screen. */
+  private get hasDataHierarchy(): boolean {
+    return this.options.getParentId !== undefined;
+  }
+
+  /**
+   * Descendants that passed the filter, whether or not they are drawn.
+   *
+   * A collapsed group's children are absent from the projection but were never
+   * excluded by anything — so with the hierarchy in hand they still count.
+   * Reading membership off the projection conflated the two, and a group
+   * collapsed before it was ever opened stood only for itself: clicking it
+   * reported the category's own id as though it were an instrument.
+   */
+  private filteredLeavesOf(rowId: string): readonly string[] {
+    return this.keepFiltered(this.storeLeavesOf(rowId));
+  }
+
+  private keepFiltered(ids: readonly string[]): readonly string[] {
+    const filtered = this.filtered;
+    // Before the first projection nothing is known about the filter, which is
+    // not the same as a filter that excluded everything.
+    if (filtered === undefined) return ids;
+    return ids.filter((id) => filtered.has(id));
   }
 
   /** Every selectable leaf beneath a row in the data. A leaf stands for itself. */

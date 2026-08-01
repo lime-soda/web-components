@@ -319,15 +319,22 @@ A group row can stand for three different things, set by `scope`:
 | `filteredChildren` _(default)_ | only those the filter left visible    |
 
 ```ts
-new GroupSelectionModule<Quote>({ scope: 'filteredChildren' }); // the default
-
-// Reaching hidden rows needs the hierarchy from the data, because rows the
-// filter removed are not in the projection at all.
 new GroupSelectionModule<Quote>({
-  scope: 'children',
+  scope: 'filteredChildren', // the default
   getParentId: (quote) => quote.groupId,
 });
 ```
+
+**Supply `getParentId` whichever scope you use.** Without it, membership is read
+off the projection, and the projection hides two different things: rows the
+filter excluded, and rows a _collapsed_ group is not drawing. The second kind
+were never excluded by anything. A group collapsed before it had ever been
+opened therefore stood only for itself, and clicking it reported the category's
+own id as though it were an instrument.
+
+With `getParentId` the hierarchy is read from the data, so `filteredChildren`
+means what it says — descendants that passed the filter, drawn or not — and
+`children` can reach rows the filter removed.
 
 `filteredChildren` is the default because it is the conservative one: it can only
 ever select rows the user can see, so a filtered view cannot quietly put hidden
