@@ -411,14 +411,8 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   private activate(rowId: string, event: MouseEvent): void {
     const additive = event.ctrlKey || event.metaKey || (this.options.selectionWithoutKeys ?? false);
 
-    if (event.shiftKey && this.mode === 'multi' && this.range && this.anchor !== null) {
-      // The span replaces what came before unless the click asked to keep it,
-      // but the anchor has to outlive the clearing — selecting the clicked row
-      // first would move the anchor onto it and collapse the span to one row.
-      const anchor = this.anchor;
-      if (!additive) this.selected.clear();
-      this.anchor = anchor;
-      this.range(rowId);
+    if (this.extendsRange(event.shiftKey)) {
+      this.range!(rowId);
       return;
     }
 
@@ -473,9 +467,23 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     };
   }
 
+  /**
+   * Whether this click extends a range rather than picking out a single row.
+   *
+   * The same answer for a checkbox and for a row, so shift-clicking either
+   * re-cuts the span the same way. The range module gives back what the new
+   * span no longer covers, so nothing here needs to clear the selection —
+   * which is what used to make a shift-click discard rows chosen separately.
+   */
+  private extendsRange(shiftKey: boolean): boolean {
+    return shiftKey && this.mode === 'multi' && this.range !== undefined && this.anchor !== null;
+  }
+
   /** Exposed for the checkbox renderer, which lives in the same module. */
   handleCheckbox(rowId: string, checked: boolean, shiftKey: boolean): void {
-    if (checked && shiftKey && this.range) this.range(rowId);
+    // Deliberately regardless of `checked`: shift-clicking a ticked box is
+    // still a range gesture, and re-cutting the span is the answer to it.
+    if (this.extendsRange(shiftKey)) this.range!(rowId);
     else this.setRowSelected(rowId, checked);
   }
 

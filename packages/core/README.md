@@ -290,8 +290,14 @@ new SelectionModule<Quote>({
 
 With `clickToSelect`, row clicks follow the desktop conventions: a plain click
 replaces the selection, Ctrl or Cmd adds to it, and Shift extends from the last
-row clicked. Checkbox clicks always accumulate, modifier or not — that is what
-a checkbox is for. Set `selectionWithoutKeys` for touch devices, where there are
+row acted on. A plain checkbox click always accumulates, modifier or not — that
+is what a checkbox is for.
+
+Shift works identically on a row and on a checkbox, and both **re-cut** the span
+rather than only growing it: drag out to row 6, come back to row 3, and rows 4
+to 6 are given up again. Only the span is given up — rows picked out separately,
+by a plain click or a Ctrl-click, are not the range's to withdraw and survive
+it. Moving the anchor starts a fresh span. Set `selectionWithoutKeys` for touch devices, where there are
 no modifier keys and a plain click has to accumulate to be useful.
 
 `mode`, `checkboxColumn` and `clickToSelect` are independent. Single selection

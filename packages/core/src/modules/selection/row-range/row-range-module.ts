@@ -19,6 +19,17 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
 
   private selection?: SelectionModule<TData>;
 
+  /**
+   * The span this module last applied, and the anchor it was measured from.
+   *
+   * Shift-clicking again re-cuts that span rather than clearing the selection:
+   * rows picked out separately — by a plain click, a Ctrl-click, a checkbox —
+   * are none of the range's business and survive it. When the anchor moves, a
+   * new range has begun and the old span is no longer this module's to withdraw.
+   */
+  private lastSpan: readonly string[] = [];
+  private spanAnchor: string | null = null;
+
   init(context: ModuleContext<TData>): void {
     const selection = context.getModule<SelectionModule<TData>>('selection');
     // `dependsOn` is asserted by the registry, so this is a type narrowing
@@ -44,6 +55,8 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
     const anchor = selection.getAnchor();
     if (anchor === null) {
       selection.setRowSelected(toRowId, true);
+      this.lastSpan = [];
+      this.spanAnchor = null;
       return;
     }
 
@@ -57,8 +70,17 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
 
     const span = rows.slice(Math.min(from, to), Math.max(from, to) + 1).map((row) => row.rowId);
 
+    // Shrinking a range has to give back what it no longer covers, or dragging
+    // back from row 6 to row 3 would leave 4, 5 and 6 selected and the span
+    // would only ever grow.
+    const previous = this.spanAnchor === anchor ? this.lastSpan : [];
+    const withdrawn = previous.filter((rowId) => !span.includes(rowId));
+    if (withdrawn.length > 0) selection.setRowsSelected(withdrawn, false);
+
     // One change for the whole span rather than one per row, so the grid
     // repaints once and a listener hears a single event.
     selection.setRowsSelected(span, true);
+    this.lastSpan = span;
+    this.spanAnchor = anchor;
   }
 }
