@@ -11,9 +11,9 @@ in the custom element registry as a consequence.
 A working grid comes from an entry that provides one, and each registers the
 elements so a single import is enough:
 
-- `flow-grid/define` — both layouts, switchable through `layout`
-- `flow-grid/flow` — the horizontal layout alone
-- `flow-grid/stack` — the vertical layout alone
+- `flow-grid/flow` — the horizontal layout
+- `flow-grid/stack` — the vertical layout
+- `flow-grid/layouts` — every layout, switchable through `layout`
 
 The grid controller no longer names both engines and picks with a ternary; an
 entry point registers what it provides, and asking for a layout that was not

@@ -5,7 +5,7 @@
 Register elements explicitly instead of on import
 
 Importing `flow-grid` no longer defines the custom elements. Call
-`defineElements()`, or import `flow-grid/define`, which does it for you.
+`defineElements()`, or import `flow-grid/layouts`, which does it for you.
 
 Importing a class now gives you the class and nothing else — no registration,
 and no sibling elements dragged in behind it — so an element can be subclassed,

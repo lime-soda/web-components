@@ -3,7 +3,7 @@ import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 import type { ColumnDef, GridTheme, FlowGrid, GridOptions } from 'flow-grid';
 import 'flow-grid';
-import 'flow-grid/define';
+import 'flow-grid/layouts';
 import { TreeModule } from 'flow-grid/tree';
 import { SortModule } from 'flow-grid/sort';
 import { FilterModule } from 'flow-grid/filter';

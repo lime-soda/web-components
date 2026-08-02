@@ -35,7 +35,7 @@ npm install flow-grid
 ## Quick start
 
 ```ts
-import 'flow-grid/define';
+import 'flow-grid/layouts';
 import 'flow-grid/themes/flow-grid.css';
 import type { ColumnDef, FlowGrid, GridOptions } from 'flow-grid';
 
@@ -98,11 +98,16 @@ in the custom element registry as a consequence.
 A working grid comes from an entry that provides one. Each registers the
 elements, so one import is enough:
 
-| Import             | Gives you                             |
-| ------------------ | ------------------------------------- |
-| `flow-grid/define` | both layouts, switchable via `layout` |
-| `flow-grid/flow`   | the horizontal layout alone           |
-| `flow-grid/stack`  | the vertical layout alone             |
+| Import              | Gives you                             |
+| ------------------- | ------------------------------------- |
+| `flow-grid/flow`    | the horizontal layout                 |
+| `flow-grid/stack`   | the vertical layout                   |
+| `flow-grid/layouts` | every layout, switchable via `layout` |
+
+`flow-grid/layouts` is the plural of the other two and does nothing they cannot:
+importing `flow-grid/flow` and `flow-grid/stack` together has the same effect,
+since each registers its own engine and registering an element twice is a no-op.
+It exists because wanting both is common enough to deserve a name.
 
 ```ts
 import 'flow-grid/flow'; // elements registered, horizontal layout available

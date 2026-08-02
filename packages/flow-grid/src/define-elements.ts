@@ -33,7 +33,7 @@ export function defineElement(tagName: string, constructor: CustomElementConstru
  * substituted through an import map without a grid appearing in the registry as
  * a consequence.
  *
- * Call this once, or import `flow-grid/define`, which does it for you.
+ * Call this once, or import `flow-grid/layouts`, which does it for you.
  *
  * Idempotent, so calling it repeatedly is harmless.
  */

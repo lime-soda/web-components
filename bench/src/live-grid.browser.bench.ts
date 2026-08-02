@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 import 'flow-grid';
-import 'flow-grid/define';
+import 'flow-grid/layouts';
 import type { ColumnDef, FlowGrid, GridOptions } from 'flow-grid';
 import { TreeModule } from 'flow-grid/tree';
 import { SortModule } from 'flow-grid/sort';

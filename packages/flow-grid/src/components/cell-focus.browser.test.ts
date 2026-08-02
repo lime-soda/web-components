@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import '../define.js';
+import '../layouts.js';
 import { SelectionModule } from '../modules/selection/index.js';
 import { KeyboardModule } from '../modules/keyboard/index.js';
 import type { FlowGrid } from './grid.js';

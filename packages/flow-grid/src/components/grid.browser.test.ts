@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import '../index.js';
-import '../define.js';
+import '../layouts.js';
 import { CellRendererElement } from './cell-renderer-element.js';
 import type { FlowGrid } from './grid.js';
 import type { GridModule } from '../modules/types.js';

@@ -12,7 +12,7 @@ The package is now `flow-grid`, and "core" means what it always meant: the `.`
 entry, the grid with no modules installed.
 
 ```ts
-import 'flow-grid/define';
+import 'flow-grid/layouts';
 import { TreeModule } from 'flow-grid/tree';
 ```
 

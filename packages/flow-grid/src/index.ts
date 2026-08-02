@@ -4,7 +4,7 @@
 // registry as a consequence.
 //
 // A grid comes from one of the entry points that provides one:
-//   flow-grid/define  both layouts, switchable at runtime
+//   flow-grid/layouts  both layouts, switchable at runtime
 //   flow-grid/flow    the horizontal layout alone
 //   flow-grid/stack   the vertical layout alone
 export { defineElements, defineElement, ELEMENTS } from './define-elements.js';

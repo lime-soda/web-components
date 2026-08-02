@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import './define.js';
+import './layouts.js';
 import './index.js';
-import './define.js';
+import './layouts.js';
 import type { ColumnDef } from './columns/types.js';
 import type { GridOptions } from './controller/grid-controller.js';
 import type { FlowGrid } from './components/grid.js';

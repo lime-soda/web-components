@@ -27,10 +27,10 @@
   },
   "type": "module",
   "sideEffects": [
-    "./dist/define.js",
+    "./dist/layouts.js",
     "./dist/flow.js",
     "./dist/stack.js",
-    "./src/define.ts",
+    "./src/layouts.ts",
     "./src/flow.ts",
     "./src/stack.ts",
     "**/*.css"
@@ -51,10 +51,10 @@
       "development": "./src/index.ts",
       "default": "./dist/index.js"
     },
-    "./define": {
-      "types": "./dist/define.d.ts",
-      "development": "./src/define.ts",
-      "default": "./dist/define.js"
+    "./layouts": {
+      "types": "./dist/layouts.d.ts",
+      "development": "./src/layouts.ts",
+      "default": "./dist/layouts.js"
     },
     "./flow": {
       "types": "./dist/flow.d.ts",

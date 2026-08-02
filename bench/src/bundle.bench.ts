@@ -62,7 +62,7 @@ function bundle(modules: readonly ModuleName[]): string {
   const entry = join(sandbox, `app-${slug}.js`);
   writeFileSync(
     entry,
-    `import 'flow-grid/define';
+    `import 'flow-grid/layouts';
 ${imports}
 const grid = document.createElement('flow-grid');
 grid.gridOptions = { columns: [{ field: 'a' }], modules: [${uses}] };
@@ -208,7 +208,7 @@ document.body.append(grid);
       }).outputFiles[0]!.text;
     };
 
-    const both = build('define', 'both-layouts');
+    const both = build('layouts', 'both-layouts');
     const flowOnly = build('flow', 'flow-only');
 
     report('both layouts', both);
