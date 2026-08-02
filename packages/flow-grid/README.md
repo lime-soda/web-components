@@ -88,28 +88,40 @@ The package's tests assert this directly rather than describing it: after a tick
 Measured in Chromium, 5,000 rows with six modules installed, 20 updates per
 frame: median frame 16.7 ms, zero dropped frames, 6 of 194 instances mounted.
 
-## Registering the elements
+## Entry points
 
-`flow-grid/define` registers `<flow-grid>` and the elements it renders
-with. It is the only entry point with a side effect, and importing it once
-anywhere in the application is enough.
+The root entry has **no side effects**: it hands out classes, types and helpers,
+registers nothing and provides no layout. That is what lets you import a type,
+subclass an element or swap one through an import map without a grid appearing
+in the custom element registry as a consequence.
 
-Importing from `flow-grid` gives you classes and nothing else — no
-registration, and no sibling elements dragged in behind the one you asked for.
-That is what makes it possible to subclass an element, render one in a test, or
-swap an implementation through an import map without a grid appearing in the
-registry as a consequence:
+A working grid comes from an entry that provides one. Each registers the
+elements, so one import is enough:
+
+| Import             | Gives you                             |
+| ------------------ | ------------------------------------- |
+| `flow-grid/define` | both layouts, switchable via `layout` |
+| `flow-grid/flow`   | the horizontal layout alone           |
+| `flow-grid/stack`  | the vertical layout alone             |
 
 ```ts
-import { ELEMENTS, defineElement, defineElements } from 'flow-grid';
-
-defineElements(); // everything, the same as importing /define
-
-defineElement('flow-cell', class extends ELEMENTS['flow-cell'] {}); // or your own
+import 'flow-grid/flow'; // elements registered, horizontal layout available
+import type { ColumnDef } from 'flow-grid'; // no side effect
 ```
 
-Registration is idempotent and the first name registered wins, so two copies of
-the package on one page will not throw.
+Asking for a layout an entry point did not provide throws, and names the import
+that would:
+
+```
+Layout "stack" is not available. Import 'flow-grid' for both layouts,
+or 'flow-grid/stack' for this one alone.
+```
+
+Choosing a single layout saves about 0.3 kB gzipped — the engine, and little
+else. The grid element's own stack chrome is a branch inside a class rather than
+a separate module, so it stays either way; excluding that would mean splitting
+the element itself. The reason to reach for `flow-grid/flow` is that it says
+what the application does, not that it saves much.
 
 ## Modules
 

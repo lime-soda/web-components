@@ -1,5 +1,12 @@
-// Element classes. Importing them registers nothing — call `defineElements()`
-// or import `flow-grid/define` for that.
+// Element classes, types and helpers — and nothing else. This entry has no
+// side effects: it registers no elements and provides no layout, so importing a
+// type or subclassing an element cannot put a grid in the custom element
+// registry as a consequence.
+//
+// A grid comes from one of the entry points that provides one:
+//   flow-grid/define  both layouts, switchable at runtime
+//   flow-grid/flow    the horizontal layout alone
+//   flow-grid/stack   the vertical layout alone
 export { defineElements, defineElement, ELEMENTS } from './define-elements.js';
 
 export { FlowGrid } from './components/grid.js';
@@ -48,7 +55,9 @@ export type {
 export { RowStore } from './store/row-store.js';
 export type { RowNode, RowTransaction, TransactionResult } from './store/types.js';
 
-// Layout.
+// Layout. The classes are here; which of them a grid can actually use follows
+// from the entry point that registered it.
+export { registerLayoutEngine, createLayoutEngine } from './layout/engine-registry.js';
 export { FlowLayoutEngine } from './layout/flow-layout-engine.js';
 export { StackLayoutEngine } from './layout/stack-layout-engine.js';
 export type {

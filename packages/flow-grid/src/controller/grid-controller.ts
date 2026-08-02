@@ -2,8 +2,7 @@ import type { CoreGridApi, GridApi, GridState } from '../api/types.js';
 import { resolveColumns } from '../columns/resolve-columns.js';
 import type { ColumnDefs, ColumnResolutionOptions, ResolvedColumn } from '../columns/types.js';
 import type { FocusController } from './focus-controller.js';
-import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
-import { StackLayoutEngine } from '../layout/stack-layout-engine.js';
+import { createLayoutEngine } from '../layout/engine-registry.js';
 import type { LayoutResult, ViewportMetrics } from '../layout/types.js';
 import { type GridTheme, assertValidTheme } from '../theme/tokens.js';
 import { ModuleRegistry } from '../modules/module-registry.js';
@@ -196,7 +195,7 @@ export class GridController<TData = unknown> {
 }
 
 function engineFor(mode: LayoutMode) {
-  return mode === 'stack' ? new StackLayoutEngine() : new FlowLayoutEngine();
+  return createLayoutEngine(mode);
 }
 
 function defaultGetRowId(data: unknown): string {

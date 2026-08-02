@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import { defineElements } from '../define-elements.js';
+import '../define.js';
 import { SelectionModule } from '../modules/selection/index.js';
 import { KeyboardModule } from '../modules/keyboard/index.js';
 import type { FlowGrid } from './grid.js';
@@ -28,8 +28,6 @@ const data: Row[] = Array.from({ length: 8 }, (_, i) => ({
 }));
 
 let host: HTMLDivElement | undefined;
-
-defineElements();
 
 async function waitFor(condition: () => boolean, timeout = 2000): Promise<void> {
   const start = performance.now();

@@ -1,10 +1,17 @@
 import { defineElements } from './define-elements.js';
+import { registerLayoutEngine } from './layout/engine-registry.js';
+import { FlowLayoutEngine } from './layout/flow-layout-engine.js';
+import { StackLayoutEngine } from './layout/stack-layout-engine.js';
 
 /**
- * Side-effect entry: registers the grid's elements on import.
+ * A grid with both layouts, switchable through `layout: 'flow' | 'stack'`.
  *
- * `import 'flow-grid/define'` for consumers who want the elements
- * available and nothing to think about. Everything else in the package is
- * side-effect free, so importing the classes alone registers nothing.
+ * Registers the elements too, so this one import is enough to render. Reach for
+ * `flow-grid/flow` or `flow-grid/stack` instead when the choice is made at
+ * build time and the other layout is dead weight.
  */
 defineElements();
+registerLayoutEngine('flow', () => new FlowLayoutEngine());
+registerLayoutEngine('stack', () => new StackLayoutEngine());
+
+export * from './index.js';

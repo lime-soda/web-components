@@ -182,6 +182,41 @@ console.log(FlowGrid.name);
     expect(bytes(all) - bytes(core)).toBeLessThanOrEqual(individually + 1024);
   });
 
+  it('leaves the stack engine out of a flow-only bundle', () => {
+    // The entry point decides which engines a bundle contains. The grid
+    // element's own stack chrome — its `.stack-*` rules and `renderStack`
+    // branches — is a branch inside a class and stays either way; excluding
+    // that would mean splitting the element itself.
+    const build = (entryPoint: string, name: string): string => {
+      const entry = join(sandbox, `${name}.js`);
+      writeFileSync(
+        entry,
+        `import 'flow-grid/${entryPoint}';
+const grid = document.createElement('flow-grid');
+grid.gridOptions = { columns: [{ field: 'a' }] };
+document.body.append(grid);
+`,
+      );
+      return buildSync({
+        entryPoints: [entry],
+        bundle: true,
+        minify: true,
+        format: 'esm',
+        write: false,
+        logLevel: 'error',
+        absWorkingDir: sandbox,
+      }).outputFiles[0]!.text;
+    };
+
+    const both = build('define', 'both-layouts');
+    const flowOnly = build('flow', 'flow-only');
+
+    report('both layouts', both);
+    report('flow only', flowOnly, both);
+
+    expect(bytes(flowOnly), 'the flow-only entry saved nothing').toBeLessThan(bytes(both));
+  });
+
   it('keeps core within its budget', () => {
     // Generous: this catches a dependency accidentally pulled into core, not a
     // few hundred bytes of drift.

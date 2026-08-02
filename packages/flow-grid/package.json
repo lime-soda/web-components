@@ -28,7 +28,11 @@
   "type": "module",
   "sideEffects": [
     "./dist/define.js",
+    "./dist/flow.js",
+    "./dist/stack.js",
     "./src/define.ts",
+    "./src/flow.ts",
+    "./src/stack.ts",
     "**/*.css"
   ],
   "publishConfig": {
@@ -51,6 +55,16 @@
       "types": "./dist/define.d.ts",
       "development": "./src/define.ts",
       "default": "./dist/define.js"
+    },
+    "./flow": {
+      "types": "./dist/flow.d.ts",
+      "development": "./src/flow.ts",
+      "default": "./dist/flow.js"
+    },
+    "./stack": {
+      "types": "./dist/stack.d.ts",
+      "development": "./src/stack.ts",
+      "default": "./dist/stack.js"
     },
     "./tree": {
       "types": "./dist/modules/tree/index.d.ts",
