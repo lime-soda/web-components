@@ -9,9 +9,9 @@ import { KeyboardModule, type SkipRowParams } from './keyboard-module.js';
  * Passing over rows the consumer does not want to land on.
  *
  * The predicate always comes from the consumer. This module has no notion of a
- * group row, and a `skipGroupRows` flag would give it one — it would have to
- * read `meta.depth` or `meta.isGroup`, conventions owned by whichever module
- * built the hierarchy.
+ * parent row, and a `skipParentRows` flag would give it one — it would have to
+ * read `meta.depth` or `meta.hasChildren`, conventions owned by whichever
+ * module built the hierarchy.
  */
 
 interface Row {

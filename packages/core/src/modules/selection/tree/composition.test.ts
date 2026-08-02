@@ -32,7 +32,7 @@ const setup = (withGroup: boolean) => {
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
   const selection = new SelectionModule<Bond>();
-  const group = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
+  const treeSelection = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
   const registry = new ModuleRegistry<Bond>({
     pipeline,
     getColumns: () => resolveColumns<Bond>([{ field: 'name' }]),
@@ -42,13 +42,13 @@ const setup = (withGroup: boolean) => {
     new TreeModule<Bond>({ getParentId: (d) => d.parentId, defaultExpanded: true }),
   );
   registry.register(selection);
-  if (withGroup) registry.register(group);
+  if (withGroup) registry.register(treeSelection);
   registry.start();
   pipeline.projector.rows.get();
-  return { selection, group, registry, pipeline };
+  return { selection, treeSelection, registry, pipeline };
 };
 
-describe('selection without the group module', () => {
+describe('selection without the tree module', () => {
   it('selects the group row alone, standing for nothing else', () => {
     const { selection } = setup(false);
 
@@ -75,7 +75,7 @@ describe('selection without the group module', () => {
   });
 });
 
-describe('selection with the group module', () => {
+describe('selection with the tree module', () => {
   it('makes the group stand for its children', () => {
     const { selection } = setup(true);
 
@@ -101,9 +101,9 @@ describe('selection with the group module', () => {
   });
 
   it('declares its dependency, so the registry can order and check it', () => {
-    const group = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
+    const treeSelection = new TreeSelectionModule<Bond>({ getParentId: (bond) => bond.parentId });
 
-    expect(group.dependsOn).toEqual(['selection']);
+    expect(treeSelection.dependsOn).toEqual(['selection']);
   });
 
   it('refuses to start without the module it depends on', () => {

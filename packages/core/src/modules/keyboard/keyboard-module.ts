@@ -21,9 +21,10 @@ export interface KeyboardModuleOptions<TData = unknown> {
    * whatever else a particular grid treats as scenery.
    *
    * There is deliberately no built-in notion of which rows those are. This
-   * module does not know what a group row is, and giving it a `skipGroupRows`
-   * flag would teach it: it would have to read `meta.depth` or `meta.isGroup`,
-   * conventions that belong to whichever module produced the hierarchy. The
+   * module does not know what a parent row is, and giving it a `skipParentRows`
+   * flag would teach it: it would have to read `meta.depth` or
+   * `meta.hasChildren`, conventions that belong to whichever module produced
+   * the hierarchy. The
    * predicate comes from the consumer, who knows what their rows mean, and the
    * module stays a mapping from keys onto movement.
    *

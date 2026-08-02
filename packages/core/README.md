@@ -232,7 +232,7 @@ new KeyboardModule<Quote>({
 ```
 
 The predicate always comes from the consumer. There is deliberately no
-`skipGroupRows` flag: the module would have to read `meta.hasChildren` or
+`skipParentRows` flag: the module would have to read `meta.hasChildren` or
 `meta.depth` to implement one, and those are conventions belonging to whichever
 module built the hierarchy. Keeping the predicate outside is what lets the
 keyboard module stay a mapping from keys onto movement.

@@ -2,7 +2,7 @@
 '@flow-grid/core': minor
 ---
 
-Split selection into row selection, group selection and row ranges
+Split selection into row selection, tree selection and row ranges
 
 `SelectionModule` is now flat by construction: a set of selected row ids where
 every row stands for itself. Hierarchy and spans arrive as separate modules

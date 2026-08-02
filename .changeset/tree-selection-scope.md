@@ -2,7 +2,7 @@
 '@flow-grid/core': minor
 ---
 
-Give group selection three scopes instead of a boolean
+Give tree selection three scopes instead of a boolean
 
 `TreeSelectionModule`'s `groupSelectsChildren` boolean becomes `scope`, which
 says what a group row actually stands for:

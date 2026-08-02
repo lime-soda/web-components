@@ -33,7 +33,7 @@ const setup = (options: Record<string, unknown> = {}) => {
   const pipeline = new GridPipeline<Row>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
   const selection = new SelectionModule<Row>(selectionOptions);
-  const group = new TreeSelectionModule<Row>({
+  const treeSelection = new TreeSelectionModule<Row>({
     getParentId: (row) => row.parentId,
     ...(groupSelectsChildren === undefined
       ? {}
@@ -47,19 +47,19 @@ const setup = (options: Record<string, unknown> = {}) => {
   });
   registry.register(tree);
   registry.register(selection);
-  registry.register(group);
+  registry.register(treeSelection);
   registry.start();
   pipeline.projector.rows.get();
-  return { selection, group, pipeline, registry };
+  return { selection, treeSelection, pipeline, registry };
 };
 
 describe('module options are reactive', () => {
   it('switches a group from standing for its children to standing alone', () => {
-    const { selection, group } = setup();
+    const { selection, treeSelection } = setup();
     selection.setRowSelected('g', true);
     expect(selection.getSelectedRows()).toEqual(['a', 'b']);
 
-    group.setOptions({ scope: 'self' });
+    treeSelection.setOptions({ scope: 'self' });
     selection.clearSelection();
     selection.setRowSelected('g', true);
 
@@ -68,11 +68,11 @@ describe('module options are reactive', () => {
   });
 
   it('switches back again', () => {
-    const { selection, group } = setup({ groupSelectsChildren: false });
+    const { selection, treeSelection } = setup({ groupSelectsChildren: false });
     selection.setRowSelected('g', true);
     expect(selection.getSelectedRows()).toEqual(['g']);
 
-    group.setOptions({ scope: 'filteredChildren' });
+    treeSelection.setOptions({ scope: 'filteredChildren' });
     selection.clearSelection();
     selection.setRowSelected('g', true);
 
@@ -84,9 +84,9 @@ describe('module options are reactive', () => {
     // alter the projection — so a stale index would keep answering with the old
     // mode's leaves. Checked through the group, since rows selected before the
     // switch are legitimately still selected after it.
-    const { selection, group } = setup();
+    const { selection, treeSelection } = setup();
 
-    group.setOptions({ scope: 'self' });
+    treeSelection.setOptions({ scope: 'self' });
 
     expect(selection.getRowState('g')).toBe('unchecked');
     selection.setRowSelected('g', true);
@@ -95,10 +95,10 @@ describe('module options are reactive', () => {
 
   it('leaves rows selected before the switch selected after it', () => {
     // A mode change is not a deselection.
-    const { selection, group } = setup();
+    const { selection, treeSelection } = setup();
     selection.setRowSelected('a', true);
 
-    group.setOptions({ scope: 'self' });
+    treeSelection.setOptions({ scope: 'self' });
 
     expect(selection.getRowState('a')).toBe('checked');
   });

@@ -85,10 +85,10 @@ interface Args {
   expandByDefault: boolean;
   ticksPerFrame: number;
   resortOnValueChange: boolean;
-  skipGroupRows: boolean;
+  skipParentRows: boolean;
   selectionMode: 'multi' | 'single';
   checkboxColumn: boolean;
-  groupSelectionScope: 'self' | 'children' | 'filteredChildren';
+  treeSelectionScope: 'self' | 'children' | 'filteredChildren';
   clickToSelect: boolean;
 }
 
@@ -157,7 +157,7 @@ const meta: Meta<Args> = {
       description: 'Expand every category, or collapse them all.',
       table: { category: 'Tree' },
     },
-    skipGroupRows: {
+    skipParentRows: {
       control: 'boolean',
       description:
         "Arrow past category headings instead of landing on them. The predicate is the story's, not the module's — it reads meta.hasChildren, a convention the tree module owns.",
@@ -180,7 +180,7 @@ const meta: Meta<Args> = {
         'Show the leading checkbox column. Independent of the mode: single selection with checkboxes behaves like radio buttons, and the header select-all never appears in single mode.',
       table: { category: 'Selection' },
     },
-    groupSelectionScope: {
+    treeSelectionScope: {
       control: 'inline-radio',
       options: ['self', 'children', 'filteredChildren'],
       description:
@@ -211,10 +211,10 @@ export const BondMarket: StoryObj<Args> = {
     expandByDefault: true,
     ticksPerFrame: 50,
     resortOnValueChange: false,
-    skipGroupRows: false,
+    skipParentRows: false,
     selectionMode: 'multi',
     checkboxColumn: true,
-    groupSelectionScope: 'filteredChildren',
+    treeSelectionScope: 'filteredChildren',
     clickToSelect: false,
   },
   render: (args) => {
@@ -238,9 +238,9 @@ export const BondMarket: StoryObj<Args> = {
     }
 
     bondMarketSort.setOptions({ resortOnValueChange: args.resortOnValueChange });
-    // The predicate is the application's: the module has no idea what a group is.
+    // The predicate is the application's: the module has no idea what a parent row is.
     bondMarketKeyboard.setOptions({
-      skipRow: args.skipGroupRows ? ({ meta }) => meta['hasChildren'] === true : undefined,
+      skipRow: args.skipParentRows ? ({ meta }) => meta['hasChildren'] === true : undefined,
     });
 
     const selection = bondMarketSelection;
@@ -250,7 +250,7 @@ export const BondMarket: StoryObj<Args> = {
       clickToSelect: args.clickToSelect,
     });
     // Group behaviour belongs to the module that supplies it.
-    bondMarketTreeSelection.setOptions({ scope: args.groupSelectionScope });
+    bondMarketTreeSelection.setOptions({ scope: args.treeSelectionScope });
     const data = generateBonds(args.groups, args.instruments);
     let frame: number | null = null;
 
@@ -267,7 +267,7 @@ export const BondMarket: StoryObj<Args> = {
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
         bondMarketKeyboard,
-        // Row selection is flat on its own. The group module is what makes
+        // Row selection is flat on its own. The tree selection module is what makes
         // ticking a category select the instruments beneath it, respecting the
         // current filter and showing indeterminate while only some are; the
         // row-range module is what makes shift-click select a span.

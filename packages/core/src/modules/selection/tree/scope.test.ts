@@ -69,7 +69,7 @@ const selectGroup = (scope: TreeSelectionScope) => {
   return [...selection.getSelectedRows()].sort();
 };
 
-describe('group selection scope', () => {
+describe('tree selection scope', () => {
   it('selects the group alone with `self`', () => {
     expect(selectGroup('self')).toEqual(['g']);
   });

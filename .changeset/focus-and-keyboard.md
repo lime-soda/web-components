@@ -16,7 +16,7 @@ that instance's header, while down and forwards always land on data.
 
 `KeyboardModule` accepts a `skipRow` predicate for rows to pass over rather than
 land on. The predicate always comes from the consumer — there is deliberately no
-`skipGroupRows` flag, which would require the module to know what a group row is.
+`skipParentRows` flag, which would require the module to know what a parent row is.
 
 The rightmost column no longer has its focus ring clipped: an instance is sized
 to its columns, and its border is now added around that rather than eaten out of
