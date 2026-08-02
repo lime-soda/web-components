@@ -24,6 +24,11 @@ declare module '../../columns/types.js' {
 }
 
 declare module '../../api/types.js' {
+  interface GridState {
+    /** The column filters and the quick filter text. */
+    filter?: { model: FilterModel; quickFilter: string };
+  }
+
   interface GridApi<TData> {
     getFilterModel(): FilterModel;
     setFilterModel(model: FilterModel): void;

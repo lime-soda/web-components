@@ -23,6 +23,11 @@ declare module '../../columns/types.js' {
 }
 
 declare module '../../api/types.js' {
+  interface GridState {
+    /** The active sort, in priority order. */
+    sort?: SortModelEntry[];
+  }
+
   interface GridApi<TData> {
     getSortModel(): readonly SortModelEntry[];
     setSortModel(model: readonly SortModelEntry[]): void;

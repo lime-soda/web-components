@@ -1,4 +1,4 @@
-import type { CoreGridApi, GridApi } from '../api/types.js';
+import type { CoreGridApi, GridApi, GridState } from '../api/types.js';
 import { resolveColumns } from '../columns/resolve-columns.js';
 import type { ColumnDefs, ColumnResolutionOptions, ResolvedColumn } from '../columns/types.js';
 import type { FocusController } from './focus-controller.js';
@@ -172,8 +172,10 @@ export class GridController<TData = unknown> {
       scrollToRow: (id) => this.dispatcher('flow-scroll-to-row', { id }),
       refresh: () => this.pipeline.projector.invalidate(),
       getModule: (id) => this.registry.get(id),
-      getState: () => this.registry.getState(),
-      setState: (state) => this.registry.setState(state),
+      // The registry keys slices by module id; `GridState` is the typed view of
+      // that same object, assembled by whichever modules are imported.
+      getState: () => this.registry.getState() as GridState,
+      setState: (state) => this.registry.setState(state as Record<string, unknown>),
     };
 
     // Module methods are merged in, never allowed to shadow a core method.

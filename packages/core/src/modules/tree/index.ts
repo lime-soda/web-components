@@ -10,6 +10,11 @@ export type { TreeIndexOptions } from './tree-index.js';
  * import they do not exist, and do not type-check.
  */
 declare module '../../api/types.js' {
+  interface GridState {
+    /** The ids of the expanded rows. */
+    tree?: string[];
+  }
+
   interface GridApi<TData> {
     isExpanded(id: string): boolean;
     setExpanded(id: string, expanded: boolean): void;

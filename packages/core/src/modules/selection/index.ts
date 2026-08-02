@@ -7,6 +7,11 @@ export { FlatMembership } from './membership.js';
 export type { RangeHandler, SelectionMembership } from './membership.js';
 
 declare module '../../api/types.js' {
+  interface GridState {
+    /** The selected row ids. */
+    selection?: string[];
+  }
+
   interface GridApi<TData> {
     /** True only when every id the row stands for is selected. */
     isRowSelected(rowId: string): boolean;

@@ -46,7 +46,32 @@ export interface CoreGridApi<TData = unknown> {
   refresh(): void;
 
   getModule<T extends GridModule<TData>>(id: string): T | undefined;
-  /** Aggregated module state, suitable for persisting. */
-  getState(): Record<string, unknown>;
-  setState(state: Record<string, unknown>): void;
+  /**
+   * Everything worth persisting, keyed by the module that owns it.
+   *
+   * Serialisable, so it can go straight to `localStorage` or a user profile
+   * and come back through {@link setState}.
+   */
+  getState(): GridState;
+  /**
+   * Restores state produced by {@link getState}.
+   *
+   * A slice belonging to a module that is not installed is ignored rather than
+   * being an error, so a saved profile survives a grid that has since dropped a
+   * feature — and picks it up again if the feature returns.
+   */
+  setState(state: GridState): void;
 }
+
+/**
+ * The persisted shape of a grid, assembled from the modules installed.
+ *
+ * Empty in core, because core has no state to save: a module contributes its
+ * slice by augmenting this, the same way it contributes API methods and column
+ * options. Import `@flow-grid/core/sort` and `state.sort` exists and is typed;
+ * without it, reading `state.sort` does not compile.
+ *
+ * Every slice is optional. State saved by a grid with more modules than the one
+ * restoring it is still valid — the extra slices are simply not claimed.
+ */
+export interface GridState {}

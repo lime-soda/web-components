@@ -194,6 +194,41 @@ grid.api.refreshSort(); // re-order now, leaving the sort model alone
 Set `resortOnValueChange: true` for data that changes rarely, where an order
 drifting out of date is more surprising than one that moves.
 
+## Saving and restoring state
+
+`api.getState()` returns everything worth persisting, keyed by the module that
+owns it, and `api.setState()` puts it back:
+
+```ts
+localStorage.setItem('grid', JSON.stringify(grid.api.getState()));
+
+grid.api.setState(JSON.parse(localStorage.getItem('grid')!));
+```
+
+A module owns its own slice, exactly as it owns its API methods, and contributes
+it by augmenting `GridState`. So the shape follows the imports:
+
+```ts
+import '@flow-grid/core/sort';
+
+const state = grid.api.getState();
+state.sort; // ✅ typed, because sort is imported
+state.filter; // ❌ compile error without /filter
+```
+
+| Module      | Slice                                        |
+| ----------- | -------------------------------------------- |
+| `sort`      | the active sort, in priority order           |
+| `filter`    | the column filters and the quick filter text |
+| `selection` | the selected row ids                         |
+| `tree`      | the ids of the expanded rows                 |
+
+Every slice is optional, and a slice belonging to a module that is not installed
+is ignored rather than being an error — so a profile saved by a grid with more
+features still restores into one with fewer, and picks the rest up again if they
+return. Modules with nothing worth persisting contribute nothing: cell-flash is
+an animation, and a row range is a gesture that has already finished.
+
 ## Keyboard and focus
 
 The grid tracks focus itself rather than relying on the browser's, and paints
@@ -542,7 +577,7 @@ grid.api.setRowData(rows);
 grid.api.getRow(id);
 grid.api.setColumnDefs(columns);
 grid.api.scrollToRow(id);
-grid.api.getState(); // aggregated module state, for persisting
+grid.api.getState(); // everything worth persisting, typed per module
 grid.api.setState(state);
 ```
 
