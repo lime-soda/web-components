@@ -202,8 +202,14 @@ does not match a mouse click, so a cell clicked into was genuinely focused —
 arrows moved from it, screen readers followed it — while looking exactly like an
 unfocused cell.
 
-Exactly one cell is tabbable at a time, so the grid is a single tab stop. Tab
-into it and arrows move; click a cell and arrows move from there.
+Exactly one cell is tabbable at a time, so the grid is a single tab stop from
+outside. Once inside, **Tab moves a cell at a time** in reading order — along
+the row, on to the next, and into the next instance, taking in each header
+where reading order puts it. Shift-Tab reverses it.
+
+At either end Tab is left unhandled, so focus leaves the grid rather than being
+trapped in it. `skipRow` does not apply to Tab: it says where the arrows come to
+rest, and a row Tab could not reach would be a row no keyboard could reach.
 
 Arrow keys reach the **header** too, but only backwards: up from the first row
 enters that instance's header, and down or forwards always lands on data. A

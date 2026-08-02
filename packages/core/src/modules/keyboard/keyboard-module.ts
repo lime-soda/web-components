@@ -31,6 +31,9 @@ export interface KeyboardModuleOptions<TData = unknown> {
    * and not to movement along one, since that never changes row. Headers are
    * never offered to it: a header is not a row.
    *
+   * Tab is exempt. It walks every cell in reading order, and a row Tab could
+   * not reach would be a row no keyboard could reach.
+   *
    * With every candidate skipped, the movement is refused and focus stays put.
    *
    * Explicitly allows `undefined` so `setOptions({ skipRow: undefined })` puts
@@ -110,6 +113,14 @@ export class KeyboardModule<TData = unknown> implements GridModule<TData> {
         return this.jump(1);
       case 'PageUp':
         return this.jump(-1);
+      // Reading order, and deliberately able to run out: at either end of the
+      // grid this returns false, the key goes unhandled, and the browser moves
+      // focus to whatever follows. A grid you cannot Tab out of is a trap.
+      case 'Tab':
+        // Deliberately not subject to `skipRow`: that is about where the arrows
+        // come to rest, and a row Tab could not reach would be a row a keyboard
+        // could not reach at all.
+        return focus.moveCell(event.shiftKey ? -1 : 1);
       case 'Escape':
         focus.clear();
         return true;

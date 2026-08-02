@@ -188,6 +188,58 @@ export class FocusController {
     return this.commit(nextInstance, wrappedRow, wrappedColumn.colId);
   }
 
+  /**
+   * Moves one cell in reading order: along the row, then on to the next row.
+   *
+   * What Tab means in a grid. Unlike the arrows, it does not stop at the end of
+   * a row or the end of an instance — it carries on to the next, taking in the
+   * header at the top of each because that is where reading order puts it.
+   *
+   * Returns false at the two ends of the grid, which is what lets Tab leave:
+   * refusing to move means the key is not handled, so the browser takes focus
+   * onward to whatever follows the grid rather than trapping the user in it.
+   */
+  moveCell(delta: 1 | -1): boolean {
+    const located = this.locate();
+    if (!located) return false;
+
+    const columns = this.getColumns();
+    const { instances, instanceIndex, rowIndex, colIndex, section } = located;
+    const next = colIndex + delta;
+
+    // Still within the row.
+    if (next >= 0 && next < columns.length) {
+      const colId = columns[next]!.colId;
+      return section === 'header'
+        ? this.commitHeader(instanceIndex, colId)
+        : this.commit(instanceIndex, rowIndex, colId);
+    }
+
+    const first = columns[0]?.colId;
+    const last = columns[columns.length - 1]?.colId;
+    if (first === undefined || last === undefined) return false;
+
+    if (delta > 0) {
+      // Off the end of a header: into the rows it heads.
+      if (section === 'header') return this.commit(instanceIndex, 0, first);
+
+      const rows = instances[instanceIndex]?.rows.length ?? 0;
+      if (rowIndex + 1 < rows) return this.commit(instanceIndex, rowIndex + 1, first);
+      // Off the end of an instance: the next one begins with its header.
+      return this.commitHeader(instanceIndex + 1, first);
+    }
+
+    // Backwards out of a header: the end of the instance before it.
+    if (section === 'header') {
+      const previous = instances[instanceIndex - 1];
+      if (!previous) return false;
+      return this.commit(instanceIndex - 1, previous.rows.length - 1, last);
+    }
+
+    if (rowIndex > 0) return this.commit(instanceIndex, rowIndex - 1, last);
+    return this.commitHeader(instanceIndex, last);
+  }
+
   /** Jumps a whole instance, keeping the row and column. */
   moveInstance(delta: number): boolean {
     const located = this.locate();
