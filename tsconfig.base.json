@@ -6,6 +6,10 @@
     "module": "ES2022",
     "moduleResolution": "bundler",
     "strict": true,
+    // The compiler says the same thing the linter does, so an editor flags
+    // dead code while it is being written rather than at commit time.
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,

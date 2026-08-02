@@ -5,6 +5,11 @@ export default defineConfig({
     jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
     rules: {
       'vite-plus/prefer-vite-plus-imports': 'error',
+      // Errors, not warnings: a warning does not fail a build or refuse a
+      // commit, so unused imports and dead locals accumulate exactly as they
+      // did when there was no linter at all.
+      'no-unused-vars': 'error',
+      'typescript/no-unused-vars': 'error',
       // Cannot tell a defensive copy from a pointless one. Every spread it
       // flags here guards an iteration against mutation during the loop.
       'unicorn/no-useless-spread': 'off',

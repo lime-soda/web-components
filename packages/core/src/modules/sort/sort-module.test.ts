@@ -217,7 +217,7 @@ describe('SortModule', () => {
     // stability.test.ts.
     const tracking = { resortOnValueChange: true };
 
-    const dependencies = (sort: SortModule<Quote>, pipeline: GridPipeline<Quote>) => {
+    const dependencies = (pipeline: GridPipeline<Quote>) => {
       const stage = (
         pipeline.projector as unknown as { stages: { id: string; dependsOn: unknown }[] }
       ).stages;
@@ -225,9 +225,9 @@ describe('SortModule', () => {
     };
 
     it('declares nothing when no sort is active', () => {
-      const { sort, pipeline } = setup([quote('a', 'A', 1)]);
+      const { pipeline } = setup([quote('a', 'A', 1)]);
 
-      expect(dependencies(sort, pipeline)).toBeUndefined();
+      expect(dependencies(pipeline)).toBeUndefined();
     });
 
     it('declares only the active sort field', () => {
@@ -235,7 +235,7 @@ describe('SortModule', () => {
 
       sort.setSortModel([{ colId: 'price', direction: 'asc' }]);
 
-      expect([...(dependencies(sort, pipeline) as Set<string>)]).toEqual(['price']);
+      expect([...(dependencies(pipeline) as Set<string>)]).toEqual(['price']);
     });
 
     it("declares '*' when a sort column has a value getter it cannot see into", () => {
@@ -248,7 +248,7 @@ describe('SortModule', () => {
 
       sort.setSortModel([{ colId: 'derived', direction: 'asc' }]);
 
-      expect(dependencies(sort, pipeline)).toBe('*');
+      expect(dependencies(pipeline)).toBe('*');
     });
 
     it('does not re-sort when an unrelated field ticks', () => {
