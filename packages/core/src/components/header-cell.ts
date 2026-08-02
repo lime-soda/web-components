@@ -120,9 +120,13 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
   override updated(): void {
     // Follows the grid's focus into the DOM, so the browser scrolls the header
     // into view and a screen reader announces it.
-    if (this.isFocusedHeader() && this.getRootNode() instanceof ShadowRoot) {
+    if (this.isFocusedHeader() && this.gridHasFocus() && this.getRootNode() instanceof ShadowRoot) {
       if (!this.matches(':focus')) this.focus({ preventScroll: false });
     }
+  }
+
+  private gridHasFocus(): boolean {
+    return this.grid?.focus.withinGrid.get() ?? false;
   }
 
   private isFocusedHeader(): boolean {
@@ -141,7 +145,7 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
     registry?.version.get();
 
     const focused = this.isFocusedHeader();
-    this.toggleAttribute('data-focused', focused);
+    this.toggleAttribute('data-focused', focused && this.gridHasFocus());
     // A header is only reachable by arrowing up into it, so it is never the
     // grid's tab stop; -1 keeps it focusable without adding a stop.
     this.tabIndex = focused ? 0 : -1;

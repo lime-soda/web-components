@@ -208,7 +208,11 @@ the row, on to the next, and into the next instance, taking in each header
 where reading order puts it. Shift-Tab reverses it.
 
 At either end Tab is left unhandled, so focus leaves the grid rather than being
-trapped in it. `skipRow` does not apply to Tab: it says where the arrows come to
+trapped in it.
+
+When focus leaves, the ring goes with it but the position does not: the cell
+stays the grid's tab stop, so Tab returns to where you were rather than to the
+first cell. A remembered position is not a focused grid. `skipRow` does not apply to Tab: it says where the arrows come to
 rest, and a row Tab could not reach would be a row no keyboard could reach.
 
 Arrow keys reach the **header** too, but only backwards: up from the first row

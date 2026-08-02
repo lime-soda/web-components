@@ -371,6 +371,11 @@ describe('<flow-grid>', () => {
       const grid = await mount({ modules: [new KeyboardModule<Quote>()] });
       const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
 
+      // Focus first: a key press can only reach the grid if something inside it
+      // has focus, and the ring is painted only while it does.
+      allCells(grid)[0]!.focus();
+      await grid.updateComplete;
+
       scroller.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }),
       );

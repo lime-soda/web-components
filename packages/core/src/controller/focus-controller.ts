@@ -37,6 +37,8 @@ export class FocusController {
     null,
   );
 
+  private readonly inside: WritableSignal<boolean> = signal(false);
+
   constructor(
     private readonly getLayout: () => LayoutResult,
     // Only colId is ever read, so that is all this asks for. Taking the full
@@ -46,6 +48,23 @@ export class FocusController {
 
   get focused(): ReadableSignal<CellPosition | null> {
     return this.position;
+  }
+
+  /**
+   * Whether focus is inside the grid at all.
+   *
+   * Separate from the position, because they answer different questions. The
+   * position is remembered when focus leaves — that is what lets Tab return to
+   * the cell you left rather than to the first one — but a remembered position
+   * is not a focused grid, and painting a ring on it claims focus that
+   * something else holds.
+   */
+  get withinGrid(): ReadableSignal<boolean> {
+    return this.inside;
+  }
+
+  setWithinGrid(inside: boolean): void {
+    this.inside.set(inside);
   }
 
   /**

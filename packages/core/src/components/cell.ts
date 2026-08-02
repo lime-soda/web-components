@@ -131,7 +131,9 @@ export class FlowCell extends SignalWatcher(LitElement) {
     this.grid?.registry.version.get();
 
     this.tabIndex = this.isTabbableCell() ? 0 : -1;
-    this.toggleAttribute('data-focused', this.isFocusedCell());
+    // Only while the grid has focus: a remembered position is where Tab would
+    // return to, not somewhere that is focused now.
+    this.toggleAttribute('data-focused', this.isFocusedCell() && this.gridHasFocus());
 
     const value = getCellValue(this.column, node);
     const decorations =
@@ -204,7 +206,7 @@ export class FlowCell extends SignalWatcher(LitElement) {
 
     // Roving tabindex: exactly one cell is tabbable, and it pulls DOM focus to
     // itself so the browser scrolls it into view and screen readers follow.
-    if (this.isFocusedCell() && this.getRootNode() instanceof ShadowRoot) {
+    if (this.isFocusedCell() && this.gridHasFocus() && this.getRootNode() instanceof ShadowRoot) {
       if (!this.matches(':focus')) this.focus({ preventScroll: false });
     }
   }
@@ -215,6 +217,11 @@ export class FlowCell extends SignalWatcher(LitElement) {
     const rowKey = this.row?.displayRow.id;
     if (instanceId === undefined || rowKey === undefined || !this.grid) return false;
     return this.grid.focus.isTabbable(instanceId, rowKey, this.column.colId);
+  }
+
+  /** Whether focus is inside the grid, rather than merely remembered by it. */
+  private gridHasFocus(): boolean {
+    return this.grid?.focus.withinGrid.get() ?? false;
   }
 
   private isFocusedCell(): boolean {

@@ -215,3 +215,77 @@ describe('selecting from the keyboard', () => {
     expect(grid.api.getSelectedCount()).toBe(0);
   });
 });
+
+describe('when focus leaves the grid', () => {
+  /**
+   * The position is remembered so Tab returns to the cell it left. That is not
+   * the same as the grid being focused, and painting a ring on a remembered
+   * position claims focus that something else holds.
+   */
+  const elsewhere = () => {
+    const button = document.createElement('button');
+    button.textContent = 'outside';
+    document.body.append(button);
+    return button;
+  };
+
+  it('stops painting the ring', async () => {
+    const grid = await mount();
+    const cell = cells(grid)[5]!;
+    cell.focus();
+    await waitFor(() => cell.hasAttribute('data-focused'));
+
+    const outside = elsewhere();
+    outside.focus();
+    await waitFor(() => !cell.hasAttribute('data-focused'));
+
+    expect(cell.hasAttribute('data-focused')).toBe(false);
+    outside.remove();
+  });
+
+  it('remembers where it was, so Tab comes back to the same cell', async () => {
+    const grid = await mount();
+    const cell = cells(grid)[5]!;
+    cell.focus();
+    await waitFor(() => grid.controller!.focus.focused.get() !== null);
+    const position = grid.controller!.focus.focused.get();
+
+    const outside = elsewhere();
+    outside.focus();
+    await waitFor(() => !cell.hasAttribute('data-focused'));
+
+    expect(grid.controller!.focus.focused.get()).toEqual(position);
+    expect(cell.tabIndex).toBe(0);
+    outside.remove();
+  });
+
+  it('paints again when focus returns', async () => {
+    const grid = await mount();
+    const cell = cells(grid)[5]!;
+    cell.focus();
+    await waitFor(() => cell.hasAttribute('data-focused'));
+
+    const outside = elsewhere();
+    outside.focus();
+    await waitFor(() => !cell.hasAttribute('data-focused'));
+
+    cell.focus();
+    await waitFor(() => cell.hasAttribute('data-focused'));
+
+    expect(cell.hasAttribute('data-focused')).toBe(true);
+    outside.remove();
+  });
+
+  it('keeps the ring while focus moves between cells', async () => {
+    // Moving within the grid fires focusout too; only leaving counts.
+    const grid = await mount();
+    const [first, , third] = cells(grid);
+
+    first!.focus();
+    await waitFor(() => first!.hasAttribute('data-focused'));
+    third!.focus();
+    await waitFor(() => third!.hasAttribute('data-focused'));
+
+    expect(third!.hasAttribute('data-focused')).toBe(true);
+  });
+});

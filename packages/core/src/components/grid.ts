@@ -218,8 +218,36 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     this.dispatchReady();
   }
 
+  /**
+   * Whether focus has entered or left the grid.
+   *
+   * `focusin` and `focusout` rather than `focus` and `blur`, because only the
+   * former bubble — the cell that gains focus is several shadow roots down.
+   *
+   * `relatedTarget` says where focus went. Moving between two cells retargets
+   * it to this host, so the grid can tell "somewhere else inside me" from
+   * "somewhere else entirely" and only reports the latter as leaving.
+   */
+  private readonly handleFocusIn = (): void => {
+    this.controller?.focus.setWithinGrid(true);
+  };
+
+  private readonly handleFocusOut = (event: FocusEvent): void => {
+    const next = event.relatedTarget;
+    if (next !== null && this.contains(next as Node)) return;
+    this.controller?.focus.setWithinGrid(false);
+  };
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.addEventListener('focusin', this.handleFocusIn);
+    this.addEventListener('focusout', this.handleFocusOut);
+  }
+
   override disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.removeEventListener('focusin', this.handleFocusIn);
+    this.removeEventListener('focusout', this.handleFocusOut);
     this.resizeObserver?.disconnect();
     this.virtualizer?.disconnect();
     this.removeScrollJacking();
