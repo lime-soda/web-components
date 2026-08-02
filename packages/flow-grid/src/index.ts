@@ -1,5 +1,5 @@
 // Element classes. Importing them registers nothing — call `defineElements()`
-// or import `@flow-grid/core/define` for that.
+// or import `flow-grid/define` for that.
 export { defineElements, defineElement, ELEMENTS } from './define-elements.js';
 
 export { FlowGrid } from './components/grid.js';

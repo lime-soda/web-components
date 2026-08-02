@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': minor
+'flow-grid': minor
 ---
 
 Hold the row order while values tick

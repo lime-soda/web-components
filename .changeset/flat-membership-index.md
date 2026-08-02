@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': patch
+'flow-grid': patch
 ---
 
 Index flat selection membership by row id

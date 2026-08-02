@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': patch
+'flow-grid': patch
 ---
 
 Tell a collapsed group apart from a filtered one

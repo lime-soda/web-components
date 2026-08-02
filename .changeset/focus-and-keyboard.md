@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': minor
+'flow-grid': minor
 ---
 
 Make focus visible, reachable and skippable

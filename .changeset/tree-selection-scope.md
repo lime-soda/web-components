@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': minor
+'flow-grid': minor
 ---
 
 Give tree selection three scopes instead of a boolean

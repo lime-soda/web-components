@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': minor
+'flow-grid': minor
 ---
 
 Split selection into row selection, tree selection and row ranges
@@ -10,10 +10,10 @@ through two published seams, so a grid pays only for what it uses.
 
 - Group selection — ticking a category selecting its instruments, indeterminate
   state, membership surviving collapse — moves to `TreeSelectionModule` from
-  `@flow-grid/core/selection/tree`, and `groupSelectsChildren` moves to its
+  `flow-grid/selection/tree`, and `groupSelectsChildren` moves to its
   options.
 - Shift-click spans move to `RowRangeModule` from
-  `@flow-grid/core/selection/row-range`. Without it, shift is a plain click.
+  `flow-grid/selection/row-range`. Without it, shift is a plain click.
 
 Row clicks now follow the desktop conventions: a plain click replaces the
 selection, Ctrl or Cmd adds to it, and Shift extends from the anchor. Checkbox

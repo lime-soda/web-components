@@ -12,7 +12,7 @@ import type { RowTransaction, TransactionResult } from '../store/types.js';
  *
  * @example
  * ```ts
- * declare module '@flow-grid/core' {
+ * declare module 'flow-grid' {
  *   interface GridApi<TData> {
  *     expandAll(): void;
  *   }
@@ -68,7 +68,7 @@ export interface CoreGridApi<TData = unknown> {
  *
  * Empty in core, because core has no state to save: a module contributes its
  * slice by augmenting this, the same way it contributes API methods and column
- * options. Import `@flow-grid/core/sort` and `state.sort` exists and is typed;
+ * options. Import `flow-grid/sort` and `state.sort` exists and is typed;
  * without it, reading `state.sort` does not compile.
  *
  * Every slice is optional. State saved by a grid with more modules than the one

@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import '@flow-grid/core';
-import '@flow-grid/core/define';
-import type { ColumnDef, FlowGrid, GridOptions } from '@flow-grid/core';
-import { TreeModule } from '@flow-grid/core/tree';
-import { SortModule } from '@flow-grid/core/sort';
-import { FilterModule } from '@flow-grid/core/filter';
-import { SelectionModule } from '@flow-grid/core/selection';
-import { CellFlashModule } from '@flow-grid/core/cell-flash';
+import 'flow-grid';
+import 'flow-grid/define';
+import type { ColumnDef, FlowGrid, GridOptions } from 'flow-grid';
+import { TreeModule } from 'flow-grid/tree';
+import { SortModule } from 'flow-grid/sort';
+import { FilterModule } from 'flow-grid/filter';
+import { SelectionModule } from 'flow-grid/selection';
+import { CellFlashModule } from 'flow-grid/cell-flash';
 
 /**
  * The benchmarks that need a real browser: sustained frame timing under a live

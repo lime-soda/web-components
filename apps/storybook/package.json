@@ -11,7 +11,7 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@flow-grid/core": "workspace:*",
+    "flow-grid": "workspace:*",
     "lit": "^3.3.1"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': patch
+'flow-grid': patch
 ---
 
 Fix unused code and a text filter over non-primitive values

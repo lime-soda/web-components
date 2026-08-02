@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': patch
+'flow-grid': patch
 ---
 
 Make a checkbox and a row extend a range the same way

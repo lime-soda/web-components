@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': minor
+'flow-grid': minor
 ---
 
 Read the tree selection hierarchy only from the data

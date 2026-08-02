@@ -1,11 +1,11 @@
 ---
-'@flow-grid/core': minor
+'flow-grid': minor
 ---
 
 Rename group selection to tree selection
 
 `GroupSelectionModule` becomes `TreeSelectionModule`, and
-`@flow-grid/core/selection/group` becomes `@flow-grid/core/selection/tree`.
+`flow-grid/selection/group` becomes `flow-grid/selection/tree`.
 
 The module only ever understood tree data, where every row is a record in the
 store with an id of its own — the parent included. That is why `getParentId`

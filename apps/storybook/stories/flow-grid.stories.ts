@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
-import type { ColumnDef, GridTheme, FlowGrid, GridOptions } from '@flow-grid/core';
-import '@flow-grid/core';
-import '@flow-grid/core/define';
-import { TreeModule } from '@flow-grid/core/tree';
-import { SortModule } from '@flow-grid/core/sort';
-import { FilterModule } from '@flow-grid/core/filter';
-import { SelectionModule } from '@flow-grid/core/selection';
-import { TreeSelectionModule } from '@flow-grid/core/selection/tree';
-import { RowRangeModule } from '@flow-grid/core/selection/row-range';
-import { CellFlashModule } from '@flow-grid/core/cell-flash';
-import { KeyboardModule } from '@flow-grid/core/keyboard';
+import type { ColumnDef, GridTheme, FlowGrid, GridOptions } from 'flow-grid';
+import 'flow-grid';
+import 'flow-grid/define';
+import { TreeModule } from 'flow-grid/tree';
+import { SortModule } from 'flow-grid/sort';
+import { FilterModule } from 'flow-grid/filter';
+import { SelectionModule } from 'flow-grid/selection';
+import { TreeSelectionModule } from 'flow-grid/selection/tree';
+import { RowRangeModule } from 'flow-grid/selection/row-range';
+import { CellFlashModule } from 'flow-grid/cell-flash';
+import { KeyboardModule } from 'flow-grid/keyboard';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 

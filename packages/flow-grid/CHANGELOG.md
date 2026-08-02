@@ -1,4 +1,4 @@
-# @flow-grid/core
+# flow-grid
 
 ## 0.1.0
 

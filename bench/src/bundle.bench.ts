@@ -19,7 +19,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const PACKAGE = resolve(HERE, '../../packages/core');
+const PACKAGE = resolve(HERE, '../../packages/flow-grid');
 const REPO = resolve(HERE, '../..');
 
 /** Distinctive strings, each present only if that module was included. */
@@ -53,7 +53,7 @@ let sandbox: string;
 /** Bundles an app importing core plus the named modules, and returns the output. */
 function bundle(modules: readonly ModuleName[]): string {
   const imports = modules
-    .map((name) => `import { ${ENTRIES[name]} } from '@flow-grid/core/${name}';`)
+    .map((name) => `import { ${ENTRIES[name]} } from 'flow-grid/${name}';`)
     .join('\n');
   const uses = modules.map((name) => `new ${ENTRIES[name]}({ getParentId: () => null })`).join(',');
 
@@ -62,7 +62,7 @@ function bundle(modules: readonly ModuleName[]): string {
   const entry = join(sandbox, `app-${slug}.js`);
   writeFileSync(
     entry,
-    `import '@flow-grid/core/define';
+    `import 'flow-grid/define';
 ${imports}
 const grid = document.createElement('flow-grid');
 grid.gridOptions = { columns: [{ field: 'a' }], modules: [${uses}] };
@@ -95,11 +95,11 @@ const report = (label: string, code: string, baseline?: string) => {
 };
 
 beforeAll(() => {
-  // A sandbox that resolves @flow-grid/core the way a consumer would, through
+  // A sandbox that resolves flow-grid the way a consumer would, through
   // the package's own exports map rather than the workspace's source paths.
   sandbox = mkdtempSync(join(tmpdir(), 'flow-grid-bundle-'));
-  mkdirSync(join(sandbox, 'node_modules', '@flow-grid'), { recursive: true });
-  symlinkSync(PACKAGE, join(sandbox, 'node_modules', '@flow-grid', 'core'));
+  mkdirSync(join(sandbox, 'node_modules'), { recursive: true });
+  symlinkSync(PACKAGE, join(sandbox, 'node_modules', 'flow-grid'));
   symlinkSync(join(REPO, 'node_modules', 'lit'), join(sandbox, 'node_modules', 'lit'));
   symlinkSync(join(REPO, 'node_modules', '.pnpm'), join(sandbox, 'node_modules', '.pnpm'));
 }, 60_000);
@@ -124,7 +124,7 @@ describe('bundle composition', () => {
     const entry = join(sandbox, 'classes-only.js');
     writeFileSync(
       entry,
-      `import { FlowGrid } from '@flow-grid/core';
+      `import { FlowGrid } from 'flow-grid';
 console.log(FlowGrid.name);
 `,
     );

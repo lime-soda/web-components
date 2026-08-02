@@ -1,5 +1,5 @@
 ---
-'@flow-grid/core': patch
+'flow-grid': patch
 ---
 
 Stop a span selecting a whole group it only clipped

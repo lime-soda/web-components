@@ -1,4 +1,4 @@
-# @flow-grid/core
+# flow-grid
 
 A data grid web component that lays rows out **horizontally**.
 
@@ -29,15 +29,15 @@ far-right instance still says what you are looking at.
 ## Install
 
 ```sh
-npm install @flow-grid/core
+npm install flow-grid
 ```
 
 ## Quick start
 
 ```ts
-import '@flow-grid/core/define';
-import '@flow-grid/core/themes/flow-grid.css';
-import type { ColumnDef, FlowGrid, GridOptions } from '@flow-grid/core';
+import 'flow-grid/define';
+import 'flow-grid/themes/flow-grid.css';
+import type { ColumnDef, FlowGrid, GridOptions } from 'flow-grid';
 
 interface Quote {
   id: string;
@@ -90,18 +90,18 @@ frame: median frame 16.7 ms, zero dropped frames, 6 of 194 instances mounted.
 
 ## Registering the elements
 
-`@flow-grid/core/define` registers `<flow-grid>` and the elements it renders
+`flow-grid/define` registers `<flow-grid>` and the elements it renders
 with. It is the only entry point with a side effect, and importing it once
 anywhere in the application is enough.
 
-Importing from `@flow-grid/core` gives you classes and nothing else — no
+Importing from `flow-grid` gives you classes and nothing else — no
 registration, and no sibling elements dragged in behind the one you asked for.
 That is what makes it possible to subclass an element, render one in a test, or
 swap an implementation through an import map without a grid appearing in the
 registry as a consequence:
 
 ```ts
-import { ELEMENTS, defineElement, defineElements } from '@flow-grid/core';
+import { ELEMENTS, defineElement, defineElements } from 'flow-grid';
 
 defineElements(); // everything, the same as importing /define
 
@@ -115,20 +115,20 @@ the package on one page will not throw.
 
 Every feature beyond the core is an additive module with its own entry point.
 
-| Import                                | Adds                                                        |
-| ------------------------------------- | ----------------------------------------------------------- |
-| `@flow-grid/core/tree`                | Hierarchy, expand/collapse, and the repeated group headings |
-| `@flow-grid/core/sort`                | Multi-column sort, comparators, header indicators           |
-| `@flow-grid/core/filter`              | Quick filter and per-column filters                         |
-| `@flow-grid/core/selection`           | Row selection, checkbox column, click and modifier handling |
-| `@flow-grid/core/selection/tree`      | Makes a parent stand for the rows beneath it, for tree data |
-| `@flow-grid/core/selection/row-range` | Shift-click spans over contiguous rows                      |
-| `@flow-grid/core/cell-flash`          | Directional flash on value change                           |
-| `@flow-grid/core/keyboard`            | Arrow navigation across instances, Home/End, Page keys      |
+| Import                          | Adds                                                        |
+| ------------------------------- | ----------------------------------------------------------- |
+| `flow-grid/tree`                | Hierarchy, expand/collapse, and the repeated group headings |
+| `flow-grid/sort`                | Multi-column sort, comparators, header indicators           |
+| `flow-grid/filter`              | Quick filter and per-column filters                         |
+| `flow-grid/selection`           | Row selection, checkbox column, click and modifier handling |
+| `flow-grid/selection/tree`      | Makes a parent stand for the rows beneath it, for tree data |
+| `flow-grid/selection/row-range` | Shift-click spans over contiguous rows                      |
+| `flow-grid/cell-flash`          | Directional flash on value change                           |
+| `flow-grid/keyboard`            | Arrow navigation across instances, Home/End, Page keys      |
 
 ```ts
-import { TreeModule } from '@flow-grid/core/tree';
-import { SelectionModule } from '@flow-grid/core/selection';
+import { TreeModule } from 'flow-grid/tree';
+import { SelectionModule } from 'flow-grid/selection';
 
 grid.gridOptions = {
   columns,
@@ -162,7 +162,7 @@ Importing a module also adds its options and api methods **to the types**. Witho
 the import, `api.expandAll()` does not exist and does not compile:
 
 ```ts
-import '@flow-grid/core/tree';
+import 'flow-grid/tree';
 
 grid.api.expandAll(); // ✅ typed, because tree is imported
 grid.api.setSortModel([/* … */]); // ❌ compile error without /sort
@@ -209,7 +209,7 @@ A module owns its own slice, exactly as it owns its API methods, and contributes
 it by augmenting `GridState`. So the shape follows the imports:
 
 ```ts
-import '@flow-grid/core/sort';
+import 'flow-grid/sort';
 
 const state = grid.api.getState();
 state.sort; // ✅ typed, because sort is imported
@@ -293,9 +293,9 @@ whole model, and it is what a grid of instruments with no grouping should pay
 for.
 
 ```ts
-import { SelectionModule } from '@flow-grid/core/selection';
-import { TreeSelectionModule } from '@flow-grid/core/selection/tree';
-import { RowRangeModule } from '@flow-grid/core/selection/row-range';
+import { SelectionModule } from 'flow-grid/selection';
+import { TreeSelectionModule } from 'flow-grid/selection/tree';
+import { RowRangeModule } from 'flow-grid/selection/row-range';
 
 modules: [
   new SelectionModule<Quote>({ mode: 'multi' }),
@@ -458,7 +458,7 @@ A column that needs its value type — for a comparator or a typed formatter —
 declares it, and still sits in the same array as its siblings:
 
 ```ts
-import type { ColumnDef, ColumnDefs } from '@flow-grid/core';
+import type { ColumnDef, ColumnDefs } from 'flow-grid';
 
 const price: ColumnDef<Quote, number> = {
   field: 'price',
@@ -475,7 +475,7 @@ Set `cellRenderer` to a custom element's tag name. The element reads its row and
 column from context — no props are drilled through:
 
 ```ts
-import { CellRendererElement } from '@flow-grid/core';
+import { CellRendererElement } from 'flow-grid';
 
 @customElement('depth-bar')
 class DepthBar extends CellRendererElement<Quote, number> {
@@ -497,7 +497,7 @@ Two ways in, both landing on the same custom properties.
 A typed theme object, validated on assignment:
 
 ```ts
-import type { GridTheme } from '@flow-grid/core';
+import type { GridTheme } from 'flow-grid';
 
 const theme: GridTheme = {
   rowHeight: '28px',
@@ -528,7 +528,7 @@ flow-grid {
 }
 ```
 
-`@flow-grid/core/themes/flow-grid.css` provides a light/dark pair, honouring
+`flow-grid/themes/flow-grid.css` provides a light/dark pair, honouring
 `prefers-color-scheme` with a `data-flow-theme="light|dark"` override.
 
 Every token maps to one property by the same rule — `selectionBackground` is
@@ -591,7 +591,7 @@ A module reaches the grid through hooks; it never renders a cell itself, so
 several modules can decorate the same cell without fighting:
 
 ```ts
-import type { GridModule } from '@flow-grid/core';
+import type { GridModule } from 'flow-grid';
 
 export class HighlightModule implements GridModule<Quote> {
   readonly id = 'highlight';

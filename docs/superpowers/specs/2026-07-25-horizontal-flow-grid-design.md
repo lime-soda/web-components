@@ -67,14 +67,14 @@ pipeline above.
 One npm package with per-module entry points — AG Grid v33's consolidation, and it avoids version skew:
 
 ```
-@flow-grid/core            core: store, projection, layout, components, contexts, api
-@flow-grid/core/tree       tree data + expansion
-@flow-grid/core/sort
-@flow-grid/core/filter
-@flow-grid/core/selection
-@flow-grid/core/keyboard
-@flow-grid/core/cell-flash
-@flow-grid/core/themes     light + dark CSS
+flow-grid            core: store, projection, layout, components, contexts, api
+flow-grid/tree       tree data + expansion
+flow-grid/sort
+flow-grid/filter
+flow-grid/selection
+flow-grid/keyboard
+flow-grid/cell-flash
+flow-grid/themes     light + dark CSS
 ```
 
 `"sideEffects": false` and an `exports` map keep unused modules out of consumer bundles.
@@ -229,8 +229,8 @@ Plus `defaultColDef` and `columnTypes` on grid config. Resolution order per cell
 Modules add their own column properties by augmentation, so core's `ColumnDef` never grows:
 
 ```ts
-// @flow-grid/core/sort
-declare module '@flow-grid/core' {
+// flow-grid/sort
+declare module 'flow-grid' {
   interface ColumnDef<TData, TValue> {
     sortable?: boolean;
     comparator?: (a: TValue, b: TValue, ctx: ComparatorContext<TData>) => number;
@@ -292,7 +292,7 @@ Events are typed CustomEvents on the host with a `GridEventMap` so `addEventList
 ### Theming
 
 CSS custom properties (`--flow-*`, evolved from the prototype's `--grid-*`) plus `::part()` on grid, instance,
-header-cell, row and cell. No colour literals in component styles. `@flow-grid/core/themes` ships light and
+header-cell, row and cell. No colour literals in component styles. `flow-grid/themes` ships light and
 dark.
 
 ---

@@ -35,7 +35,7 @@ export type CellRendererFn<TData = unknown, TValue = unknown> = (
  *
  * @example
  * ```ts
- * declare module '@flow-grid/core' {
+ * declare module 'flow-grid' {
  *   interface ColumnDef<TData, TValue> {
  *     sortable?: boolean;
  *   }

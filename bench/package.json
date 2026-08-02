@@ -12,7 +12,7 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@flow-grid/core": "workspace:*"
+    "flow-grid": "workspace:*"
   },
   "devDependencies": {
     "@vitest/browser": "^3.2.4",

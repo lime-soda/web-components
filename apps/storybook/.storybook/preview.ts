@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/web-components-vite';
-import '@flow-grid/core/themes/flow-grid.css';
+import 'flow-grid/themes/flow-grid.css';
 import './preview.css';
 
 const preview: Preview = {
