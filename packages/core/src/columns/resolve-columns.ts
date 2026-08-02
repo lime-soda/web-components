@@ -1,11 +1,5 @@
 import type { RowNode } from '../store/types.js';
-import type {
-  ColumnDef,
-  ColumnDefs,
-  ColumnResolutionOptions,
-  ResolvedColumn,
-  ValueFormatterParams,
-} from './types.js';
+import type { ColumnDef, ColumnDefs, ColumnResolutionOptions, ResolvedColumn } from './types.js';
 
 const DEFAULT_WIDTH = 100;
 

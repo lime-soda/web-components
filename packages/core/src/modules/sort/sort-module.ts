@@ -89,7 +89,21 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
   }
 
   private createStage(): ProjectionStage<TData> {
-    const self = this;
+    const sortedFields = (): ReadonlySet<string> | '*' | undefined => {
+      if (this.model.length === 0) return undefined;
+      if (!(this.options.resortOnValueChange ?? false)) return undefined;
+
+      const fields = new Set<string>();
+      for (const entry of this.model) {
+        const column = this.columnFor(entry.colId);
+        if (!column) continue;
+        // A value getter can read anything, so nothing narrower is safe.
+        if (column.valueGetter) return '*';
+        if (column.field) fields.add(column.field);
+      }
+      return fields;
+    };
+
     return {
       id: 'sort',
       phase: 'sort',
@@ -103,22 +117,13 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
        * their positions and only their cells repaint. A structural change or a
        * new sort model still re-runs the stage, against current values.
        */
+      // An arrow, so the module is what `this` means inside it. A getter's own
+      // `this` is the stage object, which is what an alias used to work around.
       get dependsOn(): ReadonlySet<string> | '*' | undefined {
-        if (self.model.length === 0) return undefined;
-        if (!(self.options.resortOnValueChange ?? false)) return undefined;
-
-        const fields = new Set<string>();
-        for (const entry of self.model) {
-          const column = self.columnFor(entry.colId);
-          if (!column) continue;
-          // A value getter can read anything, so nothing narrower is safe.
-          if (column.valueGetter) return '*';
-          if (column.field) fields.add(column.field);
-        }
-        return fields;
+        return sortedFields();
       },
 
-      run: (rows, ctx) => self.sort(rows, ctx.store.getRowNode.bind(ctx.store)),
+      run: (rows, ctx) => this.sort(rows, ctx.store.getRowNode.bind(ctx.store)),
     };
   }
 
@@ -230,9 +235,9 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     const showOrder = this.model.length > 1;
 
     return html`<span class="flow-sort-indicator" part="sort-indicator"
-      >${direction === 'asc' ? '\u25B2' : '\u25BC'}${
-        showOrder ? html`<sub class="flow-sort-order">${position + 1}</sub>` : ''
-      }</span
+      >${direction === 'asc' ? '\u25B2' : '\u25BC'}${showOrder
+        ? html`<sub class="flow-sort-order">${position + 1}</sub>`
+        : ''}</span
     >`;
   }
 

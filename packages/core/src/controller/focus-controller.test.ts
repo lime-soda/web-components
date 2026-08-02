@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import type { DisplayRow, LayoutResult, ViewportMetrics } from '../layout/types.js';
 import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
 import { FocusController } from './focus-controller.js';

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import type { LayoutEngine, ViewportMetrics } from '../layout/types.js';
 import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
 import { GridPipeline } from './grid-pipeline.js';

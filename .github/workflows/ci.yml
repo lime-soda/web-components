@@ -29,8 +29,8 @@ jobs:
       # assert in jsdom.
       - run: pnpm --filter @flow-grid/core exec playwright install --with-deps chromium
 
-      - run: pnpm typecheck
-      - run: pnpm format:check
+      # Formatting, lint and types in one pass.
+      - run: pnpm check
       - run: pnpm test
       - run: pnpm build
 

@@ -100,12 +100,14 @@
   "scripts": {
     "build": "pnpm clean && tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('src/themes','dist/themes',{recursive:true})\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
-    "test:node": "vitest run --project node",
-    "test:browser": "vitest run --project browser",
+    "test": "vp test run",
+    "test:node": "vp test run --project node",
+    "test:browser": "vp test run --project browser",
     "analyze": "cem analyze",
     "prepublishOnly": "pnpm build && pnpm analyze",
-    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "lint": "vp lint",
+    "check": "vp check"
   },
   "dependencies": {
     "@lit/context": "^1.1.6",
@@ -115,9 +117,9 @@
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.10.4",
     "@types/node": "^22.10.2",
-    "@vitest/browser": "^3.2.4",
+    "@vitest/browser-playwright": "^4.1.10",
     "playwright": "^1.56.1",
     "typescript": "~5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10"
   }
 }

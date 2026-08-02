@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { StackLayoutEngine } from './stack-layout-engine.js';
 import type { DisplayRow, ViewportMetrics } from './types.js';
 

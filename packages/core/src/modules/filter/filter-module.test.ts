@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { resolveColumns } from '../../columns/resolve-columns.js';
 import type { ColumnDef } from '../../columns/types.js';
 import { GridPipeline } from '../../pipeline/grid-pipeline.js';

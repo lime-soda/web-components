@@ -1,7 +1,7 @@
 import type { TemplateResult } from 'lit';
 import type { RowNode } from '../store/types.js';
 
-export interface ValueGetterParams<TData = unknown, TValue = unknown> {
+export interface ValueGetterParams<TData = unknown> {
   readonly data: TData;
   readonly node: RowNode<TData>;
   // Deliberately not ResolvedColumn<TData, TValue>. That self-reference put
@@ -72,7 +72,7 @@ export interface ColumnDef<TData = unknown, TValue = unknown> {
   flex?: number;
   /** Names of entries in `columnTypes` to merge in beneath this definition. */
   type?: string | readonly string[];
-  valueGetter?: (params: ValueGetterParams<TData, TValue>) => TValue;
+  valueGetter?: (params: ValueGetterParams<TData>) => TValue;
   valueFormatter?: (params: ValueFormatterParams<TData, TValue>) => string;
   /** A custom element tag name, or a function returning a Lit template. */
   cellRenderer?: string | CellRendererFn<TData, TValue>;

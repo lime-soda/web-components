@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { RowStore } from '../store/row-store.js';
 import { RowProjector } from './row-projector.js';
 import type { ProjectionStage } from './types.js';

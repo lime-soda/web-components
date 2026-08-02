@@ -58,6 +58,7 @@ export class CellFlashModule<TData = unknown> implements GridModule<TData> {
     context.addTeardown(
       context.pipeline.store.subscribe((result) => {
         for (const rowId of result.removed) {
+          // Copied: the loop deletes from the map it is walking.
           for (const key of [...this.previous.keys()]) {
             if (key.startsWith(`${rowId}\u0000`)) this.previous.delete(key);
           }

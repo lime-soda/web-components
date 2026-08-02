@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import type { RowNode } from '../store/types.js';
 import { formatCellValue, getCellValue, resolveColumns } from './resolve-columns.js';
 import type { ColumnDef } from './types.js';
@@ -180,7 +180,7 @@ describe('formatCellValue', () => {
     const column = resolve([
       {
         field: 'price',
-        valueFormatter: ({ value, data }) => `${data.instrument}: ${value}`,
+        valueFormatter: ({ value, data }) => `${data.instrument}: ${String(value)}`,
       },
     ])[0]!;
 

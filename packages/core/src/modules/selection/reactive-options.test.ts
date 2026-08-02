@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { resolveColumns } from '../../columns/resolve-columns.js';
 import { GridPipeline } from '../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../module-registry.js';
@@ -113,7 +113,7 @@ describe('module options are reactive', () => {
   });
 
   it('applies a changed mode to later selections', () => {
-    const { selection, group } = setup({ mode: 'multi' });
+    const { selection } = setup({ mode: 'multi' });
     selection.setRowSelected('a', true);
     selection.setRowSelected('b', true);
     expect(selection.getSelectedCount()).toBe(2);

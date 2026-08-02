@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 import '@flow-grid/core';
 import '@flow-grid/core/define';
 import type { ColumnDef, FlowGrid, GridOptions } from '@flow-grid/core';

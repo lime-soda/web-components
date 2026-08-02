@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 import './index.js';
 import './define.js';
 import type { ColumnDef } from './columns/types.js';

@@ -1,11 +1,6 @@
 import type { CoreGridApi, GridApi } from '../api/types.js';
 import { resolveColumns } from '../columns/resolve-columns.js';
-import type {
-  ColumnDef,
-  ColumnDefs,
-  ColumnResolutionOptions,
-  ResolvedColumn,
-} from '../columns/types.js';
+import type { ColumnDefs, ColumnResolutionOptions, ResolvedColumn } from '../columns/types.js';
 import type { FocusController } from './focus-controller.js';
 import { FlowLayoutEngine } from '../layout/flow-layout-engine.js';
 import { StackLayoutEngine } from '../layout/stack-layout-engine.js';

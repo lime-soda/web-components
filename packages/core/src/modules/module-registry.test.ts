@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { GridPipeline } from '../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from './module-registry.js';
 import type { GridModule } from './types.js';

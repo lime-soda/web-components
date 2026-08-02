@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { FlowLayoutEngine, GridPipeline, type ViewportMetrics } from '@flow-grid/core';
 import { TreeModule } from '@flow-grid/core/tree';
 import { SortModule } from '@flow-grid/core/sort';

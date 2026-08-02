@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vite-plus/test';
 import { FlowLayoutEngine } from '../../layout/flow-layout-engine.js';
 import type { DisplayRow, ViewportMetrics } from '../../layout/types.js';
 import { GridPipeline } from '../../pipeline/grid-pipeline.js';

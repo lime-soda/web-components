@@ -166,26 +166,26 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
     this.toggleAttribute('data-flow-unnamed', unnamed);
 
     return html`
-      ${
-        unnamed
-          ? nothing
-          : html`<span
-              class=${activators.length > 0 ? 'label activatable' : 'label'}
-              part="header-label"
-              title=${this.column.headerName}
-              role=${activators.length > 0 ? 'button' : nothing}
-              tabindex=${activators.length > 0 ? 0 : nothing}
-              @click=${(event: Event) => activators.forEach((fn) => fn(event))}
-              @keydown=${(event: KeyboardEvent) => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                activators.forEach((fn) => fn(event));
-              }}
-            >
-              ${this.column.headerName}
-            </span>`
-      }
-      ${slots.length === 0 ? nothing : html`<span class="slots" part="header-slots">${slots}</span>`}
+      ${unnamed
+        ? nothing
+        : html`<span
+            class=${activators.length > 0 ? 'label activatable' : 'label'}
+            part="header-label"
+            title=${this.column.headerName}
+            role=${activators.length > 0 ? 'button' : nothing}
+            tabindex=${activators.length > 0 ? 0 : nothing}
+            @click=${(event: Event) => activators.forEach((fn) => fn(event))}
+            @keydown=${(event: KeyboardEvent) => {
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
+              activators.forEach((fn) => fn(event));
+            }}
+          >
+            ${this.column.headerName}
+          </span>`}
+      ${slots.length === 0
+        ? nothing
+        : html`<span class="slots" part="header-slots">${slots}</span>`}
     `;
   }
 }

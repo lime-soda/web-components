@@ -6,7 +6,9 @@
   "scripts": {
     "storybook": "storybook dev -p 6006",
     "build": "storybook build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "vp lint",
+    "check": "vp check"
   },
   "dependencies": {
     "@flow-grid/core": "workspace:*",

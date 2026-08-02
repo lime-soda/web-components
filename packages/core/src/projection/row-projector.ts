@@ -118,6 +118,8 @@ export class RowProjector<TData = unknown> {
   }
 
   private notify(): void {
+    // Copied: a listener that unsubscribes while being called would otherwise
+    // shift the set under the iteration and skip its neighbour.
     for (const listener of [...this.listeners]) listener();
   }
 }

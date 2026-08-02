@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import type { DisplayRow } from '../../layout/types.js';
 import { FlatMembership } from './membership.js';
 

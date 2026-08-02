@@ -59,6 +59,23 @@ export function matchesFilter(value: unknown, filter: ColumnFilter): boolean {
   }
 }
 
+/**
+ * A value's text, for a filter that compares text.
+ *
+ * Anything without one reads as blank rather than as its default
+ * stringification: a cell holding an object would otherwise contain the literal
+ * "[object Object]", and a search for "object" would match every one of them.
+ */
+function asText(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+  if (value instanceof Date) return value.toISOString();
+  return '';
+}
+
 function matchesText(value: unknown, filter: TextFilter): boolean {
   if (filter.operator === 'blank') return isBlank(value);
   if (filter.operator === 'notBlank') return !isBlank(value);
@@ -67,7 +84,8 @@ function matchesText(value: unknown, filter: TextFilter): boolean {
   // matching nothing — a half-typed filter should not blank the grid.
   if (filter.value === undefined || filter.value === '') return true;
 
-  const haystack = filter.caseSensitive ? String(value ?? '') : String(value ?? '').toLowerCase();
+  const text = asText(value);
+  const haystack = filter.caseSensitive ? text : text.toLowerCase();
   const needle = filter.caseSensitive ? filter.value : filter.value.toLowerCase();
 
   switch (filter.operator) {

@@ -238,7 +238,6 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
     const mode = controller.options.layout ?? 'flow';
     const layout = controller.layout.get();
-    const viewport = controller.pipeline.viewport;
 
     // The engine's capacity arithmetic and the CSS that lays rows out must agree.
     // Publishing the configured heights as custom properties is what keeps them
@@ -305,11 +304,9 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
           })}
           ${ref((element) => this.observeSlot(element))}
         >
-          ${
-            this.visibleInstances.has(instance.id)
-              ? html`<flow-instance part="instance" .instance=${instance}></flow-instance>`
-              : html`<div class="placeholder" part="placeholder"></div>`
-          }
+          ${this.visibleInstances.has(instance.id)
+            ? html`<flow-instance part="instance" .instance=${instance}></flow-instance>`
+            : html`<div class="placeholder" part="placeholder"></div>`}
         </div>
       `,
     );
@@ -337,19 +334,17 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     const stickyInstance = this.stickyInstanceFor(instance, stickyRows);
 
     return html`
-      ${
-        stickyRows.length === 0
-          ? nothing
-          : html`<flow-instance
-              class="stack-sticky"
-              part="instance-sticky"
-              parts="rows"
-              .instance=${stickyInstance}
-              style=${styleMap({
-                '--flow-sticky-height': `${stickyRows.length * rowHeight}px`,
-              })}
-            ></flow-instance>`
-      }
+      ${stickyRows.length === 0
+        ? nothing
+        : html`<flow-instance
+            class="stack-sticky"
+            part="instance-sticky"
+            parts="rows"
+            .instance=${stickyInstance}
+            style=${styleMap({
+              '--flow-sticky-height': `${stickyRows.length * rowHeight}px`,
+            })}
+          ></flow-instance>`}
       <div
         class="stack-spacer"
         style=${styleMap({ '--flow-spacer-height': `${instance.offset}px` })}

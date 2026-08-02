@@ -63,23 +63,28 @@ export class FilterModule<TData = unknown> implements GridModule<
   }
 
   private createStage(): ProjectionStage<TData> {
-    const self = this;
+    const dependencies = (): ReadonlySet<string> | '*' | undefined => {
+      // A quick filter reads every column, so any value change can change what
+      // matches.
+      if (this.quickFilter !== '') return '*';
+      return filterDependencies(this.model, (colId) => {
+        const column = this.columnFor(colId);
+        if (!column) return undefined;
+        return { field: column.field, derived: column.valueGetter !== undefined };
+      });
+    };
+
     return {
       id: 'filter',
       phase: 'filter',
 
+      // An arrow, so the module is what `this` means inside it. A getter's own
+      // `this` is the stage object, which is what an alias used to work around.
       get dependsOn(): ReadonlySet<string> | '*' | undefined {
-        // A quick filter reads every column, so any value change can change what
-        // matches.
-        if (self.quickFilter !== '') return '*';
-        return filterDependencies(self.model, (colId) => {
-          const column = self.columnFor(colId);
-          if (!column) return undefined;
-          return { field: column.field, derived: column.valueGetter !== undefined };
-        });
+        return dependencies();
       },
 
-      run: (rows, ctx) => self.filter(rows, ctx.store.getRowNode.bind(ctx.store)),
+      run: (rows, ctx) => this.filter(rows, ctx.store.getRowNode.bind(ctx.store)),
     };
   }
 

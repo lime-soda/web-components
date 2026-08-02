@@ -147,30 +147,23 @@ export class FlowInstance extends SignalWatcher(LitElement) {
         part="instance-grid"
         style=${styleMap({ '--flow-column-template': template })}
       >
-        ${
-          showHeader
-            ? html`<div class="header" role="row">
-                ${repeat(
-                  columns,
-                  (column) => column.colId,
-                  (column) =>
-                    html`<flow-header-cell
-                      part="header-cell"
-                      .column=${column}
-                    ></flow-header-cell>`,
-                )}
-              </div>`
-            : nothing
-        }
-        ${
-          showRows
-            ? repeat(
-                this.instance.rows,
-                (row) => row.id,
-                (row) => html`<flow-row .row=${row}></flow-row>`,
-              )
-            : nothing
-        }
+        ${showHeader
+          ? html`<div class="header" role="row">
+              ${repeat(
+                columns,
+                (column) => column.colId,
+                (column) =>
+                  html`<flow-header-cell part="header-cell" .column=${column}></flow-header-cell>`,
+              )}
+            </div>`
+          : nothing}
+        ${showRows
+          ? repeat(
+              this.instance.rows,
+              (row) => row.id,
+              (row) => html`<flow-row .row=${row}></flow-row>`,
+            )
+          : nothing}
       </div>
     `;
   }

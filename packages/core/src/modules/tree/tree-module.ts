@@ -211,23 +211,21 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
       },
       prefix: html`
         <span class="flow-tree-indent"></span>
-        ${
-          hasChildren
-            ? html`<button
-                part="tree-expander"
-                class="flow-expander"
-                aria-label=${isExpanded ? 'Collapse' : 'Expand'}
-                aria-expanded=${isExpanded}
-                tabindex="-1"
-                @click=${(event: Event) => {
-                  event.stopPropagation();
-                  this.toggleExpanded(ctx.row.rowId);
-                }}
-              >
-                ▶
-              </button>`
-            : html`<span class="flow-tree-spacer"></span>`
-        }
+        ${hasChildren
+          ? html`<button
+              part="tree-expander"
+              class="flow-expander"
+              aria-label=${isExpanded ? 'Collapse' : 'Expand'}
+              aria-expanded=${isExpanded}
+              tabindex="-1"
+              @click=${(event: Event) => {
+                event.stopPropagation();
+                this.toggleExpanded(ctx.row.rowId);
+              }}
+            >
+              ▶
+            </button>`
+          : html`<span class="flow-tree-spacer"></span>`}
       `,
     };
   }

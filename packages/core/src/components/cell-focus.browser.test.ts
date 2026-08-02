@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { defineElements } from '../define-elements.js';
 import { SelectionModule } from '../modules/selection/index.js';
 import { KeyboardModule } from '../modules/keyboard/index.js';

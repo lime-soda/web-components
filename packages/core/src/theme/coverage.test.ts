@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { THEME_TOKENS, customPropertyFor } from './tokens.js';
 
 /**
@@ -19,7 +19,7 @@ function sourceFiles(dir: string, out: string[] = []): string[] {
     const path = join(dir, entry);
     if (statSync(path).isDirectory()) {
       sourceFiles(path, out);
-    } else if (/\.(ts|css)$/.test(entry) && !/\.test\.ts$/.test(entry)) {
+    } else if (/\.(ts|css)$/.test(entry) && !entry.endsWith('.test.ts')) {
       out.push(path);
     }
   }

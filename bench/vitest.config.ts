@@ -1,4 +1,5 @@
-import { defineConfig } from 'vitest/config';
+import { playwright } from 'vite-plus/test/browser-playwright';
+import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
   resolve: {
@@ -25,7 +26,7 @@ export default defineConfig({
           include: ['src/**/*.browser.bench.ts'],
           browser: {
             enabled: true,
-            provider: 'playwright',
+            provider: playwright(),
             headless: true,
             instances: [
               {

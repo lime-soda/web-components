@@ -3,7 +3,7 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "typecheck", "check"],
       "outputs": ["dist/**", "storybook-static/**", "custom-elements.json"]
     },
     "typecheck": {
@@ -38,6 +38,10 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
+    },
+    "check": {
+      "dependsOn": ["^build"],
+      "outputs": []
     }
   }
 }
