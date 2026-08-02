@@ -154,7 +154,7 @@ const meta: Meta<Args> = {
     },
     expandByDefault: {
       control: 'boolean',
-      description: 'Expand every category, or collapse them all. Belongs to the tree module.',
+      description: 'Expand every category, or collapse them all.',
       table: { category: 'Tree' },
     },
     skipGroupRows: {
