@@ -114,17 +114,49 @@ const bondMarketRowRange = new RowRangeModule<Bond>();
 
 /** Held outside `render` for the same reason as the selection module. */
 const bondMarketSort = new SortModule<Bond>();
+
+/**
+ * Hoisted for the same reason as the others, and with a wrinkle: `defaultExpanded`
+ * seeds expansion at init and says nothing afterwards, so the control applies it
+ * by expanding or collapsing when it changes rather than by rebuilding the module.
+ */
+const bondMarketTree = new TreeModule<Bond>({
+  getParentId: (bond) => bond.parentId,
+  defaultExpanded: (bond) => bond.parentId === null,
+});
+let lastExpandByDefault: boolean | undefined;
 const bondMarketKeyboard = new KeyboardModule<Bond>();
 
 const meta: Meta<Args> = {
   title: 'Flow grid/Bond market',
   argTypes: {
-    groups: { control: { type: 'range', min: 1, max: 50, step: 1 } },
-    instruments: { control: { type: 'range', min: 10, max: 10_000, step: 10 } },
-    rowHeight: { control: { type: 'range', min: 20, max: 48, step: 1 } },
-    ticksPerFrame: { control: { type: 'range', min: 1, max: 100, step: 1 } },
-    enableScrollJacking: { control: 'boolean' },
-    expandByDefault: { control: 'boolean' },
+    groups: {
+      control: { type: 'range', min: 1, max: 50, step: 1 },
+      table: { category: 'Data' },
+    },
+    instruments: {
+      control: { type: 'range', min: 10, max: 10_000, step: 10 },
+      table: { category: 'Data' },
+    },
+    rowHeight: {
+      control: { type: 'range', min: 20, max: 48, step: 1 },
+      table: { category: 'Layout' },
+    },
+    ticksPerFrame: {
+      control: { type: 'range', min: 1, max: 100, step: 1 },
+      description: 'Rows updated per frame once ticking starts.',
+      table: { category: 'Data' },
+    },
+    enableScrollJacking: {
+      control: 'boolean',
+      description: 'Turn vertical wheel movement into horizontal scrolling.',
+      table: { category: 'Layout' },
+    },
+    expandByDefault: {
+      control: 'boolean',
+      description: 'Expand every category, or collapse them all. Belongs to the tree module.',
+      table: { category: 'Tree' },
+    },
     skipGroupRows: {
       control: 'boolean',
       description:
@@ -191,6 +223,20 @@ export const BondMarket: StoryObj<Args> = {
     // Reused across renders. Storybook re-runs render on every control change,
     // and a fresh module would never be registered — the grid keeps the modules
     // it started with — so the controls would appear to do nothing.
+    // Two halves, because expansion is seeded once and then is state.
+    // `defaultExpanded` is read when the module initialises, which happens after
+    // this render — so the first mount needs the option set...
+    bondMarketTree.setOptions({
+      defaultExpanded: args.expandByDefault ? (bond: Bond) => bond.parentId === null : false,
+    });
+    // ...and every later change needs saying out loud, since nothing re-reads it.
+    // Only on change, so it does not fight rows the reader expanded by hand.
+    if (lastExpandByDefault !== args.expandByDefault) {
+      lastExpandByDefault = args.expandByDefault;
+      if (args.expandByDefault) bondMarketTree.expandAll();
+      else bondMarketTree.collapseAll();
+    }
+
     bondMarketSort.setOptions({ resortOnValueChange: args.resortOnValueChange });
     // The predicate is the application's: the module has no idea what a group is.
     bondMarketKeyboard.setOptions({
@@ -216,10 +262,7 @@ export const BondMarket: StoryObj<Args> = {
       theme: deskTheme,
       ariaLabel: `Bond market: ${args.instruments} instruments across ${args.groups} groups`,
       modules: [
-        new TreeModule<Bond>({
-          getParentId: (bond) => bond.parentId,
-          defaultExpanded: args.expandByDefault ? (bond) => bond.parentId === null : false,
-        }),
+        bondMarketTree,
         bondMarketSort,
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
