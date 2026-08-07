@@ -82,7 +82,10 @@ export class FlowInstance extends SignalWatcher(LitElement) {
     }
 
     .header {
-      display: contents;
+      /* Same as a row: a real element, aligned to the instance's tracks. */
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
     }
   `;
 
@@ -108,6 +111,8 @@ export class FlowInstance extends SignalWatcher(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    // Replaced on first render with whatever the modules declare — 'treegrid'
+    // when rows sit inside other rows.
     this.setAttribute('role', 'grid');
   }
 
@@ -141,6 +146,16 @@ export class FlowInstance extends SignalWatcher(LitElement) {
     const showHeader = this.parts !== 'rows';
     const showRows = this.parts !== 'header';
 
+    // An instance is a complete table: its own header, its own rows. So it
+    // carries the counts, and they describe what it holds rather than the whole
+    // data set — a reader is told "20 rows" about a panel of 20, not 10,000
+    // about one it cannot reach.
+    //
+    // Row 1 is the header, so the body starts at 2.
+    this.setAttribute('role', grid.registry.gridRole());
+    this.setAttribute('aria-colcount', String(columns.length));
+    this.setAttribute('aria-rowcount', String(this.instance.rows.length + (showHeader ? 1 : 0)));
+
     return html`
       <div
         class="grid"
@@ -148,7 +163,7 @@ export class FlowInstance extends SignalWatcher(LitElement) {
         style=${styleMap({ '--flow-column-template': template })}
       >
         ${showHeader
-          ? html`<div class="header" role="row">
+          ? html`<div class="header" role="row" aria-rowindex="1">
               ${repeat(
                 columns,
                 (column) => column.colId,
@@ -161,7 +176,8 @@ export class FlowInstance extends SignalWatcher(LitElement) {
           ? repeat(
               this.instance.rows,
               (row) => row.id,
-              (row) => html`<flow-row .row=${row}></flow-row>`,
+              (row, index) =>
+                html`<flow-row .row=${row} .rowIndex=${index + (showHeader ? 2 : 1)}></flow-row>`,
             )
           : nothing}
       </div>

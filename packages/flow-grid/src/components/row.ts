@@ -24,12 +24,28 @@ import { SignalWatcher } from '../reactive/index.js';
 export class FlowRow extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
-      display: contents;
+      /*
+       * A row spans every column and lines its cells up with the instance's
+       * tracks, rather than dissolving into them.
+       *
+       * It was display:contents, which made the cells grid items directly. That
+       * works, but it puts role=row, aria-rowindex and aria-level on an element
+       * with no box — a combination browsers have handled inconsistently, and
+       * one there is no reason to rely on. Subgrid gives the same alignment
+       * with the row still a real element.
+       */
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
     }
   `;
 
   @property({ attribute: false })
   accessor row!: DisplayRow;
+
+  /** 1-based position within this instance, the header row being 1. */
+  @property({ attribute: false })
+  accessor rowIndex = 0;
 
   @consume({ context: gridContext, subscribe: true })
   accessor grid: GridController | undefined;
@@ -86,6 +102,8 @@ export class FlowRow extends SignalWatcher(LitElement) {
   }
 
   override render(): unknown {
+    if (this.rowIndex > 0) this.setAttribute('aria-rowindex', String(this.rowIndex));
+
     const grid = this.grid;
     if (!grid || !this.rowValue) return nothing;
 
@@ -110,6 +128,7 @@ export class FlowRow extends SignalWatcher(LitElement) {
         html`<flow-cell
           part="cell"
           role="gridcell"
+          aria-colindex=${column.index + 1}
           class=${cellClasses}
           style=${styleMap(cellProperties)}
           .column=${column}

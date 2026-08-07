@@ -1,7 +1,15 @@
 import { css, html } from 'lit';
 import type { DisplayRow } from '../../layout/types.js';
 import type { ProjectionStage } from '../../projection/types.js';
-import type { CellContext, CellDecoration, GridModule, ModuleContext } from '../types.js';
+import type {
+  CellContext,
+  CellDecoration,
+  GridModule,
+  GridRole,
+  ModuleContext,
+  RowContextInfo,
+  RowDecoration,
+} from '../types.js';
 import { TreeIndex, type TreeIndexOptions } from './tree-index.js';
 
 export interface TreeModuleOptions<TData = unknown> extends TreeIndexOptions<TData> {
@@ -190,6 +198,34 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
   `;
 
   readonly styles = TreeModule.styles;
+
+  /**
+   * Rows sit inside other rows here, which is what `treegrid` means.
+   *
+   * Declared rather than inferred: core would have to read `meta.depth` to work
+   * this out, and that convention is this module's.
+   */
+  provideGridRole(): GridRole {
+    return 'treegrid';
+  }
+
+  /**
+   * The hierarchy, for assistive technology.
+   *
+   * `aria-level` is 1-based, and `aria-expanded` belongs on the row rather than
+   * on the expander button: in a treegrid it is the row that is open or closed,
+   * and a screen reader looks for it there.
+   */
+  rowDecorator(ctx: RowContextInfo<TData>): RowDecoration | null {
+    const depth = (ctx.row.meta?.['depth'] as number | undefined) ?? 0;
+    const hasChildren = (ctx.row.meta?.['hasChildren'] as boolean | undefined) ?? false;
+
+    const attributes: Record<string, string> = { 'aria-level': String(depth + 1) };
+    if (hasChildren) {
+      attributes['aria-expanded'] = String(this.expanded.has(ctx.row.rowId));
+    }
+    return { attributes };
+  }
 
   cellDecorator(ctx: CellContext<TData>): CellDecoration | null {
     if (ctx.column.colId !== this.treeColumnId()) return null;

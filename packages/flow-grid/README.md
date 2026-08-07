@@ -246,6 +246,28 @@ features still restores into one with fewer, and picks the rest up again if they
 return. Modules with nothing worth persisting contribute nothing: cell-flash is
 an animation, and a row range is a gesture that has already finished.
 
+## Accessibility
+
+Each instance is a complete table — its own header, its own rows — so each is a
+`grid`, and reports what it holds rather than what the whole data set holds. A
+reader is told "20 rows" about a panel of 20, not "10,000" about one it cannot
+reach.
+
+| Attribute       | On                | Meaning                              |
+| --------------- | ----------------- | ------------------------------------ |
+| `aria-rowcount` | the instance      | its rows, plus the header row        |
+| `aria-colcount` | the instance      | the number of columns                |
+| `aria-rowindex` | each row          | 1 is the header, so data starts at 2 |
+| `aria-colindex` | each cell, header | 1-based column position              |
+
+With `TreeModule` installed the role becomes **`treegrid`**, and rows carry
+`aria-level` and — where a row has children — `aria-expanded`. The role is
+declared by the module rather than inferred by core, which would mean reading a
+hierarchy convention core does not own.
+
+Rows are laid out with `subgrid` rather than `display: contents`, so a row with
+`role="row"` is a real element rather than one with no box.
+
 ## Keyboard and focus
 
 The grid tracks focus itself rather than relying on the browser's, and paints

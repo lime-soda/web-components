@@ -13,6 +13,8 @@ import type {
   RowContextInfo,
   RowDecoration,
 } from './types.js';
+import { providesGridRole } from './types.js';
+import type { GridRole } from './types.js';
 
 export interface ModuleRegistryOptions<TData> {
   pipeline: GridPipeline<TData>;
@@ -145,6 +147,22 @@ export class ModuleRegistry<TData = unknown> {
 
   apiExtensions(): Record<string, unknown> {
     return Object.assign({}, ...this.each((module) => module.apiExtension?.() ?? {}));
+  }
+
+  /**
+   * How the grid should be announced.
+   *
+   * `grid` unless a module says its rows are hierarchical. Two modules
+   * disagreeing is a registration error rather than a coin toss, for the same
+   * reason two membership providers are.
+   */
+  gridRole(): GridRole {
+    const providers = this.orderedModules().filter(providesGridRole);
+    if (providers.length > 1) {
+      const names = providers.map((provider) => `"${provider.id}"`).join(' and ');
+      throw new Error(`Modules ${names} both declare a grid role.`);
+    }
+    return providers[0]?.provideGridRole() ?? 'grid';
   }
 
   getState(): Record<string, unknown> {

@@ -144,6 +144,8 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
     // repaint.
     registry?.version.get();
 
+    this.setAttribute('aria-colindex', String(this.column.index + 1));
+
     const focused = this.isFocusedHeader();
     this.toggleAttribute('data-focused', focused && this.gridHasFocus());
     // A header is only reachable by arrowing up into it, so it is never the

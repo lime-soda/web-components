@@ -6,6 +6,23 @@ import type { FocusController } from '../controller/focus-controller.js';
 import type { ProjectionStage } from '../projection/types.js';
 import type { RowNode } from '../store/types.js';
 
+/**
+ * How assistive technology should read the grid.
+ *
+ * `treegrid` when rows sit inside other rows, which only a module that builds a
+ * hierarchy can know. Core cannot infer it without reading a convention it does
+ * not own, which is the mistake every other seam here exists to avoid.
+ */
+export type GridRole = 'grid' | 'treegrid';
+
+/** A module whose rows are hierarchical, and says so. */
+export interface GridRoleProvider {
+  provideGridRole(): GridRole;
+}
+
+export const providesGridRole = <T>(module: T): module is T & GridRoleProvider =>
+  typeof (module as Partial<GridRoleProvider>).provideGridRole === 'function';
+
 /** What a module is handed at init. Its whole view of the grid. */
 export interface ModuleContext<TData = unknown> {
   readonly pipeline: GridPipeline<TData>;
