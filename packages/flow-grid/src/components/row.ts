@@ -102,7 +102,16 @@ export class FlowRow extends SignalWatcher(LitElement) {
   }
 
   override render(): unknown {
-    if (this.rowIndex > 0) this.setAttribute('aria-rowindex', String(this.rowIndex));
+    // A repeat carries no index and is hidden: it is the same row appearing
+    // again at the top of a continuation, and reading it twice would be a lie
+    // about how many rows there are.
+    if (this.rowIndex > 0) {
+      this.setAttribute('aria-rowindex', String(this.rowIndex));
+      this.removeAttribute('aria-hidden');
+    } else {
+      this.removeAttribute('aria-rowindex');
+      this.setAttribute('aria-hidden', 'true');
+    }
 
     const grid = this.grid;
     if (!grid || !this.rowValue) return nothing;

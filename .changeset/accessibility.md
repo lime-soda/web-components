@@ -9,9 +9,14 @@ the counting attributes, which matter more here than in a conventional grid
 because rows are spread across instances. Without them a reader is told only
 about the markup that happens to exist.
 
-Each instance now carries `aria-rowcount` and `aria-colcount` describing what it
-holds, rows carry `aria-rowindex` counting from the header, and cells and header
-cells carry `aria-colindex`.
+The grid carries `aria-rowcount` and `aria-colcount` describing the whole data
+set; each instance is a `rowgroup` labelled with the rows it holds; rows carry
+`aria-rowindex` giving their place in the data rather than in the panel drawing
+them; and cells and header cells carry `aria-colindex`.
+
+The repeated header and a group heading re-emitted atop a continuation are
+hidden from readers — both are content that has already been read, and counting
+them would make the numbering disagree with itself.
 
 With `TreeModule` installed the role becomes `treegrid`, and rows carry
 `aria-level` and `aria-expanded` — the latter on the row, where a treegrid looks

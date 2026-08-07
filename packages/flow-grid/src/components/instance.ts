@@ -5,7 +5,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { gridContext, instanceContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
-import type { LayoutInstance } from '../layout/types.js';
+import type { DisplayRow, LayoutInstance } from '../layout/types.js';
 import { SignalWatcher } from '../reactive/index.js';
 
 /** Which bands of the instance to render. */
@@ -116,6 +116,38 @@ export class FlowInstance extends SignalWatcher(LitElement) {
     this.setAttribute('role', 'grid');
   }
 
+  /**
+   * What this instance holds, for a reader who lands in the middle of the data.
+   *
+   * Counted over its own rows: a repeated ancestor is the same row appearing
+   * again at the top of a continuation, not another row of data.
+   */
+  private describeContents(): string {
+    const own = this.instance?.rows.filter((row) => row.meta?.['isRepeat'] !== true) ?? [];
+    if (own.length === 0) return 'No rows';
+
+    const first = (this.instance?.firstRowIndex ?? 0) + 1;
+    return `Rows ${first} to ${first + own.length - 1}`;
+  }
+
+  /**
+   * A row's place in the whole data set, counting the header as 1.
+   *
+   * A repeated ancestor gets 0, which the row reads as "do not say": it is a
+   * second appearance of a row that already has a place, and claiming another
+   * would make the count disagree with itself.
+   */
+  private rowIndexOf(row: DisplayRow): number {
+    if (row.meta?.['isRepeat'] === true) return 0;
+
+    const own =
+      this.instance?.rows.filter((candidate) => candidate.meta?.['isRepeat'] !== true) ?? [];
+    const position = own.indexOf(row);
+    if (position === -1) return 0;
+    // 1 is the header row, so data starts at 2.
+    return (this.instance?.firstRowIndex ?? 0) + position + 2;
+  }
+
   override render(): unknown {
     const grid = this.grid;
     if (!grid || !this.instance) return nothing;
@@ -146,15 +178,12 @@ export class FlowInstance extends SignalWatcher(LitElement) {
     const showHeader = this.parts !== 'rows';
     const showRows = this.parts !== 'header';
 
-    // An instance is a complete table: its own header, its own rows. So it
-    // carries the counts, and they describe what it holds rather than the whole
-    // data set — a reader is told "20 rows" about a panel of 20, not 10,000
-    // about one it cannot reach.
-    //
-    // Row 1 is the header, so the body starts at 2.
-    this.setAttribute('role', grid.registry.gridRole());
-    this.setAttribute('aria-colcount', String(columns.length));
-    this.setAttribute('aria-rowcount', String(this.instance.rows.length + (showHeader ? 1 : 0)));
+    // A group of rows within the grid, not a grid of its own: the rows are one
+    // list, and an instance is where some of them happen to be drawn. The label
+    // says which, so a reader arriving here knows where in the data they are
+    // rather than only that there are more rows somewhere.
+    this.setAttribute('role', 'rowgroup');
+    this.setAttribute('aria-label', this.describeContents());
 
     return html`
       <div
@@ -163,7 +192,12 @@ export class FlowInstance extends SignalWatcher(LitElement) {
         style=${styleMap({ '--flow-column-template': template })}
       >
         ${showHeader
-          ? html`<div class="header" role="row" aria-rowindex="1">
+          ? html`<div
+              class="header"
+              role="row"
+              aria-rowindex="1"
+              aria-hidden=${this.instance.index > 0 ? 'true' : nothing}
+            >
               ${repeat(
                 columns,
                 (column) => column.colId,
@@ -176,8 +210,7 @@ export class FlowInstance extends SignalWatcher(LitElement) {
           ? repeat(
               this.instance.rows,
               (row) => row.id,
-              (row, index) =>
-                html`<flow-row .row=${row} .rowIndex=${index + (showHeader ? 2 : 1)}></flow-row>`,
+              (row) => html`<flow-row .row=${row} .rowIndex=${this.rowIndexOf(row)}></flow-row>`,
             )
           : nothing}
       </div>

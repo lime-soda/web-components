@@ -28,6 +28,7 @@ export class FlowLayoutEngine implements LayoutEngine {
     let current: DisplayRow[] = [];
     let used = 0;
     let truncated = false;
+    let consumed = 0;
 
     const commit = (): boolean => {
       if (current.length === 0) return true;
@@ -43,7 +44,11 @@ export class FlowLayoutEngine implements LayoutEngine {
         width: viewport.instanceWidth,
         height: viewport.height,
         offset: index * (viewport.instanceWidth + viewport.instanceGap),
+        firstRowIndex: consumed,
       });
+      // Repeats are the same row appearing again, so they do not advance the
+      // position in the data.
+      consumed += current.filter((row) => row.meta?.['isRepeat'] !== true).length;
       return true;
     };
 

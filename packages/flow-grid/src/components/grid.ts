@@ -240,6 +240,9 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    // The rows are one list however they are arranged, so the element holding
+    // all of them is the grid. Instances are groups of rows within it.
+    this.setAttribute('role', 'grid');
     this.addEventListener('focusin', this.handleFocusIn);
     this.addEventListener('focusout', this.handleFocusOut);
   }
@@ -266,6 +269,13 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
     const mode = controller.options.layout ?? 'flow';
     const layout = controller.layout.get();
+
+    // Totals describe the data, not the markup: the rows on screen are a
+    // fraction of them, which is the case aria-rowcount exists for. One is
+    // added for the header row.
+    this.setAttribute('role', controller.registry.gridRole());
+    this.setAttribute('aria-rowcount', String(controller.pipeline.projector.rows.get().length + 1));
+    this.setAttribute('aria-colcount', String(controller.columns.get().length));
 
     // The engine's capacity arithmetic and the CSS that lays rows out must agree.
     // Publishing the configured heights as custom properties is what keeps them
@@ -321,6 +331,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       (instance) => html`
         <div
           class="instance-slot"
+          role="presentation"
           data-instance-id=${instance.id}
           style=${styleMap({
             // The layout engine sizes an instance to its columns, which is its

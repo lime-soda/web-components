@@ -58,6 +58,15 @@ export interface LayoutInstance {
   readonly height: number;
   /** Offset along the scroll axis in px. */
   readonly offset: number;
+  /**
+   * Index into the projection of this instance's first row of its own.
+   *
+   * What lets a row say where it sits in the whole data set rather than in the
+   * panel that happens to hold it — the rows are one list, however they are
+   * arranged on screen. Repeated ancestors are not counted: they are the same
+   * row appearing again.
+   */
+  readonly firstRowIndex: number;
 }
 
 export interface LayoutResult {

@@ -51,6 +51,8 @@ export class StackLayoutEngine implements LayoutEngine {
               width: viewport.instanceWidth,
               height: contentHeight,
               offset: offsets[first] ?? 0,
+              // The window's start is where these rows sit in the data.
+              firstRowIndex: first,
             },
           ];
 

@@ -7,9 +7,10 @@ import type { FlowGrid } from './grid.js';
 /**
  * What assistive technology is told.
  *
- * The counts matter more here than in a conventional grid: rows are spread
- * across instances, so without them a reader is told only about the markup that
- * happens to exist rather than about the data.
+ * The rows are one list however they are arranged, so the grid is the element
+ * holding all of them and its totals describe the data. An instance is a group
+ * of rows within it, labelled with which rows — otherwise a reader landing in
+ * the middle of a wide grid learns only that there are more rows somewhere.
  */
 
 interface Bond {
@@ -83,13 +84,20 @@ afterEach(() => {
 });
 
 describe('the grid announces its shape', () => {
-  it('counts its rows and columns', async () => {
+  it('counts the whole data set, not the markup', async () => {
+    const grid = await mount(flat);
+
+    expect(grid.getAttribute('aria-colcount')).toBe('2');
+    // Six rows plus the header, whatever is currently drawn.
+    expect(grid.getAttribute('aria-rowcount')).toBe('7');
+  });
+
+  it('makes an instance a group of rows, saying which', async () => {
     const grid = await mount(flat);
     const panel = instance(grid);
 
-    expect(panel.getAttribute('aria-colcount')).toBe('2');
-    // Its own rows plus the header, which is what this panel actually holds.
-    expect(panel.getAttribute('aria-rowcount')).toBe(String(rows(grid).length + 1));
+    expect(panel.getAttribute('role')).toBe('rowgroup');
+    expect(panel.getAttribute('aria-label')).toMatch(/^Rows 1 to \d+$/);
   });
 
   it('numbers rows from the header down', async () => {
@@ -113,7 +121,7 @@ describe('the grid announces its shape', () => {
   it('is a plain grid with no hierarchy', async () => {
     const grid = await mount(flat);
 
-    expect(instance(grid).getAttribute('role')).toBe('grid');
+    expect(grid.getAttribute('role')).toBe('grid');
   });
 });
 
@@ -125,7 +133,7 @@ describe('with tree data', () => {
   it('becomes a treegrid, because rows sit inside rows', async () => {
     const grid = await mount(tree, withTree());
 
-    expect(instance(grid).getAttribute('role')).toBe('treegrid');
+    expect(grid.getAttribute('role')).toBe('treegrid');
   });
 
   it('gives every row its level, counted from one', async () => {
@@ -154,5 +162,79 @@ describe('with tree data', () => {
     await waitFor(() => rows(grid)[0]!.getAttribute('aria-expanded') === 'false');
 
     expect(rows(grid)[0]!.getAttribute('aria-expanded')).toBe('false');
+  });
+});
+
+describe('across instances', () => {
+  /**
+   * The point of the aggregate model: a row's number means its place in the
+   * data, not its place in the panel it happens to be drawn in.
+   */
+  const many: Bond[] = Array.from({ length: 40 }, (_, i) => ({
+    id: `r${i}`,
+    parentId: null,
+    name: `Row ${i}`,
+    price: i,
+  }));
+
+  const instances = (grid: FlowGrid<Bond>) => [
+    ...grid.shadowRoot!.querySelectorAll('flow-instance'),
+  ];
+  const rowsOf = (panel: Element) => [...panel.shadowRoot!.querySelectorAll('flow-row')];
+
+  it('numbers rows continuously from one instance to the next', async () => {
+    const grid = await mount(many);
+    await waitFor(() => instances(grid).length > 1);
+
+    const [first, second] = instances(grid);
+    const lastOfFirst = rowsOf(first!).at(-1)!;
+    const firstOfSecond = rowsOf(second!)[0]!;
+
+    expect(Number(firstOfSecond.getAttribute('aria-rowindex'))).toBe(
+      Number(lastOfFirst.getAttribute('aria-rowindex')) + 1,
+    );
+  });
+
+  it('labels each instance with the rows it holds', async () => {
+    const grid = await mount(many);
+    await waitFor(() => instances(grid).length > 1);
+
+    const labels = instances(grid).map((panel) => panel.getAttribute('aria-label'));
+
+    expect(labels[0]).toMatch(/^Rows 1 to /);
+    expect(labels[1]).not.toBe(labels[0]);
+  });
+
+  it('shows the header once, not once per instance', async () => {
+    const grid = await mount(many);
+    await waitFor(() => instances(grid).length > 1);
+
+    const headers = instances(grid).map((panel) =>
+      panel.shadowRoot!.querySelector('.header')?.getAttribute('aria-hidden'),
+    );
+
+    expect(headers[0]).toBeNull();
+    expect(headers[1]).toBe('true');
+  });
+
+  it('hides a repeated ancestor, which is a row read once already', async () => {
+    const deep: Bond[] = [
+      { id: 'g', parentId: null, name: 'Gilts', price: 0 },
+      ...Array.from({ length: 40 }, (_, i) => ({
+        id: `g-${i}`,
+        parentId: 'g',
+        name: `Bond ${i}`,
+        price: i,
+      })),
+    ];
+    const grid = await mount(deep, [
+      new TreeModule<Bond>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
+    ]);
+    await waitFor(() => instances(grid).length > 1);
+
+    const repeated = rowsOf(instances(grid)[1]!)[0]!;
+
+    expect(repeated.getAttribute('aria-hidden')).toBe('true');
+    expect(repeated.hasAttribute('aria-rowindex')).toBe(false);
   });
 });
