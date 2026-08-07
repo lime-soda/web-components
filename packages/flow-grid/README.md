@@ -248,17 +248,23 @@ an animation, and a row range is a gesture that has already finished.
 
 ## Accessibility
 
-Each instance is a complete table — its own header, its own rows — so each is a
-`grid`, and reports what it holds rather than what the whole data set holds. A
-reader is told "20 rows" about a panel of 20, not "10,000" about one it cannot
-reach.
+The rows are one list however they are arranged, so the grid is the element
+holding all of them and its totals describe the **data**, not the markup. An
+instance is a group of rows within it, labelled with which rows — so a reader
+landing in the middle of a wide grid knows where they are.
 
-| Attribute       | On                | Meaning                              |
-| --------------- | ----------------- | ------------------------------------ |
-| `aria-rowcount` | the instance      | its rows, plus the header row        |
-| `aria-colcount` | the instance      | the number of columns                |
-| `aria-rowindex` | each row          | 1 is the header, so data starts at 2 |
-| `aria-colindex` | each cell, header | 1-based column position              |
+| Attribute       | On                | Meaning                                |
+| --------------- | ----------------- | -------------------------------------- |
+| `aria-rowcount` | the grid          | every row, plus the header             |
+| `aria-colcount` | the grid          | the number of columns                  |
+| `aria-label`    | each instance     | "Rows 23 to 43" — which rows it holds  |
+| `aria-rowindex` | each row          | its place in the data; 1 is the header |
+| `aria-colindex` | each cell, header | 1-based column position                |
+
+Two kinds of repetition are hidden from readers, because both are content that
+has already been read: the header, which every instance draws but only the first
+exposes, and a group heading re-emitted atop a continuation, which already has a
+place in the numbering.
 
 With `TreeModule` installed the role becomes **`treegrid`**, and rows carry
 `aria-level` and — where a row has children — `aria-expanded`. The role is

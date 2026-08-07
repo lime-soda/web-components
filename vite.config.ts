@@ -24,7 +24,11 @@ export default defineConfig({
    * decision and fails the commit rather than being papered over.
    */
   staged: {
-    '*.{ts,js,mjs,cjs,json,css,md}': ['vp fmt', 'vp lint --fix'],
+    // Split by what each tool can actually read. Pointing the linter at a
+    // markdown-only commit made it fail with "no files found to lint", which
+    // refused the commit for having nothing wrong with it.
+    '*.{ts,js,mjs,cjs}': ['vp fmt', 'vp lint --fix'],
+    '*.{json,css,md}': ['vp fmt'],
   },
   fmt: {
     semi: true,
