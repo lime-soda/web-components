@@ -57,20 +57,33 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
    * Depth is the projection's own convention, and with no hierarchy in play
    * every row is depth 0 and nothing is ever dropped.
    */
-  private spanOf(rows: readonly DisplayRow[], from: number, to: number): readonly string[] {
-    const depthOf = (row: DisplayRow | undefined): number =>
-      (row?.meta?.['depth'] as number | undefined) ?? 0;
+  private spanOf(
+    selection: SelectionModule<TData>,
+    rows: readonly DisplayRow[],
+    from: number,
+    to: number,
+  ): readonly string[] {
+    const projected = new Set(rows.map((row) => row.rowId));
 
-    const span: string[] = [];
-    for (let index = from; index <= to; index += 1) {
-      const row = rows[index];
-      if (!row) continue;
-      // The next row in the projection, which may sit beyond the span: a group
-      // whose children start after the span still has them on screen.
-      const hasChildrenOnScreen = depthOf(rows[index + 1]) > depthOf(row);
-      if (!hasChildrenOnScreen) span.push(row.rowId);
-    }
-    return span;
+    // A row whose rows are themselves on screen adds nothing to a span: each of
+    // them is selectable in its own right, and the span covers exactly those it
+    // reaches. A row whose are *not* on screen — a leaf, or a parent whose
+    // contents are hidden behind it — is the only thing that can stand for them.
+    //
+    // So a range over a whole parent takes the whole parent, one that clips a
+    // corner takes only the corner, and one that stops at a heading reaches
+    // nothing past it.
+    //
+    // Asked of selection rather than worked out from `meta.depth`, so this
+    // module needs no notion of hierarchy and cannot disagree with whichever
+    // module supplied one.
+    const standsForSomethingOnScreen = (rowId: string): boolean =>
+      selection.standsFor(rowId).some((id) => id !== rowId && projected.has(id));
+
+    return rows
+      .slice(from, to + 1)
+      .map((row) => row.rowId)
+      .filter((rowId) => !standsForSomethingOnScreen(rowId));
   }
 
   /** How a shift-click extends the selection, for core selection to find. */
@@ -106,7 +119,7 @@ export class RowRangeModule<TData = unknown> implements GridModule<TData> {
       return;
     }
 
-    const span = this.spanOf(rows, Math.min(from, to), Math.max(from, to));
+    const span = this.spanOf(selection, rows, Math.min(from, to), Math.max(from, to));
 
     // Shrinking a range has to give back what it no longer covers, or dragging
     // back from row 6 to row 3 would leave 4, 5 and 6 selected and the span

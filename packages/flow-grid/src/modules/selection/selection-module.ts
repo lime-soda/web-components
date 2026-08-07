@@ -567,6 +567,18 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     return this.options.isSelectable?.(rowId, meta) ?? true;
   }
 
+  /**
+   * The ids this row stands for.
+   *
+   * Itself, ordinarily. With a membership module installed, a parent stands for
+   * the rows beneath it — which is how a caller can tell whether one row already
+   * speaks for another without knowing what a hierarchy is or how this one was
+   * built.
+   */
+  standsFor(rowId: string): readonly string[] {
+    return this.membership.leavesOf(rowId);
+  }
+
   /** Whether a row's checkbox should be interactive at all. */
   isRowSelectable(rowId: string): boolean {
     return this.membership.leavesOf(rowId).length > 0;
