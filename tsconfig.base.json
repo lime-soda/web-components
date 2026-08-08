@@ -5,6 +5,11 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ES2022",
     "moduleResolution": "bundler",
+    // Resolve workspace packages through their `development` condition, which
+    // points at source. Without it TypeScript follows `types` into `dist`, so
+    // typechecking and type-aware linting only worked once something had been
+    // built — passing locally off stale output and failing on a clean checkout.
+    "customConditions": ["development"],
     "strict": true,
     // The compiler says the same thing the linter does, so an editor flags
     // dead code while it is being written rather than at commit time.
