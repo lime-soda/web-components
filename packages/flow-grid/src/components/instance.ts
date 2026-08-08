@@ -92,6 +92,9 @@ export class FlowInstance extends SignalWatcher(LitElement) {
   @property({ attribute: false })
   accessor instance!: LayoutInstance;
 
+  private cachedIndexRows: readonly DisplayRow[] | undefined;
+  private cachedIndices: ReadonlyMap<DisplayRow, number> | undefined;
+
   /**
    * Which bands to render. `full` is the flow layout; the stack layout renders a
    * `header` instance and a `rows` instance so only the latter scrolls.
@@ -137,15 +140,24 @@ export class FlowInstance extends SignalWatcher(LitElement) {
    * second appearance of a row that already has a place, and claiming another
    * would make the count disagree with itself.
    */
-  private rowIndexOf(row: DisplayRow): number {
-    if (row.meta?.['isRepeat'] === true) return 0;
+  private rowIndices(): ReadonlyMap<DisplayRow, number> {
+    const rows = this.instance?.rows ?? [];
+    if (this.cachedIndexRows === rows && this.cachedIndices) return this.cachedIndices;
 
-    const own =
-      this.instance?.rows.filter((candidate) => candidate.meta?.['isRepeat'] !== true) ?? [];
-    const position = own.indexOf(row);
-    if (position === -1) return 0;
-    // 1 is the header row, so data starts at 2.
-    return (this.instance?.firstRowIndex ?? 0) + position + 2;
+    const indices = new Map<DisplayRow, number>();
+    let position = 0;
+    for (const row of rows) {
+      // A repeat has no place of its own: it is a row already counted, drawn
+      // again atop a continuation.
+      if (row.meta?.['isRepeat'] === true) continue;
+      // 1 is the header row, so data starts at 2.
+      indices.set(row, (this.instance?.firstRowIndex ?? 0) + position + 2);
+      position += 1;
+    }
+
+    this.cachedIndexRows = rows;
+    this.cachedIndices = indices;
+    return indices;
   }
 
   override render(): unknown {
@@ -185,6 +197,10 @@ export class FlowInstance extends SignalWatcher(LitElement) {
     this.setAttribute('role', 'rowgroup');
     this.setAttribute('aria-label', this.describeContents());
 
+    // Built once per render rather than per row: it was a filter and a linear
+    // search for every row, which is quadratic in the rows an instance holds.
+    const indices = this.rowIndices();
+
     return html`
       <div
         class="grid"
@@ -210,7 +226,7 @@ export class FlowInstance extends SignalWatcher(LitElement) {
           ? repeat(
               this.instance.rows,
               (row) => row.id,
-              (row) => html`<flow-row .row=${row} .rowIndex=${this.rowIndexOf(row)}></flow-row>`,
+              (row) => html`<flow-row .row=${row} .rowIndex=${indices.get(row) ?? 0}></flow-row>`,
             )
           : nothing}
       </div>
