@@ -55,9 +55,9 @@ Stories are co-located with components:
 
 ```ts
 // Button.stories.ts
-import type { Meta, StoryObj } from '@storybook/web-components'
-import { html } from 'lit'
-import '../src/index.js'
+import type { Meta, StoryObj } from '@storybook/web-components';
+import { html } from 'lit';
+import '../src/index.js';
 
 const meta: Meta = {
   title: 'Components/Button',
@@ -69,17 +69,17 @@ const meta: Meta = {
       },
     },
   },
-}
+};
 
-export default meta
+export default meta;
 
 export const Default: StoryObj = {
   render: () => html`<ls-button>Click me</ls-button>`,
-}
+};
 
 export const Primary: StoryObj = {
   render: () => html`<ls-button variant="primary">Primary</ls-button>`,
-}
+};
 ```
 
 ## Configuration

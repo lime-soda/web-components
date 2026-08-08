@@ -105,7 +105,7 @@ describe('module options are reactive', () => {
 
   it('adds and removes its contributed column', () => {
     const { selection, registry } = setup();
-    expect(registry.provideColumns().map((c) => c.colId)).toEqual(['flow-selection']);
+    expect(registry.provideColumns().map((c) => c.colId)).toEqual(['ls-grid-selection']);
 
     selection.setOptions({ checkboxColumn: false });
 

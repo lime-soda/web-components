@@ -3,7 +3,7 @@ import '../index.js';
 import '../layouts.js';
 import type { ColumnDef } from '../columns/types.js';
 import type { GridOptions } from '../controller/grid-controller.js';
-import type { FlowGrid } from '../components/grid.js';
+import type { Grid } from '../components/grid.js';
 import { TreeModule } from '../modules/tree/index.js';
 import { SortModule } from '../modules/sort/index.js';
 import { SelectionModule } from '../modules/selection/index.js';
@@ -56,12 +56,12 @@ const data: Row[] = [
 
 let host: HTMLDivElement | undefined;
 
-async function mount(overrides: Partial<GridOptions<Row>> = {}): Promise<FlowGrid<Row>> {
+async function mount(overrides: Partial<GridOptions<Row>> = {}): Promise<Grid<Row>> {
   host = document.createElement('div');
   host.style.cssText = 'width:800px;height:400px';
   document.body.append(host);
 
-  const grid = document.createElement('flow-grid') as FlowGrid<Row>;
+  const grid = document.createElement('ls-grid') as Grid<Row>;
   grid.gridOptions = {
     columns,
     rowHeight: 32,
@@ -79,16 +79,16 @@ async function mount(overrides: Partial<GridOptions<Row>> = {}): Promise<FlowGri
   await grid.updateComplete;
   // Settled means an instance has actually mounted, not merely that the layout
   // produced slots — an empty grid would otherwise let tests pass vacuously.
-  await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null, {
+  await waitFor(() => grid.shadowRoot?.querySelector('ls-grid-instance') !== null, {
     description: 'the first instance to mount',
   });
   await grid.updateComplete;
   return grid;
 }
 
-const instance = (grid: FlowGrid<Row>) => grid.shadowRoot!.querySelector('flow-instance')!;
-const rows = (grid: FlowGrid<Row>) => [...instance(grid).shadowRoot!.querySelectorAll('flow-row')];
-const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('flow-cell')];
+const instance = (grid: Grid<Row>) => grid.shadowRoot!.querySelector('ls-grid-instance')!;
+const rows = (grid: Grid<Row>) => [...instance(grid).shadowRoot!.querySelectorAll('ls-grid-row')];
+const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('ls-grid-cell')];
 
 /**
  * A cell by column id rather than position. The selection module prepends its
@@ -99,8 +99,8 @@ const cellFor = (row: Element, colId: string) =>
     (cell) => (cell as unknown as { column?: { colId: string } }).column?.colId === colId,
   )!;
 
-const headerFor = (grid: FlowGrid<Row>, colId: string) =>
-  [...instance(grid).shadowRoot!.querySelectorAll('flow-header-cell')].find(
+const headerFor = (grid: Grid<Row>, colId: string) =>
+  [...instance(grid).shadowRoot!.querySelectorAll('ls-grid-header-cell')].find(
     (header) => (header as unknown as { column?: { colId: string } }).column?.colId === colId,
   )!;
 const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
@@ -116,8 +116,8 @@ describe('theming', () => {
     const grid = await mount({ theme });
     const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
-    expect(themed.style.getPropertyValue('--flow-text')).toBe('rgb(0, 128, 0)');
-    expect(themed.style.getPropertyValue('--flow-background')).toBe('rgb(240, 240, 240)');
+    expect(themed.style.getPropertyValue('--ls-grid-text')).toBe('rgb(0, 128, 0)');
+    expect(themed.style.getPropertyValue('--ls-grid-background')).toBe('rgb(240, 240, 240)');
   });
 
   it('inherits a token through every shadow root down to a cell', async () => {
@@ -128,7 +128,7 @@ describe('theming', () => {
 
   it('themes a header through the same tokens', async () => {
     const grid = await mount({ theme: { headerText: 'rgb(128, 0, 0)' } });
-    const header = instance(grid).shadowRoot!.querySelector('flow-header-cell')!;
+    const header = instance(grid).shadowRoot!.querySelector('ls-grid-header-cell')!;
 
     expect(getComputedStyle(header).color).toBe('rgb(128, 0, 0)');
   });
@@ -147,7 +147,7 @@ describe('theming', () => {
   it('drives tree indent from a token rather than a computed pixel value', async () => {
     const grid = await mount({ theme: { treeIndent: '40px' } });
     const childIndent = cellFor(rows(grid)[1]!, 'name').shadowRoot!.querySelector(
-      '.flow-tree-indent',
+      '.ls-grid-tree-indent',
     )!;
 
     // Depth 1 at 40px per level.
@@ -169,7 +169,7 @@ describe('theming', () => {
     const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
     // A partial theme is valid; unset tokens simply are not declared.
-    expect(themed.style.getPropertyValue('--flow-border')).toBe('');
+    expect(themed.style.getPropertyValue('--ls-grid-border')).toBe('');
   });
 
   it('updates live when the theme is replaced', async () => {
@@ -192,7 +192,7 @@ describe('theming', () => {
     const grid = await mount({ rowHeight: 32, theme: { rowHeight: '999px' } });
     const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
-    expect(themed.style.getPropertyValue('--flow-row-height')).toBe('32px');
+    expect(themed.style.getPropertyValue('--ls-grid-row-height')).toBe('32px');
   });
 
   describe('no inline styles', () => {
@@ -230,18 +230,18 @@ describe('theming', () => {
       )!;
 
       expect(indicator.getAttribute('style')).toBeNull();
-      expect(indicator.classList.contains('flow-sort-indicator')).toBe(true);
+      expect(indicator.classList.contains('ls-grid-sort-indicator')).toBe(true);
     });
 
     it('styles the selection checkbox by class, not inline', async () => {
       const grid = await mount();
-      const checkbox = cellFor(rows(grid)[0]!, 'flow-selection').shadowRoot!.querySelector(
-        'flow-selection-checkbox',
+      const checkbox = cellFor(rows(grid)[0]!, 'ls-grid-selection').shadowRoot!.querySelector(
+        'ls-grid-selection-checkbox',
       )!;
       const input = checkbox.shadowRoot!.querySelector('input')!;
 
       expect(input.getAttribute('style')).toBeNull();
-      expect(input.classList.contains('flow-checkbox')).toBe(true);
+      expect(input.classList.contains('ls-grid-checkbox')).toBe(true);
     });
   });
 });

@@ -230,7 +230,7 @@ Modules add their own column properties by augmentation, so core's `ColumnDef` n
 
 ```ts
 // flow-grid/sort
-declare module 'flow-grid' {
+declare module '@lime-soda/grid' {
   interface ColumnDef<TData, TValue> {
     sortable?: boolean;
     comparator?: (a: TValue, b: TValue, ctx: ComparatorContext<TData>) => number;

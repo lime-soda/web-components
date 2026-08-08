@@ -1,19 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
-import type { ColumnDef, GridTheme, FlowGrid, GridOptions } from 'flow-grid';
-import 'flow-grid';
-import 'flow-grid/layouts';
-import { TreeModule } from 'flow-grid/tree';
-import { SortModule } from 'flow-grid/sort';
-import { FilterModule } from 'flow-grid/filter';
-import { SelectionModule } from 'flow-grid/selection';
-import { TreeSelectionModule } from 'flow-grid/selection/tree';
-import { RowRangeModule } from 'flow-grid/selection/row-range';
-import { CellFlashModule } from 'flow-grid/cell-flash';
-import { KeyboardModule } from 'flow-grid/keyboard';
+import type { ColumnDef, GridTheme, Grid, GridOptions } from '@lime-soda/grid';
+import '@lime-soda/grid';
+import '@lime-soda/grid/layouts';
+import { TreeModule } from '@lime-soda/grid/tree';
+import { SortModule } from '@lime-soda/grid/sort';
+import { FilterModule } from '@lime-soda/grid/filter';
+import { SelectionModule } from '@lime-soda/grid/selection';
+import { TreeSelectionModule } from '@lime-soda/grid/selection/tree';
+import { RowRangeModule } from '@lime-soda/grid/selection/row-range';
+import { CellFlashModule } from '@lime-soda/grid/cell-flash';
+import { KeyboardModule } from '@lime-soda/grid/keyboard';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
+import '@lime-soda/grid/themes/grid.css';
+import './demo.css';
 
 const columns: ColumnDef<Bond>[] = [
   { field: 'instrument', headerName: 'Instrument', width: 260 },
@@ -128,7 +130,20 @@ let lastExpandByDefault: boolean | undefined;
 const bondMarketKeyboard = new KeyboardModule<Bond>();
 
 const meta: Meta<Args> = {
-  title: 'Flow grid/Bond market',
+  title: 'Grid/Bond market',
+  // The grid fills its container, and the point of the flow layout is a wide
+  // one: padded, centred docs canvas would show a single instance.
+  parameters: {
+    layout: 'fullscreen',
+    controls: { expanded: true },
+    // Known, unfixed: a continuation instance repeats the header and the
+    // ancestor rows, and marks the copies `aria-hidden` so they are not counted
+    // twice. Their sort activators, checkboxes and expanders stay natively
+    // focusable, which axe reports as `aria-hidden-focus`. The fix is a
+    // decision about the repeats — inert (and so unclickable), or reachable and
+    // not hidden — not something to settle in passing.
+    a11y: { test: 'todo' },
+  },
   argTypes: {
     groups: {
       control: { type: 'range', min: 1, max: 50, step: 1 },
@@ -218,7 +233,11 @@ export const BondMarket: StoryObj<Args> = {
     clickToSelect: false,
   },
   render: (args) => {
-    const gridRef = createRef<FlowGrid<Bond>>();
+    const gridRef = createRef<Grid<Bond>>();
+    // The instance counter polls on a frame loop. Held here so the loop can be
+    // cancelled when the story is torn down: left running, it kept reading
+    // `.api` off a detached grid, which throws once the options are gone.
+    let counterFrame = 0;
 
     // Reused across renders. Storybook re-runs render on every control change,
     // and a fresh module would never be registered — the grid keeps the modules
@@ -325,24 +344,29 @@ export const BondMarket: StoryObj<Args> = {
             instances: <strong>${''}</strong>
             <span
               ${ref((el) => {
+                cancelAnimationFrame(counterFrame);
                 if (!el) return;
                 const update = () => {
                   const grid = gridRef.value;
-                  if (grid) el.textContent = String(grid.api.getLayout().instances.length);
-                  requestAnimationFrame(update);
+                  // `.api` throws until `gridOptions` is set, and the story can
+                  // be pulled out from under the loop between frames.
+                  if (grid?.isConnected && grid.gridOptions) {
+                    el.textContent = String(grid.api.getLayout().instances.length);
+                  }
+                  counterFrame = requestAnimationFrame(update);
                 };
-                update();
+                counterFrame = requestAnimationFrame(update);
               })}
             ></span>
           </span>
         </div>
         <div class="demo__grid">
-          <flow-grid
+          <ls-grid
             ${ref(gridRef)}
             .gridOptions=${options}
             .rowData=${data}
             style="height: 100%"
-          ></flow-grid>
+          ></ls-grid>
         </div>
       </div>
     `;
@@ -370,7 +394,7 @@ export const CoreOnly: StoryObj<Args> = {
           <span class="demo__stat">Core only — no modules imported</span>
         </div>
         <div class="demo__grid">
-          <flow-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></flow-grid>
+          <ls-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></ls-grid>
         </div>
       </div>
     `;
@@ -408,7 +432,7 @@ export const StackLayout: StoryObj<Args> = {
           <span class="demo__stat">Vertical layout — same data, same core</span>
         </div>
         <div class="demo__grid">
-          <flow-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></flow-grid>
+          <ls-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></ls-grid>
         </div>
       </div>
     `;

@@ -7,8 +7,8 @@
   "scripts": {
     "build": "storybook build",
     "dev": "storybook dev -p 6006",
-    "lint": "eslint .",
-    "test": "vitest --project=storybook"
+    "lint": "vp lint",
+    "test": "vp test run --project storybook"
   },
   "keywords": [
     "storybook",
@@ -20,6 +20,7 @@
   "dependencies": {
     "@chromatic-com/storybook": "^5.0.0",
     "@lime-soda/button": "workspace:*",
+    "@lime-soda/grid": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
     "@storybook/addon-a11y": "^10.0.0",
     "@storybook/addon-docs": "^10.0.0",
@@ -28,14 +29,10 @@
     "@vitest/browser": "^4.0.0",
     "@vitest/coverage-v8": "^4.0.0",
     "chromatic": "^16.0.0",
-    "eslint-plugin-storybook": "^10.0.0",
     "lit": "^3.3.1",
     "playwright": "^1.54.2",
     "storybook": "^10.0.0",
     "vite-tsconfig-paths": "^6.0.0",
     "vitest": "^4.0.0"
-  },
-  "devDependencies": {
-    "@lime-soda/eslint-config": "workspace:*"
   }
 }

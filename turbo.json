@@ -1,28 +1,53 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**/*.{js,css}"]
+      "dependsOn": ["^build", "typecheck", "check"],
+      "outputs": ["dist/**/*.{js,css,map}", "storybook-static/**"]
     },
     "build:types": {
       "dependsOn": ["^build", "^build:types"],
-      "outputs": ["dist/**/*.d.ts"]
+      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"]
     },
     "build:manifest": {
       "dependsOn": ["^build"],
       "outputs": ["custom-elements.json"]
     },
+    "typecheck": {
+      "outputs": []
+    },
+    "check": {
+      "outputs": []
+    },
     "lint": {
-      "cache": true,
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.js",
-        "*.ts",
-        "*.js",
-        "eslint.config.js",
-        "tsconfig.json"
-      ]
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:node": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:browser": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "bench": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "storybook": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
     },
     "@lime-soda/storybook#build": {
       "dependsOn": ["^build"],

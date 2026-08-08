@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { FlowLayoutEngine, GridPipeline, type ViewportMetrics } from 'flow-grid';
-import { TreeModule } from 'flow-grid/tree';
-import { SortModule } from 'flow-grid/sort';
-import { FilterModule } from 'flow-grid/filter';
-import { ModuleRegistry, resolveColumns } from 'flow-grid';
+import { FlowLayoutEngine, GridPipeline, type ViewportMetrics } from '@lime-soda/grid';
+import { TreeModule } from '@lime-soda/grid/tree';
+import { SortModule } from '@lime-soda/grid/sort';
+import { FilterModule } from '@lime-soda/grid/filter';
+import { ModuleRegistry, resolveColumns } from '@lime-soda/grid';
 import { measure, report } from './report.js';
 
 /**

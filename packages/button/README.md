@@ -14,7 +14,7 @@ npm install @lime-soda/button
 
 ```html
 <script type="module">
-  import '@lime-soda/button'
+  import '@lime-soda/button';
 </script>
 
 <ls-button>Click me</ls-button>
@@ -25,31 +25,29 @@ npm install @lime-soda/button
 ### JavaScript/TypeScript
 
 ```ts
-import '@lime-soda/button'
-import { LsButton } from '@lime-soda/button'
+import '@lime-soda/button';
+import { LsButton } from '@lime-soda/button';
 
 // Use in HTML templates
-const button = document.createElement('ls-button')
-button.textContent = 'Click me'
-button.size = 'lg'
-button.color = 'primary'
+const button = document.createElement('ls-button');
+button.textContent = 'Click me';
+button.size = 'lg';
+button.color = 'primary';
 
 // Type-safe access to properties
-const button = document.querySelector('ls-button') as LsButton
-button.size = 'md'
+const button = document.querySelector('ls-button') as LsButton;
+button.size = 'md';
 ```
 
 ### Lit Templates
 
 ```ts
-import { html } from 'lit'
-import '@lime-soda/button'
+import { html } from 'lit';
+import '@lime-soda/button';
 
 const template = html`
-  <ls-button @click=${handleClick} size="lg" color="primary">
-    Save Changes
-  </ls-button>
-`
+  <ls-button @click=${handleClick} size="lg" color="primary"> Save Changes </ls-button>
+`;
 ```
 
 ## API
@@ -157,7 +155,5 @@ The button component includes:
 ### Custom Styling
 
 ```html
-<ls-button style="--button-primary-background-color: #28a745;">
-  Custom Green Button
-</ls-button>
+<ls-button style="--button-primary-background-color: #28a745;"> Custom Green Button </ls-button>
 ```

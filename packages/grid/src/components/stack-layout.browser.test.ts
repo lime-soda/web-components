@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import '../layouts.js';
 import type { ColumnDef } from '../columns/types.js';
 import type { GridOptions } from '../controller/grid-controller.js';
-import type { FlowGrid } from './grid.js';
+import type { Grid } from './grid.js';
 import { TreeModule } from '../modules/tree/index.js';
 import { SortModule } from '../modules/sort/index.js';
 
@@ -52,12 +52,12 @@ async function waitFor(
 async function mount(
   options: Partial<GridOptions<Row>> = {},
   data = rows(500),
-): Promise<FlowGrid<Row>> {
+): Promise<Grid<Row>> {
   host = document.createElement('div');
   host.style.cssText = 'width:600px;height:400px';
   document.body.append(host);
 
-  const grid = document.createElement('flow-grid') as FlowGrid<Row>;
+  const grid = document.createElement('ls-grid') as Grid<Row>;
   grid.gridOptions = {
     columns,
     layout: 'stack',
@@ -70,37 +70,34 @@ async function mount(
 
   await grid.updateComplete;
   await waitFor(
-    () => grid.shadowRoot?.querySelector('flow-instance[parts="rows"]:not(.stack-sticky)') !== null,
+    () =>
+      grid.shadowRoot?.querySelector('ls-grid-instance[parts="rows"]:not(.stack-sticky)') !== null,
     { description: 'the body instance to render' },
   );
   await grid.updateComplete;
   return grid;
 }
 
-const scrollerOf = (grid: FlowGrid<Row>) =>
-  grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
-const headerOf = (grid: FlowGrid<Row>) =>
-  grid.shadowRoot!.querySelector('flow-instance[parts="header"]')!;
-const chromeOf = (grid: FlowGrid<Row>) => grid.shadowRoot!.querySelector('.stack-chrome')!;
-const viewportOf = (grid: FlowGrid<Row>) =>
-  grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
+const scrollerOf = (grid: Grid<Row>) => grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+const headerOf = (grid: Grid<Row>) =>
+  grid.shadowRoot!.querySelector('ls-grid-instance[parts="header"]')!;
+const chromeOf = (grid: Grid<Row>) => grid.shadowRoot!.querySelector('.stack-chrome')!;
+const viewportOf = (grid: Grid<Row>) => grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 // The sticky group band is also parts="rows", so it must be excluded or it
 // matches first and every body assertion reads the wrong element.
-const bodyOf = (grid: FlowGrid<Row>) =>
-  grid.shadowRoot!.querySelector('flow-instance[parts="rows"]:not(.stack-sticky)')!;
-const bodyRows = (grid: FlowGrid<Row>) => [
-  ...bodyOf(grid).shadowRoot!.querySelectorAll('flow-row'),
-];
+const bodyOf = (grid: Grid<Row>) =>
+  grid.shadowRoot!.querySelector('ls-grid-instance[parts="rows"]:not(.stack-sticky)')!;
+const bodyRows = (grid: Grid<Row>) => [...bodyOf(grid).shadowRoot!.querySelectorAll('ls-grid-row')];
 
 /** The first cell's text of the first rendered row. */
-const firstRowText = (grid: FlowGrid<Row>): string => {
+const firstRowText = (grid: Grid<Row>): string => {
   const row = bodyRows(grid)[0];
   if (!row) return '';
-  const cell = row.shadowRoot!.querySelector('flow-cell');
+  const cell = row.shadowRoot!.querySelector('ls-grid-cell');
   return cell?.shadowRoot?.textContent?.trim() ?? '';
 };
 
-async function scrollTo(grid: FlowGrid<Row>, top: number): Promise<void> {
+async function scrollTo(grid: Grid<Row>, top: number): Promise<void> {
   const before = firstRowText(grid);
   scrollerOf(grid).scrollTop = top;
   await waitFor(() => firstRowText(grid) !== before, {
@@ -157,14 +154,14 @@ describe('stack layout', () => {
       const grid = await mount();
       await scrollTo(grid, 3000);
 
-      expect(grid.shadowRoot!.querySelectorAll('flow-instance[parts="header"]')).toHaveLength(1);
+      expect(grid.shadowRoot!.querySelectorAll('ls-grid-instance[parts="header"]')).toHaveLength(1);
     });
 
     it('carries no rows, and the body carries no header', async () => {
       const grid = await mount();
 
-      expect(headerOf(grid).shadowRoot!.querySelectorAll('flow-row')).toHaveLength(0);
-      expect(bodyOf(grid).shadowRoot!.querySelectorAll('flow-header-cell')).toHaveLength(0);
+      expect(headerOf(grid).shadowRoot!.querySelectorAll('ls-grid-row')).toHaveLength(0);
+      expect(bodyOf(grid).shadowRoot!.querySelectorAll('ls-grid-header-cell')).toHaveLength(0);
     });
 
     it('keeps its columns aligned with the body', async () => {
@@ -172,8 +169,8 @@ describe('stack layout', () => {
       const grid = await mount();
       await scrollTo(grid, 2000);
 
-      const headerCells = [...headerOf(grid).shadowRoot!.querySelectorAll('flow-header-cell')];
-      const bodyCells = [...bodyRows(grid)[0]!.shadowRoot!.querySelectorAll('flow-cell')];
+      const headerCells = [...headerOf(grid).shadowRoot!.querySelectorAll('ls-grid-header-cell')];
+      const bodyCells = [...bodyRows(grid)[0]!.shadowRoot!.querySelectorAll('ls-grid-cell')];
 
       expect(headerCells).toHaveLength(bodyCells.length);
       for (const [index, headerCell] of headerCells.entries()) {
@@ -202,8 +199,8 @@ describe('stack layout', () => {
         description: 'the header to follow a horizontal scroll',
       });
 
-      const headerCell = headerOf(grid).shadowRoot!.querySelectorAll('flow-header-cell')[0]!;
-      const bodyCell = bodyRows(grid)[0]!.shadowRoot!.querySelectorAll('flow-cell')[0]!;
+      const headerCell = headerOf(grid).shadowRoot!.querySelectorAll('ls-grid-header-cell')[0]!;
+      const bodyCell = bodyRows(grid)[0]!.shadowRoot!.querySelectorAll('ls-grid-cell')[0]!;
 
       expect(headerOf(grid).getBoundingClientRect().left).toBeCloseTo(before - 200, 0);
       expect(
@@ -301,7 +298,7 @@ describe('stack layout', () => {
       const grid = await mount({ modules: [new SortModule<Row>()] });
       await scrollTo(grid, 2000);
 
-      const header = headerOf(grid).shadowRoot!.querySelectorAll('flow-header-cell')[1]!;
+      const header = headerOf(grid).shadowRoot!.querySelectorAll('ls-grid-header-cell')[1]!;
       (header.shadowRoot!.querySelector('.label') as HTMLElement).click();
       await waitFor(() => grid.api.getSortModel().length > 0, { description: 'the sort to apply' });
 
@@ -335,12 +332,12 @@ describe('stack layout', () => {
         grouped(),
       );
 
-    const stickyOf = (grid: FlowGrid<Row>) => grid.shadowRoot!.querySelector('.stack-sticky');
-    const stickyText = (grid: FlowGrid<Row>): string => {
+    const stickyOf = (grid: Grid<Row>) => grid.shadowRoot!.querySelector('.stack-sticky');
+    const stickyText = (grid: Grid<Row>): string => {
       const band = stickyOf(grid);
       if (!band) return '';
-      return [...band.shadowRoot!.querySelectorAll('flow-row')]
-        .flatMap((row) => [...row.shadowRoot!.querySelectorAll('flow-cell')])
+      return [...band.shadowRoot!.querySelectorAll('ls-grid-row')]
+        .flatMap((row) => [...row.shadowRoot!.querySelectorAll('ls-grid-cell')])
         .map((cell) => cell.shadowRoot?.textContent ?? '')
         .join(' ');
     };
@@ -356,7 +353,7 @@ describe('stack layout', () => {
 
       const band = (stickyOf(grid) as HTMLElement).getBoundingClientRect();
       const heading = bodyRows(grid)[0]!
-        .shadowRoot!.querySelector('flow-cell')!
+        .shadowRoot!.querySelector('ls-grid-cell')!
         .getBoundingClientRect();
       expect(Math.abs(band.top - heading.top)).toBeLessThan(1.5);
     });
@@ -473,7 +470,7 @@ describe('stack layout', () => {
   });
 
   describe('column sizing', () => {
-    const templateOf = (grid: FlowGrid<Row>) =>
+    const templateOf = (grid: Grid<Row>) =>
       getComputedStyle(headerOf(grid).shadowRoot!.querySelector('.grid') as HTMLElement)
         .gridTemplateColumns;
 
@@ -562,16 +559,16 @@ describe('stack layout', () => {
       host.style.cssText = 'width:800px;height:400px';
       document.body.append(host);
 
-      const grid = document.createElement('flow-grid') as FlowGrid<Row>;
+      const grid = document.createElement('ls-grid') as Grid<Row>;
       grid.gridOptions = { columns: [{ field: 'name' }, { field: 'price' }], rowHeight: 32 };
       grid.rowData = rows(50);
       host.append(grid);
       await grid.updateComplete;
-      await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null, {
+      await waitFor(() => grid.shadowRoot?.querySelector('ls-grid-instance') !== null, {
         description: 'an instance to mount',
       });
 
-      const instance = grid.shadowRoot!.querySelector('flow-instance')!;
+      const instance = grid.shadowRoot!.querySelector('ls-grid-instance')!;
       const template = getComputedStyle(
         instance.shadowRoot!.querySelector('.grid') as HTMLElement,
       ).gridTemplateColumns;
@@ -587,22 +584,22 @@ describe('stack layout', () => {
       host.style.cssText = 'width:800px;height:400px';
       document.body.append(host);
 
-      const grid = document.createElement('flow-grid') as FlowGrid<Row>;
+      const grid = document.createElement('ls-grid') as Grid<Row>;
       grid.gridOptions = { columns, rowHeight: 32, headerHeight: 32 };
       grid.rowData = rows(50);
       host.append(grid);
       await grid.updateComplete;
-      await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null, {
+      await waitFor(() => grid.shadowRoot?.querySelector('ls-grid-instance') !== null, {
         description: 'an instance to mount',
       });
 
-      const instances = [...grid.shadowRoot!.querySelectorAll('flow-instance')];
+      const instances = [...grid.shadowRoot!.querySelectorAll('ls-grid-instance')];
       expect(instances.length).toBeGreaterThan(0);
       for (const instance of instances) {
         // `full`, so each carries its own header inline rather than split out.
         expect(instance.getAttribute('parts')).toBe('full');
-        expect(instance.shadowRoot!.querySelectorAll('flow-header-cell')).toHaveLength(2);
-        expect(instance.shadowRoot!.querySelectorAll('flow-row').length).toBeGreaterThan(0);
+        expect(instance.shadowRoot!.querySelectorAll('ls-grid-header-cell')).toHaveLength(2);
+        expect(instance.shadowRoot!.querySelectorAll('ls-grid-row').length).toBeGreaterThan(0);
       }
     });
   });

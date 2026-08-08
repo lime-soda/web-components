@@ -1,4 +1,4 @@
-import { CellRendererElement } from 'flow-grid';
+import { CellRendererElement } from '@lime-soda/grid';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import type { Bond } from './bond-data.js';

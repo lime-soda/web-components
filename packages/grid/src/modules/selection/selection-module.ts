@@ -1,6 +1,6 @@
 import { css, html } from 'lit';
 import { defineElement } from '../../define-elements.js';
-import { FlowSelectionCheckbox } from './selection-checkbox.js';
+import { GridSelectionCheckbox } from './selection-checkbox.js';
 import {
   FlatMembership,
   type RangeHandler,
@@ -25,7 +25,7 @@ export type SelectionMode = 'single' | 'multi';
 /** What a checkbox should show. Derived, never stored. */
 export type SelectionState = 'checked' | 'indeterminate' | 'unchecked';
 
-const SELECTION_COL_ID = 'flow-selection';
+const SELECTION_COL_ID = 'ls-grid-selection';
 
 export interface SelectionModuleOptions {
   mode?: SelectionMode;
@@ -118,7 +118,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     // The module's checkbox column names this element, so the module is what
     // must ensure it exists — rather than an import side effect that would
     // register it even for a grid with no selection.
-    defineElement('flow-selection-checkbox', FlowSelectionCheckbox);
+    defineElement('ls-grid-selection-checkbox', GridSelectionCheckbox);
 
     context.addTeardown(
       context.pipeline.store.subscribe((result) => {
@@ -363,19 +363,19 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   // -- Rendering --------------------------------------------------------------
 
   static readonly styles = css`
-    .flow-checkbox {
+    .ls-grid-checkbox {
       cursor: pointer;
       margin: 0;
-      accent-color: var(--flow-focus, #3b82f6);
+      accent-color: var(--ls-grid-focus, #3b82f6);
     }
 
-    .flow-checkbox:disabled {
+    .ls-grid-checkbox:disabled {
       cursor: default;
-      opacity: var(--flow-disabled-opacity, 0.4);
+      opacity: var(--ls-grid-disabled-opacity, 0.4);
     }
 
-    .flow-checkbox:focus-visible {
-      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
+    .ls-grid-checkbox:focus-visible {
+      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
       outline-offset: 1px;
     }
   `;
@@ -402,7 +402,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
         width: this.options.checkboxColumnWidth ?? 28,
         sortable: false,
         filterable: false,
-        cellRenderer: 'flow-selection-checkbox',
+        cellRenderer: 'ls-grid-selection-checkbox',
       },
     ];
   }
@@ -503,11 +503,11 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     }
 
     return {
-      classes: ['flow-row-selected'],
+      classes: ['ls-grid-row-selected'],
       attributes: { 'aria-selected': 'true' },
       // A row is `display: contents` and has no box to paint, so the highlight
       // travels to the cells as a class the cell stylesheet styles.
-      cellClasses: ['flow-cell-selected'],
+      cellClasses: ['ls-grid-cell-selected'],
       ...activation,
     };
   }
@@ -596,7 +596,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   private changed(): void {
     this.context?.requestRender();
-    this.context?.dispatch('flow-selection-changed', {
+    this.context?.dispatch('ls-grid-selection-changed', {
       selected: this.getSelectedRows(),
       count: this.selected.size,
     });
@@ -619,7 +619,7 @@ export const selectionCheckboxTemplate = (
       event.stopPropagation();
       onChange((event.target as HTMLInputElement).checked, (event as MouseEvent).shiftKey);
     }}
-    class="flow-checkbox"
+    class="ls-grid-checkbox"
   />`;
 
 /** One module may do a job; two cannot, and saying so early is the whole point. */

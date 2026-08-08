@@ -1,6 +1,7 @@
-import path from 'node:path'
-import { defineConfig } from 'vitest/config'
-import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
+import path from 'node:path';
+import { defineConfig } from 'vite-plus';
+import { playwright } from 'vite-plus/test/browser-playwright';
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
@@ -20,7 +21,7 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: 'playwright',
+            provider: playwright(),
             instances: [{ browser: 'chromium' }],
           },
           setupFiles: ['.storybook/vitest.setup.ts'],
@@ -28,4 +29,4 @@ export default defineConfig({
       },
     ],
   },
-})
+});

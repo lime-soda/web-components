@@ -32,4 +32,5 @@ custom-elements.json
 test-results/
 playwright-report/
 __screenshots__/
+.vitest-attachments/
 .screenshots/

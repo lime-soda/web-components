@@ -20,16 +20,16 @@ import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
  * decides which instances are worth rendering. Everything below reads from the
  * context, so nothing is drilled down the tree.
  */
-export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
+export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
       height: 100%;
       overflow: hidden;
-      color: var(--flow-text, #101010);
-      background: var(--flow-surface, transparent);
-      font-family: var(--flow-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
-      font-size: var(--flow-font-size, 13px);
+      color: var(--ls-grid-text, #101010);
+      background: var(--ls-grid-surface, transparent);
+      font-family: var(--ls-grid-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+      font-size: var(--ls-grid-font-size, 13px);
       -webkit-font-smoothing: antialiased;
     }
 
@@ -63,26 +63,26 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       flex: 0 0 auto;
       overflow: hidden;
       /* Matches the width the body's scrollbar takes, so columns stay in line. */
-      padding-right: var(--flow-scrollbar-width, 0px);
+      padding-right: var(--ls-grid-scrollbar-width, 0px);
       box-sizing: border-box;
     }
 
     .stack-chrome-header {
-      transform: translateX(calc(-1 * var(--flow-scroll-left, 0px)));
+      transform: translateX(calc(-1 * var(--ls-grid-scroll-left, 0px)));
     }
 
     .scroller[data-layout='flow'] {
       display: flex;
       align-items: flex-start;
-      gap: var(--flow-instance-gap, 16px);
+      gap: var(--ls-grid-instance-gap, 16px);
       overflow-y: hidden;
     }
 
     .instance-slot {
       flex: 0 0 auto;
       box-sizing: border-box;
-      width: var(--flow-instance-width, auto);
-      height: var(--flow-instance-height, auto);
+      width: var(--ls-grid-instance-width, auto);
+      height: var(--ls-grid-instance-height, auto);
     }
 
     /* Offscreen instances keep their exact footprint so the scrollbar never jumps. */
@@ -90,14 +90,14 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       box-sizing: border-box;
       width: 100%;
       height: 100%;
-      background: var(--flow-placeholder-background, var(--flow-background, #ffffff));
-      border: 1px solid var(--flow-border, #d8d8d8);
-      border-radius: var(--flow-radius, 4px);
+      background: var(--ls-grid-placeholder-background, var(--ls-grid-background, #ffffff));
+      border: 1px solid var(--ls-grid-border, #d8d8d8);
+      border-radius: var(--ls-grid-radius, 4px);
     }
 
     .stack-spacer {
       width: 100%;
-      height: var(--flow-spacer-height, 0);
+      height: var(--ls-grid-spacer-height, 0);
     }
 
     /*
@@ -115,7 +115,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       position: sticky;
       top: 0;
       z-index: 1;
-      margin-bottom: calc(-1 * var(--flow-sticky-height, 0px));
+      margin-bottom: calc(-1 * var(--ls-grid-sticky-height, 0px));
     }
   `;
 
@@ -317,11 +317,11 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     const viewport = controller.pipeline.viewport;
     return {
       ...themeToCustomProperties(controller.options.theme ?? {}),
-      '--flow-row-height': `${viewport.rowHeight}px`,
-      '--flow-header-height': `${viewport.headerHeight}px`,
-      '--flow-instance-gap': `${viewport.instanceGap}px`,
-      '--flow-scroll-left': `${this.bodyScrollLeft}px`,
-      '--flow-scrollbar-width': `${this.scrollbarWidth}px`,
+      '--ls-grid-row-height': `${viewport.rowHeight}px`,
+      '--ls-grid-header-height': `${viewport.headerHeight}px`,
+      '--ls-grid-instance-gap': `${viewport.instanceGap}px`,
+      '--ls-grid-scroll-left': `${this.bodyScrollLeft}px`,
+      '--ls-grid-scrollbar-width': `${this.scrollbarWidth}px`,
     };
   }
 
@@ -340,14 +340,16 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
             // *content*. The border is chrome around that, so it is added here
             // — with it inside, the last column overflowed the padding box and
             // was clipped, taking the focus ring's right edge with it.
-            '--flow-instance-width': `calc(${instance.width}px + 2 * var(--flow-instance-border-width, 1px))`,
-            '--flow-instance-height': `${height}px`,
+            '--ls-grid-instance-width': `calc(${instance.width}px + 2 * var(--ls-grid-instance-border-width, 1px))`,
+            '--ls-grid-instance-height': `${height}px`,
           })}
           ${ref((element) => this.observeSlot(element))}
         >
-          ${this.visibleInstances.has(instance.id)
-            ? html`<flow-instance part="instance" .instance=${instance}></flow-instance>`
-            : html`<div class="placeholder" part="placeholder"></div>`}
+          ${
+            this.visibleInstances.has(instance.id)
+              ? html`<ls-grid-instance part="instance" .instance=${instance}></ls-grid-instance>`
+              : html`<div class="placeholder" part="placeholder"></div>`
+          }
         </div>
       `,
     );
@@ -375,28 +377,30 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     const stickyInstance = this.stickyInstanceFor(instance, stickyRows);
 
     return html`
-      ${stickyRows.length === 0
-        ? nothing
-        : html`<flow-instance
-            class="stack-sticky"
-            role="presentation"
-            part="instance-sticky"
-            parts="rows"
-            .instance=${stickyInstance}
-            style=${styleMap({
-              '--flow-sticky-height': `${stickyRows.length * rowHeight}px`,
-            })}
-          ></flow-instance>`}
+      ${
+        stickyRows.length === 0
+          ? nothing
+          : html`<ls-grid-instance
+              class="stack-sticky"
+              role="presentation"
+              part="instance-sticky"
+              parts="rows"
+              .instance=${stickyInstance}
+              style=${styleMap({
+                '--ls-grid-sticky-height': `${stickyRows.length * rowHeight}px`,
+              })}
+            ></ls-grid-instance>`
+      }
       <div
         class="stack-spacer"
         role="presentation"
-        style=${styleMap({ '--flow-spacer-height': `${instance.offset}px` })}
+        style=${styleMap({ '--ls-grid-spacer-height': `${instance.offset}px` })}
       ></div>
-      <flow-instance part="instance" parts="rows" .instance=${instance}></flow-instance>
+      <ls-grid-instance part="instance" parts="rows" .instance=${instance}></ls-grid-instance>
       <div
         class="stack-spacer"
         role="presentation"
-        style=${styleMap({ '--flow-spacer-height': `${below}px` })}
+        style=${styleMap({ '--ls-grid-spacer-height': `${below}px` })}
       ></div>
     `;
   }
@@ -437,12 +441,12 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
     return html`
       <div class="stack-chrome" role="presentation">
-        <flow-instance
+        <ls-grid-instance
           class="stack-chrome-header"
           part="instance-header"
           parts="header"
           .instance=${instance}
-        ></flow-instance>
+        ></ls-grid-instance>
       </div>
     `;
   }
@@ -513,7 +517,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
   }
 
   private emit(type: string, detail: unknown): void {
-    if (type === 'flow-scroll-to-row') {
+    if (type === 'ls-grid-scroll-to-row') {
       this.scrollToRow((detail as { id: string }).id);
       return;
     }
@@ -540,6 +544,6 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'flow-grid': FlowGrid;
+    'ls-grid': Grid;
   }
 }

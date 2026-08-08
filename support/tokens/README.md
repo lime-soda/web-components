@@ -111,16 +111,14 @@ the Style Dictionary token definitions.
 
 ```ts
 // Import combined CSS with light-dark() functions
-import '@lime-soda/tokens/tokens.css'
+import '@lime-soda/tokens/tokens.css';
 
 const styles = css`
   .button {
-    background: var(
-      --color-primary-500
-    ); /* Automatically adapts to light/dark */
+    background: var(--color-primary-500); /* Automatically adapts to light/dark */
     color: var(--color-primary-on-primary);
   }
-`
+`;
 ```
 
 The `light-dark()` function automatically switches between light and dark values
@@ -141,10 +139,10 @@ based on the user's system preference or the `color-scheme` property.
 
 ```ts
 // Light mode only
-import '@lime-soda/tokens/tokens-light.css'
+import '@lime-soda/tokens/tokens-light.css';
 
 // Dark mode only
-import '@lime-soda/tokens/tokens-dark.css'
+import '@lime-soda/tokens/tokens-dark.css';
 ```
 
 ### Component Usage Examples
@@ -152,15 +150,15 @@ import '@lime-soda/tokens/tokens-dark.css'
 #### Using Component Token Exports
 
 ```ts
-import * as styles from '@lime-soda/tokens/button'
+import * as styles from '@lime-soda/tokens/button';
 
 // Use CSS custom properties
-styles.props // :host { --button-sm-padding: 0.375rem 0.75rem; ... }
+styles.props; // :host { --button-sm-padding: 0.375rem 0.75rem; ... }
 
 // Use grouped token objects
-styles.sm.padding // css`var(--button-sm-padding)`
-styles.primary.backgroundColor // css`var(--button-primary-background-color)`
-styles.transition // css`var(--button-transition)`
+styles.sm.padding; // css`var(--button-sm-padding)`
+styles.primary.backgroundColor; // css`var(--button-primary-background-color)`
+styles.transition; // css`var(--button-transition)`
 ```
 
 #### Traditional CSS Custom Properties
@@ -182,7 +180,7 @@ const buttonStyles = css`
     background: var(--color-secondary-500);
     color: var(--color-secondary-on-secondary);
   }
-`
+`;
 
 // Form validation
 const formStyles = css`
@@ -195,7 +193,7 @@ const formStyles = css`
     border-color: var(--color-success-500);
     background: var(--color-success-50);
   }
-`
+`;
 ```
 
 ## Accessibility

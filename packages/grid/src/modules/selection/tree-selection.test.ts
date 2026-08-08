@@ -352,7 +352,7 @@ describe('tree selection', () => {
   describe('the header while collapsed', () => {
     const headerState = (selection: SelectionModule<Bond>) => {
       const slot = selection.headerSlot({
-        column: { colId: 'flow-selection', headerName: '', width: 28, index: 0 },
+        column: { colId: 'ls-grid-selection', headerName: '', width: 28, index: 0 },
       } as never);
       // The template's bound properties carry the tri-state.
       const values = (slot as unknown as { values: unknown[] }).values;

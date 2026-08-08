@@ -40,11 +40,11 @@ const setup = (options: SelectionModuleOptions = {}) => {
 
 const headerSlot = (selection: SelectionModule<Row>) =>
   selection.headerSlot({
-    column: { colId: 'flow-selection', headerName: '', width: 28, index: 0 },
+    column: { colId: 'ls-grid-selection', headerName: '', width: 28, index: 0 },
   } as never);
 
 const hasCheckboxColumn = (selection: SelectionModule<Row>) =>
-  selection.provideColumns().some((column) => column.colId === 'flow-selection');
+  selection.provideColumns().some((column) => column.colId === 'ls-grid-selection');
 
 const activation = (selection: SelectionModule<Row>, rowId = 'a') =>
   selection.rowDecorator({ row: { id: rowId, rowId }, node: undefined } as never)?.onActivate;

@@ -35,7 +35,7 @@ export type CellRendererFn<TData = unknown, TValue = unknown> = (
  *
  * @example
  * ```ts
- * declare module 'flow-grid' {
+ * declare module '@lime-soda/grid' {
  *   interface ColumnDef<TData, TValue> {
  *     sortable?: boolean;
  *   }

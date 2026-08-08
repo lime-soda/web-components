@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import '../layouts.js';
 import { TreeModule } from '../modules/tree/index.js';
 import type { GridOptions } from '../controller/grid-controller.js';
-import type { FlowGrid } from './grid.js';
+import type { Grid } from './grid.js';
 
 /**
  * What assistive technology is told.
@@ -50,13 +50,13 @@ async function waitFor(condition: () => boolean, timeout = 2000): Promise<void> 
 async function mount(
   rows: Bond[],
   modules: GridOptions<Bond>['modules'] = [],
-): Promise<FlowGrid<Bond>> {
+): Promise<Grid<Bond>> {
   host = document.createElement('div');
   host.style.height = '400px';
   host.style.width = '600px';
   document.body.append(host);
 
-  const grid = document.createElement('flow-grid') as FlowGrid<Bond>;
+  const grid = document.createElement('ls-grid') as Grid<Bond>;
   grid.style.height = '100%';
   grid.gridOptions = {
     columns: [
@@ -69,14 +69,14 @@ async function mount(
   grid.rowData = rows;
   host.append(grid);
 
-  await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null);
-  await waitFor(() => instance(grid).shadowRoot!.querySelector('flow-row') !== null);
+  await waitFor(() => grid.shadowRoot?.querySelector('ls-grid-instance') !== null);
+  await waitFor(() => instance(grid).shadowRoot!.querySelector('ls-grid-row') !== null);
   return grid;
 }
 
-const instance = (grid: FlowGrid<Bond>) =>
-  grid.shadowRoot!.querySelector('flow-instance') as HTMLElement;
-const rows = (grid: FlowGrid<Bond>) => [...instance(grid).shadowRoot!.querySelectorAll('flow-row')];
+const instance = (grid: Grid<Bond>) =>
+  grid.shadowRoot!.querySelector('ls-grid-instance') as HTMLElement;
+const rows = (grid: Grid<Bond>) => [...instance(grid).shadowRoot!.querySelectorAll('ls-grid-row')];
 
 afterEach(() => {
   host?.remove();
@@ -111,8 +111,8 @@ describe('the grid announces its shape', () => {
 
   it('numbers columns from one, on cells and headers alike', async () => {
     const grid = await mount(flat);
-    const cells = [...rows(grid)[0]!.shadowRoot!.querySelectorAll('flow-cell')];
-    const headers = [...instance(grid).shadowRoot!.querySelectorAll('flow-header-cell')];
+    const cells = [...rows(grid)[0]!.shadowRoot!.querySelectorAll('ls-grid-cell')];
+    const headers = [...instance(grid).shadowRoot!.querySelectorAll('ls-grid-header-cell')];
 
     expect(cells.map((c) => c.getAttribute('aria-colindex'))).toEqual(['1', '2']);
     expect(headers.map((h) => h.getAttribute('aria-colindex'))).toEqual(['1', '2']);
@@ -177,10 +177,10 @@ describe('across instances', () => {
     price: i,
   }));
 
-  const instances = (grid: FlowGrid<Bond>) => [
-    ...grid.shadowRoot!.querySelectorAll('flow-instance'),
+  const instances = (grid: Grid<Bond>) => [
+    ...grid.shadowRoot!.querySelectorAll('ls-grid-instance'),
   ];
-  const rowsOf = (panel: Element) => [...panel.shadowRoot!.querySelectorAll('flow-row')];
+  const rowsOf = (panel: Element) => [...panel.shadowRoot!.querySelectorAll('ls-grid-row')];
 
   it('numbers rows continuously from one instance to the next', async () => {
     const grid = await mount(many);

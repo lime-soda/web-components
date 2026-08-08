@@ -22,8 +22,8 @@ export function createLayoutEngine(mode: LayoutMode): LayoutEngine {
   const create = engines.get(mode);
   if (!create) {
     throw new Error(
-      `Layout "${mode}" is not available. Import 'flow-grid' for both layouts, ` +
-        `or 'flow-grid/${mode}' for this one alone.`,
+      `Layout "${mode}" is not available. Import '@lime-soda/grid' for both layouts, ` +
+        `or '@lime-soda/grid/${mode}' for this one alone.`,
     );
   }
   return create();

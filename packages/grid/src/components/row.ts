@@ -21,7 +21,7 @@ import { SignalWatcher } from '../reactive/index.js';
  * (node, selection, store) with matching teardown in `disconnectedCallback`; here
  * the row context reads a signal and Lit handles the rest.
  */
-export class FlowRow extends SignalWatcher(LitElement) {
+export class GridRow extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       /*
@@ -87,8 +87,8 @@ export class FlowRow extends SignalWatcher(LitElement) {
    */
   private readonly handleHover = (event: Event): void => {
     const hovered = event.type === 'mouseenter';
-    for (const cell of this.shadowRoot?.querySelectorAll('flow-cell') ?? []) {
-      cell.classList.toggle('flow-row-hover', hovered);
+    for (const cell of this.shadowRoot?.querySelectorAll('ls-grid-cell') ?? []) {
+      cell.classList.toggle('ls-grid-row-hover', hovered);
     }
   };
 
@@ -134,18 +134,18 @@ export class FlowRow extends SignalWatcher(LitElement) {
       grid.columns.get(),
       (column) => column.colId,
       (column) =>
-        html`<flow-cell
+        html`<ls-grid-cell
           part="cell"
           role="gridcell"
           aria-colindex=${column.index + 1}
           class=${cellClasses}
           style=${styleMap(cellProperties)}
           .column=${column}
-        ></flow-cell>`,
+        ></ls-grid-cell>`,
     );
   }
 
-  /** See flow-cell: decorations must be withdrawn as well as applied. */
+  /** See ls-grid-cell: decorations must be withdrawn as well as applied. */
   private applyDecorations(decorations: readonly RowDecoration[]): void {
     const classes = new Set(decorations.flatMap((d) => d.classes ?? []));
     const attributes = new Map<string, string>();
@@ -174,6 +174,6 @@ export class FlowRow extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'flow-row': FlowRow;
+    'ls-grid-row': GridRow;
   }
 }

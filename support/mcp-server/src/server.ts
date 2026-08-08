@@ -1,14 +1,14 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { z } from 'zod'
-import * as components from './tools/components.js'
-import * as tokens from './tools/tokens.js'
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import * as components from './tools/components.js';
+import * as tokens from './tools/tokens.js';
 
 export function createServer() {
   const server = new McpServer({
     name: 'lime-soda-mcp-server',
     version: '0.0.0',
-  })
+  });
 
   server.registerTool(
     'list-components',
@@ -17,7 +17,7 @@ export function createServer() {
       description: 'List all available web components in the packages',
     },
     async () => {
-      const componentList = await components.listComponents()
+      const componentList = await components.listComponents();
       return {
         content: [
           {
@@ -25,22 +25,21 @@ export function createServer() {
             text: JSON.stringify(componentList, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   server.registerTool(
     'get-component-details',
     {
       title: 'Get Component Details',
-      description:
-        'Get detailed information about a specific component by name or tag',
+      description: 'Get detailed information about a specific component by name or tag',
       inputSchema: {
         nameOrTag: z.string(),
       },
     },
     async ({ nameOrTag }: { nameOrTag: string }) => {
-      const component = await components.getComponentDetails(nameOrTag)
+      const component = await components.getComponentDetails(nameOrTag);
 
       if (!component) {
         return {
@@ -50,7 +49,7 @@ export function createServer() {
               text: `Component "${nameOrTag}" not found`,
             },
           ],
-        }
+        };
       }
 
       return {
@@ -60,16 +59,15 @@ export function createServer() {
             text: JSON.stringify(component, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   server.registerTool(
     'search-components',
     {
       title: 'Search Components',
-      description:
-        'Search components by name, description, properties, or CSS custom properties',
+      description: 'Search components by name, description, properties, or CSS custom properties',
       inputSchema: {
         query: z
           .string()
@@ -79,7 +77,7 @@ export function createServer() {
       },
     },
     async ({ query }: { query: string }) => {
-      const matchingComponents = await components.searchComponents(query)
+      const matchingComponents = await components.searchComponents(query);
       return {
         content: [
           {
@@ -87,9 +85,9 @@ export function createServer() {
             text: JSON.stringify(matchingComponents, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   server.registerTool(
     'get-component-css-properties',
@@ -101,7 +99,7 @@ export function createServer() {
       },
     },
     async ({ nameOrTag }: { nameOrTag: string }) => {
-      const result = await components.getComponentCssProperties(nameOrTag)
+      const result = await components.getComponentCssProperties(nameOrTag);
 
       if (!result) {
         return {
@@ -111,7 +109,7 @@ export function createServer() {
               text: `Component "${nameOrTag}" not found`,
             },
           ],
-        }
+        };
       }
 
       return {
@@ -121,9 +119,9 @@ export function createServer() {
             text: JSON.stringify(result, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   server.registerTool(
     'list-token-categories',
@@ -132,7 +130,7 @@ export function createServer() {
       description: 'List all available design token categories',
     },
     () => {
-      const categories = tokens.listTokenCategories()
+      const categories = tokens.listTokenCategories();
       return {
         content: [
           {
@@ -140,9 +138,9 @@ export function createServer() {
             text: JSON.stringify(categories, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   server.registerTool(
     'get-tokens',
@@ -150,14 +148,11 @@ export function createServer() {
       title: 'Get Tokens',
       description: 'Get design tokens, optionally filtered by category',
       inputSchema: {
-        category: z
-          .string()
-          .optional()
-          .describe('Optional category name to filter tokens'),
+        category: z.string().optional().describe('Optional category name to filter tokens'),
       },
     },
     ({ category }: { category?: string }) => {
-      const tokenData = tokens.getTokens(category)
+      const tokenData = tokens.getTokens(category);
 
       if (category && !tokenData) {
         return {
@@ -167,7 +162,7 @@ export function createServer() {
               text: `Token category "${category}" not found`,
             },
           ],
-        }
+        };
       }
 
       return {
@@ -177,9 +172,9 @@ export function createServer() {
             text: JSON.stringify(tokenData, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   server.registerTool(
     'get-css-variables',
@@ -188,7 +183,7 @@ export function createServer() {
       description: 'Get all available CSS custom properties with their values',
     },
     async () => {
-      const variables = await tokens.getCssVariables()
+      const variables = await tokens.getCssVariables();
       return {
         content: [
           {
@@ -196,9 +191,9 @@ export function createServer() {
             text: JSON.stringify(variables, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   server.registerTool(
     'search-tokens',
@@ -208,13 +203,11 @@ export function createServer() {
       inputSchema: {
         query: z
           .string()
-          .describe(
-            'Search query to match against token names, values, or descriptions',
-          ),
+          .describe('Search query to match against token names, values, or descriptions'),
       },
     },
     ({ query }: { query: string }) => {
-      const matchingTokens = tokens.searchTokens(query)
+      const matchingTokens = tokens.searchTokens(query);
       return {
         content: [
           {
@@ -222,14 +215,14 @@ export function createServer() {
             text: JSON.stringify(matchingTokens, null, 2),
           },
         ],
-      }
+      };
     },
-  )
+  );
 
   return {
     async start() {
-      const transport = new StdioServerTransport()
-      await server.connect(transport)
+      const transport = new StdioServerTransport();
+      await server.connect(transport);
     },
-  }
+  };
 }

@@ -20,16 +20,16 @@ import { SignalWatcher } from '../reactive/index.js';
  * price tick cheap: the cell reads its row's signal during render, so a change
  * repaints this cell and touches nothing above it.
  */
-export class FlowCell extends SignalWatcher(LitElement) {
+export class GridCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
       align-items: center;
       box-sizing: border-box;
       overflow: hidden;
-      padding: 0 var(--flow-cell-padding-x, 8px);
-      border-bottom: 1px solid var(--flow-border-subtle, #f0f0f0);
-      color: var(--flow-text, #101010);
+      padding: 0 var(--ls-grid-cell-padding-x, 8px);
+      border-bottom: 1px solid var(--ls-grid-border-subtle, #f0f0f0);
+      color: var(--ls-grid-text, #101010);
       font-variant-numeric: tabular-nums;
     }
 
@@ -56,23 +56,23 @@ export class FlowCell extends SignalWatcher(LitElement) {
      * and says so here, so clicking and tabbing look the same.
      */
     :host([data-focused]) {
-      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--flow-focus-width, 2px));
+      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--ls-grid-focus-width, 2px));
     }
 
     /* Applied by the selection module. A row is display:contents and has no box
        of its own, so the highlight is painted by its cells. */
-    :host(.flow-cell-selected) {
-      background: var(--flow-selection-background, rgb(59 130 246 / 12%));
+    :host(.ls-grid-cell-selected) {
+      background: var(--ls-grid-selection-background, rgb(59 130 246 / 12%));
     }
 
     /* Tracking a row across a monitor-wide grid is the whole reason this exists. */
-    :host(.flow-row-hover) {
-      background: var(--flow-hover-background, rgb(0 0 0 / 3%));
+    :host(.ls-grid-row-hover) {
+      background: var(--ls-grid-hover-background, rgb(0 0 0 / 3%));
     }
 
-    :host(.flow-row-hover.flow-cell-selected) {
-      background: var(--flow-selection-background, rgb(59 130 246 / 12%));
+    :host(.ls-grid-row-hover.ls-grid-cell-selected) {
+      background: var(--ls-grid-selection-background, rgb(59 130 246 / 12%));
     }
 
     /* Plain values: single line, ellipsised, vertically centred by the host. */
@@ -127,7 +127,7 @@ export class FlowCell extends SignalWatcher(LitElement) {
     const node = this.row?.node;
     if (!node || !this.column) return nothing;
 
-    // See flow-header-cell: keeps module-contributed decorations current.
+    // See ls-grid-header-cell: keeps module-contributed decorations current.
     this.grid?.registry.version.get();
 
     this.tabIndex = this.isTabbableCell() ? 0 : -1;
@@ -310,6 +310,6 @@ function tagFor(tag: string) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'flow-cell': FlowCell;
+    'ls-grid-cell': GridCell;
   }
 }

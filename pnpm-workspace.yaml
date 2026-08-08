@@ -4,3 +4,7 @@ packages:
   - 'tools/*'
 linkWorkspacePackages: 'deep'
 preferWorkspacePackages: true
+# esbuild ships a platform binary from a postinstall script. The bundle
+# benchmark shells out to it, so without this it fails to resolve at run time.
+onlyBuiltDependencies:
+  - esbuild

@@ -7,7 +7,7 @@ import { THEME_TOKENS, customPropertyFor } from './tokens.js';
  * Keeps the theme schema honest against the source.
  *
  * A token list is only a contract if nothing can read a property that is not on
- * it. These tests walk the actual source, so adding `var(--flow-something-new)` to
+ * it. These tests walk the actual source, so adding `var(--ls-grid-something-new)` to
  * a component without declaring the token fails here rather than quietly
  * producing an unthemeable value.
  */
@@ -35,40 +35,40 @@ const declaredProperties = new Set(THEME_TOKENS.map(customPropertyFor));
  * them. Each is either measured geometry or a per-cell value.
  */
 const INTERNAL = new Set([
-  '--flow-instance-width',
-  '--flow-instance-height',
-  '--flow-spacer-height',
-  '--flow-column-template',
-  '--flow-tree-depth',
+  '--ls-grid-instance-width',
+  '--ls-grid-instance-height',
+  '--ls-grid-spacer-height',
+  '--ls-grid-column-template',
+  '--ls-grid-tree-depth',
   // Height of the pinned group band, so it can be lifted out of the flow.
-  '--flow-sticky-height',
+  '--ls-grid-sticky-height',
   // Body scroll offset and scrollbar width, so the static header can follow the
   // body sideways and reserve the gutter it occupies.
-  '--flow-scroll-left',
-  '--flow-scrollbar-width',
+  '--ls-grid-scroll-left',
+  '--ls-grid-scrollbar-width',
 ]);
 
 /** Sub-token knobs a consumer may set but which are not part of the core schema. */
 const OPTIONAL = new Set([
-  '--flow-tree-expander-size',
-  '--flow-tree-expander-font-size',
-  '--flow-sort-indicator-font-size',
-  '--flow-sort-order-font-size',
-  '--flow-filter-input-width',
-  '--flow-filter-font-size',
-  '--flow-filter-padding',
-  '--flow-disabled-opacity',
+  '--ls-grid-tree-expander-size',
+  '--ls-grid-tree-expander-font-size',
+  '--ls-grid-sort-indicator-font-size',
+  '--ls-grid-sort-order-font-size',
+  '--ls-grid-filter-input-width',
+  '--ls-grid-filter-font-size',
+  '--ls-grid-filter-padding',
+  '--ls-grid-disabled-opacity',
   // Border of an instance. Read when sizing the slot, so the columns inside
   // fit the content box rather than being clipped by it.
-  '--flow-instance-border-width',
+  '--ls-grid-instance-border-width',
 ]);
 
 const usages = new Map<string, string[]>();
 for (const file of files) {
   const source = readFileSync(file, 'utf8');
-  // `var(--flow-x)` in CSS, and `'--flow-x'` where a module reads one at runtime
+  // `var(--ls-grid-x)` in CSS, and `'--ls-grid-x'` where a module reads one at runtime
   // through getComputedStyle — the flash colours arrive that way.
-  for (const match of source.matchAll(/var\((--flow-[a-z0-9-]+)|'(--flow-[a-z0-9-]+)'/g)) {
+  for (const match of source.matchAll(/var\((--ls-grid-[a-z0-9-]+)|'(--ls-grid-[a-z0-9-]+)'/g)) {
     const property = (match[1] ?? match[2])!;
     usages.set(property, [...(usages.get(property) ?? []), file]);
   }
@@ -86,7 +86,7 @@ describe('theme coverage', () => {
 
   it('gives every declared token a default in the stylesheet', () => {
     // Otherwise a token would exist on the type but have nothing to override.
-    const stylesheet = readFileSync(join(SRC, 'themes/flow-grid.css'), 'utf8');
+    const stylesheet = readFileSync(join(SRC, 'themes/grid.css'), 'utf8');
     const missing = THEME_TOKENS.map(customPropertyFor).filter(
       (property) => !stylesheet.includes(`${property}:`),
     );

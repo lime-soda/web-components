@@ -1,6 +1,6 @@
-import { LitElement, css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
-import * as tokens from '@lime-soda/tokens/button'
+import { LitElement, css, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import * as tokens from '@lime-soda/tokens/button';
 
 /**
  * Button element.
@@ -14,20 +14,20 @@ export class Button extends LitElement {
    * The size of the button.
    */
   @property({ type: String })
-  size: 'sm' | 'md' | 'lg' = 'md'
+  size: 'sm' | 'md' | 'lg' = 'md';
 
   /**
    * The variant of the button.
    */
   @property({ type: String })
-  variant: 'primary' | 'secondary' | 'outline' | 'ghost' = 'primary'
+  variant: 'primary' | 'secondary' | 'outline' | 'ghost' = 'primary';
 
   render() {
     return html`
       <button part="button" class="${this.size} ${this.variant}">
         <slot></slot>
       </button>
-    `
+    `;
   }
 
   static styles = [
@@ -130,11 +130,11 @@ export class Button extends LitElement {
         }
       }
     `,
-  ]
+  ];
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ls-button': Button
+    'ls-button': Button;
   }
 }

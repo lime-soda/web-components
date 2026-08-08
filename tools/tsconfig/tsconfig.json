@@ -6,11 +6,7 @@
     "useDefineForClassFields": false,
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "moduleDetection": "force",
     "noUnusedLocals": true,
     "sourceMap": true

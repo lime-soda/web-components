@@ -155,25 +155,25 @@ export class FilterModule<TData = unknown> implements GridModule<
   // -- Header -----------------------------------------------------------------
 
   static readonly styles = css`
-    .flow-filter-input {
-      width: var(--flow-filter-input-width, 70px);
+    .ls-grid-filter-input {
+      width: var(--ls-grid-filter-input-width, 70px);
       min-width: 0;
       font: inherit;
-      font-size: var(--flow-filter-font-size, 11px);
-      padding: var(--flow-filter-padding, 1px 4px);
-      border-radius: var(--flow-radius, 3px);
-      border: 1px solid var(--flow-border, #d8d8d8);
+      font-size: var(--ls-grid-filter-font-size, 11px);
+      padding: var(--ls-grid-filter-padding, 1px 4px);
+      border-radius: var(--ls-grid-radius, 3px);
+      border: 1px solid var(--ls-grid-border, #d8d8d8);
       background: transparent;
       color: inherit;
     }
 
     /* An active filter is worth seeing at a glance across a wide monitor. */
-    .flow-filter-input[data-flow-active] {
-      border-color: var(--flow-focus, #3b82f6);
+    .ls-grid-filter-input[data-flow-active] {
+      border-color: var(--ls-grid-focus, #3b82f6);
     }
 
-    .flow-filter-input:focus-visible {
-      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
+    .ls-grid-filter-input:focus-visible {
+      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
       outline-offset: -1px;
     }
   `;
@@ -189,7 +189,7 @@ export class FilterModule<TData = unknown> implements GridModule<
     const value = current && 'value' in current ? String(current.value ?? '') : '';
 
     return html`<input
-      class="flow-filter-input"
+      class="ls-grid-filter-input"
       part="filter-input"
       type="search"
       aria-label=${`Filter ${ctx.column.headerName}`}
@@ -252,7 +252,7 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   private changed(): void {
     this.context?.invalidate();
-    this.context?.dispatch('flow-filter-changed', {
+    this.context?.dispatch('ls-grid-filter-changed', {
       model: this.model,
       quickFilter: this.quickFilter,
     });

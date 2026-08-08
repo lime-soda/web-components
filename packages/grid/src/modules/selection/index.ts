@@ -2,7 +2,7 @@ import type { SelectionState } from './selection-module.js';
 
 export { SelectionModule } from './selection-module.js';
 export type { SelectionMode, SelectionModuleOptions, SelectionState } from './selection-module.js';
-export { FlowSelectionCheckbox } from './selection-checkbox.js';
+export { GridSelectionCheckbox } from './selection-checkbox.js';
 export { FlatMembership } from './membership.js';
 export type { RangeHandler, SelectionMembership } from './membership.js';
 

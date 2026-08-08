@@ -313,7 +313,7 @@ describe('FilterModule', () => {
       filter.setQuickFilter('x');
 
       expect(dispatch).toHaveBeenCalledWith(
-        'flow-filter-changed',
+        'ls-grid-filter-changed',
         expect.objectContaining({ quickFilter: 'x' }),
       );
     });

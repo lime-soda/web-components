@@ -21,7 +21,7 @@ export interface TreeModuleOptions<TData = unknown> extends TreeIndexOptions<TDa
    * deep in the tree stays reachable. On by default.
    */
   retainAncestors?: boolean;
-  /** Indent per depth level, in px. Defaults to 16 via --flow-tree-indent. */
+  /** Indent per depth level, in px. Defaults to 16 via --ls-grid-tree-indent. */
   indentSize?: number;
 }
 
@@ -153,45 +153,45 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
    * Indent depth is the one genuinely per-cell value here, so it travels as a
    * custom property on the element and the width is computed in CSS. Everything
    * else is static and lives in this stylesheet, themeable through the same
-   * `--flow-*` properties as the rest of the grid.
+   * `--ls-grid-*` properties as the rest of the grid.
    */
   static readonly styles = css`
-    .flow-tree-indent {
+    .ls-grid-tree-indent {
       display: inline-block;
       flex: 0 0 auto;
       /* Set per cell by the decoration; falls back to no indent. */
-      width: calc(var(--flow-tree-depth, 0) * var(--flow-tree-indent, 16px));
+      width: calc(var(--ls-grid-tree-depth, 0) * var(--ls-grid-tree-indent, 16px));
     }
 
-    .flow-tree-spacer {
+    .ls-grid-tree-spacer {
       display: inline-block;
       flex: 0 0 auto;
-      width: var(--flow-tree-expander-size, 18px);
+      width: var(--ls-grid-tree-expander-size, 18px);
     }
 
-    .flow-expander {
+    .ls-grid-expander {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      width: var(--flow-tree-expander-size, 18px);
+      width: var(--ls-grid-tree-expander-size, 18px);
       padding: 0;
       background: none;
       border: none;
       cursor: pointer;
-      font-size: var(--flow-tree-expander-font-size, 10px);
+      font-size: var(--ls-grid-tree-expander-font-size, 10px);
       line-height: 1;
-      color: var(--flow-text-muted, #666);
+      color: var(--ls-grid-text-muted, #666);
       transition: transform 150ms ease-out;
       transform: rotate(0deg);
     }
 
-    .flow-expander[aria-expanded='true'] {
+    .ls-grid-expander[aria-expanded='true'] {
       transform: rotate(90deg);
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .flow-expander {
+      .ls-grid-expander {
         transition: none;
       }
     }
@@ -235,33 +235,35 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
     const isExpanded = this.expanded.has(ctx.row.rowId);
 
     return {
-      classes: ['flow-tree-cell'],
+      classes: ['ls-grid-tree-cell'],
       attributes: { 'data-flow-depth': String(depth) },
       // Depth drives the indent width through CSS rather than a computed pixel
-      // value, so a consumer can change --flow-tree-indent and every level follows.
+      // value, so a consumer can change --ls-grid-tree-indent and every level follows.
       customProperties: {
-        '--flow-tree-depth': String(depth),
+        '--ls-grid-tree-depth': String(depth),
         ...(this.options.indentSize === undefined
           ? {}
-          : { '--flow-tree-indent': `${this.options.indentSize}px` }),
+          : { '--ls-grid-tree-indent': `${this.options.indentSize}px` }),
       },
       prefix: html`
-        <span class="flow-tree-indent"></span>
-        ${hasChildren
-          ? html`<button
-              part="tree-expander"
-              class="flow-expander"
-              aria-label=${isExpanded ? 'Collapse' : 'Expand'}
-              aria-expanded=${isExpanded}
-              tabindex="-1"
-              @click=${(event: Event) => {
-                event.stopPropagation();
-                this.toggleExpanded(ctx.row.rowId);
-              }}
-            >
-              ▶
-            </button>`
-          : html`<span class="flow-tree-spacer"></span>`}
+        <span class="ls-grid-tree-indent"></span>
+        ${
+          hasChildren
+            ? html`<button
+                part="tree-expander"
+                class="ls-grid-expander"
+                aria-label=${isExpanded ? 'Collapse' : 'Expand'}
+                aria-expanded=${isExpanded}
+                tabindex="-1"
+                @click=${(event: Event) => {
+                  event.stopPropagation();
+                  this.toggleExpanded(ctx.row.rowId);
+                }}
+              >
+                ▶
+              </button>`
+            : html`<span class="ls-grid-tree-spacer"></span>`
+        }
       `,
     };
   }
@@ -399,7 +401,7 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
 
   private onExpansionChanged(ids: readonly string[]): void {
     this.context?.invalidate();
-    this.context?.dispatch('flow-expansion-changed', {
+    this.context?.dispatch('ls-grid-expansion-changed', {
       ids,
       expanded: [...this.expanded],
     });

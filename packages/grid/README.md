@@ -1,4 +1,4 @@
-# flow-grid
+# @lime-soda/grid
 
 A data grid web component that lays rows out **horizontally**.
 
@@ -29,15 +29,15 @@ far-right instance still says what you are looking at.
 ## Install
 
 ```sh
-npm install flow-grid
+npm install @lime-soda/grid
 ```
 
 ## Quick start
 
 ```ts
-import 'flow-grid/layouts';
-import 'flow-grid/themes/flow-grid.css';
-import type { ColumnDef, FlowGrid, GridOptions } from 'flow-grid';
+import '@lime-soda/grid/layouts';
+import '@lime-soda/grid/themes/grid.css';
+import type { ColumnDef, Grid, GridOptions } from '@lime-soda/grid';
 
 interface Quote {
   id: string;
@@ -50,7 +50,7 @@ const columns: ColumnDef<Quote>[] = [
   { field: 'price', width: 100, valueFormatter: ({ value }) => value!.toFixed(3) },
 ];
 
-const grid = document.querySelector<FlowGrid<Quote>>('flow-grid')!;
+const grid = document.querySelector<Grid<Quote>>('ls-grid')!;
 grid.gridOptions = { columns } satisfies GridOptions<Quote>;
 grid.rowData = quotes;
 
@@ -59,7 +59,7 @@ grid.api.applyTransaction({ update: [{ id: 'UKT30', instrument: 'UKT 4% 2030', p
 ```
 
 ```html
-<flow-grid style="height: 100%"></flow-grid>
+<ls-grid style="height: 100%"></ls-grid>
 ```
 
 That is the whole of core: columns, rows, and a layout. No sorting, no
@@ -74,7 +74,7 @@ The read path is rows → projection → layout, each step a memoised signal:
 RowStore ──► RowProjector ──► DisplayRow[] ──► LayoutEngine ──► Instance[] ──► DOM
    │              ▲                                                            │
    │      module projection stages                                 InstanceVirtualizer
-   └── per-row signals ─────────────────────────────────────────────────► <flow-cell>
+   └── per-row signals ─────────────────────────────────────────────────► <ls-grid-cell>
 ```
 
 A price tick writes one row signal. The bound cells re-render; the projection and
@@ -98,54 +98,54 @@ in the custom element registry as a consequence.
 A working grid comes from an entry that provides one. Each registers the
 elements, so one import is enough:
 
-| Import              | Gives you                             |
-| ------------------- | ------------------------------------- |
-| `flow-grid/flow`    | the horizontal layout                 |
-| `flow-grid/stack`   | the vertical layout                   |
-| `flow-grid/layouts` | every layout, switchable via `layout` |
+| Import                    | Gives you                             |
+| ------------------------- | ------------------------------------- |
+| `@lime-soda/grid/flow`    | the horizontal layout                 |
+| `@lime-soda/grid/stack`   | the vertical layout                   |
+| `@lime-soda/grid/layouts` | every layout, switchable via `layout` |
 
-`flow-grid/layouts` is the plural of the other two and does nothing they cannot:
-importing `flow-grid/flow` and `flow-grid/stack` together has the same effect,
+`@lime-soda/grid/layouts` is the plural of the other two and does nothing they cannot:
+importing `@lime-soda/grid/flow` and `@lime-soda/grid/stack` together has the same effect,
 since each registers its own engine and registering an element twice is a no-op.
 It exists because wanting both is common enough to deserve a name.
 
 ```ts
-import 'flow-grid/flow'; // elements registered, horizontal layout available
-import type { ColumnDef } from 'flow-grid'; // no side effect
+import '@lime-soda/grid/flow'; // elements registered, horizontal layout available
+import type { ColumnDef } from '@lime-soda/grid'; // no side effect
 ```
 
 Asking for a layout an entry point did not provide throws, and names the import
 that would:
 
 ```
-Layout "stack" is not available. Import 'flow-grid' for both layouts,
-or 'flow-grid/stack' for this one alone.
+Layout "stack" is not available. Import '@lime-soda/grid' for both layouts,
+or '@lime-soda/grid/stack' for this one alone.
 ```
 
 Choosing a single layout saves about 0.3 kB gzipped — the engine, and little
 else. The grid element's own stack chrome is a branch inside a class rather than
 a separate module, so it stays either way; excluding that would mean splitting
-the element itself. The reason to reach for `flow-grid/flow` is that it says
+the element itself. The reason to reach for `@lime-soda/grid/flow` is that it says
 what the application does, not that it saves much.
 
 ## Modules
 
 Every feature beyond the core is an additive module with its own entry point.
 
-| Import                          | Adds                                                        |
-| ------------------------------- | ----------------------------------------------------------- |
-| `flow-grid/tree`                | Hierarchy, expand/collapse, and the repeated group headings |
-| `flow-grid/sort`                | Multi-column sort, comparators, header indicators           |
-| `flow-grid/filter`              | Quick filter and per-column filters                         |
-| `flow-grid/selection`           | Row selection, checkbox column, click and modifier handling |
-| `flow-grid/selection/tree`      | Makes a parent stand for the rows beneath it, for tree data |
-| `flow-grid/selection/row-range` | Shift-click spans over contiguous rows                      |
-| `flow-grid/cell-flash`          | Directional flash on value change                           |
-| `flow-grid/keyboard`            | Arrow navigation across instances, Home/End, Page keys      |
+| Import                                | Adds                                                        |
+| ------------------------------------- | ----------------------------------------------------------- |
+| `@lime-soda/grid/tree`                | Hierarchy, expand/collapse, and the repeated group headings |
+| `@lime-soda/grid/sort`                | Multi-column sort, comparators, header indicators           |
+| `@lime-soda/grid/filter`              | Quick filter and per-column filters                         |
+| `@lime-soda/grid/selection`           | Row selection, checkbox column, click and modifier handling |
+| `@lime-soda/grid/selection/tree`      | Makes a parent stand for the rows beneath it, for tree data |
+| `@lime-soda/grid/selection/row-range` | Shift-click spans over contiguous rows                      |
+| `@lime-soda/grid/cell-flash`          | Directional flash on value change                           |
+| `@lime-soda/grid/keyboard`            | Arrow navigation across instances, Home/End, Page keys      |
 
 ```ts
-import { TreeModule } from 'flow-grid/tree';
-import { SelectionModule } from 'flow-grid/selection';
+import { TreeModule } from '@lime-soda/grid/tree';
+import { SelectionModule } from '@lime-soda/grid/selection';
 
 grid.gridOptions = {
   columns,
@@ -179,7 +179,7 @@ Importing a module also adds its options and api methods **to the types**. Witho
 the import, `api.expandAll()` does not exist and does not compile:
 
 ```ts
-import 'flow-grid/tree';
+import '@lime-soda/grid/tree';
 
 grid.api.expandAll(); // ✅ typed, because tree is imported
 grid.api.setSortModel([/* … */]); // ❌ compile error without /sort
@@ -226,7 +226,7 @@ A module owns its own slice, exactly as it owns its API methods, and contributes
 it by augmenting `GridState`. So the shape follows the imports:
 
 ```ts
-import 'flow-grid/sort';
+import '@lime-soda/grid/sort';
 
 const state = grid.api.getState();
 state.sort; // ✅ typed, because sort is imported
@@ -343,9 +343,9 @@ whole model, and it is what a grid of instruments with no grouping should pay
 for.
 
 ```ts
-import { SelectionModule } from 'flow-grid/selection';
-import { TreeSelectionModule } from 'flow-grid/selection/tree';
-import { RowRangeModule } from 'flow-grid/selection/row-range';
+import { SelectionModule } from '@lime-soda/grid/selection';
+import { TreeSelectionModule } from '@lime-soda/grid/selection/tree';
+import { RowRangeModule } from '@lime-soda/grid/selection/row-range';
 
 modules: [
   new SelectionModule<Quote>({ mode: 'multi' }),
@@ -508,7 +508,7 @@ A column that needs its value type — for a comparator or a typed formatter —
 declares it, and still sits in the same array as its siblings:
 
 ```ts
-import type { ColumnDef, ColumnDefs } from 'flow-grid';
+import type { ColumnDef, ColumnDefs } from '@lime-soda/grid';
 
 const price: ColumnDef<Quote, number> = {
   field: 'price',
@@ -525,7 +525,7 @@ Set `cellRenderer` to a custom element's tag name. The element reads its row and
 column from context — no props are drilled through:
 
 ```ts
-import { CellRendererElement } from 'flow-grid';
+import { CellRendererElement } from '@lime-soda/grid';
 
 @customElement('depth-bar')
 class DepthBar extends CellRendererElement<Quote, number> {
@@ -547,7 +547,7 @@ Two ways in, both landing on the same custom properties.
 A typed theme object, validated on assignment:
 
 ```ts
-import type { GridTheme } from 'flow-grid';
+import type { GridTheme } from '@lime-soda/grid';
 
 const theme: GridTheme = {
   rowHeight: '28px',
@@ -570,19 +570,19 @@ Or set the properties directly, on the grid or any ancestor. They inherit throug
 every shadow root:
 
 ```css
-flow-grid {
-  --flow-row-height: 28px;
-  --flow-background: #1a1a1a;
-  --flow-text: #e5e5e5;
-  --flow-selection-background: rgb(59 130 246 / 18%);
+ls-grid {
+  --ls-grid-row-height: 28px;
+  --ls-grid-background: #1a1a1a;
+  --ls-grid-text: #e5e5e5;
+  --ls-grid-selection-background: rgb(59 130 246 / 18%);
 }
 ```
 
-`flow-grid/themes/flow-grid.css` provides a light/dark pair, honouring
+`@lime-soda/grid/themes/grid.css` provides a light/dark pair, honouring
 `prefers-color-scheme` with a `data-flow-theme="light|dark"` override.
 
 Every token maps to one property by the same rule — `selectionBackground` is
-`--flow-selection-background`:
+`--ls-grid-selection-background`:
 
 | Group      | Tokens                                                                        |
 | ---------- | ----------------------------------------------------------------------------- |
@@ -602,7 +602,7 @@ No component uses inline styles — a test walks the source and fails on any, so
 every rule is reachable from a stylesheet. Module-contributed markup is styled
 the same way: a module ships a `styles` stylesheet that is adopted into the
 shadow roots its markup renders in, which is why the tree expander answers to
-`--flow-text-muted` like everything else.
+`--ls-grid-text-muted` like everything else.
 
 For structure rather than colour, the elements expose `::part()`: `scroller`,
 `instance`, `instance-grid`, `placeholder`, `header-cell`, `header-label`,
@@ -631,9 +631,9 @@ grid.api.getState(); // everything worth persisting, typed per module
 grid.api.setState(state);
 ```
 
-Events are typed `CustomEvent`s on the host: `flow-grid-ready`, `flow-data-changed`,
-plus `flow-sort-changed`, `flow-filter-changed`, `flow-selection-changed` and
-`flow-expansion-changed` from their modules.
+Events are typed `CustomEvent`s on the host: `ls-grid-ready`, `ls-grid-data-changed`,
+plus `ls-grid-sort-changed`, `ls-grid-filter-changed`, `ls-grid-selection-changed` and
+`ls-grid-expansion-changed` from their modules.
 
 ## Writing a module
 
@@ -641,7 +641,7 @@ A module reaches the grid through hooks; it never renders a cell itself, so
 several modules can decorate the same cell without fighting:
 
 ```ts
-import type { GridModule } from 'flow-grid';
+import type { GridModule } from '@lime-soda/grid';
 
 export class HighlightModule implements GridModule<Quote> {
   readonly id = 'highlight';

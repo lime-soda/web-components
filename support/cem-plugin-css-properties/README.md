@@ -14,8 +14,8 @@ pnpm add @lime-soda/cem-plugin-css-properties
 ### Basic Usage with Element Prefix
 
 ```javascript
-import { cssPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties'
-import tokens from './design-tokens.js'
+import { cssPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties';
+import tokens from './design-tokens.js';
 
 export default {
   plugins: [
@@ -23,18 +23,18 @@ export default {
       prefix: 'ls', // Removes 'ls-' prefix from element names (dash added automatically)
     }),
   ],
-}
+};
 ```
 
 ### Advanced Usage with Custom Mapping Function
 
 ```javascript
-import { cssPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties'
-import tokens from './design-tokens.js'
+import { cssPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties';
+import tokens from './design-tokens.js';
 
 // Custom mapping function
 function mapElementToTokens(manifest, tokens) {
-  const mapping = new Map()
+  const mapping = new Map();
 
   // Process manifest to create custom mappings
   if (manifest.modules) {
@@ -43,18 +43,18 @@ function mapElementToTokens(manifest, tokens) {
         for (const declaration of module.declarations) {
           if (declaration.tagName) {
             // Custom logic for mapping element to token key
-            const baseName = declaration.tagName.replace(/^ls-/, '')
+            const baseName = declaration.tagName.replace(/^ls-/, '');
 
             switch (baseName) {
               case 'btn':
-                mapping.set(declaration.tagName, 'button')
-                break
+                mapping.set(declaration.tagName, 'button');
+                break;
               case 'input-field':
-                mapping.set(declaration.tagName, 'input')
-                break
+                mapping.set(declaration.tagName, 'input');
+                break;
               default:
                 if (baseName in tokens) {
-                  mapping.set(declaration.tagName, baseName)
+                  mapping.set(declaration.tagName, baseName);
                 }
             }
           }
@@ -63,7 +63,7 @@ function mapElementToTokens(manifest, tokens) {
     }
   }
 
-  return mapping
+  return mapping;
 }
 
 export default {
@@ -72,7 +72,7 @@ export default {
       mapElementToTokens,
     }),
   ],
-}
+};
 ```
 
 ## Configuration
@@ -131,7 +131,7 @@ const tokens = {
       },
     },
   },
-}
+};
 ```
 
 ## Output

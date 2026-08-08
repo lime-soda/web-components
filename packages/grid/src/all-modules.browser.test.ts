@@ -4,7 +4,7 @@ import './index.js';
 import './layouts.js';
 import type { ColumnDef } from './columns/types.js';
 import type { GridOptions } from './controller/grid-controller.js';
-import type { FlowGrid } from './components/grid.js';
+import type { Grid } from './components/grid.js';
 import { TreeModule } from './modules/tree/index.js';
 import { SortModule } from './modules/sort/index.js';
 import { FilterModule } from './modules/filter/index.js';
@@ -78,12 +78,12 @@ const allModules = () => [
   new KeyboardModule<Bond>(),
 ];
 
-async function mount(overrides: Partial<GridOptions<Bond>> = {}): Promise<FlowGrid<Bond>> {
+async function mount(overrides: Partial<GridOptions<Bond>> = {}): Promise<Grid<Bond>> {
   host = document.createElement('div');
   host.style.cssText = 'width:900px;height:400px';
   document.body.append(host);
 
-  const grid = document.createElement('flow-grid') as FlowGrid<Bond>;
+  const grid = document.createElement('ls-grid') as Grid<Bond>;
   grid.gridOptions = {
     columns,
     rowHeight: 32,
@@ -97,19 +97,19 @@ async function mount(overrides: Partial<GridOptions<Bond>> = {}): Promise<FlowGr
   await grid.updateComplete;
   // Settled means an instance has actually mounted, not merely that the layout
   // produced slots — an empty grid would otherwise let tests pass vacuously.
-  await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null, {
+  await waitFor(() => grid.shadowRoot?.querySelector('ls-grid-instance') !== null, {
     description: 'the first instance to mount',
   });
   await grid.updateComplete;
   return grid;
 }
 
-const instances = (grid: FlowGrid<Bond>) => [
-  ...(grid.shadowRoot?.querySelectorAll('flow-instance') ?? []),
+const instances = (grid: Grid<Bond>) => [
+  ...(grid.shadowRoot?.querySelectorAll('ls-grid-instance') ?? []),
 ];
-const rowsOf = (grid: FlowGrid<Bond>) =>
-  instances(grid).flatMap((instance) => [...instance.shadowRoot!.querySelectorAll('flow-row')]);
-const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('flow-cell')];
+const rowsOf = (grid: Grid<Bond>) =>
+  instances(grid).flatMap((instance) => [...instance.shadowRoot!.querySelectorAll('ls-grid-row')]);
+const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('ls-grid-cell')];
 const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
 
 afterEach(() => {
@@ -134,7 +134,7 @@ describe('all v1 modules together', () => {
       const groupRow = rowsOf(grid)[0]!;
       const [selectionCell, instrumentCell] = cellsOf(groupRow);
 
-      expect(grid.api.getColumns()[0]!.colId).toBe('flow-selection');
+      expect(grid.api.getColumns()[0]!.colId).toBe('ls-grid-selection');
       expect(selectionCell!.shadowRoot!.querySelector('[part="tree-expander"]')).toBeNull();
       expect(instrumentCell!.shadowRoot!.querySelector('[part="tree-expander"]')).not.toBeNull();
     });
@@ -144,7 +144,7 @@ describe('all v1 modules together', () => {
 
       for (const row of rowsOf(grid)) {
         const cell = cellsOf(row)[0]!;
-        const box = cell.shadowRoot!.querySelector('flow-selection-checkbox');
+        const box = cell.shadowRoot!.querySelector('ls-grid-selection-checkbox');
         const input = box?.shadowRoot?.querySelector('input');
         expect(input, row.getAttribute('role') ?? '').toBeTruthy();
 
@@ -237,7 +237,7 @@ describe('all v1 modules together', () => {
       await settle();
 
       const focused = grid.controller!.focus.focused.get();
-      expect(focused?.colId).toBe('flow-selection');
+      expect(focused?.colId).toBe('ls-grid-selection');
       expect(focused?.rowKey).toBe('g0-i0');
     });
 

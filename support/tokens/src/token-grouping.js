@@ -1,43 +1,45 @@
-import StyleDictionary from 'style-dictionary'
-import { transforms } from 'style-dictionary/enums'
+import StyleDictionary from 'style-dictionary';
+import { transforms } from 'style-dictionary/enums';
 
 /**
  * Groups tokens by path segments for structured exports
  * Separates single-level tokens from grouped tokens
  */
 export function groupTokensByPath(tokens, options) {
-  const groups = {}
-  const singleLevelTokens = {}
+  const groups = {};
+  const singleLevelTokens = {};
 
   tokens.forEach((token) => {
-    const [, groupKey, ...rest] = token.path
-    if (!groupKey) return
+    const [, groupKey, ...rest] = token.path;
+    if (!groupKey) return;
 
     if (rest.length === 0) {
       singleLevelTokens[groupKey] = {
         cssVar: `--${token.path.join('-')}`,
         token,
-      }
-      return
+      };
+      return;
     }
 
     if (!groups[groupKey]) {
-      groups[groupKey] = []
+      groups[groupKey] = [];
     }
 
-    const propName = StyleDictionary.hooks.transforms[
-      transforms.nameCamel
-    ].transform({ path: rest }, options)
-    const cssVarName = StyleDictionary.hooks.transforms[
-      transforms.nameKebab
-    ].transform(token, options)
+    const propName = StyleDictionary.hooks.transforms[transforms.nameCamel].transform(
+      { path: rest },
+      options,
+    );
+    const cssVarName = StyleDictionary.hooks.transforms[transforms.nameKebab].transform(
+      token,
+      options,
+    );
 
     groups[groupKey].push({
       propName,
-      cssVar: `--${cssVarName}`,
+      cssVar: `--${String(cssVarName)}`,
       token,
-    })
-  })
+    });
+  });
 
-  return { groups, singleLevelTokens }
+  return { groups, singleLevelTokens };
 }

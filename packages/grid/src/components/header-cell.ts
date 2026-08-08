@@ -15,21 +15,21 @@ import { SignalWatcher } from '../reactive/index.js';
  * arrive as module header slots, so a grid with neither module installed has a
  * header with no affordances rather than dead ones.
  */
-export class FlowHeaderCell extends SignalWatcher(LitElement) {
+export class GridHeaderCell extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: flex;
       align-items: center;
       gap: 8px;
       box-sizing: border-box;
-      padding: 0 var(--flow-cell-padding-x, 8px);
+      padding: 0 var(--ls-grid-cell-padding-x, 8px);
       height: 100%;
-      background: var(--flow-header-background, #f5f5f5);
-      border-bottom: 2px solid var(--flow-border, #d8d8d8);
-      border-right: 1px solid var(--flow-border-subtle, #f0f0f0);
-      color: var(--flow-header-text, #101010);
-      font-weight: var(--flow-header-font-weight, 500);
-      font-size: var(--flow-header-font-size, 13px);
+      background: var(--ls-grid-header-background, #f5f5f5);
+      border-bottom: 2px solid var(--ls-grid-border, #d8d8d8);
+      border-right: 1px solid var(--ls-grid-border-subtle, #f0f0f0);
+      color: var(--ls-grid-header-text, #101010);
+      font-weight: var(--ls-grid-header-font-weight, 500);
+      font-size: var(--ls-grid-header-font-size, 13px);
       overflow: hidden;
     }
 
@@ -43,8 +43,8 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
      * nothing at all.
      */
     :host([data-focused]) {
-      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--flow-focus-width, 2px));
+      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--ls-grid-focus-width, 2px));
     }
 
     /* No label to sit beside, so whatever a module contributed is centred. */
@@ -71,8 +71,8 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
     }
 
     .label.activatable:focus-visible {
-      outline: var(--flow-focus-width, 2px) solid var(--flow-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--flow-focus-width, 2px));
+      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
+      outline-offset: calc(-1 * var(--ls-grid-focus-width, 2px));
     }
 
     .slots {
@@ -172,32 +172,34 @@ export class FlowHeaderCell extends SignalWatcher(LitElement) {
     this.toggleAttribute('data-flow-unnamed', unnamed);
 
     return html`
-      ${unnamed
-        ? nothing
-        : html`<span
-            class=${activators.length > 0 ? 'label activatable' : 'label'}
-            part="header-label"
-            title=${this.column.headerName}
-            role=${activators.length > 0 ? 'button' : nothing}
-            tabindex=${activators.length > 0 ? 0 : nothing}
-            @click=${(event: Event) => activators.forEach((fn) => fn(event))}
-            @keydown=${(event: KeyboardEvent) => {
-              if (event.key !== 'Enter' && event.key !== ' ') return;
-              event.preventDefault();
-              activators.forEach((fn) => fn(event));
-            }}
-          >
-            ${this.column.headerName}
-          </span>`}
-      ${slots.length === 0
-        ? nothing
-        : html`<span class="slots" part="header-slots">${slots}</span>`}
+      ${
+        unnamed
+          ? nothing
+          : html`<span
+              class=${activators.length > 0 ? 'label activatable' : 'label'}
+              part="header-label"
+              title=${this.column.headerName}
+              role=${activators.length > 0 ? 'button' : nothing}
+              tabindex=${activators.length > 0 ? 0 : nothing}
+              @click=${(event: Event) => activators.forEach((fn) => fn(event))}
+              @keydown=${(event: KeyboardEvent) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                activators.forEach((fn) => fn(event));
+              }}
+            >
+              ${this.column.headerName}
+            </span>`
+      }
+      ${
+        slots.length === 0 ? nothing : html`<span class="slots" part="header-slots">${slots}</span>`
+      }
     `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'flow-header-cell': FlowHeaderCell;
+    'ls-grid-header-cell': GridHeaderCell;
   }
 }

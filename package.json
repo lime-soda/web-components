@@ -11,32 +11,32 @@
     "dev:packages": "turbo watch build build:types --filter=./packages/*",
     "dev:storybook": "pnpm run --filter=@lime-soda/storybook dev",
     "dev:support": "turbo watch build --filter=@lime-soda/tokens",
-    "lint": "turbo run lint",
-    "prepare": "husky",
+    "test": "turbo run test",
+    "test:node": "turbo run test:node",
+    "test:browser": "turbo run test:browser",
+    "bench": "turbo run bench",
+    "typecheck": "turbo run typecheck",
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "format": "vp fmt",
+    "format:check": "vp fmt --check",
+    "check": "vp check",
+    "check:fix": "vp check --fix",
     "release": "changeset publish"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "packageManager": "pnpm@10.34.4",
-  "lint-staged": {
-    "*.{js,ts,json,md,yaml,yml}": [
-      "prettier --write"
-    ]
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
-    "@eslint/js": "^9.32.0",
-    "@lime-soda/eslint-config": "workspace:*",
     "@lime-soda/generate": "workspace:*",
     "@lime-soda/tsconfig": "workspace:*",
-    "eslint": "^9.32.0",
-    "globals": "^17.0.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.0.0",
-    "prettier": "^3.6.2",
     "turbo": "^2.5.5",
-    "typescript": "~5.9.2",
-    "typescript-eslint": "^8.38.0"
+    "typescript": "~5.9.3",
+    "vite-plus": "^0.2.7"
   }
 }

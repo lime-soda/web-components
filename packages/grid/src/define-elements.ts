@@ -1,16 +1,16 @@
-import { FlowCell } from './components/cell.js';
-import { FlowGrid } from './components/grid.js';
-import { FlowHeaderCell } from './components/header-cell.js';
-import { FlowInstance } from './components/instance.js';
-import { FlowRow } from './components/row.js';
+import { GridCell } from './components/cell.js';
+import { Grid } from './components/grid.js';
+import { GridHeaderCell } from './components/header-cell.js';
+import { GridInstance } from './components/instance.js';
+import { GridRow } from './components/row.js';
 
 /** Tag name to class, for the elements a grid needs in order to render. */
 export const ELEMENTS: Readonly<Record<string, CustomElementConstructor>> = {
-  'flow-grid': FlowGrid,
-  'flow-instance': FlowInstance,
-  'flow-row': FlowRow,
-  'flow-cell': FlowCell,
-  'flow-header-cell': FlowHeaderCell,
+  'ls-grid': Grid,
+  'ls-grid-instance': GridInstance,
+  'ls-grid-row': GridRow,
+  'ls-grid-cell': GridCell,
+  'ls-grid-header-cell': GridHeaderCell,
 };
 
 /**
@@ -33,7 +33,7 @@ export function defineElement(tagName: string, constructor: CustomElementConstru
  * substituted through an import map without a grid appearing in the registry as
  * a consequence.
  *
- * Call this once, or import `flow-grid/layouts`, which does it for you.
+ * Call this once, or import `ls-grid/layouts`, which does it for you.
  *
  * Idempotent, so calling it repeatedly is harmless.
  */

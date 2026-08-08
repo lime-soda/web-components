@@ -1,5 +1,5 @@
-import './preview.css'
-import type { Preview } from '@storybook/web-components-vite'
+import './preview.css';
+import type { Preview } from '@storybook/web-components-vite';
 
 const preview: Preview = {
   globalTypes: {
@@ -22,15 +22,15 @@ const preview: Preview = {
   },
   decorators: [
     (story, { globals }) => {
-      const theme = (globals?.theme as 'light' | 'dark' | 'system') ?? 'system'
+      const theme = (globals?.theme as 'light' | 'dark' | 'system') ?? 'system';
 
       // Set theme class on document body for global theming
       document.body.className =
         document.body.className
           .replace(/theme-\w+/g, '') // Remove existing theme classes
-          .trim() + ` theme-${theme}`
+          .trim() + ` theme-${theme}`;
 
-      return story()
+      return story();
     },
   ],
   parameters: {
@@ -44,6 +44,6 @@ const preview: Preview = {
       test: 'error',
     },
   },
-}
+};
 
-export default preview
+export default preview;

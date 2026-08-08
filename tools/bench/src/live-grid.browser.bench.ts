@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import 'flow-grid';
-import 'flow-grid/layouts';
-import type { ColumnDef, FlowGrid, GridOptions } from 'flow-grid';
-import { TreeModule } from 'flow-grid/tree';
-import { SortModule } from 'flow-grid/sort';
-import { FilterModule } from 'flow-grid/filter';
-import { SelectionModule } from 'flow-grid/selection';
-import { CellFlashModule } from 'flow-grid/cell-flash';
+import '@lime-soda/grid';
+import '@lime-soda/grid/layouts';
+import type { ColumnDef, Grid, GridOptions } from '@lime-soda/grid';
+import { TreeModule } from '@lime-soda/grid/tree';
+import { SortModule } from '@lime-soda/grid/sort';
+import { FilterModule } from '@lime-soda/grid/filter';
+import { SelectionModule } from '@lime-soda/grid/selection';
+import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 
 /**
  * The benchmarks that need a real browser: sustained frame timing under a live
@@ -57,13 +57,13 @@ const generate = (): Bond[] => {
 
 let host: HTMLDivElement | undefined;
 
-async function mount(): Promise<{ grid: FlowGrid<Bond>; data: Bond[] }> {
+async function mount(): Promise<{ grid: Grid<Bond>; data: Bond[] }> {
   host = document.createElement('div');
   host.style.cssText = 'width:1600px;height:800px';
   document.body.append(host);
 
   const data = generate();
-  const grid = document.createElement('flow-grid') as FlowGrid<Bond>;
+  const grid = document.createElement('ls-grid') as Grid<Bond>;
   const options: GridOptions<Bond> = {
     columns,
     rowHeight: 28,
@@ -212,7 +212,7 @@ describe('live grid benchmarks', () => {
 
   it('mounts only a fraction of the instances at any scroll position', async () => {
     const { grid } = await mount();
-    const mounted = grid.shadowRoot!.querySelectorAll('flow-instance').length;
+    const mounted = grid.shadowRoot!.querySelectorAll('ls-grid-instance').length;
     const total = grid.api.getLayout().instances.length;
 
     // eslint-disable-next-line no-console -- a benchmark's output is its purpose

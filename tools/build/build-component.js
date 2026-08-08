@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { build } from 'esbuild'
-import { glob } from 'glob'
-import path from 'node:path'
+import { build } from 'esbuild';
+import { glob } from 'glob';
+import path from 'node:path';
 
 async function buildComponent(options) {
   return build({
@@ -10,17 +10,17 @@ async function buildComponent(options) {
     format: 'esm',
     packages: 'external',
     ...options,
-  })
+  });
 }
 
 // TODO: get from argv
-const args = {}
+const args = {};
 
-const entryPoints = await glob(path.join(process.cwd(), 'src/**/*.ts'))
-const outdir = path.join(process.cwd(), 'dist')
+const entryPoints = await glob(path.join(process.cwd(), 'src/**/*.ts'));
+const outdir = path.join(process.cwd(), 'dist');
 
 await buildComponent({
   entryPoints: ['index.ts', ...entryPoints],
   outdir,
   ...args,
-})
+});

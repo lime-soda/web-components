@@ -9,7 +9,7 @@
     "build-manifest": "./build-manifest.js"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "vp lint"
   },
   "keywords": [],
   "author": "Phil Parsons",
@@ -21,7 +21,5 @@
     "esbuild": "^0.28.0",
     "glob": "^13.0.0"
   },
-  "devDependencies": {
-    "@lime-soda/eslint-config": "workspace:*"
-  }
+  "devDependencies": {}
 }

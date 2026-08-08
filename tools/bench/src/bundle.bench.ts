@@ -13,14 +13,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
  *
  *  - Does importing the package register its custom elements? A blanket
  *    `sideEffects: false` let bundlers drop the entry outright, so every element
- *    went undefined and `<flow-grid>` rendered nothing at all.
+ *    went undefined and `<ls-grid>` rendered nothing at all.
  *  - Does an unused module stay out of the bundle? That is the whole point of
  *    shipping features as separate entry points.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const PACKAGE = resolve(HERE, '../../packages/flow-grid');
-const REPO = resolve(HERE, '../..');
+const REPO = resolve(HERE, '../../..');
+const PACKAGE = resolve(REPO, 'packages/grid');
 
 /** Distinctive strings, each present only if that module was included. */
 const MARKERS = {
@@ -53,7 +53,7 @@ let sandbox: string;
 /** Bundles an app importing core plus the named modules, and returns the output. */
 function bundle(modules: readonly ModuleName[]): string {
   const imports = modules
-    .map((name) => `import { ${ENTRIES[name]} } from 'flow-grid/${name}';`)
+    .map((name) => `import { ${ENTRIES[name]} } from '@lime-soda/grid/${name}';`)
     .join('\n');
   const uses = modules.map((name) => `new ${ENTRIES[name]}({ getParentId: () => null })`).join(',');
 
@@ -62,9 +62,9 @@ function bundle(modules: readonly ModuleName[]): string {
   const entry = join(sandbox, `app-${slug}.js`);
   writeFileSync(
     entry,
-    `import 'flow-grid/layouts';
+    `import '@lime-soda/grid/layouts';
 ${imports}
-const grid = document.createElement('flow-grid');
+const grid = document.createElement('ls-grid');
 grid.gridOptions = { columns: [{ field: 'a' }], modules: [${uses}] };
 document.body.append(grid);
 `,
@@ -95,11 +95,11 @@ const report = (label: string, code: string, baseline?: string) => {
 };
 
 beforeAll(() => {
-  // A sandbox that resolves flow-grid the way a consumer would, through
+  // A sandbox that resolves the grid the way a consumer would, through
   // the package's own exports map rather than the workspace's source paths.
-  sandbox = mkdtempSync(join(tmpdir(), 'flow-grid-bundle-'));
-  mkdirSync(join(sandbox, 'node_modules'), { recursive: true });
-  symlinkSync(PACKAGE, join(sandbox, 'node_modules', 'flow-grid'));
+  sandbox = mkdtempSync(join(tmpdir(), 'ls-grid-bundle-'));
+  mkdirSync(join(sandbox, 'node_modules', '@lime-soda'), { recursive: true });
+  symlinkSync(PACKAGE, join(sandbox, 'node_modules', '@lime-soda', 'grid'));
   symlinkSync(join(REPO, 'node_modules', 'lit'), join(sandbox, 'node_modules', 'lit'));
   symlinkSync(join(REPO, 'node_modules', '.pnpm'), join(sandbox, 'node_modules', '.pnpm'));
 }, 60_000);
@@ -112,7 +112,7 @@ describe('bundle composition', () => {
   it('registers the elements through the define entry', () => {
     const code = bundle([]);
 
-    expect(code).toContain('flow-grid');
+    expect(code).toContain('ls-grid');
     expect(code).toContain('customElements');
     expect(code.length).toBeGreaterThan(10_000);
   });
@@ -124,8 +124,8 @@ describe('bundle composition', () => {
     const entry = join(sandbox, 'classes-only.js');
     writeFileSync(
       entry,
-      `import { FlowGrid } from 'flow-grid';
-console.log(FlowGrid.name);
+      `import { Grid } from '@lime-soda/grid';
+console.log(Grid.name);
 `,
     );
     const { outputFiles } = buildSync({
@@ -191,8 +191,8 @@ console.log(FlowGrid.name);
       const entry = join(sandbox, `${name}.js`);
       writeFileSync(
         entry,
-        `import 'flow-grid/${entryPoint}';
-const grid = document.createElement('flow-grid');
+        `import '@lime-soda/grid/${entryPoint}';
+const grid = document.createElement('ls-grid');
 grid.gridOptions = { columns: [{ field: 'a' }] };
 document.body.append(grid);
 `,

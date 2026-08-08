@@ -1,6 +1,6 @@
-import StyleDictionary from 'style-dictionary'
-import { transforms } from 'style-dictionary/enums'
-import { typescriptLitFormat, javascriptLitFormat } from './formats.js'
+import StyleDictionary from 'style-dictionary';
+import { transforms } from 'style-dictionary/enums';
+import { typescriptLitFormat, javascriptLitFormat } from './formats.js';
 
 /**
  * Creates Style Dictionary configuration for a specific mode
@@ -9,12 +9,11 @@ function createStyleDictionaryConfig(mode, components) {
   // Filter for theme and definition tokens (excludes components)
   const globalVariablesFilter = (token) =>
     !token.filePath.includes('components/') &&
-    (token.filePath.includes('definitions/') ||
-      token.filePath.includes('theme/'))
+    (token.filePath.includes('definitions/') || token.filePath.includes('theme/'));
 
   // Filter for component-specific tokens
   const componentFilter = (componentName) => (token) =>
-    token.filePath.includes(`components/${componentName}.json`)
+    token.filePath.includes(`components/${componentName}.json`);
 
   const files = [
     // Global CSS variables (definitions + theme tokens)
@@ -51,7 +50,7 @@ function createStyleDictionaryConfig(mode, components) {
       },
       filter: componentFilter(component),
     })),
-  ]
+  ];
 
   // Add complete token export for light mode only
   if (mode === 'light') {
@@ -66,7 +65,7 @@ function createStyleDictionaryConfig(mode, components) {
         format: 'typescript/module-declarations',
         filter: globalVariablesFilter,
       },
-    )
+    );
   }
 
   return {
@@ -83,27 +82,27 @@ function createStyleDictionaryConfig(mode, components) {
         files,
       },
     },
-  }
+  };
 }
 
 /**
  * Creates and configures Style Dictionary instance with custom formats
  */
 function createStyleDictionary(mode, components) {
-  const config = createStyleDictionaryConfig(mode, components)
-  const sd = new StyleDictionary(config, { verbosity: 'verbose' })
+  const config = createStyleDictionaryConfig(mode, components);
+  const sd = new StyleDictionary(config, { verbosity: 'verbose' });
 
   sd.registerFormat({
     name: 'typescript/lit',
     format: typescriptLitFormat,
-  })
+  });
 
   sd.registerFormat({
     name: 'javascript/lit',
     format: javascriptLitFormat,
-  })
+  });
 
-  return sd
+  return sd;
 }
 
 /**
@@ -111,11 +110,9 @@ function createStyleDictionary(mode, components) {
  */
 export async function buildStyleDictionary(mode, components) {
   try {
-    const sd = createStyleDictionary(mode, components)
-    await sd.buildAllPlatforms()
+    const sd = createStyleDictionary(mode, components);
+    await sd.buildAllPlatforms();
   } catch (error) {
-    throw new Error(
-      `Failed to build Style Dictionary for ${mode} mode: ${error.message}`,
-    )
+    throw new Error(`Failed to build Style Dictionary for ${mode} mode: ${error.message}`);
   }
 }

@@ -23,7 +23,7 @@ export interface GridOptions<TData = unknown> extends ColumnResolutionOptions<TD
   instanceGap?: number;
   maxInstances?: number;
   /**
-   * Theme tokens, applied as `--flow-*` custom properties on the grid.
+   * Theme tokens, applied as `--ls-grid-*` custom properties on the grid.
    *
    * Validated on assignment: an unknown key or a value containing a declaration
    * separator throws rather than being silently dropped. Anything left unset
@@ -44,7 +44,7 @@ const DEFAULTS = {
 /**
  * Everything a grid instance owns, independent of the DOM.
  *
- * `<flow-grid>` provides this on a context and reads from it at render time; keeping
+ * `<ls-grid>` provides this on a context and reads from it at render time; keeping
  * it a plain object rather than an element is what lets the whole data path be
  * exercised without a browser.
  */
@@ -155,12 +155,12 @@ export class GridController<TData = unknown> {
     const core: CoreGridApi<TData> = {
       applyTransaction: (transaction: RowTransaction<TData>): TransactionResult => {
         const result = this.pipeline.store.applyTransaction(transaction);
-        this.dispatcher('flow-data-changed', { result });
+        this.dispatcher('ls-grid-data-changed', { result });
         return result;
       },
       setRowData: (data) => {
         const result = this.pipeline.store.setRowData(data);
-        this.dispatcher('flow-data-changed', { result });
+        this.dispatcher('ls-grid-data-changed', { result });
         return result;
       },
       getRow: (id) => this.pipeline.store.getRow(id),
@@ -168,7 +168,7 @@ export class GridController<TData = unknown> {
       setColumnDefs: (columns) => this.setOptions({ columns }),
       getColumns: () => this.columns.get(),
       getLayout: () => this.pipeline.layout.get(),
-      scrollToRow: (id) => this.dispatcher('flow-scroll-to-row', { id }),
+      scrollToRow: (id) => this.dispatcher('ls-grid-scroll-to-row', { id }),
       refresh: () => this.pipeline.projector.invalidate(),
       getModule: (id) => this.registry.get(id),
       // The registry keys slices by module id; `GridState` is the typed view of

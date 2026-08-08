@@ -13,8 +13,8 @@ import './flow.js';
 
 describe('the flow entry point', () => {
   it('registers the elements', () => {
-    expect(customElements.get('flow-grid')).toBeDefined();
-    expect(customElements.get('flow-cell')).toBeDefined();
+    expect(customElements.get('ls-grid')).toBeDefined();
+    expect(customElements.get('ls-grid-cell')).toBeDefined();
   });
 
   it('provides the flow layout', () => {
@@ -22,6 +22,6 @@ describe('the flow entry point', () => {
   });
 
   it('refuses the stack layout, naming the import that would provide it', () => {
-    expect(() => createLayoutEngine('stack')).toThrow(/flow-grid\/stack/);
+    expect(() => createLayoutEngine('stack')).toThrow(/@lime-soda\/grid\/stack/);
   });
 });

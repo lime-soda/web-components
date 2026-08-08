@@ -22,14 +22,14 @@ export type InstanceParts = 'full' | 'header' | 'rows';
  * spacer, so the header renders separately and stays put. Both bands share the
  * same column template, so they stay aligned without measuring anything.
  */
-export class FlowInstance extends SignalWatcher(LitElement) {
+export class GridInstance extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
       box-sizing: border-box;
-      background: var(--flow-background, #ffffff);
-      border: var(--flow-instance-border-width, 1px) solid var(--flow-border, #d8d8d8);
-      border-radius: var(--flow-radius, 4px);
+      background: var(--ls-grid-background, #ffffff);
+      border: var(--ls-grid-instance-border-width, 1px) solid var(--ls-grid-border, #d8d8d8);
+      border-radius: var(--ls-grid-radius, 4px);
       overflow: hidden;
     }
 
@@ -70,9 +70,9 @@ export class FlowInstance extends SignalWatcher(LitElement) {
 
     .grid {
       display: grid;
-      grid-template-columns: var(--flow-column-template);
-      grid-template-rows: var(--flow-header-height, 32px);
-      grid-auto-rows: var(--flow-row-height, 32px);
+      grid-template-columns: var(--ls-grid-column-template);
+      grid-template-rows: var(--ls-grid-header-height, 32px);
+      grid-auto-rows: var(--ls-grid-row-height, 32px);
       width: 100%;
     }
 
@@ -205,30 +205,38 @@ export class FlowInstance extends SignalWatcher(LitElement) {
       <div
         class="grid"
         part="instance-grid"
-        style=${styleMap({ '--flow-column-template': template })}
+        style=${styleMap({ '--ls-grid-column-template': template })}
       >
-        ${showHeader
-          ? html`<div
-              class="header"
-              role="row"
-              aria-rowindex="1"
-              aria-hidden=${this.instance.index > 0 ? 'true' : nothing}
-            >
-              ${repeat(
-                columns,
-                (column) => column.colId,
-                (column) =>
-                  html`<flow-header-cell part="header-cell" .column=${column}></flow-header-cell>`,
-              )}
-            </div>`
-          : nothing}
-        ${showRows
-          ? repeat(
-              this.instance.rows,
-              (row) => row.id,
-              (row) => html`<flow-row .row=${row} .rowIndex=${indices.get(row) ?? 0}></flow-row>`,
-            )
-          : nothing}
+        ${
+          showHeader
+            ? html`<div
+                class="header"
+                role="row"
+                aria-rowindex="1"
+                aria-hidden=${this.instance.index > 0 ? 'true' : nothing}
+              >
+                ${repeat(
+                  columns,
+                  (column) => column.colId,
+                  (column) =>
+                    html`<ls-grid-header-cell
+                      part="header-cell"
+                      .column=${column}
+                    ></ls-grid-header-cell>`,
+                )}
+              </div>`
+            : nothing
+        }
+        ${
+          showRows
+            ? repeat(
+                this.instance.rows,
+                (row) => row.id,
+                (row) =>
+                  html`<ls-grid-row .row=${row} .rowIndex=${indices.get(row) ?? 0}></ls-grid-row>`,
+              )
+            : nothing
+        }
       </div>
     `;
   }
@@ -236,6 +244,6 @@ export class FlowInstance extends SignalWatcher(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'flow-instance': FlowInstance;
+    'ls-grid-instance': GridInstance;
   }
 }

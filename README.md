@@ -38,6 +38,14 @@ pnpm create-component
 Customizable button component with multiple variants, full accessibility
 support, and extensive theming options.
 
+#### [`@lime-soda/grid`](./packages/grid/)
+
+Data grid that lays rows out horizontally: rows fill an instance to the viewport
+height, then flow into another beside it, so one component fills a wide monitor
+without the application building multi-pane UX. Minimal core with tree data,
+sort, filter, selection, keyboard and cell flash as separately importable
+modules.
+
 ### 🎨 Design System
 
 #### [`@lime-soda/tokens`](./support/tokens/)
@@ -59,10 +67,11 @@ Custom Elements Manifest plugin that automatically adds CSS custom properties
 from design tokens to component manifests, with conditional debug logging for
 troubleshooting.
 
-#### [`@lime-soda/eslint-config`](./tools/eslint-config/)
+#### [`@lime-soda/bench`](./tools/bench/)
 
-Shared ESLint configuration with TypeScript, Prettier, JSON, and CSS support for
-consistent code quality.
+Benchmarks for the grid, written as budgets rather than timings: they catch an
+order-of-magnitude regression such as a lost memo or a retained element, not a
+few milliseconds of noise.
 
 #### [`@lime-soda/generate`](./tools/generate/)
 
@@ -94,15 +103,16 @@ and design tokens.
 
 ```
 web-components/
-├── packages/           # Public web components
-│   └── button/        # Individual component packages
-├── support/           # Internal support packages
+├── packages/          # Public web components
+│   ├── button/       # Individual component packages
+│   └── grid/         # Horizontal-flow data grid
+├── support/          # Internal support packages
 │   ├── mcp-server/   # MCP server for AI tooling
 │   ├── storybook/    # Documentation and testing
 │   └── tokens/       # Design tokens
 ├── tools/            # Development tools
+│   ├── bench/        # Grid performance budgets
 │   ├── build/        # Component build tool
-│   ├── eslint-config/ # Shared linting configuration
 │   ├── generate/     # Component generator
 │   └── tsconfig/     # TypeScript configurations
 └── CLAUDE.md         # AI assistant instructions
@@ -113,11 +123,11 @@ web-components/
 - **Lit 3** - Web component framework with decorators and reactive properties
 - **TypeScript 5.9** - Type safety and modern JavaScript features
 - **Style Dictionary** - Design token compilation and CSS generation
-- **Storybook 8** - Component documentation and testing
-- **Vitest** - Fast unit testing with browser environment
+- **Storybook 10** - Component documentation and testing
+- **Vitest 4** - Fast unit testing with browser environment
 - **Turbo** - Build system orchestration and caching
-- **ESLint 9** - Code quality with flat config
-- **Prettier** - Consistent code formatting
+- **Vite+** - Linting, formatting and testing in one tool (`vp check`), with a
+  pre-commit hook that fixes what it can
 
 ### Key Features
 
@@ -152,14 +162,20 @@ pnpm dev:mcp           # Start MCP server
 
 # Building
 pnpm build             # Build all packages
-pnpm lint              # Lint all packages
 pnpm create-component  # Generate new component
+
+# Quality
+pnpm check             # Formatting, lint and types in one pass
+pnpm check:fix         # ...and fix what can be fixed
+
+# Testing
+pnpm test              # Every package's tests
+pnpm test:node         # Pure units only, no browser
+pnpm test:browser      # Component tests in real Chromium
+pnpm bench             # Performance budgets for the grid
 
 # Debugging
 DEBUG=cem-plugin:* pnpm build  # Debug CEM plugin during build
-
-# Testing
-cd support/storybook && pnpm test  # Run component tests
 ```
 
 ### Creating Components
@@ -175,7 +191,7 @@ This creates a complete component package with:
 - Lit-based TypeScript implementation
 - Automated Custom Elements Manifest with design token CSS properties
 - TypeScript declarations and grouped token exports
-- ESLint and build configuration
+- Build configuration
 - README documentation template
 
 ### Design Tokens
@@ -197,14 +213,14 @@ cd packages/button && pnpm build:manifest
 Token exports provide both CSS custom properties and grouped Lit objects:
 
 ```typescript
-import * as styles from '@lime-soda/tokens/button'
+import * as styles from '@lime-soda/tokens/button';
 
 // Use CSS custom properties
-styles.props // :host { --button-sm-padding: 0.375rem 0.75rem; }
+styles.props; // :host { --button-sm-padding: 0.375rem 0.75rem; }
 
 // Use grouped token objects
-styles.sm.padding // css`var(--button-sm-padding)`
-styles.primary.backgroundColor // css`var(--button-primary-background-color)`
+styles.sm.padding; // css`var(--button-sm-padding)`
+styles.primary.backgroundColor; // css`var(--button-primary-background-color)`
 ```
 
 ## Contributing
@@ -212,7 +228,7 @@ styles.primary.backgroundColor // css`var(--button-primary-background-color)`
 1. **Follow conventions** - Use existing patterns for consistency
 2. **Include tests** - Add Storybook stories with tests for new components
 3. **Update documentation** - Keep READMEs current with changes
-4. **Lint code** - Run `pnpm lint` before submitting
+4. **Check your work** - Run `pnpm check` and `pnpm test` before submitting
 5. **Build successfully** - Ensure `pnpm build` completes without errors
 
 ## License

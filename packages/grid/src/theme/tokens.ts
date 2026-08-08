@@ -2,9 +2,9 @@
  * The complete set of theme tokens.
  *
  * This is the schema: a theme object may set these keys and no others. Every
- * token maps to one `--flow-*` custom property, and every property the components
+ * token maps to one `--ls-grid-*` custom property, and every property the components
  * read appears here — the two are kept in step by a test that scans the source
- * for `var(--flow-…)` and fails on anything undeclared.
+ * for `var(--ls-grid-…)` and fails on anything undeclared.
  *
  * Tokens are grouped by what they control rather than by CSS property, so a
  * consumer can restyle one concern without hunting through a flat list.
@@ -112,13 +112,13 @@ export type ThemeToken = (typeof THEME_TOKENS)[number];
 const TOKEN_SET: ReadonlySet<string> = new Set(THEME_TOKENS);
 
 /**
- * `rowHeight` → `--flow-row-height`.
+ * `rowHeight` → `--ls-grid-row-height`.
  *
  * Derived rather than tabulated, so a new token cannot be added with a
  * mismatched property name.
  */
 export function customPropertyFor(token: ThemeToken): string {
-  return `--flow-${token.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
+  return `--ls-grid-${token.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
 }
 
 export interface ThemeValidationIssue {
@@ -167,7 +167,7 @@ export function assertValidTheme(theme: unknown): asserts theme is GridTheme {
   throw new Error(`Invalid grid theme:\n${issues.map((i) => `  - ${i.message}`).join('\n')}`);
 }
 
-/** The `--flow-*` declarations a theme resolves to. Unset tokens are omitted. */
+/** The `--ls-grid-*` declarations a theme resolves to. Unset tokens are omitted. */
 export function themeToCustomProperties(theme: GridTheme): Readonly<Record<string, string>> {
   const declarations: Record<string, string> = {};
 

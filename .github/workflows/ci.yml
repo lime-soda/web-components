@@ -9,24 +9,28 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   verify:
+    name: Verify
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
       # Turbo's own cache. Without it every run rebuilds work it has already
       # done, and `build` is the slowest task here.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.sha }}
@@ -34,16 +38,16 @@ jobs:
 
       # Chromium is ~100MB and does not change between runs; only the Playwright
       # version invalidates it.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       # Component tests drive a real Chromium: the flow layout depends on real
-      # measurement and a real IntersectionObserver, so there is nothing useful to
-      # assert in jsdom. `--with-deps` still runs, since the system libraries it
-      # installs are not part of the cached browser.
-      - run: pnpm --filter flow-grid exec playwright install --with-deps chromium
+      # measurement and a real IntersectionObserver, so there is nothing useful
+      # to assert in jsdom. `--with-deps` still runs, since the system libraries
+      # it installs are not part of the cached browser.
+      - run: pnpm --filter @lime-soda/grid exec playwright install --with-deps chromium
 
       # Formatting, lint and types in one pass.
       - run: pnpm check
@@ -54,33 +58,28 @@ jobs:
       # as a lost memo or a retained element, not a few ms of runner noise.
       - run: pnpm bench
 
-  # Only after `verify`, and only on main. Previously this was a second workflow
-  # racing the first, so a release could be cut from a commit whose tests had
-  # not finished — or had failed.
-  release:
+  # Visual regression. Runs after verify so a broken build does not burn
+  # snapshots, and on both PRs and main so Chromatic has a baseline to diff.
+  chromatic:
+    name: Chromatic
     needs: verify
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      id-token: write
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
         with:
-          node-version: 22
+          # Chromatic needs history to find the ancestor build to compare with.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
 
       - run: pnpm install --frozen-lockfile
 
-      # Restores what `verify` just built, so this is a cache hit rather than a
-      # second full build.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.sha }}
@@ -88,9 +87,52 @@ jobs:
 
       - run: pnpm build
 
-      # Opens a "Version Packages" PR while changesets are pending, and publishes
-      # once that PR is merged. Nothing happens until a changeset exists, so an
-      # ordinary commit to main is a no-op here.
+      - uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: support/storybook
+          buildScriptName: build
+          exitZeroOnChanges: true
+
+  # Only after `verify`, and only on main. Previously this was a second workflow
+  # racing the first, so a release could be cut from a commit whose tests had
+  # not finished — or had failed.
+  release:
+    name: Release
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      # Restores what `verify` just built, so this is a cache hit rather than a
+      # second full build.
+      - uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - run: pnpm build
+
+      # Opens a "Version Packages" PR while changesets are pending, and
+      # publishes once that PR is merged. Nothing happens until a changeset
+      # exists, so an ordinary commit to main is a no-op here.
       - uses: changesets/action@v1
         with:
           # Changesets rewrites code fences in the changelog with its own
@@ -98,9 +140,10 @@ jobs:
           # the format check and, because release waits on verify, blocked its
           # own publish. Formatting here means what it commits already passes.
           version: pnpm exec changeset version && pnpm format
-          publish: pnpm exec changeset publish
+          publish: pnpm run release
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

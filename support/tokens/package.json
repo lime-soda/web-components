@@ -7,7 +7,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "node index.js",
-    "lint": "eslint ."
+    "lint": "vp lint"
   },
   "exports": {
     ".": {
@@ -30,7 +30,5 @@
   "optionalDependencies": {
     "lit": "^3.3.1"
   },
-  "devDependencies": {
-    "@lime-soda/eslint-config": "workspace:*"
-  }
+  "devDependencies": {}
 }

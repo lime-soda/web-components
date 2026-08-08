@@ -1,9 +1,9 @@
-import { join } from 'node:path'
-import minimist from 'minimist'
-import { Plop, run } from 'plop'
+import { join } from 'node:path';
+import minimist from 'minimist';
+import { Plop, run } from 'plop';
 
-const args = process.argv.slice(2)
-const argv = minimist(args)
+const args = process.argv.slice(2);
+const argv = minimist(args);
 
 Plop.prepare(
   {
@@ -17,8 +17,8 @@ Plop.prepare(
       const options = {
         ..._env,
         dest: process.cwd(),
-      }
-      void run(options, undefined, true)
-    })
+      };
+      void run(options, undefined, true);
+    });
   },
-)
+);

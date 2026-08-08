@@ -1,1 +1,1 @@
-export * from './src/Button.js'
+export * from './src/Button.js';

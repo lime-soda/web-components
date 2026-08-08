@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import '../layouts.js';
 import { SelectionModule } from '../modules/selection/index.js';
 import { KeyboardModule } from '../modules/keyboard/index.js';
-import type { FlowGrid } from './grid.js';
+import type { Grid } from './grid.js';
 import type { GridOptions } from '../controller/grid-controller.js';
 
 /**
@@ -37,13 +37,13 @@ async function waitFor(condition: () => boolean, timeout = 2000): Promise<void> 
   }
 }
 
-async function mount(selection: { checkboxColumn?: boolean } = {}): Promise<FlowGrid<Row>> {
+async function mount(selection: { checkboxColumn?: boolean } = {}): Promise<Grid<Row>> {
   host = document.createElement('div');
   host.style.height = '400px';
   host.style.width = '600px';
   document.body.append(host);
 
-  const grid = document.createElement('flow-grid') as FlowGrid<Row>;
+  const grid = document.createElement('ls-grid') as Grid<Row>;
   grid.style.height = '100%';
   grid.gridOptions = {
     columns: [
@@ -60,11 +60,11 @@ async function mount(selection: { checkboxColumn?: boolean } = {}): Promise<Flow
   return grid;
 }
 
-const cells = (grid: FlowGrid<Row>): HTMLElement[] => {
-  const instance = grid.shadowRoot?.querySelector('flow-instance');
-  const rows = [...(instance?.shadowRoot?.querySelectorAll('flow-row') ?? [])];
+const cells = (grid: Grid<Row>): HTMLElement[] => {
+  const instance = grid.shadowRoot?.querySelector('ls-grid-instance');
+  const rows = [...(instance?.shadowRoot?.querySelectorAll('ls-grid-row') ?? [])];
   return rows.flatMap((row) => [
-    ...((row as HTMLElement).shadowRoot?.querySelectorAll('flow-cell') ?? []),
+    ...((row as HTMLElement).shadowRoot?.querySelectorAll('ls-grid-cell') ?? []),
   ]) as HTMLElement[];
 };
 
@@ -117,7 +117,7 @@ describe('selecting from the keyboard', () => {
    * checkbox is the thing being operated, and a key that selected from anywhere
    * would fight whatever a value cell wants Enter for.
    */
-  const press = (grid: FlowGrid<Row>, key: string) => {
+  const press = (grid: Grid<Row>, key: string) => {
     const target = cells(grid).find((cell) => cell.hasAttribute('data-focused')) ?? grid;
     const event = new KeyboardEvent('keydown', {
       key,
@@ -130,10 +130,10 @@ describe('selecting from the keyboard', () => {
   };
 
   /** Focuses the checkbox cell of the second row. */
-  const focusCheckbox = async (grid: FlowGrid<Row>) => {
+  const focusCheckbox = async (grid: Grid<Row>) => {
     const checkbox = cells(grid).find(
       (cell) =>
-        (cell as unknown as { column?: { colId: string } }).column?.colId === 'flow-selection',
+        (cell as unknown as { column?: { colId: string } }).column?.colId === 'ls-grid-selection',
     )!;
     checkbox.focus();
     await waitFor(() => grid.controller!.focus.focused.get() !== null);

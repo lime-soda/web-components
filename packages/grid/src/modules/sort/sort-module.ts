@@ -198,7 +198,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     const direction = this.getSortDirection(ctx.column.colId);
 
     return {
-      classes: ['flow-sortable'],
+      classes: ['ls-grid-sortable'],
       attributes: {
         'aria-sort':
           direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none',
@@ -211,17 +211,17 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
   }
 
   static readonly styles = css`
-    .flow-sort-indicator {
+    .ls-grid-sort-indicator {
       display: inline-flex;
       align-items: center;
       gap: 2px;
       flex: 0 0 auto;
-      font-size: var(--flow-sort-indicator-font-size, 10px);
-      color: var(--flow-text-muted, #666);
+      font-size: var(--ls-grid-sort-indicator-font-size, 10px);
+      color: var(--ls-grid-text-muted, #666);
     }
 
-    .flow-sort-order {
-      font-size: var(--flow-sort-order-font-size, 8px);
+    .ls-grid-sort-order {
+      font-size: var(--ls-grid-sort-order-font-size, 8px);
     }
   `;
 
@@ -234,10 +234,10 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     const position = this.model.findIndex((entry) => entry.colId === ctx.column.colId);
     const showOrder = this.model.length > 1;
 
-    return html`<span class="flow-sort-indicator" part="sort-indicator"
-      >${direction === 'asc' ? '\u25B2' : '\u25BC'}${showOrder
-        ? html`<sub class="flow-sort-order">${position + 1}</sub>`
-        : ''}</span
+    return html`<span class="ls-grid-sort-indicator" part="sort-indicator"
+      >${direction === 'asc' ? '\u25B2' : '\u25BC'}${
+        showOrder ? html`<sub class="ls-grid-sort-order">${position + 1}</sub>` : ''
+      }</span
     >`;
   }
 
@@ -294,7 +294,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
 
   private changed(): void {
     this.context?.invalidate();
-    this.context?.dispatch('flow-sort-changed', { model: this.getSortModel() });
+    this.context?.dispatch('ls-grid-sort-changed', { model: this.getSortModel() });
   }
 }
 

@@ -1,0 +1,105 @@
+/*
+ * Default theme.
+ *
+ * Every value the components read is one of these custom properties, and each
+ * corresponds to a token on the `GridTheme` object — `--ls-grid-row-height` is
+ * `theme.rowHeight`. A test scans the source for `var(--ls-grid-…)` and fails on any
+ * property that is not a declared token, so the two cannot drift apart.
+ *
+ * This file is optional. Components carry inline fallbacks, so a grid renders
+ * without it; import it for a coherent light/dark pair, pass a `theme` object,
+ * or set the same properties yourself from your own design tokens.
+ *
+ * Custom properties inherit through shadow roots, which is why theming needs no
+ * ::part() rules for colour. Parts exist for structural overrides: scroller,
+ * instance, instance-grid, placeholder, header-cell, header-label, header-slots,
+ * cell, cell-content, tree-expander, sort-indicator, filter-input,
+ * selection-checkbox.
+ */
+
+:root,
+:host {
+  /* Typography */
+  --ls-grid-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ls-grid-font-size: 13px;
+  --ls-grid-header-font-size: 13px;
+  --ls-grid-header-font-weight: 500;
+
+  /* Metrics */
+  --ls-grid-row-height: 32px;
+  --ls-grid-header-height: 32px;
+  --ls-grid-cell-padding-x: 8px;
+  --ls-grid-instance-gap: 16px;
+  --ls-grid-radius: 4px;
+  --ls-grid-tree-indent: 16px;
+
+  /* Surfaces */
+  --ls-grid-surface: transparent;
+  --ls-grid-background: #ffffff;
+  --ls-grid-header-background: #f5f5f5;
+  --ls-grid-placeholder-background: #ffffff;
+
+  /* Text */
+  --ls-grid-text: #101010;
+  --ls-grid-text-muted: #666666;
+  --ls-grid-header-text: #101010;
+
+  /* Lines */
+  --ls-grid-border: #d8d8d8;
+  --ls-grid-border-subtle: #f0f0f0;
+
+  /* State */
+  --ls-grid-focus: #3b82f6;
+  --ls-grid-focus-width: 2px;
+  --ls-grid-selection-background: rgb(59 130 246 / 12%);
+  --ls-grid-hover-background: rgb(0 0 0 / 3%);
+
+  /* Cell flash. Trading convention: green up, red down. */
+  --ls-grid-flash-up: rgb(34 197 94 / 35%);
+  --ls-grid-flash-down: rgb(239 68 68 / 35%);
+  --ls-grid-flash-neutral: rgb(148 163 184 / 35%);
+  --ls-grid-flash-duration: 600ms;
+}
+
+/*
+ * Dark by preference, with an explicit opt-out for applications that manage
+ * their own theme switch rather than following the OS.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-flow-theme='light']),
+  :host(:not([data-flow-theme='light'])) {
+    --ls-grid-surface: #0a0a0a;
+    --ls-grid-background: #1a1a1a;
+    --ls-grid-header-background: #262626;
+    --ls-grid-placeholder-background: #1a1a1a;
+
+    --ls-grid-text: #e5e5e5;
+    --ls-grid-text-muted: #a3a3a3;
+    --ls-grid-header-text: #e5e5e5;
+
+    --ls-grid-border: #333333;
+    --ls-grid-border-subtle: #2a2a2a;
+
+    --ls-grid-focus: #60a5fa;
+    --ls-grid-selection-background: rgb(59 130 246 / 18%);
+    --ls-grid-hover-background: rgb(255 255 255 / 4%);
+  }
+}
+
+[data-flow-theme='dark'] {
+  --ls-grid-surface: #0a0a0a;
+  --ls-grid-background: #1a1a1a;
+  --ls-grid-header-background: #262626;
+  --ls-grid-placeholder-background: #1a1a1a;
+
+  --ls-grid-text: #e5e5e5;
+  --ls-grid-text-muted: #a3a3a3;
+  --ls-grid-header-text: #e5e5e5;
+
+  --ls-grid-border: #333333;
+  --ls-grid-border-subtle: #2a2a2a;
+
+  --ls-grid-focus: #60a5fa;
+  --ls-grid-selection-background: rgb(59 130 246 / 18%);
+  --ls-grid-hover-background: rgb(255 255 255 / 4%);
+}

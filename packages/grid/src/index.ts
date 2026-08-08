@@ -4,16 +4,16 @@
 // registry as a consequence.
 //
 // A grid comes from one of the entry points that provides one:
-//   flow-grid/layouts  both layouts, switchable at runtime
-//   flow-grid/flow    the horizontal layout alone
-//   flow-grid/stack   the vertical layout alone
+//   ls-grid/layouts  both layouts, switchable at runtime
+//   ls-grid/flow    the horizontal layout alone
+//   ls-grid/stack   the vertical layout alone
 export { defineElements, defineElement, ELEMENTS } from './define-elements.js';
 
-export { FlowGrid } from './components/grid.js';
-export { FlowInstance } from './components/instance.js';
-export { FlowRow } from './components/row.js';
-export { FlowCell } from './components/cell.js';
-export { FlowHeaderCell } from './components/header-cell.js';
+export { Grid } from './components/grid.js';
+export { GridInstance } from './components/instance.js';
+export { GridRow } from './components/row.js';
+export { GridCell } from './components/cell.js';
+export { GridHeaderCell } from './components/header-cell.js';
 export { CellRendererElement } from './components/cell-renderer-element.js';
 
 // Theming: a validated token object, or the same tokens as CSS custom properties.

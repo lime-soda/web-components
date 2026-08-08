@@ -6,7 +6,7 @@ import { SortModule } from '../modules/sort/index.js';
 import { TreeModule } from '../modules/tree/index.js';
 import { TreeSelectionModule } from '../modules/selection/tree/index.js';
 import type { GridOptions } from '../controller/grid-controller.js';
-import type { FlowGrid } from './grid.js';
+import type { Grid } from './grid.js';
 
 /**
  * Accessibility, measured rather than asserted.
@@ -53,13 +53,13 @@ async function waitFor(condition: () => boolean, timeout = 3000): Promise<void> 
 async function mount(
   rows: Bond[],
   modules: GridOptions<Bond>['modules'] = [],
-): Promise<FlowGrid<Bond>> {
+): Promise<Grid<Bond>> {
   host = document.createElement('div');
   host.style.height = '400px';
   host.style.width = '700px';
   document.body.append(host);
 
-  const grid = document.createElement('flow-grid') as FlowGrid<Bond>;
+  const grid = document.createElement('ls-grid') as Grid<Bond>;
   grid.style.height = '100%';
   grid.gridOptions = {
     columns: [
@@ -72,18 +72,18 @@ async function mount(
   grid.rowData = rows;
   host.append(grid);
 
-  await waitFor(() => grid.shadowRoot?.querySelector('flow-instance') !== null);
+  await waitFor(() => grid.shadowRoot?.querySelector('ls-grid-instance') !== null);
   await waitFor(
     () =>
-      (grid.shadowRoot!.querySelector('flow-instance') as HTMLElement).shadowRoot!.querySelector(
-        'flow-row',
+      (grid.shadowRoot!.querySelector('ls-grid-instance') as HTMLElement).shadowRoot!.querySelector(
+        'ls-grid-row',
       ) !== null,
   );
   return grid;
 }
 
 /** Runs axe over the grid and returns violations, described for a failure message. */
-async function violationsIn(grid: FlowGrid<Bond>): Promise<string[]> {
+async function violationsIn(grid: Grid<Bond>): Promise<string[]> {
   const results = await axe.run(grid, {
     // Contrast depends on the page's theme rather than on the component, and
     // the harness has none.

@@ -329,7 +329,7 @@ describe('SortModule', () => {
 
       sort.toggleSort('price');
 
-      expect(dispatch).toHaveBeenCalledWith('flow-sort-changed', {
+      expect(dispatch).toHaveBeenCalledWith('ls-grid-sort-changed', {
         model: [{ colId: 'price', direction: 'asc' }],
       });
     });
