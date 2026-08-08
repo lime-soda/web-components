@@ -114,8 +114,8 @@
   entry, the grid with no modules installed.
 
   ```ts
-  import "flow-grid/layouts";
-  import { TreeModule } from "flow-grid/tree";
+  import 'flow-grid/layouts';
+  import { TreeModule } from 'flow-grid/tree';
   ```
 
   Nothing else moves. The entry points, their contents and the tree-shaking are

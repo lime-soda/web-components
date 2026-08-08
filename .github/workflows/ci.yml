@@ -93,7 +93,11 @@ jobs:
       # ordinary commit to main is a no-op here.
       - uses: changesets/action@v1
         with:
-          version: pnpm exec changeset version
+          # Changesets rewrites code fences in the changelog with its own
+          # defaults, which disagree with ours — so the generated file failed
+          # the format check and, because release waits on verify, blocked its
+          # own publish. Formatting here means what it commits already passes.
+          version: pnpm exec changeset version && pnpm format
           publish: pnpm exec changeset publish
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
