@@ -7,7 +7,6 @@
       "outputs": ["dist/**", "storybook-static/**", "custom-elements.json"]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
       "outputs": []
     },
     "test": {
@@ -40,7 +39,6 @@
       "persistent": true
     },
     "check": {
-      "dependsOn": ["^build"],
       "outputs": []
     }
   }
