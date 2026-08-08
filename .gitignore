@@ -3,6 +3,7 @@ node_modules
 dist
 coverage
 *.local
+*.tsbuildinfo
 
 # Logs
 logs
@@ -26,3 +27,9 @@ storybook-static
 .turbo
 custom-elements.json
 .claude
+
+# Test output
+test-results/
+playwright-report/
+__screenshots__/
+.screenshots/

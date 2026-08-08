@@ -1,0 +1,140 @@
+{
+  "name": "flow-grid",
+  "version": "0.2.0",
+  "description": "Horizontal-flow data grid web component for trading platforms. Minimal core, additive modules.",
+  "keywords": [
+    "grid",
+    "datagrid",
+    "data-grid",
+    "table",
+    "web-components",
+    "lit",
+    "custom-elements",
+    "trading",
+    "virtualization",
+    "tree-data"
+  ],
+  "author": "Phil Parsons",
+  "license": "MIT",
+  "homepage": "https://github.com/flow-grid-dev/flowgrid#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flow-grid-dev/flowgrid.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/flow-grid-dev/flowgrid/issues"
+  },
+  "type": "module",
+  "sideEffects": [
+    "./dist/layouts.js",
+    "./dist/flow.js",
+    "./dist/stack.js",
+    "./src/layouts.ts",
+    "./src/flow.ts",
+    "./src/stack.ts",
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "customElements": "custom-elements.json",
+  "files": [
+    "dist",
+    "custom-elements.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./layouts": {
+      "types": "./dist/layouts.d.ts",
+      "development": "./src/layouts.ts",
+      "default": "./dist/layouts.js"
+    },
+    "./flow": {
+      "types": "./dist/flow.d.ts",
+      "development": "./src/flow.ts",
+      "default": "./dist/flow.js"
+    },
+    "./stack": {
+      "types": "./dist/stack.d.ts",
+      "development": "./src/stack.ts",
+      "default": "./dist/stack.js"
+    },
+    "./tree": {
+      "types": "./dist/modules/tree/index.d.ts",
+      "development": "./src/modules/tree/index.ts",
+      "default": "./dist/modules/tree/index.js"
+    },
+    "./sort": {
+      "types": "./dist/modules/sort/index.d.ts",
+      "development": "./src/modules/sort/index.ts",
+      "default": "./dist/modules/sort/index.js"
+    },
+    "./filter": {
+      "types": "./dist/modules/filter/index.d.ts",
+      "development": "./src/modules/filter/index.ts",
+      "default": "./dist/modules/filter/index.js"
+    },
+    "./selection": {
+      "types": "./dist/modules/selection/index.d.ts",
+      "development": "./src/modules/selection/index.ts",
+      "default": "./dist/modules/selection/index.js"
+    },
+    "./selection/tree": {
+      "types": "./dist/modules/selection/tree/index.d.ts",
+      "development": "./src/modules/selection/tree/index.ts",
+      "default": "./dist/modules/selection/tree/index.js"
+    },
+    "./selection/row-range": {
+      "types": "./dist/modules/selection/row-range/index.d.ts",
+      "development": "./src/modules/selection/row-range/index.ts",
+      "default": "./dist/modules/selection/row-range/index.js"
+    },
+    "./keyboard": {
+      "types": "./dist/modules/keyboard/index.d.ts",
+      "development": "./src/modules/keyboard/index.ts",
+      "default": "./dist/modules/keyboard/index.js"
+    },
+    "./cell-flash": {
+      "types": "./dist/modules/cell-flash/index.d.ts",
+      "development": "./src/modules/cell-flash/index.ts",
+      "default": "./dist/modules/cell-flash/index.js"
+    },
+    "./themes/*.css": {
+      "development": "./src/themes/*.css",
+      "default": "./dist/themes/*.css"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('src/themes','dist/themes',{recursive:true})\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vp test run",
+    "test:node": "vp test run --project node",
+    "test:browser": "vp test run --project browser",
+    "analyze": "cem analyze",
+    "prepublishOnly": "pnpm build && pnpm analyze",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "lint": "vp lint",
+    "check": "vp check"
+  },
+  "dependencies": {
+    "@lit/context": "^1.1.6",
+    "lit": "^3.3.1",
+    "signal-polyfill": "^0.2.2"
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.10.4",
+    "@types/node": "^22.10.2",
+    "@vitest/browser-playwright": "^4.1.10",
+    "axe-core": "^4.13.0",
+    "playwright": "^1.56.1",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10"
+  }
+}
