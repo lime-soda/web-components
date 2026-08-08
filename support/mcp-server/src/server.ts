@@ -151,7 +151,7 @@ export function createServer() {
         category: z.string().optional().describe('Optional category name to filter tokens'),
       },
     },
-    ({ category }: { category?: string }) => {
+    ({ category }: { category?: string | undefined }) => {
       const tokenData = tokens.getTokens(category);
 
       if (category && !tokenData) {

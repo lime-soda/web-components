@@ -43,11 +43,11 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      # Component tests drive a real Chromium: the flow layout depends on real
-      # measurement and a real IntersectionObserver, so there is nothing useful
-      # to assert in jsdom. `--with-deps` still runs, since the system libraries
-      # it installs are not part of the cached browser.
-      - run: pnpm --filter @lime-soda/grid exec playwright install --with-deps chromium
+      # Component tests drive a real Chromium: shadow DOM, focus and layout
+      # measurement have no useful answer in jsdom, and the flow layout also
+      # needs a real IntersectionObserver. `--with-deps` still runs, since the
+      # system libraries it installs are not part of the cached browser.
+      - run: pnpm exec playwright install --with-deps chromium
 
       # Formatting, lint and types in one pass.
       - run: pnpm check

@@ -1,4 +1,8 @@
 {
   "extends": "./tsconfig.json",
+  // The shared config sets `noEmit` so a stray `tsc` never writes output. This
+  // is the one place that is supposed to: without it the build silently emitted
+  // nothing and only the copied themes reached dist.
+  "compilerOptions": { "noEmit": false },
   "exclude": ["src/**/*.test.ts", "src/**/__tests__/**", "src/testing/**"]
 }

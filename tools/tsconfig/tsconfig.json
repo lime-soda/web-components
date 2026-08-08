@@ -2,13 +2,20 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    // Resolve workspace packages through their `development` condition, which
+    // points at source. Without it TypeScript follows `types` into `dist`, so
+    // typechecking and type-aware linting only work once something has been
+    // built — passing locally off stale output and failing on a clean checkout.
+    "customConditions": ["development"],
+    // Standard (TC39) decorators, not the legacy experimental ones. Lit 3
+    // supports both; standard decorators are the ones with a future, and they
+    // are what the `accessor` keyword on reactive properties requires.
+    "experimentalDecorators": false,
+    "useDefineForClassFields": true,
     "moduleDetection": "force",
-    "noUnusedLocals": true,
     "sourceMap": true
   }
 }

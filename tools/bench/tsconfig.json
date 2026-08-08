@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@lime-soda/tsconfig",
   "compilerOptions": { "noEmit": true, "types": ["vitest/globals"] },
   "include": ["src/**/*.ts", "vitest.config.ts"]
 }

@@ -1,4 +1,5 @@
 {
   "extends": "@lime-soda/tsconfig",
-  "include": ["*.ts", "src/**/*.ts", "eslint.config.js"]
+  "compilerOptions": { "types": ["vitest/globals"] },
+  "include": ["*.ts", "src/**/*.ts", "vitest.config.ts"]
 }

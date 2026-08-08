@@ -32,9 +32,6 @@ importers:
       '@lime-soda/tokens':
         specifier: workspace:*
         version: link:../../support/tokens
-      lit:
-        specifier: '>= 3.3.0'
-        version: 3.3.1
     devDependencies:
       '@lime-soda/build':
         specifier: workspace:*
@@ -42,6 +39,24 @@ importers:
       '@lime-soda/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
+      '@vitest/browser-playwright':
+        specifier: ^4.1.10
+        version: 4.1.10(playwright@1.61.1)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))(vitest@4.1.10)
+      axe-core:
+        specifier: ^4.13.0
+        version: 4.13.0
+      lit:
+        specifier: ^3.3.1
+        version: 3.3.1
+      playwright:
+        specifier: ^1.56.1
+        version: 1.61.1
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@25.9.3)(@vitest/browser-playwright@4.1.10(playwright@1.61.1)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))(vitest@4.1.10))(@vitest/browser-preview@4.1.10)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/grid:
     dependencies:
@@ -58,6 +73,9 @@ importers:
       '@custom-elements-manifest/analyzer':
         specifier: ^0.10.4
         version: 0.10.6
+      '@lime-soda/tsconfig':
+        specifier: workspace:*
+        version: link:../../tools/tsconfig
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.1
@@ -206,6 +224,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/grid
     devDependencies:
+      '@lime-soda/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@vitest/browser':
         specifier: ^4.1.10
         version: 4.1.10(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))(vitest@4.1.10)
@@ -220,7 +241,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@types/node@25.9.3)(@vitest/browser-playwright@4.1.10)(@vitest/browser-preview@4.1.10)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))
+        version: 4.1.10(@types/node@25.9.3)(@vitest/browser-playwright@4.1.10(playwright@1.61.1)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))(vitest@4.1.10))(@vitest/browser-preview@4.1.10)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))
 
   tools/build:
     dependencies:
@@ -6996,7 +7017,6 @@ snapshots:
       - msw
       - utf-8-validate
       - vite
-    optional: true
 
   '@vitest/browser-preview@4.1.10(vite@7.3.1(@types/node@22.20.1)(lightningcss@1.33.0)(tsx@4.22.4)(yaml@2.9.0))(vitest@4.1.10)':
     dependencies:

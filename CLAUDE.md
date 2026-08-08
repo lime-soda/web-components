@@ -47,25 +47,28 @@ This is a pnpm workspace monorepo with packages organized into:
 - Uses TypeScript decorators (`@customElement`, `@property`)
 - Components follow the `ls-` prefix convention (e.g., `ls-button`, `ls-grid`)
 - Shadow DOM with CSS custom properties for theming
-- Two decorator dialects, which is why there is no single shared `tsconfig`:
-  `packages/button` uses the legacy experimental decorators through
-  `@lime-soda/tsconfig`, while `packages/grid` uses standard (TC39) decorators
-  through the root `tsconfig.base.json`, since `accessor` on reactive
-  properties requires them
+- **Standard (TC39) decorators**, not the legacy experimental ones, so reactive
+  properties are declared with the `accessor` keyword:
+  `@property({ type: String }) accessor size = 'md'`. Anything that compiles or
+  serves this code must target ES2022 or lower — left at `esnext`, `accessor`
+  survives into the output and bundlers cannot parse it.
 
 ### Testing & Documentation
 
 - **Storybook** for component documentation and visual testing, with Chromatic
   for visual regression
 - **Vitest** with browser testing using Playwright
-- For `packages/button`, tests are integration tests in Storybook stories using
-  `@storybook/addon-vitest`
-- `packages/grid` additionally has its own suite: a `node` project for pure
-  units (store, projection, layout engines) and a `browser` project in real
-  Chromium, because the flow layout depends on real measurement and a real
-  `IntersectionObserver`
-- Accessibility testing via `@storybook/addon-a11y`, plus axe run directly in
-  the grid's browser tests
+- Storybook stories carry integration tests via `@storybook/addon-vitest`
+- Component packages also have their own suite of `*.browser.test.ts` files
+  running in real Chromium, because shadow DOM, focus and layout measurement
+  have no useful answer in jsdom. `packages/grid` adds a `node` project for its
+  pure units (store, projection, layout engines)
+- Accessibility is tested twice on purpose: `@storybook/addon-a11y` checks the
+  themed component as rendered in a story, and axe runs directly in the browser
+  tests over every variant, with `color-contrast` disabled there because the
+  harness has no theme
+- `tools/bench` holds budgets rather than timings — published bundle sizes and
+  grid render performance — so an order-of-magnitude regression fails CI
 
 ### Build System
 
@@ -74,6 +77,9 @@ This is a pnpm workspace monorepo with packages organized into:
   `packages/grid` builds with `tsc` instead, because it emits many entry points
   and must exclude its colocated tests from `dist`
 - **Style Dictionary** for design token compilation
+- Every package extends `@lime-soda/tsconfig`; there is no second base config.
+  `noEmit` is on there, so a package that is meant to emit turns it off in its
+  own build config
 
 ### Design System
 

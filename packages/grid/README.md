@@ -161,16 +161,16 @@ Measured with esbuild, minified and gzipped:
 
 | Imports               | Wire size |
 | --------------------- | --------- |
-| core only             | 26.9 kB   |
+| core only             | 28.1 kB   |
+| + selection/row-range | +0.4 kB   |
 | + keyboard            | +0.6 kB   |
 | + cell-flash          | +0.7 kB   |
-| + sort                | +1.2 kB   |
-| + filter              | +1.4 kB   |
-| + tree                | +1.9 kB   |
-| + selection           | +2.1 kB   |
 | + selection/tree      | +0.9 kB   |
-| + selection/row-range | +0.2 kB   |
-| everything            | 35.4 kB   |
+| + sort                | +1.3 kB   |
+| + filter              | +1.5 kB   |
+| + tree                | +1.9 kB   |
+| + selection           | +2.4 kB   |
+| everything            | 36.5 kB   |
 
 A bundle-composition check in CI asserts that an unimported module leaves no
 trace in the output, so this cannot quietly regress.

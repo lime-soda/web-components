@@ -9,6 +9,11 @@ async function buildComponent(options) {
     bundle: false,
     format: 'esm',
     packages: 'external',
+    // Without a target esbuild emits esnext, which leaves standard decorators
+    // and the `accessor` keyword as native syntax. No browser implements either
+    // yet, and Rollup cannot even parse `accessor`, so the published output
+    // broke every consumer that bundles it.
+    target: 'es2022',
     ...options,
   });
 }

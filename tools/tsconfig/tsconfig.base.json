@@ -1,15 +1,26 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "erasableSyntaxOnly": true,
+    // `erasableSyntaxOnly` is deliberately off. Packages resolve each other
+    // through the `development` condition, so one package's tsconfig checks
+    // another's source — and the grid uses constructor parameter properties,
+    // which the flag forbids. It guarded the ability to run a .ts file under a
+    // type-stripping runtime, which nothing here does: mcp-server develops with
+    // tsx and ships compiled output.
     "moduleDetection": "force",
     "noEmit": true,
     "skipLibCheck": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    // The compiler says the same thing the linter does, so an editor flags dead
+    // code while it is being written rather than at commit time.
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "verbatimModuleSyntax": true
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true
   }
 }

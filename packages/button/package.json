@@ -17,6 +17,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "development": "./index.ts",
       "import": "./dist/index.js"
     }
   },
@@ -24,7 +25,11 @@
     "build": "build-component",
     "build:types": "tsc --project tsconfig.types.json",
     "build:manifest": "build-manifest",
-    "lint": "vp lint"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vp test run",
+    "test:browser": "vp test run --project browser",
+    "lint": "vp lint",
+    "check": "vp check"
   },
   "dependencies": {
     "@lime-soda/tokens": "workspace:*"
@@ -34,7 +39,13 @@
   },
   "devDependencies": {
     "@lime-soda/build": "workspace:*",
-    "@lime-soda/tsconfig": "workspace:*"
+    "@lime-soda/tsconfig": "workspace:*",
+    "@vitest/browser-playwright": "^4.1.10",
+    "axe-core": "^4.13.0",
+    "lit": "^3.3.1",
+    "playwright": "^1.56.1",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10"
   },
   "customElements": "custom-elements.json"
 }

@@ -80,7 +80,10 @@ function extractCssPropertiesFromTokens(
             // This is a token - convert to CSS custom property
             properties.push({
               name: `--${token.name}`,
-              description: token.$description,
+              // Spread rather than assign: `CssCustomProperty` comes from the
+              // CEM schema, where `description` is optional but never
+              // `undefined`, and a token without a `$description` has none.
+              ...(token.$description === undefined ? {} : { description: token.$description }),
               default: token.$value,
             });
           } else {

@@ -3,43 +3,43 @@ import type { Package, ClassField } from 'custom-elements-manifest/schema.js';
 export interface ComponentInfo {
   name: string;
   tagName: string;
-  description?: string;
+  description?: string | undefined;
   packageName: string;
   packagePath: string;
   attributes: Array<{
     name: string;
-    summary?: string;
-    description?: string;
-    type?: string;
-    default?: string;
-    fieldName?: string;
-    deprecated?: boolean | string;
+    summary?: string | undefined;
+    description?: string | undefined;
+    type?: string | undefined;
+    default?: string | undefined;
+    fieldName?: string | undefined;
+    deprecated?: boolean | string | undefined;
   }>;
   slots: Array<{
     name: string;
-    summary?: string;
-    description?: string;
-    deprecated?: boolean | string;
+    summary?: string | undefined;
+    description?: string | undefined;
+    deprecated?: boolean | string | undefined;
   }>;
   cssParts: Array<{
     name: string;
-    summary?: string;
-    description?: string;
-    deprecated?: boolean | string;
+    summary?: string | undefined;
+    description?: string | undefined;
+    deprecated?: boolean | string | undefined;
   }>;
   cssProperties: Array<{
     name: string;
-    syntax?: string;
-    default?: string;
-    summary?: string;
-    description?: string;
-    deprecated?: boolean | string;
+    syntax?: string | undefined;
+    default?: string | undefined;
+    summary?: string | undefined;
+    description?: string | undefined;
+    deprecated?: boolean | string | undefined;
   }>;
   properties: Array<{
     name: string;
-    type?: string;
-    default?: string;
-    description?: string;
+    type?: string | undefined;
+    default?: string | undefined;
+    description?: string | undefined;
   }>;
 }
 

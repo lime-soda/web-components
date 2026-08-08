@@ -9,7 +9,7 @@ export async function listComponents(): Promise<
   Array<{
     name: string;
     tagName: string;
-    description?: string;
+    description?: string | undefined;
     package: string;
   }>
 > {

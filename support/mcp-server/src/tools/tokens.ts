@@ -117,10 +117,10 @@ export async function getCssVariables(): Promise<CSSVariable[]> {
         let match;
 
         while ((match = variableRegex.exec(cssContent)) !== null) {
-          variables.push({
-            name: `--${match[1].trim()}`,
-            value: match[2].trim(),
-          });
+          // Both groups are unconditional in the pattern, so a match has both.
+          const [, name, value] = match;
+          if (name === undefined || value === undefined) continue;
+          variables.push({ name: `--${name.trim()}`, value: value.trim() });
         }
 
         debugLog(`Parsed ${variables.length} CSS variables from file`);

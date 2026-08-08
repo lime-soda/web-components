@@ -14,15 +14,15 @@ export class Button extends LitElement {
    * The size of the button.
    */
   @property({ type: String })
-  size: 'sm' | 'md' | 'lg' = 'md';
+  accessor size: 'sm' | 'md' | 'lg' = 'md';
 
   /**
    * The variant of the button.
    */
   @property({ type: String })
-  variant: 'primary' | 'secondary' | 'outline' | 'ghost' = 'primary';
+  accessor variant: 'primary' | 'secondary' | 'outline' | 'ghost' = 'primary';
 
-  render() {
+  override render() {
     return html`
       <button part="button" class="${this.size} ${this.variant}">
         <slot></slot>
@@ -30,7 +30,7 @@ export class Button extends LitElement {
     `;
   }
 
-  static styles = [
+  static override styles = [
     tokens.props,
     css`
       button {
