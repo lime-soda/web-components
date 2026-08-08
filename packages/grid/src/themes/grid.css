@@ -66,8 +66,8 @@
  * their own theme switch rather than following the OS.
  */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-flow-theme='light']),
-  :host(:not([data-flow-theme='light'])) {
+  :root:not([data-ls-grid-theme='light']),
+  :host(:not([data-ls-grid-theme='light'])) {
     --ls-grid-surface: #0a0a0a;
     --ls-grid-background: #1a1a1a;
     --ls-grid-header-background: #262626;
@@ -86,7 +86,7 @@
   }
 }
 
-[data-flow-theme='dark'] {
+[data-ls-grid-theme='dark'] {
   --ls-grid-surface: #0a0a0a;
   --ls-grid-background: #1a1a1a;
   --ls-grid-header-background: #262626;

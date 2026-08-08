@@ -168,7 +168,7 @@ export class FilterModule<TData = unknown> implements GridModule<
     }
 
     /* An active filter is worth seeing at a glance across a wide monitor. */
-    .ls-grid-filter-input[data-flow-active] {
+    .ls-grid-filter-input[data-ls-grid-active] {
       border-color: var(--ls-grid-focus, #3b82f6);
     }
 
@@ -195,7 +195,7 @@ export class FilterModule<TData = unknown> implements GridModule<
       aria-label=${`Filter ${ctx.column.headerName}`}
       .value=${value}
       placeholder="Filter"
-      ?data-flow-active=${current !== undefined}
+      ?data-ls-grid-active=${current !== undefined}
       @click=${(event: Event) => event.stopPropagation()}
       @keydown=${(event: Event) => event.stopPropagation()}
       @input=${(event: Event) => {

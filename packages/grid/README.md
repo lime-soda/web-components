@@ -579,7 +579,7 @@ ls-grid {
 ```
 
 `@lime-soda/grid/themes/grid.css` provides a light/dark pair, honouring
-`prefers-color-scheme` with a `data-flow-theme="light|dark"` override.
+`prefers-color-scheme` with a `data-ls-grid-theme="light|dark"` override.
 
 Every token maps to one property by the same rule — `selectionBackground` is
 `--ls-grid-selection-background`:

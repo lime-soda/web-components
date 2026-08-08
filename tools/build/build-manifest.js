@@ -14,8 +14,13 @@ import { cssPropertiesPlugin } from '@lime-soda/cem-plugin-css-properties';
 async function runCEMAnalysis() {
   console.log('🔍 Analyzing TypeScript files...');
 
-  // Find all TypeScript files
-  const sourceFiles = await glob('src/**/*.ts');
+  // Find all TypeScript files. Tests sit next to the source they cover, and a
+  // manifest is a description of the published package — a test file in it is
+  // noise at best, and at worst documents an element that only exists in a
+  // fixture.
+  const sourceFiles = await glob('src/**/*.ts', {
+    ignore: ['src/**/*.test.ts', 'src/**/*.bench.ts'],
+  });
 
   if (sourceFiles.length === 0) {
     throw new Error('No TypeScript files found in src/ directory');

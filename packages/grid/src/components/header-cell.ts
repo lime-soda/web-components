@@ -48,7 +48,7 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     }
 
     /* No label to sit beside, so whatever a module contributed is centred. */
-    :host([data-flow-unnamed]) {
+    :host([data-ls-grid-unnamed]) {
       justify-content: center;
       padding: 0;
     }
@@ -169,7 +169,7 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     // so its slot content centres in the header instead of being pushed aside by
     // an empty flex:1 span.
     const unnamed = this.column.headerName === '';
-    this.toggleAttribute('data-flow-unnamed', unnamed);
+    this.toggleAttribute('data-ls-grid-unnamed', unnamed);
 
     return html`
       ${

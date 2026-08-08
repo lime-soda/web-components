@@ -236,7 +236,7 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
 
     return {
       classes: ['ls-grid-tree-cell'],
-      attributes: { 'data-flow-depth': String(depth) },
+      attributes: { 'data-ls-grid-depth': String(depth) },
       // Depth drives the indent width through CSS rather than a computed pixel
       // value, so a consumer can change --ls-grid-tree-indent and every level follows.
       customProperties: {

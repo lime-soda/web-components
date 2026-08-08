@@ -43,7 +43,7 @@ export class GridCell extends SignalWatcher(LitElement) {
      * checkbox cannot sit centred in a narrow column — 16px of padding leaves
      * nothing to centre a 13px control in.
      */
-    :host([data-flow-renderer]) {
+    :host([data-ls-grid-renderer]) {
       padding: 0;
     }
 
@@ -149,7 +149,7 @@ export class GridCell extends SignalWatcher(LitElement) {
     const hasRenderer = this.column.cellRenderer !== undefined;
     // Element renderers own their box; function renderers and plain values are
     // content and keep the cell's gutter.
-    this.toggleAttribute('data-flow-renderer', typeof this.column.cellRenderer === 'string');
+    this.toggleAttribute('data-ls-grid-renderer', typeof this.column.cellRenderer === 'string');
 
     return html`
       ${decorations.map((d) => (d.prefix ? html`<span class="affix">${d.prefix}</span>` : nothing))}
