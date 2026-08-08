@@ -276,6 +276,11 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     this.setAttribute('role', controller.registry.gridRole());
     this.setAttribute('aria-rowcount', String(controller.pipeline.projector.rows.get().length + 1));
     this.setAttribute('aria-colcount', String(controller.columns.get().length));
+    // On the grid itself. It used to label the scroller, from when each
+    // instance was its own grid — and a labelled div is exposed rather than
+    // passed through, so it stood between the grid and its rows as a child no
+    // grid is allowed to have.
+    this.setAttribute('aria-label', controller.options.ariaLabel ?? 'Data grid');
 
     // The engine's capacity arithmetic and the CSS that lays rows out must agree.
     // Publishing the configured heights as custom properties is what keeps them
@@ -287,8 +292,6 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
           class="scroller"
           part="scroller"
           data-layout=${mode}
-          role="presentation"
-          aria-label=${controller.options.ariaLabel ?? 'Data grid'}
           @keydown=${this.handleKeyDown}
           ${ref(this.scrollerRef)}
         >
@@ -331,7 +334,6 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
       (instance) => html`
         <div
           class="instance-slot"
-          role="presentation"
           data-instance-id=${instance.id}
           style=${styleMap({
             // The layout engine sizes an instance to its columns, which is its
@@ -377,6 +379,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
         ? nothing
         : html`<flow-instance
             class="stack-sticky"
+            role="presentation"
             part="instance-sticky"
             parts="rows"
             .instance=${stickyInstance}
@@ -386,10 +389,15 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
           ></flow-instance>`}
       <div
         class="stack-spacer"
+        role="presentation"
         style=${styleMap({ '--flow-spacer-height': `${instance.offset}px` })}
       ></div>
       <flow-instance part="instance" parts="rows" .instance=${instance}></flow-instance>
-      <div class="stack-spacer" style=${styleMap({ '--flow-spacer-height': `${below}px` })}></div>
+      <div
+        class="stack-spacer"
+        role="presentation"
+        style=${styleMap({ '--flow-spacer-height': `${below}px` })}
+      ></div>
     `;
   }
 
@@ -428,7 +436,7 @@ export class FlowGrid<TData = unknown> extends SignalWatcher(LitElement) {
     if (!instance) return nothing;
 
     return html`
-      <div class="stack-chrome">
+      <div class="stack-chrome" role="presentation">
         <flow-instance
           class="stack-chrome-header"
           part="instance-header"

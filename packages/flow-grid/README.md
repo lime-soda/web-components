@@ -274,6 +274,11 @@ hierarchy convention core does not own.
 Rows are laid out with `subgrid` rather than `display: contents`, so a row with
 `role="row"` is a real element rather than one with no box.
 
+All of this is checked with [axe](https://github.com/dequelabs/axe-core) in the
+browser suite — a plain grid, a treegrid, one with sorting and selection
+installed, and one with a collapsed group — rather than by reading the
+specification and hoping.
+
 ## Keyboard and focus
 
 The grid tracks focus itself rather than relying on the browser's, and paints
