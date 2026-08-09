@@ -150,3 +150,39 @@ describe('geometry', () => {
     }
   });
 });
+
+describe('focus ring', () => {
+  it('uses the design system focus colour, not the primary accent', () => {
+    // The ring is a keyboard-position signal, so it stays deliberately apart
+    // from the accent, which says "selected". They were the same colour once,
+    // because the ring was tokenised by preserving what it happened to point
+    // at rather than what it meant.
+    // Declared on the element's own :host, not on :root, so it has to be read
+    // from a mounted button.
+    const button = mount();
+    const styles = getComputedStyle(button);
+    const ring = styles.getPropertyValue('--button-focus-color').trim();
+    const accent = styles.getPropertyValue('--theme-color-accent').trim();
+    const themeFocus = styles.getPropertyValue('--theme-color-focus').trim();
+
+    expect(ring).toBe(themeFocus);
+    expect(ring).not.toBe(accent);
+  });
+
+  it('reaches no further outside the button than a story can hold', async () => {
+    // An outline contributes nothing to layout and sits outside the element's
+    // box, so a screenshot cropped to that box clips it — which is what kept
+    // flagging the Chromatic snapshots. The ring is allowed to sit outside; the
+    // constraint is that it stays inside the 1rem a padded story canvas gives,
+    // so a story showing focus does not need bespoke spacing to contain it.
+    // The declared geometry, not a computed outline: an unfocused button has no
+    // outline to measure, and these are the values the ring is drawn from.
+    const button = mount();
+    await button.updateComplete;
+    const styles = getComputedStyle(button);
+    const px = (name: string) => Number.parseFloat(styles.getPropertyValue(name));
+    const outset = px('--button-focus-width') + px('--button-focus-offset');
+
+    expect(outset, `ring reaches ${outset}px beyond the button`).toBeLessThanOrEqual(16);
+  });
+});

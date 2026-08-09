@@ -50,6 +50,33 @@ export const Primary: Story = {
     await userEvent.click(button);
 
     await expect(handler).toHaveBeenCalled();
+
+    // Clicking leaves the button focused, and the snapshot is taken after this
+    // runs — so the ring ended up in every Chromatic capture of this story,
+    // drawn outside the button by its offset and against the crop edge. Whether
+    // :focus-visible matches a synthetic click is a heuristic, so it came and
+    // went between runs and flagged a diff each time. The story is about the
+    // click handler firing; the ring belongs in a story that means to show it.
+    button.blur();
+  },
+};
+
+export const Focused: Story = {
+  name: 'Focus ring',
+  args: { variant: 'primary' },
+  // The ring sits outside the button by its offset, so the story gives it room
+  // rather than letting it run into the crop edge.
+  render: ({ label, size, variant }) =>
+    html`<div style="padding: 1.5rem">
+      <ls-button size=${size} variant=${variant}>${label}</ls-button>
+    </div>`,
+  play: async ({ canvasElement }) => {
+    // Tab rather than click: :focus-visible is a modality heuristic, and only
+    // keyboard focus matches it reliably. A click may or may not, which is what
+    // made the ring flicker between snapshots.
+    canvasElement.querySelector('ls-button')!.focus();
+    await userEvent.tab({ shift: true });
+    await userEvent.tab();
   },
 };
 
