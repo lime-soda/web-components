@@ -64,16 +64,16 @@ dist/css/
   color-scheme: light dark;
 
   /* Primitive Colors - Foundation palette */
-  --color-green-700: #15803d;
-  --color-green-400: #4ade80;
-  --color-pink-600: #db2777;
-  --color-pink-400: #f472b6;
+  --color-teal-600: #3a6b6e;
+  --color-teal-400: #6aa2a4;
+  --color-taupe-600: #74675a;
+  --color-taupe-400: #a89b8d;
 
   /* Semantic tokens - Automatic theme switching */
-  --color-primary-500: light-dark(#15803d, #4ade80);
-  --color-secondary-500: light-dark(#db2777, #f472b6);
-  --color-background-default: light-dark(#ffffff, #030712);
-  --color-text-primary: light-dark(#111827, #f3f4f6);
+  --theme-color-primary-background: light-dark(var(--color-teal-600), var(--color-teal-400));
+  --theme-color-secondary-background: light-dark(var(--color-taupe-600), var(--color-taupe-400));
+  --theme-color-background-default: light-dark(var(--color-white), var(--color-gray-950));
+  --theme-color-text-default: light-dark(var(--color-gray-950), var(--color-gray-50));
 }
 ```
 

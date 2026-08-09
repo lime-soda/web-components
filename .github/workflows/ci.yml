@@ -128,6 +128,13 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
+      # Publishing is by OIDC trusted publishing, not a token, and npm only
+      # supports that from 11.5.1. Below it the publish does not error — it
+      # falls back to wanting a token and fails on authentication instead,
+      # which is a confusing way to find out. Node 24 currently bundles a new
+      # enough npm; this makes it independent of that.
+      - run: npm install -g npm@latest
+
       - run: pnpm install --frozen-lockfile
 
       # Restores what `verify` just built, so this is a cache hit rather than a
@@ -159,6 +166,7 @@ jobs:
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
         env:
+          # No npm credentials: the registry authenticates the runner itself
+          # through OIDC, which is why `id-token: write` is granted above. That
+          # also gets published provenance for free.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
