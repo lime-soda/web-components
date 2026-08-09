@@ -62,6 +62,10 @@
         "$value": "color-mix(in srgb, {theme.color.primary.background} 22%, transparent)",
         "$description": "Wash behind a selected row or option. The accent at low opacity, so the row underneath still reads and several selected rows in a run do not become a solid block"
       },
+      "focus": {
+        "$value": "{color.blue.400}",
+        "$description": "Focus ring. Deliberately not the accent: an accent says \"this is selected\" and a ring says \"the keyboard is here\", and a keyboard user needs to tell those apart on the same row. Blue also stays legible against the teal it will often sit next to"
+      },
       "success": {
         "background": {
           "$value": "{color.emerald.400}"

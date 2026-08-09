@@ -15,7 +15,7 @@
       },
       "color": {
         "$type": "color",
-        "$value": "{theme.color.primary.background}",
+        "$value": "{theme.color.focus}",
         "$description": "Focus ring colour"
       }
     },

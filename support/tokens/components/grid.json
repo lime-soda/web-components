@@ -98,7 +98,7 @@
     },
     "focus": {
       "$type": "color",
-      "$value": "{theme.color.info.background}",
+      "$value": "{theme.color.focus}",
       "$description": "Focus ring colour"
     },
     "accent": {
