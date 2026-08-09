@@ -24,6 +24,10 @@ export type InstanceParts = 'full' | 'header' | 'rows';
  * spacer, so the header renders separately and stays put. Both bands share the
  * same column template, so they stay aligned without measuring anything.
  *
+ * @csspart instance-grid - An instance's grid container, which owns the column tracks
+ * @csspart row - One row
+ * @csspart header-cell - One column heading
+ *
  * @customElement ls-grid-instance
  */
 export class GridInstance extends SignalWatcher(LitElement) {

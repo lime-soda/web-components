@@ -22,6 +22,8 @@ import { SignalWatcher } from '../reactive/index.js';
  * price tick cheap: the cell reads its row's signal during render, so a change
  * repaints this cell and touches nothing above it.
  *
+ * @csspart cell-content - A cell's content, inside its padding
+ *
  * @customElement ls-grid-cell
  */
 export class GridCell extends SignalWatcher(LitElement) {

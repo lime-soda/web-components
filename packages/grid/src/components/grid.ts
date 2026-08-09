@@ -23,6 +23,31 @@ import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
  * decides which instances are worth rendering. Everything below reads from the
  * context, so nothing is drilled down the tree.
  *
+ * @csspart scroller - The scrolling viewport
+ * @csspart instance - One instance: a block of rows filled to the viewport height
+ * @csspart instance-header - The static column header, in the stacked layout only
+ * @csspart instance-sticky - The pinned group heading band, in the stacked layout only
+ * @csspart placeholder - Stands in for an instance that is scrolled out of view
+ * @csspart instance-grid - An instance's grid container, which owns the column tracks
+ * @csspart row - One row
+ * @csspart header-cell - One column heading
+ * @csspart cell - One cell
+ * @csspart cell-content - A cell's content, inside its padding
+ * @csspart header-label - A column heading's text
+ * @csspart header-slots - Where modules add header controls
+ * @csspart tree-expander - The expand/collapse control (tree module)
+ * @csspart sort-indicator - The sort direction arrow (sort module)
+ * @csspart filter-input - A per-column filter input (filter module)
+ * @csspart selection-checkbox - A selection checkbox (selection module)
+ *
+ * @fires ls-grid-ready - The grid is ready and its api can be used
+ * @fires ls-grid-data-changed - A transaction was applied
+ * @fires ls-grid-layout-changed - The instances were laid out again
+ * @fires ls-grid-sort-changed - The sort model changed (sort module)
+ * @fires ls-grid-filter-changed - The filter model changed (filter module)
+ * @fires ls-grid-expansion-changed - A row was expanded or collapsed (tree module)
+ * @fires ls-grid-selection-changed - The selection changed (selection module)
+ *
  * @customElement ls-grid
  */
 export class Grid<TData = unknown> extends SignalWatcher(LitElement) {

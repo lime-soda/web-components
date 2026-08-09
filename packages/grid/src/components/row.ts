@@ -23,6 +23,8 @@ import { SignalWatcher } from '../reactive/index.js';
  * (node, selection, store) with matching teardown in `disconnectedCallback`; here
  * the row context reads a signal and Lit handles the rest.
  *
+ * @csspart cell - One cell
+ *
  * @customElement ls-grid-row
  */
 export class GridRow extends SignalWatcher(LitElement) {

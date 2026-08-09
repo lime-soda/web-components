@@ -16,6 +16,9 @@ import { SignalWatcher } from '../reactive/index.js';
  * arrive as module header slots, so a grid with neither module installed has a
  * header with no affordances rather than dead ones.
  *
+ * @csspart header-label - A column heading's text
+ * @csspart header-slots - Where modules add header controls
+ *
  * @customElement ls-grid-header-cell
  */
 export class GridHeaderCell extends SignalWatcher(LitElement) {
