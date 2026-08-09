@@ -10,6 +10,7 @@ import { GRID_EVENTS } from '../api/events.js';
 import type { GridApi } from '../api/types.js';
 import { gridContext } from '../context/index.js';
 import { GridController, type GridOptions } from '../controller/grid-controller.js';
+import { handleNavigationKey } from '../controller/keyboard-navigation.js';
 import { SignalWatcher } from '../reactive/index.js';
 import type { DisplayRow, LayoutInstance } from '../layout/types.js';
 import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
@@ -461,11 +462,21 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
   }
 
   /**
-   * Offers keys to modules. Core binds nothing itself: with no keyboard module
-   * installed the grid has no key behaviour at all, which is the point.
+   * Offers keys to modules first, then falls back to the navigation floor.
+   *
+   * Modules get first refusal so the keyboard module's richer handling — row
+   * skipping, instance jumps, the page keys — replaces the floor rather than
+   * competing with it. What core keeps is what the announced role obliges it to
+   * have: arrows, and a Tab that can leave.
    */
   private readonly handleKeyDown = (event: KeyboardEvent): void => {
-    if (this.controller?.registry.handleKeyDown(event) === true) {
+    const controller = this.controller;
+    if (!controller) return;
+
+    const handled =
+      controller.registry.handleKeyDown(event) || handleNavigationKey(event, controller.focus);
+
+    if (handled) {
       event.preventDefault();
       event.stopPropagation();
     }

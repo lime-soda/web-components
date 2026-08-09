@@ -65,6 +65,13 @@ That is the whole of core: columns, rows, and a layout. No sorting, no
 filtering, no hierarchy — those are modules, and a grid that imports none of
 them ships none of their code.
 
+Keyboard navigation is the exception, and deliberately so. The grid announces
+`role="grid"`, and that role tells assistive technology the arrows move around
+it — so arrows, Tab in reading order, and Escape are core. A default grid keeps
+the promise its own role makes. The keyboard module adds what the ARIA pattern
+lists as optional: Home and End, the page keys, jumping between instances, and
+skipping rows by a predicate.
+
 ## Why ticks are cheap
 
 The read path is rows → projection → layout, each step a memoised signal:
@@ -140,7 +147,7 @@ Every feature beyond the core is an additive module with its own entry point.
 | `@lime-soda/grid/selection/tree`      | Makes a parent stand for the rows beneath it, for tree data |
 | `@lime-soda/grid/selection/row-range` | Shift-click spans over contiguous rows                      |
 | `@lime-soda/grid/cell-flash`          | Directional flash on value change                           |
-| `@lime-soda/grid/keyboard`            | Arrow navigation across instances, Home/End, Page keys      |
+| `@lime-soda/grid/keyboard`            | Home/End, page keys, instance jumps, skipping rows          |
 
 ```ts
 import { TreeModule } from '@lime-soda/grid/tree';

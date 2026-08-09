@@ -31,7 +31,9 @@ const MARKERS = {
   // Module ids: string literals, so minification cannot rename them.
   'selection/tree': 'selection-tree',
   'selection/row-range': 'selection-row-range',
-  keyboard: 'ArrowDown',
+  // A page key, not an arrow: arrows are core now, so only the optional half of
+  // the ARIA pattern still identifies this module.
+  keyboard: 'PageDown',
   'cell-flash': 'getDirection',
 } as const;
 

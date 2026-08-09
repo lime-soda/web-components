@@ -405,7 +405,12 @@ describe('<ls-grid>', () => {
       expect(grid.controller!.focus.focused.get()?.instanceId).toBe('instance-1');
     });
 
-    it('does nothing without the keyboard module', async () => {
+    it('still navigates without the keyboard module', async () => {
+      // This used to assert the opposite, and asserting it was the bug: the
+      // grid announces role="grid", which tells assistive technology the arrows
+      // move around it. The module adds the optional half of that pattern — the
+      // page keys, instance jumps, row skipping — not the part the role
+      // promises. See navigation-floor.browser.test.ts for the whole floor.
       const grid = await mount();
       const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
 
@@ -414,7 +419,7 @@ describe('<ls-grid>', () => {
       );
       await grid.updateComplete;
 
-      expect(grid.controller!.focus.focused.get()).toBeNull();
+      expect(grid.controller!.focus.focused.get()).not.toBeNull();
     });
   });
 
