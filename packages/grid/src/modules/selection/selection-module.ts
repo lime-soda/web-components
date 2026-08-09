@@ -371,7 +371,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
     .ls-grid-checkbox:disabled {
       cursor: default;
-      opacity: var(--grid-disabled-opacity, 0.4);
+      opacity: var(--grid-disabled-opacity);
     }
 
     .ls-grid-checkbox:focus-visible {

@@ -166,7 +166,7 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
     .ls-grid-tree-spacer {
       display: inline-block;
       flex: 0 0 auto;
-      width: var(--grid-tree-expander-size, 18px);
+      width: var(--grid-tree-expander-size);
     }
 
     .ls-grid-expander {
@@ -174,12 +174,12 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      width: var(--grid-tree-expander-size, 18px);
+      width: var(--grid-tree-expander-size);
       padding: 0;
       background: none;
       border: none;
       cursor: pointer;
-      font-size: var(--grid-tree-expander-font-size, 10px);
+      font-size: var(--grid-tree-expander-font-size);
       line-height: 1;
       color: var(--grid-text-muted);
       transition: transform 150ms ease-out;

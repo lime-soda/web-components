@@ -24,10 +24,10 @@ const PACKAGE = resolve(REPO, 'packages/grid');
 
 /** Distinctive strings, each present only if that module was included. */
 const MARKERS = {
-  tree: 'tree-expander',
-  sort: 'sort-indicator',
-  filter: 'filter-input',
-  selection: 'selection-checkbox',
+  tree: 'ls-grid-expander',
+  sort: 'ls-grid-sort-indicator',
+  filter: 'ls-grid-filter-input',
+  selection: 'ls-grid-selection-checkbox',
   // Module ids: string literals, so minification cannot rename them.
   'selection/tree': 'selection-tree',
   'selection/row-range': 'selection-row-range',

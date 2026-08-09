@@ -160,7 +160,7 @@ Measured with esbuild, minified and gzipped:
 
 | Imports               | Wire size |
 | --------------------- | --------- |
-| core only             | 29.1 kB   |
+| core only             | 29.4 kB   |
 | + selection/row-range | +0.4 kB   |
 | + keyboard            | +0.6 kB   |
 | + cell-flash          | +0.7 kB   |
@@ -169,7 +169,7 @@ Measured with esbuild, minified and gzipped:
 | + filter              | +1.5 kB   |
 | + tree                | +1.9 kB   |
 | + selection           | +2.4 kB   |
-| everything            | 37.6 kB   |
+| everything            | 37.8 kB   |
 
 A bundle-composition check in CI asserts that an unimported module leaves no
 trace in the output, so this cannot quietly regress.
@@ -598,15 +598,16 @@ import '@lime-soda/tokens/variables.css';
 Every token maps to one property by the same rule — `selectionBackground` is
 `--grid-selection-background`:
 
-| Group      | Tokens                                                                        |
-| ---------- | ----------------------------------------------------------------------------- |
-| Typography | `font` `fontSize` `headerFontSize` `headerFontWeight`                         |
-| Metrics    | `rowHeight` `headerHeight` `cellPaddingX` `instanceGap` `radius` `treeIndent` |
-| Surfaces   | `surface` `background` `headerBackground` `placeholderBackground`             |
-| Text       | `text` `textMuted` `headerText`                                               |
-| Lines      | `border` `borderSubtle`                                                       |
-| State      | `focus` `focusWidth` `selectionBackground` `hoverBackground`                  |
-| Flash      | `flashUp` `flashDown` `flashNeutral` `flashDuration`                          |
+| Group      | Tokens                                                                                                                                                                            |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Typography | `font` `fontSize` `headerFontSize` `headerFontWeight`                                                                                                                             |
+| Metrics    | `rowHeight` `headerHeight` `cellPaddingX` `instanceGap` `radius` `treeIndent`                                                                                                     |
+| Surfaces   | `surface` `background` `headerBackground` `placeholderBackground`                                                                                                                 |
+| Text       | `text` `textMuted` `headerText`                                                                                                                                                   |
+| Lines      | `border` `borderSubtle`                                                                                                                                                           |
+| State      | `focus` `focusWidth` `selectionBackground` `hoverBackground`                                                                                                                      |
+| Flash      | `flashUp` `flashDown` `flashNeutral` `flashDuration`                                                                                                                              |
+| Controls   | `instanceBorderWidth` `disabledOpacity` `treeExpanderSize` `treeExpanderFontSize` `sortIndicatorFontSize` `sortOrderFontSize` `filterInputWidth` `filterFontSize` `filterPadding` |
 
 `rowHeight` is the one token the grid overrides: the layout engine has already
 used it to decide how many rows fit an instance, so CSS must lay them out at

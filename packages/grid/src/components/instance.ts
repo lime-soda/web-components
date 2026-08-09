@@ -30,7 +30,7 @@ export class GridInstance extends SignalWatcher(LitElement) {
       display: block;
       box-sizing: border-box;
       background: var(--grid-background);
-      border: var(--grid-instance-border-width, 1px) solid var(--grid-border);
+      border: var(--grid-instance-border-width) solid var(--grid-border);
       border-radius: var(--grid-radius);
       overflow: hidden;
     }

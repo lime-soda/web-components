@@ -120,13 +120,13 @@ export class Button extends LitElement {
         }
 
         &:disabled {
-          opacity: 0.5;
+          opacity: ${tokens.disabled.opacity};
           cursor: not-allowed;
         }
 
         &:focus-visible {
-          outline: 2px solid ${tokens.variant.primaryBackground};
-          outline-offset: 2px;
+          outline: ${tokens.focus.width} solid ${tokens.focus.color};
+          outline-offset: ${tokens.focus.offset};
         }
       }
     `,

@@ -48,21 +48,6 @@ const INTERNAL = new Set([
   '--grid-scrollbar-width',
 ]);
 
-/** Sub-token knobs a consumer may set but which are not part of the core schema. */
-const OPTIONAL = new Set([
-  '--grid-tree-expander-size',
-  '--grid-tree-expander-font-size',
-  '--grid-sort-indicator-font-size',
-  '--grid-sort-order-font-size',
-  '--grid-filter-input-width',
-  '--grid-filter-font-size',
-  '--grid-filter-padding',
-  '--grid-disabled-opacity',
-  // Border of an instance. Read when sizing the slot, so the columns inside
-  // fit the content box rather than being clipped by it.
-  '--grid-instance-border-width',
-]);
-
 const usages = new Map<string, string[]>();
 for (const file of files) {
   const source = readFileSync(file, 'utf8');
@@ -77,8 +62,7 @@ for (const file of files) {
 describe('theme coverage', () => {
   it('reads only properties that are declared tokens or explicitly internal', () => {
     const undeclared = [...usages.keys()].filter(
-      (property) =>
-        !declaredProperties.has(property) && !INTERNAL.has(property) && !OPTIONAL.has(property),
+      (property) => !declaredProperties.has(property) && !INTERNAL.has(property),
     );
 
     expect(undeclared, `undeclared custom properties: ${undeclared.join(', ')}`).toEqual([]);

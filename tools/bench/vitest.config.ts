@@ -24,6 +24,7 @@ export default defineConfig({
         test: {
           name: 'browser',
           include: ['src/**/*.browser.bench.ts'],
+          setupFiles: ['./vitest.setup.ts'],
           browser: {
             enabled: true,
             provider: playwright(),

@@ -216,12 +216,12 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
       align-items: center;
       gap: 2px;
       flex: 0 0 auto;
-      font-size: var(--grid-sort-indicator-font-size, 10px);
+      font-size: var(--grid-sort-indicator-font-size);
       color: var(--grid-text-muted);
     }
 
     .ls-grid-sort-order {
-      font-size: var(--grid-sort-order-font-size, 8px);
+      font-size: var(--grid-sort-order-font-size);
     }
   `;
 

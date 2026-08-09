@@ -74,6 +74,29 @@ export interface GridTheme {
   flashNeutral?: string;
   /** Flash duration, as a CSS time. */
   flashDuration?: string;
+
+  // -- Controls ---------------------------------------------------------------
+  // The chrome modules contribute: expanders, sort indicators, filter inputs.
+  // These were literals inlined as `var()` fallbacks, which made them the only
+  // part of the grid's appearance the design system could not reach.
+  /** Border around an instance. Also read when sizing the slot an instance fills. */
+  instanceBorderWidth?: string;
+  /** Opacity of a disabled control, such as a checkbox on an unselectable row. */
+  disabledOpacity?: string;
+  /** Hit area of the tree expander. */
+  treeExpanderSize?: string;
+  /** Size of the expander's triangle. */
+  treeExpanderFontSize?: string;
+  /** Size of the sort direction arrow in a header. */
+  sortIndicatorFontSize?: string;
+  /** Size of the sort position badge, shown when more than one column is sorted. */
+  sortOrderFontSize?: string;
+  /** Width of a per-column filter input. */
+  filterInputWidth?: string;
+  /** Font size inside a filter input. */
+  filterFontSize?: string;
+  /** Padding inside a filter input. */
+  filterPadding?: string;
 }
 
 /** Every valid token name, in declaration order. */
@@ -105,6 +128,15 @@ export const THEME_TOKENS = [
   'flashDown',
   'flashNeutral',
   'flashDuration',
+  'instanceBorderWidth',
+  'disabledOpacity',
+  'treeExpanderSize',
+  'treeExpanderFontSize',
+  'sortIndicatorFontSize',
+  'sortOrderFontSize',
+  'filterInputWidth',
+  'filterFontSize',
+  'filterPadding',
 ] as const satisfies readonly (keyof GridTheme)[];
 
 export type ThemeToken = (typeof THEME_TOKENS)[number];

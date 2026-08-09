@@ -12,10 +12,10 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@lime-soda/grid": "workspace:*"
+    "@lime-soda/grid": "workspace:*",
+    "@lime-soda/tokens": "workspace:*"
   },
   "devDependencies": {
-    "@vitest/browser": "^4.1.10",
     "esbuild": "^0.28.1",
     "playwright": "^1.56.1",
     "@lime-soda/tsconfig": "workspace:*",

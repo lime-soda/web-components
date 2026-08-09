@@ -1,6 +1,31 @@
 {
   "button": {
     "$description": "Design tokens for button component styling and behavior",
+    "focus": {
+      "$description": "Focus ring, which was two hard-coded widths before it was a token",
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.borderWidth.medium}",
+        "$description": "Thickness of the focus ring"
+      },
+      "offset": {
+        "$type": "dimension",
+        "$value": "{size.borderWidth.medium}",
+        "$description": "Gap between the button edge and the focus ring"
+      },
+      "color": {
+        "$type": "color",
+        "$value": "{theme.color.primary.background}",
+        "$description": "Focus ring colour"
+      }
+    },
+    "disabled": {
+      "opacity": {
+        "$type": "number",
+        "$value": "0.5",
+        "$description": "Opacity of a disabled button"
+      }
+    },
     "motion": {
       "transition": {
         "$type": "transition",

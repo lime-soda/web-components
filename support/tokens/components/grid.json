@@ -142,6 +142,52 @@
       "$type": "duration",
       "$value": "{motion.duration.slower}",
       "$description": "How long a cell flash lasts"
+    },
+
+    "instanceBorderWidth": {
+      "$type": "dimension",
+      "$value": "{size.borderWidth.thin}",
+      "$description": "Border around an instance. Also read when sizing the slot, so the columns inside fit the content box rather than being clipped by it"
+    },
+    "disabledOpacity": {
+      "$type": "number",
+      "$value": "0.4",
+      "$description": "Opacity of a disabled control, such as a checkbox on a row that cannot be selected"
+    },
+    "treeExpanderSize": {
+      "$type": "dimension",
+      "$value": "{size.space.4}",
+      "$description": "Hit area of the tree expander"
+    },
+    "treeExpanderFontSize": {
+      "$type": "dimension",
+      "$value": "{font.size.xs}",
+      "$description": "Size of the expander's triangle"
+    },
+    "sortIndicatorFontSize": {
+      "$type": "dimension",
+      "$value": "{font.size.xs}",
+      "$description": "Size of the sort direction arrow in a header"
+    },
+    "sortOrderFontSize": {
+      "$type": "dimension",
+      "$value": "{font.size.xs}",
+      "$description": "Size of the sort position badge, shown when more than one column is sorted"
+    },
+    "filterInputWidth": {
+      "$type": "dimension",
+      "$value": "{size.space.16}",
+      "$description": "Width of a per-column filter input"
+    },
+    "filterFontSize": {
+      "$type": "dimension",
+      "$value": "{font.size.xs}",
+      "$description": "Font size inside a filter input"
+    },
+    "filterPadding": {
+      "$type": "dimension",
+      "$value": "{size.space.half} {size.space.1}",
+      "$description": "Padding inside a filter input"
     }
   }
 }

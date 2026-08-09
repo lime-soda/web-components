@@ -156,11 +156,11 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   static readonly styles = css`
     .ls-grid-filter-input {
-      width: var(--grid-filter-input-width, 70px);
+      width: var(--grid-filter-input-width);
       min-width: 0;
       font: inherit;
-      font-size: var(--grid-filter-font-size, 11px);
-      padding: var(--grid-filter-padding, 1px 4px);
+      font-size: var(--grid-filter-font-size);
+      padding: var(--grid-filter-padding);
       border-radius: var(--grid-radius);
       border: 1px solid var(--grid-border);
       background: transparent;

@@ -349,7 +349,7 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
             // *content*. The border is chrome around that, so it is added here
             // — with it inside, the last column overflowed the padding box and
             // was clipped, taking the focus ring's right edge with it.
-            '--grid-instance-width': `calc(${instance.width}px + 2 * var(--grid-instance-border-width, 1px))`,
+            '--grid-instance-width': `calc(${instance.width}px + 2 * var(--grid-instance-border-width))`,
             '--grid-instance-height': `${height}px`,
           })}
           ${ref((element) => this.observeSlot(element))}
