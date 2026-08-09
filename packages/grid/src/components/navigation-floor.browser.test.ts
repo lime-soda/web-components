@@ -229,3 +229,39 @@ describe('the navigation floor, with no modules', () => {
     expect(focusOf(grid)!.focused.get()).toBeNull();
   });
 });
+
+describe('the realistic path: real focus, then a real key', () => {
+  // Everything above dispatches a synthetic event at an element it chose. A
+  // user tabs or clicks into the grid and presses a key wherever focus actually
+  // landed, so these drive focus first and dispatch at document's active
+  // element — the difference between "the handler works" and "the grid works".
+  for (const layout of ['flow', 'stack'] as const) {
+    it(`navigates from real focus in the ${layout} layout`, async () => {
+      const grid = await mount(layout);
+
+      const cell = grid
+        .shadowRoot!.querySelector('ls-grid-instance[part="instance"]')!
+        .shadowRoot!.querySelector('ls-grid-row')!
+        .shadowRoot!.querySelector('ls-grid-cell') as HTMLElement;
+
+      cell.focus();
+      const active = cell.shadowRoot?.activeElement ?? cell;
+      expect(focusOf(grid)!.focused.get(), 'clicking a cell did not focus it').not.toBeNull();
+      const before = focusOf(grid)!.focused.get();
+
+      active.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'ArrowDown',
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+        }),
+      );
+
+      expect(
+        focusOf(grid)!.focused.get()?.rowKey,
+        `${layout}: a key pressed at real focus did nothing`,
+      ).not.toBe(before?.rowKey);
+    });
+  }
+});
