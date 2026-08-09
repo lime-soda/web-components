@@ -127,3 +127,26 @@ describe('behaviour', () => {
     expect(clicks).toBe(1);
   });
 });
+
+describe('geometry', () => {
+  it('gives every variant the same box for the same label and size', async () => {
+    // The border has to be part of every variant's box, not only the outline
+    // one. A button is intrinsically sized, so a border on one variant alone
+    // makes it wider and taller than the others by twice the border width —
+    // visible as soon as two variants sit together in a toolbar.
+    const sizes: Record<string, { width: number; height: number }> = {};
+    for (const variant of VARIANTS) {
+      const button = mount({ variant });
+      await button.updateComplete;
+      const box = inner(button).getBoundingClientRect();
+      sizes[variant] = { width: box.width, height: box.height };
+      host?.remove();
+      host = undefined;
+    }
+
+    const [first, ...rest] = Object.values(sizes);
+    for (const box of rest) {
+      expect(box, `variant boxes differ: ${JSON.stringify(sizes)}`).toEqual(first);
+    }
+  });
+});

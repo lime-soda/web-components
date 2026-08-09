@@ -117,9 +117,11 @@
         "border": {
           "$type": "border",
           "$value": {
-            "width": "{size.borderWidth.none}"
+            "color": "transparent",
+            "width": "{size.borderWidth.thin}",
+            "style": "{size.borderStyle.solid}"
           },
-          "$description": "Primary button border"
+          "$description": "Primary button border. Transparent, but present: a button is intrinsically sized, so a border on the outline variant alone would make it wider and taller than the rest"
         }
       },
       "secondary": {
@@ -146,9 +148,11 @@
         "border": {
           "$type": "border",
           "$value": {
-            "width": "{size.borderWidth.none}"
+            "color": "transparent",
+            "width": "{size.borderWidth.thin}",
+            "style": "{size.borderStyle.solid}"
           },
-          "$description": "Secondary button border"
+          "$description": "Secondary button border. Transparent, but present: a button is intrinsically sized, so a border on the outline variant alone would make it wider and taller than the rest"
         }
       },
       "outline": {
@@ -206,9 +210,11 @@
         "border": {
           "$type": "border",
           "$value": {
-            "width": "{size.borderWidth.none}"
+            "color": "transparent",
+            "width": "{size.borderWidth.thin}",
+            "style": "{size.borderStyle.solid}"
           },
-          "$description": "Ghost button border"
+          "$description": "Ghost button border. Transparent, but present: a button is intrinsically sized, so a border on the outline variant alone would make it wider and taller than the rest"
         }
       }
     }
