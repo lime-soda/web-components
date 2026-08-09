@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { css, html } from 'lit';
 import { formatCellValue, getCellValue } from '../../columns/resolve-columns.js';
 import type { ResolvedColumn } from '../../columns/types.js';
@@ -156,24 +157,24 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   static readonly styles = css`
     .ls-grid-filter-input {
-      width: var(--grid-filter-input-width);
+      width: ${tokens.filterInputWidth};
       min-width: 0;
       font: inherit;
-      font-size: var(--grid-filter-font-size);
-      padding: var(--grid-filter-padding);
-      border-radius: var(--grid-radius);
-      border: 1px solid var(--grid-border);
+      font-size: ${tokens.filterFontSize};
+      padding: ${tokens.filterPadding};
+      border-radius: ${tokens.radius};
+      border: 1px solid ${tokens.border};
       background: transparent;
       color: inherit;
     }
 
     /* An active filter is worth seeing at a glance across a wide monitor. */
     .ls-grid-filter-input[data-ls-grid-active] {
-      border-color: var(--grid-focus);
+      border-color: ${tokens.focus};
     }
 
     .ls-grid-filter-input:focus-visible {
-      outline: var(--grid-focus-width) solid var(--grid-focus);
+      outline: ${tokens.focusWidth} solid ${tokens.focus};
       outline-offset: -1px;
     }
   `;

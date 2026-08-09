@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { instanceContext } from '../context/index.js';
 import { LitElement, css, html, nothing } from 'lit';
@@ -29,9 +30,9 @@ export class GridCell extends SignalWatcher(LitElement) {
       align-items: center;
       box-sizing: border-box;
       overflow: hidden;
-      padding: 0 var(--grid-cell-padding-x);
-      border-bottom: 1px solid var(--grid-border-subtle);
-      color: var(--grid-text);
+      padding: 0 ${tokens.cellPaddingX};
+      border-bottom: 1px solid ${tokens.borderSubtle};
+      color: ${tokens.text};
       font-variant-numeric: tabular-nums;
     }
 
@@ -58,23 +59,23 @@ export class GridCell extends SignalWatcher(LitElement) {
      * and says so here, so clicking and tabbing look the same.
      */
     :host([data-focused]) {
-      outline: var(--grid-focus-width) solid var(--grid-focus);
-      outline-offset: calc(-1 * var(--grid-focus-width));
+      outline: ${tokens.focusWidth} solid ${tokens.focus};
+      outline-offset: calc(-1 * ${tokens.focusWidth});
     }
 
     /* Applied by the selection module. A row is display:contents and has no box
        of its own, so the highlight is painted by its cells. */
     :host(.ls-grid-cell-selected) {
-      background: var(--grid-selection-background);
+      background: ${tokens.selectionBackground};
     }
 
     /* Tracking a row across a monitor-wide grid is the whole reason this exists. */
     :host(.ls-grid-row-hover) {
-      background: var(--grid-hover-background);
+      background: ${tokens.hoverBackground};
     }
 
     :host(.ls-grid-row-hover.ls-grid-cell-selected) {
-      background: var(--grid-selection-background);
+      background: ${tokens.selectionBackground};
     }
 
     /* Plain values: single line, ellipsised, vertically centred by the host. */

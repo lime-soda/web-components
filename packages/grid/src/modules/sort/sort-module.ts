@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { css, html } from 'lit';
 import { getCellValue } from '../../columns/resolve-columns.js';
 import type { ResolvedColumn } from '../../columns/types.js';
@@ -216,12 +217,12 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
       align-items: center;
       gap: 2px;
       flex: 0 0 auto;
-      font-size: var(--grid-sort-indicator-font-size);
-      color: var(--grid-text-muted);
+      font-size: ${tokens.sortIndicatorFontSize};
+      color: ${tokens.textMuted};
     }
 
     .ls-grid-sort-order {
-      font-size: var(--grid-sort-order-font-size);
+      font-size: ${tokens.sortOrderFontSize};
     }
   `;
 

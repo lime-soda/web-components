@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { css, html } from 'lit';
 import { defineElement } from '../../define-elements.js';
 import { GridSelectionCheckbox } from './selection-checkbox.js';
@@ -366,16 +367,16 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     .ls-grid-checkbox {
       cursor: pointer;
       margin: 0;
-      accent-color: var(--grid-focus);
+      accent-color: ${tokens.focus};
     }
 
     .ls-grid-checkbox:disabled {
       cursor: default;
-      opacity: var(--grid-disabled-opacity);
+      opacity: ${tokens.disabledOpacity};
     }
 
     .ls-grid-checkbox:focus-visible {
-      outline: var(--grid-focus-width) solid var(--grid-focus);
+      outline: ${tokens.focusWidth} solid ${tokens.focus};
       outline-offset: 1px;
     }
   `;

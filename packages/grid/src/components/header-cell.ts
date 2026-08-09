@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
 import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
@@ -24,14 +25,14 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
       align-items: center;
       gap: 8px;
       box-sizing: border-box;
-      padding: 0 var(--grid-cell-padding-x);
+      padding: 0 ${tokens.cellPaddingX};
       height: 100%;
-      background: var(--grid-header-background);
-      border-bottom: 2px solid var(--grid-border);
-      border-right: 1px solid var(--grid-border-subtle);
-      color: var(--grid-header-text);
-      font-weight: var(--grid-header-font-weight);
-      font-size: var(--grid-header-font-size);
+      background: ${tokens.headerBackground};
+      border-bottom: 2px solid ${tokens.border};
+      border-right: 1px solid ${tokens.borderSubtle};
+      color: ${tokens.headerText};
+      font-weight: ${tokens.headerFontWeight};
+      font-size: ${tokens.headerFontSize};
       overflow: hidden;
     }
 
@@ -45,8 +46,8 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
      * nothing at all.
      */
     :host([data-focused]) {
-      outline: var(--grid-focus-width) solid var(--grid-focus);
-      outline-offset: calc(-1 * var(--grid-focus-width));
+      outline: ${tokens.focusWidth} solid ${tokens.focus};
+      outline-offset: calc(-1 * ${tokens.focusWidth});
     }
 
     /* No label to sit beside, so whatever a module contributed is centred. */
@@ -73,8 +74,8 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     }
 
     .label.activatable:focus-visible {
-      outline: var(--grid-focus-width) solid var(--grid-focus);
-      outline-offset: calc(-1 * var(--grid-focus-width));
+      outline: ${tokens.focusWidth} solid ${tokens.focus};
+      outline-offset: calc(-1 * ${tokens.focusWidth});
     }
 
     .slots {

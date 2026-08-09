@@ -1,6 +1,6 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
-import * as tokens from '@lime-soda/tokens/grid';
 import { property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -34,10 +34,10 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
         display: block;
         height: 100%;
         overflow: hidden;
-        color: var(--grid-text);
-        background: var(--grid-surface);
-        font-family: var(--grid-font);
-        font-size: var(--grid-font-size);
+        color: ${tokens.text};
+        background: ${tokens.surface};
+        font-family: ${tokens.font};
+        font-size: ${tokens.fontSize};
         -webkit-font-smoothing: antialiased;
       }
 
@@ -82,7 +82,7 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
       .scroller[data-layout='flow'] {
         display: flex;
         align-items: flex-start;
-        gap: var(--grid-instance-gap);
+        gap: ${tokens.instanceGap};
         overflow-y: hidden;
       }
 
@@ -98,9 +98,9 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
         box-sizing: border-box;
         width: 100%;
         height: 100%;
-        background: var(--grid-placeholder-background);
-        border: 1px solid var(--grid-border);
-        border-radius: var(--grid-radius);
+        background: ${tokens.placeholderBackground};
+        border: 1px solid ${tokens.border};
+        border-radius: ${tokens.radius};
       }
 
       .stack-spacer {

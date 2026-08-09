@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -29,9 +30,9 @@ export class GridInstance extends SignalWatcher(LitElement) {
     :host {
       display: block;
       box-sizing: border-box;
-      background: var(--grid-background);
-      border: var(--grid-instance-border-width) solid var(--grid-border);
-      border-radius: var(--grid-radius);
+      background: ${tokens.background};
+      border: ${tokens.instanceBorderWidth} solid ${tokens.border};
+      border-radius: ${tokens.radius};
       overflow: hidden;
     }
 
@@ -73,8 +74,8 @@ export class GridInstance extends SignalWatcher(LitElement) {
     .grid {
       display: grid;
       grid-template-columns: var(--grid-column-template);
-      grid-template-rows: var(--grid-header-height);
-      grid-auto-rows: var(--grid-row-height);
+      grid-template-rows: ${tokens.headerHeight};
+      grid-auto-rows: ${tokens.rowHeight};
       width: 100%;
     }
 

@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { css, html } from 'lit';
 import type { DisplayRow } from '../../layout/types.js';
 import type { ProjectionStage } from '../../projection/types.js';
@@ -160,13 +161,13 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
       display: inline-block;
       flex: 0 0 auto;
       /* Set per cell by the decoration; falls back to no indent. */
-      width: calc(var(--grid-tree-depth, 0) * var(--grid-tree-indent));
+      width: calc(var(--grid-tree-depth, 0) * ${tokens.treeIndent});
     }
 
     .ls-grid-tree-spacer {
       display: inline-block;
       flex: 0 0 auto;
-      width: var(--grid-tree-expander-size);
+      width: ${tokens.treeExpanderSize};
     }
 
     .ls-grid-expander {
@@ -174,14 +175,14 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      width: var(--grid-tree-expander-size);
+      width: ${tokens.treeExpanderSize};
       padding: 0;
       background: none;
       border: none;
       cursor: pointer;
-      font-size: var(--grid-tree-expander-font-size);
+      font-size: ${tokens.treeExpanderFontSize};
       line-height: 1;
-      color: var(--grid-text-muted);
+      color: ${tokens.textMuted};
       transition: transform 150ms ease-out;
       transform: rotate(0deg);
     }

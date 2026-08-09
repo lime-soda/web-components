@@ -6,10 +6,11 @@ import { THEME_TOKENS, customPropertyFor } from './tokens.js';
 /**
  * Keeps the theme schema honest against the source.
  *
- * A token list is only a contract if nothing can read a property that is not on
- * it. These tests walk the actual source, so adding `var(--grid-something-new)` to
- * a component without declaring the token fails here rather than quietly
- * producing an unthemeable value.
+ * Components reference tokens through the generated module — `${tokens.border}`
+ * rather than `var(--grid-border)` — so the compiler already refuses a name that
+ * is not a token. What it cannot see is the other direction, or the handful of
+ * places that still write a property name as a string: internal geometry a
+ * component sets and reads itself.
  */
 
 const SRC = join(import.meta.dirname, '..');
@@ -48,13 +49,22 @@ const INTERNAL = new Set([
   '--grid-scrollbar-width',
 ]);
 
+const nameToProperty = new Map<string, string>(
+  THEME_TOKENS.map((token) => [token, customPropertyFor(token)]),
+);
+
 const usages = new Map<string, string[]>();
 for (const file of files) {
   const source = readFileSync(file, 'utf8');
-  // `var(--grid-x)` in CSS, and `'--grid-x'` where a module reads one at runtime
-  // through getComputedStyle — the flash colours arrive that way.
-  for (const match of source.matchAll(/var\((--grid-[a-z0-9-]+)|'(--grid-[a-z0-9-]+)'/g)) {
-    const property = (match[1] ?? match[2])!;
+  // Three ways a property is reached: through the generated module, as a raw
+  // `var()` for the internal geometry that has no token, and as a quoted name
+  // where a component writes or reads one at runtime — the flash colours and
+  // the measured widths arrive that way.
+  const patterns = /\$\{tokens\.([A-Za-z]+)\}|var\((--grid-[a-z0-9-]+)|'(--grid-[a-z0-9-]+)'/g;
+  for (const match of source.matchAll(patterns)) {
+    const [, tokenName, cssVar, quoted] = match;
+    const property = tokenName === undefined ? (cssVar ?? quoted) : nameToProperty.get(tokenName);
+    if (property === undefined) continue;
     usages.set(property, [...(usages.get(property) ?? []), file]);
   }
 }
