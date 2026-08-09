@@ -12,6 +12,8 @@ import { TreeSelectionModule } from '@lime-soda/grid/selection/tree';
 import { RowRangeModule } from '@lime-soda/grid/selection/row-range';
 import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
+import '@lime-soda/button';
+import type { Button } from '@lime-soda/button';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 import './demo.css';
@@ -288,19 +290,21 @@ export const BondMarket: StoryObj<Args> = {
     };
 
     const toggleTicking = (event: Event) => {
-      const button = event.currentTarget as HTMLButtonElement;
+      const button = event.currentTarget as Button;
       const grid = gridRef.value;
       if (!grid) return;
 
       if (frame !== null) {
         cancelAnimationFrame(frame);
         frame = null;
-        button.dataset['variant'] = '';
+        button.variant = 'outline';
         button.textContent = 'Start ticking';
         return;
       }
 
-      button.dataset['variant'] = 'live';
+      // The one button that reports state rather than just doing something, so
+      // it takes the accent while it is running.
+      button.variant = 'primary';
       button.textContent = 'Stop ticking';
 
       const run = () => {
@@ -313,20 +317,33 @@ export const BondMarket: StoryObj<Args> = {
     return html`
       <div class="demo">
         <div class="demo__toolbar">
-          <button @click=${toggleTicking}>Start ticking</button>
-          <button @click=${() => gridRef.value?.api.expandAll()}>Expand all</button>
-          <button @click=${() => gridRef.value?.api.collapseAll()}>Collapse all</button>
+          <ls-button size="sm" variant="outline" @click=${toggleTicking}> Start ticking </ls-button>
+          <ls-button size="sm" variant="outline" @click=${() => gridRef.value?.api.expandAll()}>
+            Expand all
+          </ls-button>
+          <ls-button size="sm" variant="outline" @click=${() => gridRef.value?.api.collapseAll()}>
+            Collapse all
+          </ls-button>
           <input
             type="search"
             placeholder="Quick filter…"
             aria-label="Quick filter"
             @input=${(event: Event) =>
               gridRef.value?.api.setQuickFilter((event.target as HTMLInputElement).value)}
-            style="background:#262626;color:#e5e5e5;border:1px solid #404040;padding:6px 10px;border-radius:4px;font:inherit"
           />
-          <button @click=${() => gridRef.value?.api.clearSort()}>Clear sort</button>
-          <button @click=${() => gridRef.value?.api.selectAll()}>Select all</button>
-          <button @click=${() => gridRef.value?.api.clearSelection()}>Clear selection</button>
+          <ls-button size="sm" variant="outline" @click=${() => gridRef.value?.api.clearSort()}>
+            Clear sort
+          </ls-button>
+          <ls-button size="sm" variant="outline" @click=${() => gridRef.value?.api.selectAll()}>
+            Select all
+          </ls-button>
+          <ls-button
+            size="sm"
+            variant="outline"
+            @click=${() => gridRef.value?.api.clearSelection()}
+          >
+            Clear selection
+          </ls-button>
           <span class="demo__stat">
             <strong>${args.instruments.toLocaleString()}</strong> instruments in
             <strong>${args.groups}</strong> groups

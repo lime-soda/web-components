@@ -32,24 +32,23 @@
   min-height: 0;
 }
 
-.demo button {
-  background: var(--theme-color-background-surface);
+/*
+ * The search input has no component yet, so it is styled here to sit alongside
+ * `ls-button` rather than beside it. The buttons need nothing: they are the
+ * design system's, and bring their own tokens.
+ */
+.demo input[type='search'] {
+  background: var(--theme-color-background-default);
   color: var(--theme-color-text-default);
   border: 1px solid var(--theme-color-border-default);
-  padding: var(--theme-spacing-component-sm) var(--theme-spacing-component-lg);
+  padding: var(--theme-spacing-component-sm) var(--theme-spacing-component-md);
   border-radius: var(--theme-radius-md);
-  cursor: pointer;
   font: inherit;
 }
 
-.demo button:hover {
-  background: var(--theme-color-background-muted);
-}
-
-.demo button[data-variant='live'] {
-  background: var(--theme-color-primary-background);
-  border-color: var(--theme-color-primary-background);
-  color: var(--theme-color-primary-text-on-background);
+.demo input[type='search']:focus-visible {
+  outline: var(--size-border-width-medium) solid var(--theme-color-primary-background);
+  outline-offset: var(--size-border-width-medium);
 }
 
 .demo__stat {
