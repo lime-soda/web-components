@@ -1,8 +1,17 @@
-# flow-grid
+# @lime-soda/grid
 
-## 0.2.0
+## Before publication
 
-### Minor Changes
+The grid was built in a separate repository under the name `flow-grid` and
+versioned to 0.2.0 there, but no release ever reached a registry: npm
+normalises `flow-grid` to `flowgrid`, which is taken. Those versions are
+development history, kept here because the changes are real, and numbered
+separately from the published ones above — which start at 0.1.0, this
+package's first actual release.
+
+### 0.2.0
+
+#### Minor Changes
 
 - 167e74e: Report the grid's shape to assistive technology, and treegrid for tree data
 
@@ -244,7 +253,7 @@
   No runtime change. The slices, their contents and the round trip are exactly as
   they were; this describes them in the type system.
 
-### Patch Changes
+#### Patch Changes
 
 - 9cce1a2: Check accessibility with axe, and fix what it found
 
@@ -379,9 +388,9 @@
   interface body: it was meant for `column`, which deliberately broke to `any` to
   keep `ColumnDef` covariant.
 
-## 0.1.0
+### 0.1.0
 
-### Minor Changes
+#### Minor Changes
 
 - d56c21c: Initial release.
 
