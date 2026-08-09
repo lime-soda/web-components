@@ -47,7 +47,11 @@ jobs:
       # measurement have no useful answer in jsdom, and the flow layout also
       # needs a real IntersectionObserver. `--with-deps` still runs, since the
       # system libraries it installs are not part of the cached browser.
-      - run: pnpm exec playwright install --with-deps chromium
+      #
+      # Run through the package that declares playwright rather than from the
+      # root, which does not. The browser lands in a shared cache, so one install
+      # serves every package that needs it.
+      - run: pnpm --filter @lime-soda/grid exec playwright install --with-deps chromium
 
       # Formatting, lint and types in one pass.
       - run: pnpm check
