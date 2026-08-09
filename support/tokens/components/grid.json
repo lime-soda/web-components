@@ -101,6 +101,11 @@
       "$value": "{theme.color.info.background}",
       "$description": "Focus ring colour"
     },
+    "accent": {
+      "$type": "color",
+      "$value": "{theme.color.accent}",
+      "$description": "Colour of a ticked selection checkbox. Follows the design system accent"
+    },
     "focusWidth": {
       "$type": "dimension",
       "$value": "{size.borderWidth.medium}",
@@ -108,8 +113,8 @@
     },
     "selectionBackground": {
       "$type": "color",
-      "$value": "color-mix(in srgb, {theme.color.info.background} 12%, transparent)",
-      "$description": "Background of a selected row, tinted so the row beneath still reads"
+      "$value": "{theme.color.accentSubtle}",
+      "$description": "Background of a selected row. The design system accent wash, so selection reads the same here as it does on a checkbox or any other control"
     },
     "hoverBackground": {
       "$type": "color",

@@ -4,9 +4,21 @@ import fs from 'node:fs/promises';
  * Creates CSS properties block from a properties map
  */
 export function createCSSProperties(propsMap, selector = ':root') {
-  return `${selector} {\n${Object.entries(propsMap)
+  const declarations = Object.entries(propsMap)
     .map(([prop, value]) => `  ${prop}: ${value};`)
-    .join('\n')}\n}`;
+    .join('\n');
+
+  // One real declaration among the custom properties: `accent-color` is what
+  // paints a native checkbox, radio or range thumb in its selected state, and
+  // there is no way for a token alone to reach those parts. Setting it here
+  // means an application's own form controls match the components without
+  // anyone wiring it up per control.
+  const accent =
+    selector === ':root' && '--theme-color-accent' in propsMap
+      ? '\n  accent-color: var(--theme-color-accent);'
+      : '';
+
+  return `${selector} {\n${declarations}${accent}\n}`;
 }
 
 /**

@@ -615,7 +615,7 @@ Every token maps to one property by the same rule — `selectionBackground` is
 | Surfaces   | `surface` `background` `headerBackground` `placeholderBackground`                                                                                                                 |
 | Text       | `text` `textMuted` `headerText`                                                                                                                                                   |
 | Lines      | `border` `borderSubtle`                                                                                                                                                           |
-| State      | `focus` `focusWidth` `selectionBackground` `hoverBackground`                                                                                                                      |
+| State      | `focus` `focusWidth` `accent` `selectionBackground` `hoverBackground`                                                                                                             |
 | Flash      | `flashUp` `flashDown` `flashNeutral` `flashDuration`                                                                                                                              |
 | Figures    | `numericVariant`                                                                                                                                                                  |
 | Controls   | `instanceBorderWidth` `disabledOpacity` `treeExpanderSize` `treeExpanderFontSize` `sortIndicatorFontSize` `sortOrderFontSize` `filterInputWidth` `filterFontSize` `filterPadding` |

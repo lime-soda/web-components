@@ -60,6 +60,12 @@ export interface GridTheme {
   focus?: string;
   /** Focus ring width. */
   focusWidth?: string;
+  /**
+   * Colour of a ticked selection checkbox. Separate from `focus`, which the
+   * checkbox used to borrow — a focus ring says "the keyboard is here" and an
+   * accent says "this is on", and they are not the same statement.
+   */
+  accent?: string;
   /** Background of a selected row. */
   selectionBackground?: string;
   /** Background of a hovered row. */
@@ -129,6 +135,7 @@ export const THEME_TOKENS = [
   'borderSubtle',
   'focus',
   'focusWidth',
+  'accent',
   'selectionBackground',
   'hoverBackground',
   'flashUp',

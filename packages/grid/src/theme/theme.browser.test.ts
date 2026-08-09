@@ -243,5 +243,27 @@ describe('theming', () => {
       expect(input.getAttribute('style')).toBeNull();
       expect(input.classList.contains('ls-grid-checkbox')).toBe(true);
     });
+
+    it('takes the checkbox accent from the design system, not from the focus colour', async () => {
+      // A ticked checkbox is painted by `accent-color`, which no token can reach
+      // on its own — it is the one place a real declaration has to carry a
+      // token through. This used to borrow `--grid-focus`, so a checked box was
+      // the focus-ring colour: a ring says "the keyboard is here", an accent
+      // says "this is on".
+      const grid = await mount();
+      const checkbox = cellFor(rows(grid)[0]!, 'ls-grid-selection').shadowRoot!.querySelector(
+        'ls-grid-selection-checkbox',
+      )!;
+      const input = checkbox.shadowRoot!.querySelector('input')!;
+
+      const accent = getComputedStyle(input).accentColor;
+      const themeAccent = getComputedStyle(document.documentElement)
+        .getPropertyValue('--theme-color-accent')
+        .trim();
+
+      expect(accent).not.toBe('auto');
+      expect(accent).not.toBe(getComputedStyle(grid).getPropertyValue('--grid-focus').trim());
+      expect(themeAccent).not.toBe('');
+    });
   });
 });

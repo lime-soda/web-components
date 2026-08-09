@@ -367,7 +367,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     .ls-grid-checkbox {
       cursor: pointer;
       margin: 0;
-      accent-color: ${tokens.focus};
+      accent-color: ${tokens.accent};
     }
 
     .ls-grid-checkbox:disabled {

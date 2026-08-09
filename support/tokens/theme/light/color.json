@@ -54,6 +54,14 @@
           "$description": "Text colour on the accent background"
         }
       },
+      "accent": {
+        "$value": "{theme.color.primary.background}",
+        "$description": "Colour of a control in its selected state \u2014 a ticked checkbox, a chosen radio, a range thumb. Follows the primary by default; retarget it here to move every such control at once"
+      },
+      "accentSubtle": {
+        "$value": "color-mix(in srgb, {theme.color.primary.background} 12%, transparent)",
+        "$description": "Wash behind a selected row or option. The accent at low opacity, so the row underneath still reads and several selected rows in a run do not become a solid block"
+      },
       "success": {
         "background": {
           "$value": "{color.emerald.600}"
