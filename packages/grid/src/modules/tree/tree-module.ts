@@ -38,6 +38,9 @@ export interface TreeModuleOptions<TData = unknown> extends TreeIndexOptions<TDa
 export class TreeModule<TData = unknown> implements GridModule<TData, string[]> {
   readonly id = 'tree';
 
+  /** Forwarded across every shadow boundary, so page CSS can reach these. */
+  readonly parts = ['tree-expander'];
+
   private context?: ModuleContext<TData>;
   private index?: TreeIndex<TData>;
   private readonly expanded = new Set<string>();

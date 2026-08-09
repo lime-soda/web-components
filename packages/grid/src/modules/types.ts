@@ -159,6 +159,16 @@ export interface GridModule<TData = unknown, TState = unknown> {
    */
   readonly styles?: CSSResultGroup;
 
+  /**
+   * `part` names this module puts on markup it renders.
+   *
+   * Declared rather than discovered, because the elements that have to forward
+   * them across their shadow boundaries render before any module markup exists.
+   * A part left undeclared still renders — it simply cannot be reached from
+   * page CSS, which is the failure this list exists to prevent.
+   */
+  readonly parts?: readonly string[];
+
   /** Columns the module owns, such as selection's checkbox column. */
   provideColumns?(): ColumnDefs<TData>;
   headerSlot?(ctx: HeaderSlotContext<TData>): TemplateResult | null;

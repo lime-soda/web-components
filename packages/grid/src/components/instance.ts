@@ -1,3 +1,4 @@
+import { HEADER_CELL_PARTS, ROW_PARTS, forwardedParts } from './part-forwarding.js';
 import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
@@ -203,6 +204,9 @@ export class GridInstance extends SignalWatcher(LitElement) {
     // Built once per render rather than per row: it was a filter and a linear
     // search for every row, which is quadratic in the rows an instance holds.
     const indices = this.rowIndices();
+    // Modules render into cells and header cells, so their parts start as deep
+    // as anything core owns and have to be forwarded the same distance.
+    const moduleParts = grid.registry.moduleParts();
 
     return html`
       <div
@@ -224,6 +228,7 @@ export class GridInstance extends SignalWatcher(LitElement) {
                   (column) =>
                     html`<ls-grid-header-cell
                       part="header-cell"
+                      exportparts=${forwardedParts(HEADER_CELL_PARTS, moduleParts)}
                       .column=${column}
                     ></ls-grid-header-cell>`,
                 )}
@@ -236,7 +241,12 @@ export class GridInstance extends SignalWatcher(LitElement) {
                 this.instance.rows,
                 (row) => row.id,
                 (row) =>
-                  html`<ls-grid-row .row=${row} .rowIndex=${indices.get(row) ?? 0}></ls-grid-row>`,
+                  html`<ls-grid-row
+                    part="row"
+                    exportparts=${forwardedParts(ROW_PARTS, moduleParts)}
+                    .row=${row}
+                    .rowIndex=${indices.get(row) ?? 0}
+                  ></ls-grid-row>`,
               )
             : nothing
         }

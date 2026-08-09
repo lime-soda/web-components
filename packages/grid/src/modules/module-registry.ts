@@ -131,6 +131,11 @@ export class ModuleRegistry<TData = unknown> {
    * Components adopt these into their shadow roots so module-contributed markup
    * is styled by CSS rather than inline declarations.
    */
+  /** Every `part` name modules contribute, for the elements that forward them. */
+  moduleParts(): readonly string[] {
+    return this.orderedModules().flatMap((module) => module.parts ?? []);
+  }
+
   moduleStyles(): readonly CSSResultOrNative[] {
     return this.orderedModules().flatMap((module) =>
       module.styles === undefined ? [] : flattenStyles(module.styles),

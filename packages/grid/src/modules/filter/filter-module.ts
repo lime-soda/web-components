@@ -39,6 +39,9 @@ export class FilterModule<TData = unknown> implements GridModule<
 > {
   readonly id = 'filter';
 
+  /** Forwarded across every shadow boundary, so page CSS can reach these. */
+  readonly parts = ['filter-input'];
+
   private context?: ModuleContext<TData>;
   private model: FilterModel = {};
   private quickFilter = '';

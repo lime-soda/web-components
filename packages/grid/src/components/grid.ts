@@ -11,6 +11,7 @@ import type { GridApi } from '../api/types.js';
 import { gridContext } from '../context/index.js';
 import { GridController, type GridOptions } from '../controller/grid-controller.js';
 import { handleNavigationKey } from '../controller/keyboard-navigation.js';
+import { INSTANCE_PARTS, forwardedParts } from './part-forwarding.js';
 import { SignalWatcher } from '../reactive/index.js';
 import type { DisplayRow, LayoutInstance } from '../layout/types.js';
 import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
@@ -357,7 +358,11 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
         >
           ${
             this.visibleInstances.has(instance.id)
-              ? html`<ls-grid-instance part="instance" .instance=${instance}></ls-grid-instance>`
+              ? html`<ls-grid-instance
+                  part="instance"
+                  exportparts=${forwardedParts(INSTANCE_PARTS, this.moduleParts())}
+                  .instance=${instance}
+                ></ls-grid-instance>`
               : html`<div class="placeholder" part="placeholder"></div>`
           }
         </div>
@@ -395,6 +400,7 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
               role="presentation"
               part="instance-sticky"
               parts="rows"
+              exportparts=${forwardedParts(INSTANCE_PARTS, this.moduleParts())}
               .instance=${stickyInstance}
               style=${styleMap({
                 '--grid-sticky-height': `${stickyRows.length * rowHeight}px`,
@@ -406,7 +412,12 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
         role="presentation"
         style=${styleMap({ '--grid-spacer-height': `${instance.offset}px` })}
       ></div>
-      <ls-grid-instance part="instance" parts="rows" .instance=${instance}></ls-grid-instance>
+      <ls-grid-instance
+        part="instance"
+        parts="rows"
+        exportparts=${forwardedParts(INSTANCE_PARTS, this.moduleParts())}
+        .instance=${instance}
+      ></ls-grid-instance>
       <div
         class="stack-spacer"
         role="presentation"
@@ -455,6 +466,7 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
           class="stack-chrome-header"
           part="instance-header"
           parts="header"
+          exportparts=${forwardedParts(INSTANCE_PARTS, this.moduleParts())}
           .instance=${instance}
         ></ls-grid-instance>
       </div>
@@ -481,6 +493,11 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
       event.stopPropagation();
     }
   };
+
+  /** Part names modules contribute, forwarded from every instance. */
+  private moduleParts(): readonly string[] {
+    return this.controller?.registry.moduleParts() ?? [];
+  }
 
   private observeSlot(element: Element | undefined): void {
     if (!element || !this.virtualizer) return;

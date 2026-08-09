@@ -1,3 +1,4 @@
+import { forwardedParts } from './part-forwarding.js';
 import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { instanceContext } from '../context/index.js';
@@ -169,7 +170,15 @@ export class GridCell extends SignalWatcher(LitElement) {
     if (typeof renderer === 'string') {
       // A custom element renderer receives nothing but its params: it reads the
       // row and column off the contexts this cell already provides.
-      return staticHtml`<${tagFor(renderer)} .params=${this.column.cellRendererParams ?? {}}></${tagFor(renderer)}>`;
+      //
+      // A renderer is a shadow root of its own, so anything it marks with
+      // `part` is a boundary further from the page than the cell is. Module
+      // parts are forwarded because they are declared and therefore known; a
+      // consumer's own renderer has to export its parts itself.
+      return staticHtml`<${tagFor(renderer)}
+        exportparts=${forwardedParts([], this.grid?.registry.moduleParts() ?? [])}
+        .params=${this.column.cellRendererParams ?? {}}
+      ></${tagFor(renderer)}>`;
     }
 
     if (typeof renderer === 'function') {

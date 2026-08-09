@@ -75,6 +75,9 @@ export interface SelectionModuleOptions {
 export class SelectionModule<TData = unknown> implements GridModule<TData, string[]> {
   readonly id = 'selection';
 
+  /** Forwarded across every shadow boundary, so page CSS can reach these. */
+  readonly parts = ['selection-checkbox'];
+
   private context?: ModuleContext<TData>;
   private readonly selected = new Set<string>();
 

@@ -60,6 +60,9 @@ const DEFAULT_CYCLE: readonly (SortDirection | null)[] = ['asc', 'desc', null];
 export class SortModule<TData = unknown> implements GridModule<TData, SortModelEntry[]> {
   readonly id = 'sort';
 
+  /** Forwarded across every shadow boundary, so page CSS can reach these. */
+  readonly parts = ['sort-indicator'];
+
   private context?: ModuleContext<TData>;
   private model: SortModelEntry[] = [];
 

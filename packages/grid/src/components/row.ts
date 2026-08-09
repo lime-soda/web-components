@@ -1,3 +1,4 @@
+import { CELL_PARTS, forwardedParts } from './part-forwarding.js';
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -138,6 +139,7 @@ export class GridRow extends SignalWatcher(LitElement) {
       (column) =>
         html`<ls-grid-cell
           part="cell"
+          exportparts=${forwardedParts(CELL_PARTS, grid.registry.moduleParts())}
           role="gridcell"
           aria-colindex=${column.index + 1}
           class=${cellClasses}
