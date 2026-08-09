@@ -4,184 +4,149 @@
       "$type": "color",
       "primary": {
         "background": {
-          "$value": "{color.green.500}",
-          "$description": "Primary background color"
+          "$value": "{color.teal.600}",
+          "$description": "Teal background"
         },
         "backgroundHover": {
-          "$value": "{color.green.600}",
-          "$description": "Primary background color on hover"
+          "$value": "{color.teal.700}",
+          "$description": "Background on hover"
         },
         "backgroundActive": {
-          "$value": "{color.green.700}",
-          "$description": "Primary background color when active"
+          "$value": "{color.teal.800}",
+          "$description": "Background when active"
         },
         "backgroundSubtle": {
-          "$value": "{color.green.50}",
-          "$description": "Subtle primary background color"
+          "$value": "{color.teal.50}",
+          "$description": "Subtle background wash"
         },
         "text": {
-          "$value": "{color.green.600}",
-          "$description": "Primary text color"
+          "$value": "{color.teal.700}",
+          "$description": "Text colour on a plain background"
         },
         "textOnBackground": {
           "$value": "{color.white}",
-          "$description": "Text color on primary background"
+          "$description": "Text colour on the accent background"
         }
       },
       "secondary": {
         "background": {
-          "$value": "{color.pink.500}",
-          "$description": "Secondary background color"
+          "$value": "{color.taupe.600}",
+          "$description": "Taupe background"
         },
         "backgroundHover": {
-          "$value": "{color.pink.600}",
-          "$description": "Secondary background color on hover"
+          "$value": "{color.taupe.700}",
+          "$description": "Background on hover"
         },
         "backgroundActive": {
-          "$value": "{color.pink.700}",
-          "$description": "Secondary background color when active"
+          "$value": "{color.taupe.800}",
+          "$description": "Background when active"
         },
         "backgroundSubtle": {
-          "$value": "{color.pink.50}",
-          "$description": "Subtle secondary background color"
+          "$value": "{color.taupe.50}",
+          "$description": "Subtle background wash"
         },
         "text": {
-          "$value": "{color.pink.600}",
-          "$description": "Secondary text color"
+          "$value": "{color.taupe.700}",
+          "$description": "Text colour on a plain background"
         },
         "textOnBackground": {
           "$value": "{color.white}",
-          "$description": "Text color on secondary background"
+          "$description": "Text colour on the accent background"
         }
       },
       "success": {
         "background": {
-          "$value": "{color.emerald.500}",
-          "$description": "Success background color"
+          "$value": "{color.emerald.600}"
         },
         "backgroundHover": {
-          "$value": "{color.emerald.600}",
-          "$description": "Success background color on hover"
+          "$value": "{color.emerald.700}"
         },
         "backgroundSubtle": {
-          "$value": "{color.emerald.50}",
-          "$description": "Subtle success background color"
+          "$value": "{color.emerald.50}"
         },
         "text": {
-          "$value": "{color.emerald.600}",
-          "$description": "Success text color"
+          "$value": "{color.emerald.700}"
         }
       },
       "warning": {
         "background": {
-          "$value": "{color.amber.500}",
-          "$description": "Warning background color"
+          "$value": "{color.amber.600}"
         },
         "backgroundHover": {
-          "$value": "{color.amber.600}",
-          "$description": "Warning background color on hover"
+          "$value": "{color.amber.700}"
         },
         "backgroundSubtle": {
-          "$value": "{color.amber.50}",
-          "$description": "Subtle warning background color"
+          "$value": "{color.amber.50}"
         },
         "text": {
-          "$value": "{color.amber.600}",
-          "$description": "Warning text color"
+          "$value": "{color.amber.700}"
         }
       },
       "error": {
         "background": {
-          "$value": "{color.red.500}",
-          "$description": "Error background color"
+          "$value": "{color.red.600}"
         },
         "backgroundHover": {
-          "$value": "{color.red.600}",
-          "$description": "Error background color on hover"
+          "$value": "{color.red.700}"
         },
         "backgroundSubtle": {
-          "$value": "{color.red.50}",
-          "$description": "Subtle error background color"
+          "$value": "{color.red.50}"
         },
         "text": {
-          "$value": "{color.red.600}",
-          "$description": "Error text color"
+          "$value": "{color.red.700}"
         }
       },
       "info": {
         "background": {
-          "$value": "{color.blue.500}",
-          "$description": "Info background color"
+          "$value": "{color.blue.600}"
         },
         "backgroundHover": {
-          "$value": "{color.blue.600}",
-          "$description": "Info background color on hover"
+          "$value": "{color.blue.700}"
         },
         "backgroundSubtle": {
-          "$value": "{color.blue.50}",
-          "$description": "Subtle info background color"
+          "$value": "{color.blue.50}"
         },
         "text": {
-          "$value": "{color.blue.600}",
-          "$description": "Info text color"
+          "$value": "{color.blue.700}"
         }
       },
       "background": {
         "default": {
           "$value": "{color.white}",
-          "$description": "Default background color"
+          "$description": "Page background"
         },
         "surface": {
           "$value": "{color.gray.50}",
-          "$description": "Surface background color"
+          "$description": "Raised surface"
         },
         "muted": {
           "$value": "{color.gray.100}",
-          "$description": "Muted background color"
+          "$description": "Muted fill, such as a hovered row"
         }
       },
       "text": {
         "default": {
           "$value": "{color.gray.950}",
-          "$description": "Default text color"
+          "$description": "Body text"
         },
         "muted": {
           "$value": "{color.gray.600}",
-          "$description": "Muted text color"
+          "$description": "Secondary text; clears AA in both modes"
         },
         "inverse": {
           "$value": "{color.gray.50}",
-          "$description": "Inverse text color"
-        },
-        "primary": {
-          "$value": "{color.green.600}",
-          "$description": "Primary text color"
-        },
-        "onPrimary": {
-          "$value": "{color.black}",
-          "$description": "Text on primary background"
-        },
-        "onPrimaryDark": {
-          "$value": "{color.white}",
-          "$description": "Text on dark primary background"
-        },
-        "onPrimaryLight": {
-          "$value": "{color.black}",
-          "$description": "Text on light primary background"
+          "$description": "Text on an inverted surface"
         }
       },
       "border": {
         "default": {
-          "$value": "{color.gray.200}",
-          "$description": "Default border color"
+          "$value": "{color.gray.200}"
         },
         "muted": {
-          "$value": "{color.gray.100}",
-          "$description": "Muted border color"
+          "$value": "{color.gray.100}"
         },
         "strong": {
-          "$value": "{color.gray.300}",
-          "$description": "Strong border color"
+          "$value": "{color.gray.300}"
         }
       }
     }

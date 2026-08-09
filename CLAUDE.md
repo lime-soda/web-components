@@ -84,8 +84,10 @@ This is a pnpm workspace monorepo with packages organized into:
 
 Three tiers, and each only ever references the one below it:
 
-1. **Primitives** in `support/tokens/definitions/` — `--color-green-500`, the
-   raw palette and scales
+1. **Primitives** in `support/tokens/definitions/` — `--color-teal-600`, the
+   raw palette and scales. Teal is the primary hue and taupe the secondary,
+   both muted: the screens this system dresses are mostly coloured data, and a
+   saturated accent competes with it
 2. **Semantic** in `support/tokens/theme/{light,dark}/` —
    `--theme-color-background-default`. Combined into a single stylesheet where
    the two modes differ by CSS `light-dark()`, so light and dark follow
@@ -102,6 +104,17 @@ rather than a shortcut.
 
 An application must load `@lime-soda/tokens/variables.css`, which defines the
 first two tiers. Without it the component tokens reference nothing.
+
+Two things to preserve when changing the palette or the scales:
+
+- **Contrast.** Every foreground/background pairing in the semantic tier clears
+  WCAG AA (4.5:1) in both modes; the tightest is 5.48:1. Note that the accent
+  inverts between modes — `primary.textOnBackground` is white on light and
+  near-black on dark, because white on the lighter dark-mode teal is 2.87:1.
+  The Storybook a11y addon gates on this, so a regression fails the test run.
+- **Density.** The scales sit one step below a typical UI: 13px body text, 2px
+  to 16px component spacing, 24px grid rows. It is a trading surface, and the
+  currency is rows on screen.
 
 ### Key Patterns
 

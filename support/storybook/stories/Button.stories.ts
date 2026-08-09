@@ -27,12 +27,10 @@ const meta: Meta = {
     variant: 'primary',
   },
   parameters: {
-    // Known, unfixed: white label text on the primary green (2.27:1) and the
-    // secondary pink (3.52:1) both miss the 4.5:1 contrast threshold. Fixing it
-    // means changing the palette, which is a design decision, not a merge one.
-    // `todo` still reports the violations in the a11y panel and in Chromatic;
-    // it only stops them failing the test run.
-    a11y: { test: 'todo' },
+    // Back to a gate rather than a report: the palette pivot put white label
+    // text on a teal and a taupe dark enough to clear AA, which the bright green
+    // and pink never did.
+    a11y: { test: 'error' },
   },
 };
 

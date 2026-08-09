@@ -1,7 +1,6 @@
 {
   "grid": {
     "$description": "Design tokens for the horizontal-flow data grid",
-
     "font": {
       "$type": "fontFamily",
       "$value": "{font.family.sans}",
@@ -14,7 +13,7 @@
     },
     "headerFontSize": {
       "$type": "dimension",
-      "$value": "{font.size.sm}",
+      "$value": "{font.size.xs}",
       "$description": "Header font size, where it differs from cells"
     },
     "headerFontWeight": {
@@ -22,15 +21,14 @@
       "$value": "{font.weight.medium}",
       "$description": "Header font weight"
     },
-
     "rowHeight": {
       "$type": "dimension",
-      "$value": "{size.space.8}",
+      "$value": "{size.space.6}",
       "$description": "Height of a data row, which also decides how many rows fit in an instance"
     },
     "headerHeight": {
       "$type": "dimension",
-      "$value": "{size.space.8}",
+      "$value": "{size.space.6}",
       "$description": "Height of the header row"
     },
     "cellPaddingX": {
@@ -50,10 +48,9 @@
     },
     "treeIndent": {
       "$type": "dimension",
-      "$value": "{theme.spacing.component.md}",
+      "$value": "{theme.spacing.component.lg}",
       "$description": "Indent applied per tree depth level"
     },
-
     "surface": {
       "$type": "color",
       "$value": "{theme.color.background.surface}",
@@ -74,7 +71,6 @@
       "$value": "{theme.color.background.default}",
       "$description": "Background of an offscreen instance placeholder"
     },
-
     "text": {
       "$type": "color",
       "$value": "{theme.color.text.default}",
@@ -90,7 +86,6 @@
       "$value": "{theme.color.text.default}",
       "$description": "Header label text"
     },
-
     "border": {
       "$type": "color",
       "$value": "{theme.color.border.default}",
@@ -101,7 +96,6 @@
       "$value": "{theme.color.border.muted}",
       "$description": "Lines between rows and columns, quieter than the border"
     },
-
     "focus": {
       "$type": "color",
       "$value": "{theme.color.info.background}",
@@ -122,7 +116,6 @@
       "$value": "{theme.color.background.muted}",
       "$description": "Background of a hovered row"
     },
-
     "flashUp": {
       "$type": "color",
       "$value": "color-mix(in srgb, {theme.color.success.background} 35%, transparent)",
@@ -143,7 +136,6 @@
       "$value": "{motion.duration.slower}",
       "$description": "How long a cell flash lasts"
     },
-
     "instanceBorderWidth": {
       "$type": "dimension",
       "$value": "{size.borderWidth.thin}",
@@ -188,6 +180,10 @@
       "$type": "dimension",
       "$value": "{size.space.half} {size.space.1}",
       "$description": "Padding inside a filter input"
+    },
+    "numericVariant": {
+      "$value": "{font.numeric.variant}",
+      "$description": "Figure settings for cells: tabular widths so a column of prices aligns, and a slashed zero so 0 and O are not confusable in an instrument code"
     }
   }
 }

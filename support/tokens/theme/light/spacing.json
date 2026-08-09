@@ -4,45 +4,45 @@
       "$type": "dimension",
       "component": {
         "xs": {
-          "$value": "{size.space.1}",
+          "$value": "{size.space.half}",
           "$description": "Extra small component spacing"
         },
         "sm": {
-          "$value": "{size.space.2}",
+          "$value": "{size.space.1}",
           "$description": "Small component spacing"
         },
         "md": {
-          "$value": "{size.space.4}",
+          "$value": "{size.space.2}",
           "$description": "Medium component spacing"
         },
         "lg": {
-          "$value": "{size.space.6}",
+          "$value": "{size.space.3}",
           "$description": "Large component spacing"
         },
         "xl": {
-          "$value": "{size.space.8}",
+          "$value": "{size.space.4}",
           "$description": "Extra large component spacing"
         }
       },
       "layout": {
         "xs": {
-          "$value": "{size.space.4}",
+          "$value": "{size.space.2}",
           "$description": "Extra small layout spacing"
         },
         "sm": {
-          "$value": "{size.space.6}",
+          "$value": "{size.space.3}",
           "$description": "Small layout spacing"
         },
         "md": {
-          "$value": "{size.space.8}",
+          "$value": "{size.space.4}",
           "$description": "Medium layout spacing"
         },
         "lg": {
-          "$value": "{size.space.12}",
+          "$value": "{size.space.6}",
           "$description": "Large layout spacing"
         },
         "xl": {
-          "$value": "{size.space.16}",
+          "$value": "{size.space.8}",
           "$description": "Extra large layout spacing"
         }
       }
@@ -50,19 +50,19 @@
     "radius": {
       "$type": "dimension",
       "xs": {
-        "$value": "{size.radius.xs}",
+        "$value": "{size.radius.none}",
         "$description": "Extra small border radius"
       },
       "sm": {
-        "$value": "{size.radius.sm}",
+        "$value": "{size.radius.xs}",
         "$description": "Small border radius"
       },
       "md": {
-        "$value": "{size.radius.md}",
+        "$value": "{size.radius.sm}",
         "$description": "Medium border radius"
       },
       "lg": {
-        "$value": "{size.radius.lg}",
+        "$value": "{size.radius.md}",
         "$description": "Large border radius"
       },
       "full": {

@@ -1,33 +1,27 @@
 /*
  * Chrome for the grid stories only.
  *
- * This lived in the grid repo's own Storybook preview, where it could style the
- * whole canvas. Here it is scoped to the `.demo` wrapper the grid stories
- * render, so it cannot reach the other components' stories.
- *
- * The stories run dark: it is what a trading desk actually looks like.
+ * Scoped to the `.demo` wrapper the grid stories render, so it cannot reach the
+ * other components' stories. Every value is a design token, so the toolbar
+ * follows the theme toolbar the same way the grid does — a story that hard-coded
+ * its own dark palette would hide whether the real one works.
  */
 .demo {
   box-sizing: border-box;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: #0a0a0a;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
-  font-size: 13px;
-  color: #e5e5e5;
+  gap: var(--theme-spacing-component-lg);
+  padding: var(--theme-spacing-layout-xs);
+  background: var(--theme-color-background-default);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  color: var(--theme-color-text-default);
 }
 
 .demo__toolbar {
   display: flex;
-  gap: 8px;
+  gap: var(--theme-spacing-component-md);
   flex-wrap: wrap;
   align-items: center;
   flex: 0 0 auto;
@@ -39,33 +33,33 @@
 }
 
 .demo button {
-  background: #262626;
-  color: #e5e5e5;
-  border: 1px solid #404040;
-  padding: 6px 12px;
-  border-radius: 4px;
+  background: var(--theme-color-background-surface);
+  color: var(--theme-color-text-default);
+  border: 1px solid var(--theme-color-border-default);
+  padding: var(--theme-spacing-component-sm) var(--theme-spacing-component-lg);
+  border-radius: var(--theme-radius-md);
   cursor: pointer;
   font: inherit;
 }
 
 .demo button:hover {
-  background: #333333;
+  background: var(--theme-color-background-muted);
 }
 
 .demo button[data-variant='live'] {
-  background: #1e3a2e;
-  border-color: #2d5945;
-  color: #22c55e;
+  background: var(--theme-color-primary-background);
+  border-color: var(--theme-color-primary-background);
+  color: var(--theme-color-primary-text-on-background);
 }
 
 .demo__stat {
-  padding: 6px 12px;
-  border: 1px solid #404040;
-  border-radius: 4px;
-  color: #a3a3a3;
+  padding: var(--theme-spacing-component-sm) var(--theme-spacing-component-lg);
+  border: 1px solid var(--theme-color-border-default);
+  border-radius: var(--theme-radius-md);
+  color: var(--theme-color-text-muted);
 }
 
 .demo__stat strong {
-  color: #e5e5e5;
-  font-weight: 500;
+  color: var(--theme-color-text-default);
+  font-weight: var(--font-weight-medium);
 }

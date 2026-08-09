@@ -1,7 +1,12 @@
 # Lime Soda Web Components
 
-A modern, type-safe web component library built with Lit and TypeScript,
-featuring a comprehensive design system and developer tooling.
+A type-safe web component library for trading and finance interfaces, built with
+Lit and TypeScript.
+
+The design system is tuned for dense, data-heavy screens: a muted teal and taupe
+palette that stays out of the way of coloured data, a type and spacing scale a
+step below the usual, and tabular figures so columns of numbers align. Every
+colour pairing clears WCAG AA in both light and dark.
 
 ## Overview
 

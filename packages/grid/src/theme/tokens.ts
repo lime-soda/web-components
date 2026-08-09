@@ -97,6 +97,13 @@ export interface GridTheme {
   filterFontSize?: string;
   /** Padding inside a filter input. */
   filterPadding?: string;
+
+  // -- Figures ----------------------------------------------------------------
+  /**
+   * `font-variant-numeric` for cells. Tabular figures so a column of prices
+   * aligns on the decimal without setting it in a monospace face.
+   */
+  numericVariant?: string;
 }
 
 /** Every valid token name, in declaration order. */
@@ -137,6 +144,7 @@ export const THEME_TOKENS = [
   'filterInputWidth',
   'filterFontSize',
   'filterPadding',
+  'numericVariant',
 ] as const satisfies readonly (keyof GridTheme)[];
 
 export type ThemeToken = (typeof THEME_TOKENS)[number];

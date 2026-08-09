@@ -33,7 +33,7 @@ export class GridCell extends SignalWatcher(LitElement) {
       padding: 0 ${tokens.cellPaddingX};
       border-bottom: 1px solid ${tokens.borderSubtle};
       color: ${tokens.text};
-      font-variant-numeric: tabular-nums;
+      font-variant-numeric: ${tokens.numericVariant};
     }
 
     :host([data-numeric]) {

@@ -56,26 +56,18 @@ const columns: ColumnDef<Bond>[] = [
 ];
 
 /**
- * A desk theme, passed as a validated object rather than a stylesheet.
+ * A desk override, passed as a validated object rather than a stylesheet.
  *
- * Only declared tokens are accepted; a typo throws instead of being ignored.
+ * Deliberately small: the colours come from the design system now, so what is
+ * worth showing here is the shape of the API — only declared tokens are
+ * accepted, and a typo throws instead of being ignored — not a second palette
+ * competing with the first.
  */
 const deskTheme: GridTheme = {
-  surface: '#0a0a0a',
-  background: '#141414',
-  headerBackground: '#1f1f1f',
-  placeholderBackground: '#141414',
-  text: '#e5e5e5',
-  textMuted: '#8a8a8a',
-  headerText: '#f0f0f0',
-  border: '#2e2e2e',
-  borderSubtle: '#232323',
-  focus: '#60a5fa',
-  selectionBackground: 'rgb(96 165 250 / 16%)',
-  hoverBackground: 'rgb(255 255 255 / 4%)',
-  flashUp: 'rgb(34 197 94 / 38%)',
-  flashDown: 'rgb(239 68 68 / 38%)',
-  flashDuration: '600ms',
+  // A desk that wants every last row, below even the dense default.
+  rowHeight: '22px',
+  // Long enough to catch out of the corner of an eye on a busy book.
+  flashDuration: '700ms',
 };
 
 interface Args {
