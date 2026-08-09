@@ -149,7 +149,12 @@ jobs:
           # defaults, which disagree with ours — so the generated file failed
           # the format check and, because release waits on verify, blocked its
           # own publish. Formatting here means what it commits already passes.
-          version: pnpm exec changeset version && pnpm format
+          #
+          # A script rather than two commands: this input is not run through a
+          # shell, so `changeset version && pnpm format` was handed to changesets
+          # as arguments, it refused the lot, and the action pushed an
+          # unversioned branch anyway.
+          version: pnpm run changeset:version
           publish: pnpm run release
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
