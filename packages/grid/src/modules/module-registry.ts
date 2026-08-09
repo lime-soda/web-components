@@ -70,6 +70,7 @@ export class ModuleRegistry<TData = unknown> {
       throw new Error(`Module "${module.id}" is already registered.`);
     }
     this.modules.set(module.id, module);
+    this.cachedModuleParts = undefined;
 
     // Registering after start is legitimate — a desk may enable a feature at
     // runtime — so the module is initialised immediately rather than waiting.
@@ -100,6 +101,7 @@ export class ModuleRegistry<TData = unknown> {
     }
     this.modules.clear();
     this.order = [];
+    this.cachedModuleParts = undefined;
     this.started = false;
   }
 
@@ -131,10 +133,20 @@ export class ModuleRegistry<TData = unknown> {
    * Components adopt these into their shadow roots so module-contributed markup
    * is styled by CSS rather than inline declarations.
    */
-  /** Every `part` name modules contribute, for the elements that forward them. */
+  /**
+   * Every `part` name modules contribute, for the elements that forward them.
+   *
+   * Cached, and deliberately identity-stable: this is read once per row, per
+   * cell and per header cell on every render, and the elements that consume it
+   * memoise on the array they were handed. A fresh array each call would defeat
+   * that and leave the string being rebuilt for every cell on every tick.
+   */
   moduleParts(): readonly string[] {
-    return this.orderedModules().flatMap((module) => module.parts ?? []);
+    this.cachedModuleParts ??= this.orderedModules().flatMap((module) => module.parts ?? []);
+    return this.cachedModuleParts;
   }
+
+  private cachedModuleParts: readonly string[] | undefined;
 
   moduleStyles(): readonly CSSResultOrNative[] {
     return this.orderedModules().flatMap((module) =>

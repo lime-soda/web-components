@@ -1,4 +1,4 @@
-import { forwardedParts } from './part-forwarding.js';
+import { NONE, forwardedParts } from './part-forwarding.js';
 import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { instanceContext } from '../context/index.js';
@@ -176,7 +176,7 @@ export class GridCell extends SignalWatcher(LitElement) {
       // parts are forwarded because they are declared and therefore known; a
       // consumer's own renderer has to export its parts itself.
       return staticHtml`<${tagFor(renderer)}
-        exportparts=${forwardedParts([], this.grid?.registry.moduleParts() ?? [])}
+        exportparts=${forwardedParts(NONE, this.grid?.registry.moduleParts() ?? NONE)}
         .params=${this.column.cellRendererParams ?? {}}
       ></${tagFor(renderer)}>`;
     }

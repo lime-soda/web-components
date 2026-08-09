@@ -234,3 +234,22 @@ describe('ModuleRegistry', () => {
     });
   });
 });
+
+describe('module parts', () => {
+  it('hands back the same array until the module set changes', () => {
+    // The elements that forward parts memoise on this array's identity, so a
+    // fresh one per call would rebuild the exportparts string for every cell on
+    // every render.
+    const { registry } = setup([mod('a', { parts: ['a-part'] })]);
+    registry.start();
+
+    const first = registry.moduleParts();
+    expect(registry.moduleParts()).toBe(first);
+    expect(first).toEqual(['a-part']);
+
+    registry.register(mod('b', { parts: ['b-part'] }));
+
+    expect(registry.moduleParts()).not.toBe(first);
+    expect(registry.moduleParts()).toEqual(['a-part', 'b-part']);
+  });
+});

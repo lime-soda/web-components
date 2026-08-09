@@ -43,7 +43,25 @@ export const INSTANCE_PARTS = [
  */
 export function forwardedParts(
   own: readonly string[],
-  moduleParts: readonly string[] = [],
+  moduleParts: readonly string[] = NONE,
 ): string {
-  return [...new Set([...own, ...moduleParts])].join(', ');
+  const cached = cache.get(own);
+  if (cached && cached.moduleParts === moduleParts) return cached.value;
+
+  const value = [...new Set([...own, ...moduleParts])].join(', ');
+  cache.set(own, { moduleParts, value });
+  return value;
 }
+
+/**
+ * One entry per `own` list, which is a module-level constant at every call site.
+ *
+ * This runs per row, per cell and per header cell on every render, and the
+ * result changes only when the module set does — so it is cached against the
+ * module parts array by identity, which the registry keeps stable for exactly
+ * this reason. Without it a ticking cell rebuilt the same string every frame.
+ */
+const cache = new WeakMap<readonly string[], { moduleParts: readonly string[]; value: string }>();
+
+/** Shared empty list, so the no-own-parts case is cacheable like the others. */
+export const NONE: readonly string[] = [];
