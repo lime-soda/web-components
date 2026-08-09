@@ -225,6 +225,10 @@ export class GridCell extends SignalWatcher(LitElement) {
 
   /** The grid's single tab stop, so a user can reach it with the keyboard. */
   private isTabbableCell(): boolean {
+    // The pinned band mirrors rows that are in the body already, so it shows
+    // focus but never takes a turn in the tab order — two tab stops for one row
+    // would be one too many.
+    if (this.instance?.pinned) return false;
     const instanceId = this.instance?.id;
     const rowKey = this.row?.displayRow.id;
     if (instanceId === undefined || rowKey === undefined || !this.grid) return false;

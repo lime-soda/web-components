@@ -604,3 +604,60 @@ describe('stack layout', () => {
     });
   });
 });
+
+describe('the pinned group band and focus', () => {
+  // The band is a copy of rows that are also in the body, drawn over them. It
+  // used to be a synthesised instance with an id of its own, which the layout
+  // did not contain — so clicking a cell in it put focus somewhere the
+  // controller could not locate, every arrow key went unhandled, and the
+  // browser scrolled the body instead of the grid moving.
+  const rows: Row[] = [
+    { id: 'g', parentId: null, name: 'Group', price: 0 },
+    ...Array.from({ length: 30 }, (_, i) => ({
+      id: `r${i}`,
+      parentId: 'g',
+      name: `Row ${i}`,
+      price: i,
+    })),
+  ];
+
+  const mountGrouped = () =>
+    mount(
+      { modules: [new TreeModule<Row>({ getParentId: (d) => d.parentId, defaultExpanded: true })] },
+      rows,
+    );
+
+  const bandOf = (grid: Grid<Row>) =>
+    grid.shadowRoot!.querySelector('ls-grid-instance.stack-sticky') as HTMLElement | null;
+
+  const cellIn = (instance: HTMLElement) =>
+    instance
+      .shadowRoot!.querySelector('ls-grid-row')!
+      .shadowRoot!.querySelector('ls-grid-cell') as HTMLElement;
+
+  it('leaves focus somewhere the arrows can move from', async () => {
+    const grid = await mountGrouped();
+    const band = bandOf(grid);
+    expect(band, 'no pinned band rendered').not.toBeNull();
+
+    cellIn(band!).focus();
+    expect(
+      grid.controller!.focus.focused.get(),
+      'clicking the band focused nothing',
+    ).not.toBeNull();
+
+    // The whole point: the position has to be one the layout contains.
+    expect(
+      grid.controller!.focus.moveRow(1),
+      'focus was stranded on an instance the layout does not have',
+    ).toBe(true);
+  });
+
+  it('keeps the band out of the tab order', async () => {
+    // The row it mirrors is tabbable already; two stops for one row is one too
+    // many.
+    const grid = await mountGrouped();
+
+    expect(cellIn(bandOf(grid)!).tabIndex).toBe(-1);
+  });
+});

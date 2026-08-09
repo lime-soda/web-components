@@ -52,6 +52,17 @@ export interface ViewportMetrics {
 
 export interface LayoutInstance {
   readonly id: string;
+  /**
+   * True for the pinned group band: a visual echo of rows that are also in the
+   * body, drawn over them.
+   *
+   * It carries the same `id` as the instance it echoes on purpose, so a focus
+   * position taken from one of its cells is a real position in that instance —
+   * otherwise clicking the band strands focus on an instance the layout does
+   * not contain, and every arrow key afterwards goes unhandled. The flag is what
+   * keeps it out of the tab order, since the row it mirrors is already in it.
+   */
+  readonly pinned?: boolean;
   readonly index: number;
   readonly rows: readonly DisplayRow[];
   readonly width: number;

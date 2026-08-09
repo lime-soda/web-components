@@ -441,7 +441,8 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
     const key = stickyRows.map((row) => row.rowId).join('\u0000');
     if (this.stickyInstance === undefined || key !== this.stickyKey) {
       this.stickyKey = key;
-      this.stickyInstance = { ...instance, id: `${instance.id}-sticky`, rows: stickyRows };
+      // Same id as the instance it echoes: see LayoutInstance.pinned.
+      this.stickyInstance = { ...instance, rows: stickyRows, pinned: true };
     }
     return this.stickyInstance;
   }
