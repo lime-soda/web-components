@@ -266,11 +266,15 @@ describe('SelectionModule', () => {
       expect(decoration.cellClasses).toBeUndefined();
     });
 
-    it('adds no click handler unless clickToSelect is on', () => {
+    it('adds the click handler whatever clickToSelect says', () => {
+      // It used to be attached only when the option was on, which left a grid
+      // with no checkbox column unreachable by pointer. The handler is always
+      // there now; the option decides what an *unmodified* click does, and a
+      // Ctrl-click selects either way. See modes.test.ts for the behaviour.
       const { selection } = setup(rows(1));
       selection.setRowSelected('r0', true);
 
-      expect(selection.rowDecorator(info('r0'))!.onActivate).toBeUndefined();
+      expect(selection.rowDecorator(info('r0'))!.onActivate).toBeTypeOf('function');
     });
 
     it('adds one when clickToSelect is on', () => {

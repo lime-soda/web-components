@@ -42,18 +42,15 @@ export interface SelectionModuleOptions {
   /** Width of that column in px. Defaults to 28. */
   checkboxColumnWidth?: number;
   /**
-   * Select a row by clicking anywhere in it.
+   * Select a row with a plain click anywhere in it. Off by default.
    *
-   * Defaults to whether the checkbox column is absent, so there is always some
-   * way to select with a pointer. With checkboxes present a row click is left
-   * alone, since it is free to mean something else — opening a detail panel,
-   * say. Set it explicitly to have both, or neither.
-   *
-   * Explicitly `| undefined` so that setting it back to undefined at runtime
-   * means "derive again" rather than being rejected: `setOptions` merges, so
-   * omitting the key would leave the previous choice in place.
+   * Off does not mean unreachable: Ctrl-click, or Cmd-click on macOS, selects
+   * whatever this is set to, so a pointer can always reach selection even with
+   * no checkbox column. What this option decides is whether an *unmodified*
+   * click means selection — which it should not by default, because a row
+   * click is free to mean something else, such as opening a detail panel.
    */
-  clickToSelect?: boolean | undefined;
+  clickToSelect?: boolean;
 
   /**
    * Make a plain row click add to the selection instead of replacing it, so
@@ -208,13 +205,9 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     return this.anchor;
   }
 
-  /** True when row clicks select, which a range module needs in order to agree. */
+  /** True when a plain row click selects, which a range module needs in order to agree. */
   get clickSelects(): boolean {
-    // Derived, not a flat default: with the checkbox column off and this off,
-    // the module had no pointer affordance at all — selectable by keyboard,
-    // inert to a mouse, which reads as the module being broken rather than as
-    // an option being unset.
-    return this.options.clickToSelect ?? !this.hasCheckboxColumn;
+    return this.options.clickToSelect ?? false;
   }
 
   get selectionMode(): SelectionMode {
@@ -473,7 +466,14 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    * the span is that module's to define.
    */
   private activate(rowId: string, event: MouseEvent): void {
-    const additive = event.ctrlKey || event.metaKey || (this.options.selectionWithoutKeys ?? false);
+    const modified = event.ctrlKey || event.metaKey;
+    const additive = modified || (this.options.selectionWithoutKeys ?? false);
+
+    // Without `clickToSelect` a plain click is not ours to interpret — the
+    // application may want it for something else entirely. A modified click is
+    // unambiguous, so it selects regardless, which is what keeps selection
+    // reachable by pointer when there is no checkbox column.
+    if (!this.clickSelects && !modified && !this.extendsRange(event.shiftKey)) return;
 
     if (this.extendsRange(event.shiftKey)) {
       this.range!(rowId);
@@ -508,9 +508,13 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     // Attached whatever the state. Putting it only on selected rows meant
     // clicking could deselect but never select — the option looked broken
     // because the rows that needed the handler most were the ones without it.
-    const activation = this.clickSelects
-      ? { onActivate: (event: Event) => this.activate(ctx.row.rowId, event as MouseEvent) }
-      : {};
+    // Always attached. Whether an unmodified click means anything is decided in
+    // `activate`, because a modified one means selection either way — leaving
+    // the handler off entirely was what made a grid with no checkbox column
+    // selectable by keyboard and inert to a mouse.
+    const activation = {
+      onActivate: (event: Event) => this.activate(ctx.row.rowId, event as MouseEvent),
+    };
 
     if (!selected) {
       // Still returns a decoration so the previous one is withdrawn and the

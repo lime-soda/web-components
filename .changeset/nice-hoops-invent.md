@@ -2,17 +2,17 @@
 '@lime-soda/grid': minor
 ---
 
-Always leave a pointer route to selection.
+Let a modified click select, so a pointer can always reach selection.
 
-`checkboxColumn` defaulted on and `clickToSelect` defaulted off, so turning the
-checkboxes off left the module with no mouse affordance at all: rows were
-selectable by keyboard and inert to a pointer, which reads as the module being
-broken rather than as an option being unset.
+`checkboxColumn` defaults on and `clickToSelect` defaults off, which together
+left a grid configured with no checkbox column selectable by keyboard and inert
+to a mouse — the pair of defaults was reachable, and broken, without setting
+anything unusual.
 
-`clickToSelect` now defaults to whether the checkbox column is absent. With
-checkboxes there, a row click is still left alone — it is free to mean something
-else, such as opening a detail panel. Setting the option explicitly overrides
-either way, and setting it back to `undefined` returns it to deriving.
+Ctrl-click, or Cmd-click on macOS, now selects whatever `clickToSelect` says.
+That keeps the plain click free to mean something else in the application —
+opening a detail panel, say — which is why the option stays off by default, and
+it means the option never has to be turned on merely to make selection possible.
 
-Anyone relying on `checkboxColumn: false` leaving row clicks inert should now
-pass `clickToSelect: false`.
+`clickSelects` still reports the plain click alone, since a range module reads
+it to decide whether to agree with row clicks.

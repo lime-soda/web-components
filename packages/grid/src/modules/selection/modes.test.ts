@@ -120,8 +120,15 @@ describe('selection modes', () => {
       expect(activation(selection)).toBeTypeOf('function');
     });
 
-    it('is absent when the option is off', () => {
-      expect(activation(setup({ clickToSelect: false }).selection)).toBeUndefined();
+    it('leaves a plain click alone when the option is off', () => {
+      // The handler is attached whatever the option says, because a modified
+      // click selects either way. What the option decides is whether an
+      // unmodified one does.
+      const { selection } = setup({ clickToSelect: false });
+
+      clickRow(selection, 'a');
+
+      expect(selection.getSelectedRows()).toEqual([]);
     });
 
     it('selects one row at a time in single mode', () => {
@@ -250,7 +257,8 @@ describe('selection modes', () => {
   it('supports checkboxes with no click-to-select, and the reverse', () => {
     const checkboxesOnly = setup({ checkboxColumn: true, clickToSelect: false }).selection;
     expect(hasCheckboxColumn(checkboxesOnly)).toBe(true);
-    expect(activation(checkboxesOnly)).toBeUndefined();
+    clickRow(checkboxesOnly, 'a');
+    expect(checkboxesOnly.getSelectedRows()).toEqual([]);
 
     const clickOnly = setup({ checkboxColumn: false, clickToSelect: true }).selection;
     expect(hasCheckboxColumn(clickOnly)).toBe(false);
@@ -258,30 +266,58 @@ describe('selection modes', () => {
   });
 });
 
-describe('a mouse route to selection always exists', () => {
-  // The module has two affordances — a checkbox column and click-to-select —
-  // and both were opt-out and opt-in respectively. Turn the checkboxes off and
-  // the pair left nothing a mouse could do: the rows were selectable by
-  // keyboard and inert to a pointer, which reads as the module being broken.
-  const rowClickSelects = (options: SelectionModuleOptions) => {
-    const selection = new SelectionModule<Row>(options);
-    return selection.clickSelects;
-  };
+describe('a pointer can always reach selection', () => {
+  // Two defaults that were each defensible alone — checkbox column on, plain
+  // click off — combined to leave a grid with no checkbox column selectable by
+  // keyboard and inert to a mouse. A modified click is unambiguous, so it
+  // selects whatever `clickToSelect` says, which keeps the plain click free to
+  // mean something else in the application.
 
-  it('selects on row click when there is no checkbox column', () => {
-    expect(rowClickSelects({ checkboxColumn: false })).toBe(true);
-    expect(rowClickSelects({ mode: 'single', checkboxColumn: false })).toBe(true);
+  it('ignores a plain click by default', () => {
+    const { selection } = setup({ checkboxColumn: false });
+
+    clickRow(selection, 'a');
+
+    expect(selection.getSelectedRows()).toEqual([]);
   });
 
-  it('leaves row clicks alone when the checkbox column provides one', () => {
-    // With checkboxes present, a row click is free to mean something else —
-    // opening a detail panel, say — so it stays opt-in.
-    expect(rowClickSelects({})).toBe(false);
-    expect(rowClickSelects({ mode: 'single' })).toBe(false);
+  it('selects on Ctrl-click even with plain clicks off', () => {
+    const { selection } = setup({ checkboxColumn: false });
+
+    clickRow(selection, 'a', { ctrlKey: true });
+
+    expect(selection.getSelectedRows()).toEqual(['a']);
   });
 
-  it('still honours an explicit choice either way', () => {
-    expect(rowClickSelects({ clickToSelect: true })).toBe(true);
-    expect(rowClickSelects({ checkboxColumn: false, clickToSelect: false })).toBe(false);
+  it('selects on Cmd-click too, so the gesture is the platform’s own', () => {
+    const { selection } = setup({ checkboxColumn: false });
+
+    clickRow(selection, 'a', { metaKey: true });
+
+    expect(selection.getSelectedRows()).toEqual(['a']);
+  });
+
+  it('reaches selection by pointer in single mode as well', () => {
+    const { selection } = setup({ mode: 'single', checkboxColumn: false });
+
+    clickRow(selection, 'a', { ctrlKey: true });
+
+    expect(selection.getSelectedRows()).toEqual(['a']);
+  });
+
+  it('takes a plain click once clickToSelect is on', () => {
+    const { selection } = setup({ checkboxColumn: false, clickToSelect: true });
+
+    clickRow(selection, 'a');
+
+    expect(selection.getSelectedRows()).toEqual(['a']);
+  });
+
+  it('keeps clickSelects meaning the plain click alone', () => {
+    // A range module reads this to decide whether it should agree with row
+    // clicks, so it must not start reporting true merely because Ctrl works.
+    expect(setup({ checkboxColumn: false }).selection.clickSelects).toBe(false);
+    expect(setup({}).selection.clickSelects).toBe(false);
+    expect(setup({ clickToSelect: true }).selection.clickSelects).toBe(true);
   });
 });

@@ -84,7 +84,7 @@ interface Args {
   selectionMode: 'multi' | 'single';
   checkboxColumn: boolean;
   treeSelectionScope: 'self' | 'children' | 'filteredChildren';
-  clickToSelect: 'default' | 'on' | 'off';
+  clickToSelect: boolean;
 }
 
 /**
@@ -196,10 +196,9 @@ const meta: Meta<Args> = {
       table: { category: 'Selection' },
     },
     clickToSelect: {
-      control: 'inline-radio',
-      options: ['default', 'on', 'off'],
+      control: 'boolean',
       description:
-        'Select by clicking anywhere in the row, not only the checkbox. Left at `default` it follows the checkbox column: on when there is none, so a pointer can always select, and off when there is, where a row click is free to mean something else. Turn the checkboxes off and leave this at `default` to see that.',
+        'Whether a plain click anywhere in the row selects it. Off leaves the plain click free to mean something else in the application — it does not make selection unreachable, because Ctrl-click (Cmd on macOS) selects either way. Turn the checkboxes off and leave this off to see that.',
       table: { category: 'Selection' },
     },
   },
@@ -225,7 +224,7 @@ export const BondMarket: StoryObj<Args> = {
     selectionMode: 'multi',
     checkboxColumn: true,
     treeSelectionScope: 'filteredChildren',
-    clickToSelect: 'default',
+    clickToSelect: false,
   },
   render: (args) => {
     const gridRef = createRef<Grid<Bond>>();
@@ -261,9 +260,7 @@ export const BondMarket: StoryObj<Args> = {
     selection.setOptions({
       mode: args.selectionMode,
       checkboxColumn: args.checkboxColumn,
-      // `undefined` is meaningful here: it lets the module derive the default
-      // from the checkbox column, which passing a boolean would override.
-      clickToSelect: args.clickToSelect === 'default' ? undefined : args.clickToSelect === 'on',
+      clickToSelect: args.clickToSelect,
     });
     // Group behaviour belongs to the module that supplies it.
     bondMarketTreeSelection.setOptions({ scope: args.treeSelectionScope });
