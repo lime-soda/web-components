@@ -37,7 +37,7 @@ async function waitFor(condition: () => boolean, timeout = 2000): Promise<void> 
   }
 }
 
-async function mount(): Promise<Grid<Row>> {
+async function mount(layout: 'flow' | 'stack' = 'flow'): Promise<Grid<Row>> {
   host = document.createElement('div');
   host.style.height = '300px';
   host.style.width = '600px';
@@ -51,6 +51,7 @@ async function mount(): Promise<Grid<Row>> {
       { field: 'price', headerName: 'Price', width: 120 },
     ],
     getRowId: (row) => row.id,
+    layout,
     modules: [],
   } satisfies GridOptions<Row>;
   grid.rowData = data;
@@ -130,6 +131,92 @@ describe('the navigation floor, with no modules', () => {
     }
     const atEnd = press(grid, 'Tab');
     expect(atEnd, 'Tab was swallowed at the last cell').toBe(true);
+  });
+
+  it('navigates the stacked layout too', async () => {
+    // The stack renders its header outside the scroller that carries the key
+    // handler, which is exactly the sort of asymmetry that leaves one layout
+    // navigable and the other not.
+    const grid = await mount('stack');
+    expect(focusOf(grid)!.focused.get()).toBeNull();
+
+    press(grid, 'ArrowDown');
+    const first = focusOf(grid)!.focused.get();
+    expect(first, 'the first arrow did not enter the grid').not.toBeNull();
+
+    press(grid, 'ArrowDown');
+    expect(focusOf(grid)!.focused.get()?.rowKey).not.toBe(first?.rowKey);
+
+    press(grid, 'ArrowRight');
+    expect(focusOf(grid)!.focused.get()?.colId).not.toBe(first?.colId);
+  });
+
+  it('navigates from the focused cell itself, in both layouts', async () => {
+    // Dispatching on the scroller is too kind: a real key press starts at the
+    // focused cell and has to bubble to whatever is listening. In the stack the
+    // header is rendered outside the scroller, so a cell there travels a
+    // different path from one in the body.
+    for (const layout of ['flow', 'stack'] as const) {
+      const grid = await mount(layout);
+      press(grid, 'ArrowDown');
+      const entered = focusOf(grid)!.focused.get();
+      expect(entered, `${layout}: never entered`).not.toBeNull();
+
+      const cell = grid
+        .shadowRoot!.querySelector('ls-grid-instance[part="instance"]')!
+        .shadowRoot!.querySelector('ls-grid-row')!
+        .shadowRoot!.querySelector('ls-grid-cell') as HTMLElement;
+      cell.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'ArrowDown',
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+        }),
+      );
+
+      expect(
+        focusOf(grid)!.focused.get()?.rowKey,
+        `${layout}: a key from the cell itself did nothing`,
+      ).not.toBe(entered?.rowKey);
+
+      host?.remove();
+      host = undefined;
+    }
+  });
+
+  it('keeps navigating once focus is in the header, in both layouts', async () => {
+    // ArrowUp from the first row enters the header. In the stack that header is
+    // rendered in the chrome above the scroller, so the key press starts
+    // outside whatever the scroller is listening to.
+    for (const layout of ['flow', 'stack'] as const) {
+      const grid = await mount(layout);
+      press(grid, 'ArrowDown');
+      press(grid, 'ArrowUp');
+
+      const inHeader = focusOf(grid)!.focused.get();
+      expect(inHeader?.section, `${layout}: ArrowUp did not reach the header`).toBe('header');
+
+      const headerCell = grid
+        .shadowRoot!.querySelector('ls-grid-instance')!
+        .shadowRoot!.querySelector('ls-grid-header-cell') as HTMLElement;
+      headerCell.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'ArrowRight',
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+        }),
+      );
+
+      expect(
+        focusOf(grid)!.focused.get()?.colId,
+        `${layout}: a key from a header cell did nothing`,
+      ).not.toBe(inHeader?.colId);
+
+      host?.remove();
+      host = undefined;
+    }
   });
 
   it('gives the grid back on Escape', async () => {

@@ -256,12 +256,20 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
     this.setAttribute('role', 'grid');
     this.addEventListener('focusin', this.handleFocusIn);
     this.addEventListener('focusout', this.handleFocusOut);
+    // On the host rather than on the scroller. The stack renders its header in
+    // chrome *above* the scroller, so a key pressed while a header cell had
+    // focus bubbled past a listener that was not in its path and did nothing —
+    // the stack was navigable in the body and inert in the header. Bound here,
+    // no part of the grid can be outside the handler, whatever chrome is added
+    // later.
+    this.addEventListener('keydown', this.handleKeyDown);
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('focusin', this.handleFocusIn);
     this.removeEventListener('focusout', this.handleFocusOut);
+    this.removeEventListener('keydown', this.handleKeyDown);
     this.resizeObserver?.disconnect();
     this.virtualizer?.disconnect();
     this.removeScrollJacking();
@@ -299,13 +307,7 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
     return html`
       <div class="viewport" data-layout=${mode} style=${styleMap(this.scrollerProperties())}>
         ${mode === 'stack' ? this.renderStackChrome(layout) : nothing}
-        <div
-          class="scroller"
-          part="scroller"
-          data-layout=${mode}
-          @keydown=${this.handleKeyDown}
-          ${ref(this.scrollerRef)}
-        >
+        <div class="scroller" part="scroller" data-layout=${mode} ${ref(this.scrollerRef)}>
           ${mode === 'stack' ? this.renderStack(layout) : this.renderFlow(layout)}
         </div>
       </div>
