@@ -22,14 +22,14 @@
     }
   },
   "scripts": {
-    "build": "build-component",
-    "build:types": "tsc --project tsconfig.types.json",
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
     "build:manifest": "build-manifest",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vp test run",
     "test:browser": "vp test run --project browser",
     "lint": "vp lint",
-    "check": "vp check"
+    "check": "vp check",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "dependencies": {
     "@lime-soda/tokens": "workspace:*"

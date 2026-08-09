@@ -60,6 +60,9 @@ importers:
 
   packages/grid:
     dependencies:
+      '@lime-soda/tokens':
+        specifier: workspace:*
+        version: link:../../support/tokens
       '@lit/context':
         specifier: ^1.1.6
         version: 1.1.6
@@ -70,9 +73,9 @@ importers:
         specifier: ^0.2.2
         version: 0.2.2
     devDependencies:
-      '@custom-elements-manifest/analyzer':
-        specifier: ^0.10.4
-        version: 0.10.6
+      '@lime-soda/build':
+        specifier: workspace:*
+        version: link:../../tools/build
       '@lime-soda/tsconfig':
         specifier: workspace:*
         version: link:../../tools/tsconfig
@@ -254,9 +257,6 @@ importers:
       '@lime-soda/tokens':
         specifier: workspace:*
         version: link:../../support/tokens
-      esbuild:
-        specifier: ^0.28.0
-        version: 0.28.1
       glob:
         specifier: ^13.0.0
         version: 13.0.6

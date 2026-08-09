@@ -366,16 +366,16 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     .ls-grid-checkbox {
       cursor: pointer;
       margin: 0;
-      accent-color: var(--ls-grid-focus, #3b82f6);
+      accent-color: var(--grid-focus);
     }
 
     .ls-grid-checkbox:disabled {
       cursor: default;
-      opacity: var(--ls-grid-disabled-opacity, 0.4);
+      opacity: var(--grid-disabled-opacity, 0.4);
     }
 
     .ls-grid-checkbox:focus-visible {
-      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
+      outline: var(--grid-focus-width) solid var(--grid-focus);
       outline-offset: 1px;
     }
   `;

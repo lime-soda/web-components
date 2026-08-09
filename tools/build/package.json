@@ -3,9 +3,8 @@
   "private": true,
   "type": "module",
   "version": "0.1.2",
-  "description": "",
+  "description": "Custom Elements Manifest generation, with design token CSS properties",
   "bin": {
-    "build-component": "./build-component.js",
     "build-manifest": "./build-manifest.js"
   },
   "scripts": {
@@ -18,7 +17,6 @@
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@lime-soda/cem-plugin-css-properties": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
-    "esbuild": "^0.28.0",
     "glob": "^13.0.0"
   },
   "devDependencies": {}

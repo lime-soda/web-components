@@ -19,6 +19,8 @@ import { SignalWatcher } from '../reactive/index.js';
  * bracket that content without owning it. Extending SignalWatcher is what keeps a
  * price tick cheap: the cell reads its row's signal during render, so a change
  * repaints this cell and touches nothing above it.
+ *
+ * @customElement ls-grid-cell
  */
 export class GridCell extends SignalWatcher(LitElement) {
   static override styles = css`
@@ -27,9 +29,9 @@ export class GridCell extends SignalWatcher(LitElement) {
       align-items: center;
       box-sizing: border-box;
       overflow: hidden;
-      padding: 0 var(--ls-grid-cell-padding-x, 8px);
-      border-bottom: 1px solid var(--ls-grid-border-subtle, #f0f0f0);
-      color: var(--ls-grid-text, #101010);
+      padding: 0 var(--grid-cell-padding-x);
+      border-bottom: 1px solid var(--grid-border-subtle);
+      color: var(--grid-text);
       font-variant-numeric: tabular-nums;
     }
 
@@ -56,23 +58,23 @@ export class GridCell extends SignalWatcher(LitElement) {
      * and says so here, so clicking and tabbing look the same.
      */
     :host([data-focused]) {
-      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--ls-grid-focus-width, 2px));
+      outline: var(--grid-focus-width) solid var(--grid-focus);
+      outline-offset: calc(-1 * var(--grid-focus-width));
     }
 
     /* Applied by the selection module. A row is display:contents and has no box
        of its own, so the highlight is painted by its cells. */
     :host(.ls-grid-cell-selected) {
-      background: var(--ls-grid-selection-background, rgb(59 130 246 / 12%));
+      background: var(--grid-selection-background);
     }
 
     /* Tracking a row across a monitor-wide grid is the whole reason this exists. */
     :host(.ls-grid-row-hover) {
-      background: var(--ls-grid-hover-background, rgb(0 0 0 / 3%));
+      background: var(--grid-hover-background);
     }
 
     :host(.ls-grid-row-hover.ls-grid-cell-selected) {
-      background: var(--ls-grid-selection-background, rgb(59 130 246 / 12%));
+      background: var(--grid-selection-background);
     }
 
     /* Plain values: single line, ellipsised, vertically centred by the host. */

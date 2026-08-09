@@ -1,0 +1,147 @@
+{
+  "grid": {
+    "$description": "Design tokens for the horizontal-flow data grid",
+
+    "font": {
+      "$type": "fontFamily",
+      "$value": "{font.family.sans}",
+      "$description": "Font stack for the whole grid"
+    },
+    "fontSize": {
+      "$type": "dimension",
+      "$value": "{font.size.sm}",
+      "$description": "Base cell font size"
+    },
+    "headerFontSize": {
+      "$type": "dimension",
+      "$value": "{font.size.sm}",
+      "$description": "Header font size, where it differs from cells"
+    },
+    "headerFontWeight": {
+      "$type": "fontWeight",
+      "$value": "{font.weight.medium}",
+      "$description": "Header font weight"
+    },
+
+    "rowHeight": {
+      "$type": "dimension",
+      "$value": "{size.space.8}",
+      "$description": "Height of a data row, which also decides how many rows fit in an instance"
+    },
+    "headerHeight": {
+      "$type": "dimension",
+      "$value": "{size.space.8}",
+      "$description": "Height of the header row"
+    },
+    "cellPaddingX": {
+      "$type": "dimension",
+      "$value": "{theme.spacing.component.sm}",
+      "$description": "Horizontal padding inside a cell"
+    },
+    "instanceGap": {
+      "$type": "dimension",
+      "$value": "{theme.spacing.component.md}",
+      "$description": "Gap between instances in the flow layout"
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{theme.radius.sm}",
+      "$description": "Corner radius on instances and controls"
+    },
+    "treeIndent": {
+      "$type": "dimension",
+      "$value": "{theme.spacing.component.md}",
+      "$description": "Indent applied per tree depth level"
+    },
+
+    "surface": {
+      "$type": "color",
+      "$value": "{theme.color.background.surface}",
+      "$description": "Behind the whole grid, including the gaps between instances"
+    },
+    "background": {
+      "$type": "color",
+      "$value": "{theme.color.background.default}",
+      "$description": "An instance's own background"
+    },
+    "headerBackground": {
+      "$type": "color",
+      "$value": "{theme.color.background.muted}",
+      "$description": "Header background"
+    },
+    "placeholderBackground": {
+      "$type": "color",
+      "$value": "{theme.color.background.default}",
+      "$description": "Background of an offscreen instance placeholder"
+    },
+
+    "text": {
+      "$type": "color",
+      "$value": "{theme.color.text.default}",
+      "$description": "Cell text"
+    },
+    "textMuted": {
+      "$type": "color",
+      "$value": "{theme.color.text.muted}",
+      "$description": "Secondary text, such as a sort order badge"
+    },
+    "headerText": {
+      "$type": "color",
+      "$value": "{theme.color.text.default}",
+      "$description": "Header label text"
+    },
+
+    "border": {
+      "$type": "color",
+      "$value": "{theme.color.border.default}",
+      "$description": "Instance outlines and the header's bottom rule"
+    },
+    "borderSubtle": {
+      "$type": "color",
+      "$value": "{theme.color.border.muted}",
+      "$description": "Lines between rows and columns, quieter than the border"
+    },
+
+    "focus": {
+      "$type": "color",
+      "$value": "{theme.color.info.background}",
+      "$description": "Focus ring colour"
+    },
+    "focusWidth": {
+      "$type": "dimension",
+      "$value": "{size.borderWidth.medium}",
+      "$description": "Focus ring width"
+    },
+    "selectionBackground": {
+      "$type": "color",
+      "$value": "color-mix(in srgb, {theme.color.info.background} 12%, transparent)",
+      "$description": "Background of a selected row, tinted so the row beneath still reads"
+    },
+    "hoverBackground": {
+      "$type": "color",
+      "$value": "{theme.color.background.muted}",
+      "$description": "Background of a hovered row"
+    },
+
+    "flashUp": {
+      "$type": "color",
+      "$value": "color-mix(in srgb, {theme.color.success.background} 35%, transparent)",
+      "$description": "Flash colour when a value rises, following the trading convention of green for up"
+    },
+    "flashDown": {
+      "$type": "color",
+      "$value": "color-mix(in srgb, {theme.color.error.background} 35%, transparent)",
+      "$description": "Flash colour when a value falls"
+    },
+    "flashNeutral": {
+      "$type": "color",
+      "$value": "color-mix(in srgb, {theme.color.text.muted} 35%, transparent)",
+      "$description": "Flash colour when the direction is unknown or disabled"
+    },
+    "flashDuration": {
+      "$type": "duration",
+      "$value": "{motion.duration.slower}",
+      "$description": "How long a cell flash lasts"
+    }
+  }
+}

@@ -7,7 +7,7 @@ import { THEME_TOKENS, customPropertyFor } from './tokens.js';
  * Keeps the theme schema honest against the source.
  *
  * A token list is only a contract if nothing can read a property that is not on
- * it. These tests walk the actual source, so adding `var(--ls-grid-something-new)` to
+ * it. These tests walk the actual source, so adding `var(--grid-something-new)` to
  * a component without declaring the token fails here rather than quietly
  * producing an unthemeable value.
  */
@@ -35,40 +35,40 @@ const declaredProperties = new Set(THEME_TOKENS.map(customPropertyFor));
  * them. Each is either measured geometry or a per-cell value.
  */
 const INTERNAL = new Set([
-  '--ls-grid-instance-width',
-  '--ls-grid-instance-height',
-  '--ls-grid-spacer-height',
-  '--ls-grid-column-template',
-  '--ls-grid-tree-depth',
+  '--grid-instance-width',
+  '--grid-instance-height',
+  '--grid-spacer-height',
+  '--grid-column-template',
+  '--grid-tree-depth',
   // Height of the pinned group band, so it can be lifted out of the flow.
-  '--ls-grid-sticky-height',
+  '--grid-sticky-height',
   // Body scroll offset and scrollbar width, so the static header can follow the
   // body sideways and reserve the gutter it occupies.
-  '--ls-grid-scroll-left',
-  '--ls-grid-scrollbar-width',
+  '--grid-scroll-left',
+  '--grid-scrollbar-width',
 ]);
 
 /** Sub-token knobs a consumer may set but which are not part of the core schema. */
 const OPTIONAL = new Set([
-  '--ls-grid-tree-expander-size',
-  '--ls-grid-tree-expander-font-size',
-  '--ls-grid-sort-indicator-font-size',
-  '--ls-grid-sort-order-font-size',
-  '--ls-grid-filter-input-width',
-  '--ls-grid-filter-font-size',
-  '--ls-grid-filter-padding',
-  '--ls-grid-disabled-opacity',
+  '--grid-tree-expander-size',
+  '--grid-tree-expander-font-size',
+  '--grid-sort-indicator-font-size',
+  '--grid-sort-order-font-size',
+  '--grid-filter-input-width',
+  '--grid-filter-font-size',
+  '--grid-filter-padding',
+  '--grid-disabled-opacity',
   // Border of an instance. Read when sizing the slot, so the columns inside
   // fit the content box rather than being clipped by it.
-  '--ls-grid-instance-border-width',
+  '--grid-instance-border-width',
 ]);
 
 const usages = new Map<string, string[]>();
 for (const file of files) {
   const source = readFileSync(file, 'utf8');
-  // `var(--ls-grid-x)` in CSS, and `'--ls-grid-x'` where a module reads one at runtime
+  // `var(--grid-x)` in CSS, and `'--grid-x'` where a module reads one at runtime
   // through getComputedStyle — the flash colours arrive that way.
-  for (const match of source.matchAll(/var\((--ls-grid-[a-z0-9-]+)|'(--ls-grid-[a-z0-9-]+)'/g)) {
+  for (const match of source.matchAll(/var\((--grid-[a-z0-9-]+)|'(--grid-[a-z0-9-]+)'/g)) {
     const property = (match[1] ?? match[2])!;
     usages.set(property, [...(usages.get(property) ?? []), file]);
   }
@@ -84,14 +84,19 @@ describe('theme coverage', () => {
     expect(undeclared, `undeclared custom properties: ${undeclared.join(', ')}`).toEqual([]);
   });
 
-  it('gives every declared token a default in the stylesheet', () => {
-    // Otherwise a token would exist on the type but have nothing to override.
-    const stylesheet = readFileSync(join(SRC, 'themes/grid.css'), 'utf8');
-    const missing = THEME_TOKENS.map(customPropertyFor).filter(
-      (property) => !stylesheet.includes(`${property}:`),
-    );
+  it('declares every token in the design system, and nothing else', () => {
+    // The defaults are design tokens, not a stylesheet in this package: Style
+    // Dictionary turns components/grid.json into the `props` block the host
+    // adopts. This is the seam between the two, and it goes wrong in both
+    // directions — a token on the type with no design token behind it has
+    // nothing to override, and a design token nothing reads is dead weight in
+    // a published stylesheet.
+    const definitions = JSON.parse(
+      readFileSync(join(SRC, '../../../support/tokens/components/grid.json'), 'utf8'),
+    ) as { grid: Record<string, unknown> };
+    const declared = Object.keys(definitions.grid).filter((key) => !key.startsWith('$'));
 
-    expect(missing, `tokens absent from the stylesheet: ${missing.join(', ')}`).toEqual([]);
+    expect([...declared].sort()).toEqual([...THEME_TOKENS].sort());
   });
 
   it('has no inline style attributes with literal declarations in components', () => {

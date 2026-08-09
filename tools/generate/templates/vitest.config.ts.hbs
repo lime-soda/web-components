@@ -1,0 +1,8 @@
+import { playwright } from 'vite-plus/test/browser-playwright'; import { defineConfig } from
+'vite-plus'; export default defineConfig({ // Resolve workspace imports to source, matching the
+`development` export // condition Storybook uses. resolve: { conditions: ['development', 'browser',
+'import', 'module', 'default'], }, // Standard decorators and the `accessor` keyword are not native
+syntax in any // browser yet, so esbuild must downlevel rather than pass them through. esbuild: {
+target: 'es2022' }, test: { projects: [ { extends: true, test: { name: 'browser', include:
+['src/**/*.browser.test.ts'], setupFiles: ['./vitest.setup.ts'], browser: { enabled: true, provider:
+playwright(), headless: true, instances: [{ browser: 'chromium' }], }, }, }, ], }, });

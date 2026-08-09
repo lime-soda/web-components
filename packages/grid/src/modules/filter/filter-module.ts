@@ -156,24 +156,24 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   static readonly styles = css`
     .ls-grid-filter-input {
-      width: var(--ls-grid-filter-input-width, 70px);
+      width: var(--grid-filter-input-width, 70px);
       min-width: 0;
       font: inherit;
-      font-size: var(--ls-grid-filter-font-size, 11px);
-      padding: var(--ls-grid-filter-padding, 1px 4px);
-      border-radius: var(--ls-grid-radius, 3px);
-      border: 1px solid var(--ls-grid-border, #d8d8d8);
+      font-size: var(--grid-filter-font-size, 11px);
+      padding: var(--grid-filter-padding, 1px 4px);
+      border-radius: var(--grid-radius);
+      border: 1px solid var(--grid-border);
       background: transparent;
       color: inherit;
     }
 
     /* An active filter is worth seeing at a glance across a wide monitor. */
     .ls-grid-filter-input[data-ls-grid-active] {
-      border-color: var(--ls-grid-focus, #3b82f6);
+      border-color: var(--grid-focus);
     }
 
     .ls-grid-filter-input:focus-visible {
-      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
+      outline: var(--grid-focus-width) solid var(--grid-focus);
       outline-offset: -1px;
     }
   `;

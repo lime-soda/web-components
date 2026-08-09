@@ -14,7 +14,6 @@ import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
 import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
-import '@lime-soda/grid/themes/grid.css';
 import './demo.css';
 
 const columns: ColumnDef<Bond>[] = [

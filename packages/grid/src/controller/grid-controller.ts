@@ -23,7 +23,7 @@ export interface GridOptions<TData = unknown> extends ColumnResolutionOptions<TD
   instanceGap?: number;
   maxInstances?: number;
   /**
-   * Theme tokens, applied as `--ls-grid-*` custom properties on the grid.
+   * Theme tokens, applied as `--grid-*` custom properties on the grid.
    *
    * Validated on assignment: an unknown key or a value containing a declaration
    * separator throws rather than being silently dropped. Anything left unset

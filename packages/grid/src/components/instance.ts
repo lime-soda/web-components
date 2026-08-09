@@ -21,15 +21,17 @@ export type InstanceParts = 'full' | 'header' | 'rows';
  * The stack layout splits the two: only the rows are windowed and moved by a
  * spacer, so the header renders separately and stays put. Both bands share the
  * same column template, so they stay aligned without measuring anything.
+ *
+ * @customElement ls-grid-instance
  */
 export class GridInstance extends SignalWatcher(LitElement) {
   static override styles = css`
     :host {
       display: block;
       box-sizing: border-box;
-      background: var(--ls-grid-background, #ffffff);
-      border: var(--ls-grid-instance-border-width, 1px) solid var(--ls-grid-border, #d8d8d8);
-      border-radius: var(--ls-grid-radius, 4px);
+      background: var(--grid-background);
+      border: var(--grid-instance-border-width, 1px) solid var(--grid-border);
+      border-radius: var(--grid-radius);
       overflow: hidden;
     }
 
@@ -70,9 +72,9 @@ export class GridInstance extends SignalWatcher(LitElement) {
 
     .grid {
       display: grid;
-      grid-template-columns: var(--ls-grid-column-template);
-      grid-template-rows: var(--ls-grid-header-height, 32px);
-      grid-auto-rows: var(--ls-grid-row-height, 32px);
+      grid-template-columns: var(--grid-column-template);
+      grid-template-rows: var(--grid-header-height);
+      grid-auto-rows: var(--grid-row-height);
       width: 100%;
     }
 
@@ -205,7 +207,7 @@ export class GridInstance extends SignalWatcher(LitElement) {
       <div
         class="grid"
         part="instance-grid"
-        style=${styleMap({ '--ls-grid-column-template': template })}
+        style=${styleMap({ '--grid-column-template': template })}
       >
         ${
           showHeader

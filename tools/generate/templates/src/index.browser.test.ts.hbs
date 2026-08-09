@@ -1,0 +1,20 @@
+import axe from 'axe-core'; import { afterEach, describe, expect, it } from 'vite-plus/test'; import
+'./index.js'; import type {
+{{pascalCase name}}
+} from './index.js'; /** * Accessibility and behaviour in a real browser. * * Shadow DOM and focus
+have no useful answer in jsdom, and axe needs a document * to walk, which is why this runs in
+Chromium rather than node. */ let host: HTMLDivElement | undefined; function mount():
+{{pascalCase name}}
+{ host = document.createElement('div'); document.body.append(host); const element =
+document.createElement('ls-{{name}}') as
+{{pascalCase name}}; element.textContent = 'Content'; host.append(element); return element; }
+afterEach(() => { host?.remove(); host = undefined; }); describe('ls-{{name}}', () => { it('has no
+accessibility violations', async () => { const element = mount(); await element.updateComplete;
+const results = await axe.run(element, { // Contrast depends on the page's theme, and this harness
+has none. The // themed check is the Storybook one. rules: { 'color-contrast': { enabled: false } },
+}); expect(results.violations.map((violation) => violation.id)).toEqual([]); }); it('re-renders when
+a reactive property changes', async () => { // Standard decorators route reactive properties through
+`accessor`. An // element compiles and renders either way, but stops reacting if that goes // wrong,
+so this is the assertion worth having from the start. const element = mount(); await
+element.updateComplete; element.variant = 'default'; await element.updateComplete;
+expect(element.shadowRoot?.querySelector('[part]')).not.toBeNull(); }); });

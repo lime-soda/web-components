@@ -14,6 +14,8 @@ import { SignalWatcher } from '../reactive/index.js';
  * Core renders the label and nothing else. Sort indicators and filter controls
  * arrive as module header slots, so a grid with neither module installed has a
  * header with no affordances rather than dead ones.
+ *
+ * @customElement ls-grid-header-cell
  */
 export class GridHeaderCell extends SignalWatcher(LitElement) {
   static override styles = css`
@@ -22,14 +24,14 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
       align-items: center;
       gap: 8px;
       box-sizing: border-box;
-      padding: 0 var(--ls-grid-cell-padding-x, 8px);
+      padding: 0 var(--grid-cell-padding-x);
       height: 100%;
-      background: var(--ls-grid-header-background, #f5f5f5);
-      border-bottom: 2px solid var(--ls-grid-border, #d8d8d8);
-      border-right: 1px solid var(--ls-grid-border-subtle, #f0f0f0);
-      color: var(--ls-grid-header-text, #101010);
-      font-weight: var(--ls-grid-header-font-weight, 500);
-      font-size: var(--ls-grid-header-font-size, 13px);
+      background: var(--grid-header-background);
+      border-bottom: 2px solid var(--grid-border);
+      border-right: 1px solid var(--grid-border-subtle);
+      color: var(--grid-header-text);
+      font-weight: var(--grid-header-font-weight);
+      font-size: var(--grid-header-font-size);
       overflow: hidden;
     }
 
@@ -43,8 +45,8 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
      * nothing at all.
      */
     :host([data-focused]) {
-      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--ls-grid-focus-width, 2px));
+      outline: var(--grid-focus-width) solid var(--grid-focus);
+      outline-offset: calc(-1 * var(--grid-focus-width));
     }
 
     /* No label to sit beside, so whatever a module contributed is centred. */
@@ -71,8 +73,8 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     }
 
     .label.activatable:focus-visible {
-      outline: var(--ls-grid-focus-width, 2px) solid var(--ls-grid-focus, #3b82f6);
-      outline-offset: calc(-1 * var(--ls-grid-focus-width, 2px));
+      outline: var(--grid-focus-width) solid var(--grid-focus);
+      outline-offset: calc(-1 * var(--grid-focus-width));
     }
 
     .slots {

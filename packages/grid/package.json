@@ -32,8 +32,7 @@
     "./dist/stack.js",
     "./src/layouts.ts",
     "./src/flow.ts",
-    "./src/stack.ts",
-    "**/*.css"
+    "./src/stack.ts"
   ],
   "publishConfig": {
     "access": "public"
@@ -105,19 +104,15 @@
       "types": "./dist/modules/cell-flash/index.d.ts",
       "development": "./src/modules/cell-flash/index.ts",
       "default": "./dist/modules/cell-flash/index.js"
-    },
-    "./themes/*.css": {
-      "development": "./src/themes/*.css",
-      "default": "./dist/themes/*.css"
     }
   },
   "scripts": {
-    "build": "pnpm clean && tsc -p tsconfig.build.json && node -e \"require('fs').cpSync('src/themes','dist/themes',{recursive:true})\"",
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vp test run",
     "test:node": "vp test run --project node",
     "test:browser": "vp test run --project browser",
-    "build:manifest": "cem analyze",
+    "build:manifest": "build-manifest",
     "prepublishOnly": "pnpm build && pnpm build:manifest",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "lint": "vp lint",
@@ -125,16 +120,17 @@
   },
   "dependencies": {
     "@lit/context": "^1.1.6",
+    "@lime-soda/tokens": "workspace:*",
     "lit": "^3.3.1",
     "signal-polyfill": "^0.2.2"
   },
   "devDependencies": {
-    "@custom-elements-manifest/analyzer": "^0.10.4",
+    "@lime-soda/build": "workspace:*",
+    "@lime-soda/tsconfig": "workspace:*",
     "@types/node": "^22.10.2",
     "@vitest/browser-playwright": "^4.1.10",
     "axe-core": "^4.13.0",
     "playwright": "^1.56.1",
-    "@lime-soda/tsconfig": "workspace:*",
     "typescript": "~5.9.3",
     "vitest": "^4.1.10"
   }

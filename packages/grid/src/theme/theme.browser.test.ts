@@ -116,8 +116,8 @@ describe('theming', () => {
     const grid = await mount({ theme });
     const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
-    expect(themed.style.getPropertyValue('--ls-grid-text')).toBe('rgb(0, 128, 0)');
-    expect(themed.style.getPropertyValue('--ls-grid-background')).toBe('rgb(240, 240, 240)');
+    expect(themed.style.getPropertyValue('--grid-text')).toBe('rgb(0, 128, 0)');
+    expect(themed.style.getPropertyValue('--grid-background')).toBe('rgb(240, 240, 240)');
   });
 
   it('inherits a token through every shadow root down to a cell', async () => {
@@ -169,7 +169,7 @@ describe('theming', () => {
     const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
     // A partial theme is valid; unset tokens simply are not declared.
-    expect(themed.style.getPropertyValue('--ls-grid-border')).toBe('');
+    expect(themed.style.getPropertyValue('--grid-border')).toBe('');
   });
 
   it('updates live when the theme is replaced', async () => {
@@ -192,7 +192,7 @@ describe('theming', () => {
     const grid = await mount({ rowHeight: 32, theme: { rowHeight: '999px' } });
     const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
 
-    expect(themed.style.getPropertyValue('--ls-grid-row-height')).toBe('32px');
+    expect(themed.style.getPropertyValue('--grid-row-height')).toBe('32px');
   });
 
   describe('no inline styles', () => {

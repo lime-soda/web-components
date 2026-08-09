@@ -20,6 +20,8 @@ import { SignalWatcher } from '../reactive/index.js';
  * The element holds no subscriptions. The prototype's row managed three by hand
  * (node, selection, store) with matching teardown in `disconnectedCallback`; here
  * the row context reads a signal and Lit handles the rest.
+ *
+ * @customElement ls-grid-row
  */
 export class GridRow extends SignalWatcher(LitElement) {
   static override styles = css`

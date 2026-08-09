@@ -52,19 +52,18 @@ function createStyleDictionaryConfig(mode, components) {
     })),
   ];
 
-  // Add complete token export for light mode only
+  // Add complete token export for light mode only.
+  //
+  // Unfiltered, unlike everything above: this is the object the CEM plugin reads
+  // to document each element's CSS custom properties, and it looks components up
+  // by name. Filtered to definitions and theme, it found no component tier at
+  // all, so every element published `cssProperties: []` while the README claimed
+  // otherwise. Values here resolve to the light theme, which is what a default
+  // in documentation should show.
   if (mode === 'light') {
     files.push(
-      {
-        destination: 'index.js',
-        format: 'javascript/esm',
-        filter: globalVariablesFilter,
-      },
-      {
-        destination: 'index.d.ts',
-        format: 'typescript/module-declarations',
-        filter: globalVariablesFilter,
-      },
+      { destination: 'index.js', format: 'javascript/esm' },
+      { destination: 'index.d.ts', format: 'typescript/module-declarations' },
     );
   }
 

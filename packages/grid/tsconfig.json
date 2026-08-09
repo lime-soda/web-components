@@ -1,11 +1,5 @@
 {
   "extends": "@lime-soda/tsconfig",
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "declaration": true,
-    "declarationMap": true,
-    "types": ["vitest/globals", "node"]
-  },
-  "include": ["src/**/*.ts"]
+  "compilerOptions": { "types": ["vitest/globals", "node"] },
+  "include": ["global.d.ts", "vitest.config.ts", "vitest.setup.ts", "src/**/*.ts"]
 }

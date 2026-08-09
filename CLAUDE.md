@@ -25,10 +25,10 @@ code in this repository.
 
 ### Individual Package Commands
 
-- `build-component` - Build individual component package (from
-  `@lime-soda/build`)
-- `tsc --emitDeclarationOnly --declarationDir dist` - Generate TypeScript
-  declarations
+- `tsc -p tsconfig.build.json` - Build a package: one pass emits both the
+  JavaScript and the declarations
+- `build-manifest` - Generate `custom-elements.json`, including each element's
+  CSS custom properties from the design tokens (from `@lime-soda/build`)
 
 ## Project Architecture
 
@@ -73,9 +73,8 @@ This is a pnpm workspace monorepo with packages organized into:
 ### Build System
 
 - **Turbo** for build orchestration
-- **esbuild** for component bundling (via custom `@lime-soda/build` tool);
-  `packages/grid` builds with `tsc` instead, because it emits many entry points
-  and must exclude its colocated tests from `dist`
+- **tsc** builds every package: one pass emits the JavaScript and the
+  declarations, from a `tsconfig.build.json` that excludes the colocated tests
 - **Style Dictionary** for design token compilation
 - Every package extends `@lime-soda/tsconfig`; there is no second base config.
   `noEmit` is on there, so a package that is meant to emit turns it off in its
@@ -83,9 +82,26 @@ This is a pnpm workspace monorepo with packages organized into:
 
 ### Design System
 
-- Design tokens in `support/tokens/` using Style Dictionary
-- CSS custom properties for theming (e.g., `--color-orange-400`)
-- Components use `var()` for consistent styling across the design system
+Three tiers, and each only ever references the one below it:
+
+1. **Primitives** in `support/tokens/definitions/` — `--color-green-500`, the
+   raw palette and scales
+2. **Semantic** in `support/tokens/theme/{light,dark}/` —
+   `--theme-color-background-default`. Combined into a single stylesheet where
+   the two modes differ by CSS `light-dark()`, so light and dark follow
+   `color-scheme` rather than a class or a media query of their own
+3. **Component** in `support/tokens/components/<name>.json` — `--button-*`,
+   `--grid-*`, named after the element minus its `ls-` prefix, which is the
+   mapping `@lime-soda/cem-plugin-css-properties` relies on
+
+**No literal values in component styles.** A component imports
+`@lime-soda/tokens/<name>`, puts `tokens.props` first in its `static styles`,
+and reads `var(--<name>-*)` from there. That is what makes the whole system
+themeable from one place, and why a hard-coded colour in a component is a bug
+rather than a shortcut.
+
+An application must load `@lime-soda/tokens/variables.css`, which defines the
+first two tiers. Without it the component tokens reference nothing.
 
 ### Key Patterns
 

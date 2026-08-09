@@ -1,5 +1,6 @@
 import { provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
+import * as tokens from '@lime-soda/tokens/grid';
 import { property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -19,88 +20,95 @@ import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
  * Owns the controller, provides it on a context, measures the container, and
  * decides which instances are worth rendering. Everything below reads from the
  * context, so nothing is drilled down the tree.
+ *
+ * @customElement ls-grid
  */
 export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
-  static override styles = css`
-    :host {
-      display: block;
-      height: 100%;
-      overflow: hidden;
-      color: var(--ls-grid-text, #101010);
-      background: var(--ls-grid-surface, transparent);
-      font-family: var(--ls-grid-font, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
-      font-size: var(--ls-grid-font-size, 13px);
-      -webkit-font-smoothing: antialiased;
-    }
+  static override styles = [
+    // The token definitions, exactly as the button adopts its own: `--grid-*`
+    // declared on the host in terms of the design system's semantic tier, and
+    // inherited from here into every shadow root below.
+    tokens.props,
+    css`
+      :host {
+        display: block;
+        height: 100%;
+        overflow: hidden;
+        color: var(--grid-text);
+        background: var(--grid-surface);
+        font-family: var(--grid-font);
+        font-size: var(--grid-font-size);
+        -webkit-font-smoothing: antialiased;
+      }
 
-    /* Chrome above, scrolling body below. Only the body scrolls. */
-    .viewport {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-    }
+      /* Chrome above, scrolling body below. Only the body scrolls. */
+      .viewport {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+      }
 
-    .scroller {
-      width: 100%;
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow: auto;
-      box-sizing: border-box;
-    }
+      .scroller {
+        width: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+        box-sizing: border-box;
+      }
 
-    .viewport[data-layout='flow'] > .scroller {
-      height: 100%;
-    }
+      .viewport[data-layout='flow'] > .scroller {
+        height: 100%;
+      }
 
-    /*
+      /*
      * Static header. Clipped rather than scrolling, and nudged sideways to follow
      * the body — a scroll container of its own would need its position driven
      * anyway, and would add a second scrollbar.
      */
-    .stack-chrome {
-      flex: 0 0 auto;
-      overflow: hidden;
-      /* Matches the width the body's scrollbar takes, so columns stay in line. */
-      padding-right: var(--ls-grid-scrollbar-width, 0px);
-      box-sizing: border-box;
-    }
+      .stack-chrome {
+        flex: 0 0 auto;
+        overflow: hidden;
+        /* Matches the width the body's scrollbar takes, so columns stay in line. */
+        padding-right: var(--grid-scrollbar-width, 0px);
+        box-sizing: border-box;
+      }
 
-    .stack-chrome-header {
-      transform: translateX(calc(-1 * var(--ls-grid-scroll-left, 0px)));
-    }
+      .stack-chrome-header {
+        transform: translateX(calc(-1 * var(--grid-scroll-left, 0px)));
+      }
 
-    .scroller[data-layout='flow'] {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--ls-grid-instance-gap, 16px);
-      overflow-y: hidden;
-    }
+      .scroller[data-layout='flow'] {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--grid-instance-gap);
+        overflow-y: hidden;
+      }
 
-    .instance-slot {
-      flex: 0 0 auto;
-      box-sizing: border-box;
-      width: var(--ls-grid-instance-width, auto);
-      height: var(--ls-grid-instance-height, auto);
-    }
+      .instance-slot {
+        flex: 0 0 auto;
+        box-sizing: border-box;
+        width: var(--grid-instance-width, auto);
+        height: var(--grid-instance-height, auto);
+      }
 
-    /* Offscreen instances keep their exact footprint so the scrollbar never jumps. */
-    .placeholder {
-      box-sizing: border-box;
-      width: 100%;
-      height: 100%;
-      background: var(--ls-grid-placeholder-background, var(--ls-grid-background, #ffffff));
-      border: 1px solid var(--ls-grid-border, #d8d8d8);
-      border-radius: var(--ls-grid-radius, 4px);
-    }
+      /* Offscreen instances keep their exact footprint so the scrollbar never jumps. */
+      .placeholder {
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        background: var(--grid-placeholder-background);
+        border: 1px solid var(--grid-border);
+        border-radius: var(--grid-radius);
+      }
 
-    .stack-spacer {
-      width: 100%;
-      height: var(--ls-grid-spacer-height, 0);
-    }
+      .stack-spacer {
+        width: 100%;
+        height: var(--grid-spacer-height, 0);
+      }
 
-    /*
+      /*
      * Pinned group headings, at the top of the body.
      *
      * These stay sticky, and correctly so: they are derived from the rows and
@@ -111,13 +119,14 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
      * passing beneath rather than displacing them — otherwise every row would be
      * pushed down by the depth of the current group, and shift as that changed.
      */
-    .stack-sticky {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      margin-bottom: calc(-1 * var(--ls-grid-sticky-height, 0px));
-    }
-  `;
+      .stack-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        margin-bottom: calc(-1 * var(--grid-sticky-height, 0px));
+      }
+    `,
+  ];
 
   @property({ attribute: false })
   accessor gridOptions: GridOptions<TData> | undefined;
@@ -317,11 +326,11 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
     const viewport = controller.pipeline.viewport;
     return {
       ...themeToCustomProperties(controller.options.theme ?? {}),
-      '--ls-grid-row-height': `${viewport.rowHeight}px`,
-      '--ls-grid-header-height': `${viewport.headerHeight}px`,
-      '--ls-grid-instance-gap': `${viewport.instanceGap}px`,
-      '--ls-grid-scroll-left': `${this.bodyScrollLeft}px`,
-      '--ls-grid-scrollbar-width': `${this.scrollbarWidth}px`,
+      '--grid-row-height': `${viewport.rowHeight}px`,
+      '--grid-header-height': `${viewport.headerHeight}px`,
+      '--grid-instance-gap': `${viewport.instanceGap}px`,
+      '--grid-scroll-left': `${this.bodyScrollLeft}px`,
+      '--grid-scrollbar-width': `${this.scrollbarWidth}px`,
     };
   }
 
@@ -340,8 +349,8 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
             // *content*. The border is chrome around that, so it is added here
             // — with it inside, the last column overflowed the padding box and
             // was clipped, taking the focus ring's right edge with it.
-            '--ls-grid-instance-width': `calc(${instance.width}px + 2 * var(--ls-grid-instance-border-width, 1px))`,
-            '--ls-grid-instance-height': `${height}px`,
+            '--grid-instance-width': `calc(${instance.width}px + 2 * var(--grid-instance-border-width, 1px))`,
+            '--grid-instance-height': `${height}px`,
           })}
           ${ref((element) => this.observeSlot(element))}
         >
@@ -387,20 +396,20 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
               parts="rows"
               .instance=${stickyInstance}
               style=${styleMap({
-                '--ls-grid-sticky-height': `${stickyRows.length * rowHeight}px`,
+                '--grid-sticky-height': `${stickyRows.length * rowHeight}px`,
               })}
             ></ls-grid-instance>`
       }
       <div
         class="stack-spacer"
         role="presentation"
-        style=${styleMap({ '--ls-grid-spacer-height': `${instance.offset}px` })}
+        style=${styleMap({ '--grid-spacer-height': `${instance.offset}px` })}
       ></div>
       <ls-grid-instance part="instance" parts="rows" .instance=${instance}></ls-grid-instance>
       <div
         class="stack-spacer"
         role="presentation"
-        style=${styleMap({ '--ls-grid-spacer-height': `${below}px` })}
+        style=${styleMap({ '--grid-spacer-height': `${below}px` })}
       ></div>
     `;
   }

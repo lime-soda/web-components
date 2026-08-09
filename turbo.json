@@ -6,10 +6,6 @@
       "dependsOn": ["^build", "typecheck", "check"],
       "outputs": ["dist/**/*.{js,css,map}", "storybook-static/**"]
     },
-    "build:types": {
-      "dependsOn": ["^build", "^build:types"],
-      "outputs": ["dist/**/*.d.ts", "dist/**/*.d.ts.map"]
-    },
     "build:manifest": {
       "dependsOn": ["^build"],
       "outputs": ["custom-elements.json"]

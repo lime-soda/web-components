@@ -4,11 +4,11 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "build": "turbo run build build:types build:manifest",
+    "build": "turbo run build build:manifest",
     "create-component": "create-component",
     "dev": "pnpm run -w --parallel \"/^dev:.*/\"",
     "dev:mcp": "pnpm run --filter=@lime-soda/mcp-server dev",
-    "dev:packages": "turbo watch build build:types --filter=./packages/*",
+    "dev:packages": "turbo watch build --filter=./packages/*",
     "dev:storybook": "pnpm run --filter=@lime-soda/storybook dev",
     "dev:support": "turbo watch build --filter=@lime-soda/tokens",
     "test": "turbo run test",

@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  // The shared config sets `noEmit` so a stray `tsc` never writes output; this
+  // is the build, so it turns it back on. One pass emits both the JavaScript
+  // and the declarations, where it used to take esbuild for one and tsc for the
+  // other.
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["index.ts", "src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
+}

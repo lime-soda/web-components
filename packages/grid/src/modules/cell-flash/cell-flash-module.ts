@@ -4,7 +4,7 @@ import type { CellContext, CellDecoration, GridModule, ModuleContext } from '../
 export type FlashDirection = 'up' | 'down' | 'neutral';
 
 export interface CellFlashModuleOptions {
-  /** Milliseconds. Defaults to the --ls-grid-flash-duration theme value, 600ms. */
+  /** Milliseconds. Defaults to the --grid-flash-duration theme value, 600ms. */
   duration?: number;
   /**
    * Colour a rise green and a fall red, rather than flashing one colour.
@@ -110,7 +110,7 @@ export class CellFlashModule<TData = unknown> implements GridModule<TData> {
 
     const colour = this.colourFor(cell, direction);
     const duration =
-      this.options.duration ?? readNumber(cell, '--ls-grid-flash-duration') ?? DEFAULT_DURATION;
+      this.options.duration ?? readNumber(cell, '--grid-flash-duration') ?? DEFAULT_DURATION;
 
     const animation = cell.animate(
       [{ backgroundColor: colour }, { backgroundColor: 'transparent' }],
@@ -126,10 +126,10 @@ export class CellFlashModule<TData = unknown> implements GridModule<TData> {
     const styles = getComputedStyle(cell);
     const variable =
       direction === 'up'
-        ? '--ls-grid-flash-up'
+        ? '--grid-flash-up'
         : direction === 'down'
-          ? '--ls-grid-flash-down'
-          : '--ls-grid-flash-neutral';
+          ? '--grid-flash-down'
+          : '--grid-flash-neutral';
 
     const value = styles.getPropertyValue(variable).trim();
     if (value !== '') return value;

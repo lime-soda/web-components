@@ -1,10 +1,14 @@
-import { LitElement, css, html } from 'lit' import { customElement, property } from
-'lit/decorators.js' /** *
+import { LitElement, css, html } from 'lit'; import { customElement, property } from
+'lit/decorators.js'; import * as tokens from '@lime-soda/tokens/{{name}}'; /** *
 {{pascalCase name}}
-component * * @slot - default content slot */ @customElement('{{name}}') export class
+component. * * @slot - default content slot * @csspart
+{{name}}
+- the root element */ @customElement('ls-{{name}}') export class
 {{pascalCase name}}
-extends LitElement { render() { return html`
-<slot></slot>
-` } static styles = css` :host{} ` } declare global { interface HTMLElementTagNameMap { '{{name}}':
-{{pascalCase name}}
-} }
+extends LitElement { /** Example reactive property. Standard decorators require `accessor`. */
+@property({ type: String }) accessor variant: 'default' = 'default'; override render() { return
+html`<div part='{{name}}' class='${this.variant}'><slot></slot></div>`; } // `tokens.props` declares
+this component's `--{{name}}-*` custom properties in // terms of the design system's semantic tier,
+so nothing here is a literal. static override styles = [ tokens.props, css` :host { display: block;
+} `, ]; } declare global { interface HTMLElementTagNameMap { 'ls-{{name}}':
+{{pascalCase name}}; } }

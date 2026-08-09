@@ -36,7 +36,6 @@ npm install @lime-soda/grid
 
 ```ts
 import '@lime-soda/grid/layouts';
-import '@lime-soda/grid/themes/grid.css';
 import type { ColumnDef, Grid, GridOptions } from '@lime-soda/grid';
 
 interface Quote {
@@ -161,16 +160,16 @@ Measured with esbuild, minified and gzipped:
 
 | Imports               | Wire size |
 | --------------------- | --------- |
-| core only             | 28.1 kB   |
+| core only             | 29.1 kB   |
 | + selection/row-range | +0.4 kB   |
 | + keyboard            | +0.6 kB   |
 | + cell-flash          | +0.7 kB   |
 | + selection/tree      | +0.9 kB   |
-| + sort                | +1.3 kB   |
+| + sort                | +1.2 kB   |
 | + filter              | +1.5 kB   |
 | + tree                | +1.9 kB   |
 | + selection           | +2.4 kB   |
-| everything            | 36.5 kB   |
+| everything            | 37.6 kB   |
 
 A bundle-composition check in CI asserts that an unimported module leaves no
 trace in the output, so this cannot quietly regress.
@@ -571,18 +570,33 @@ every shadow root:
 
 ```css
 ls-grid {
-  --ls-grid-row-height: 28px;
-  --ls-grid-background: #1a1a1a;
-  --ls-grid-text: #e5e5e5;
-  --ls-grid-selection-background: rgb(59 130 246 / 18%);
+  --grid-row-height: 28px;
+  --grid-background: #1a1a1a;
+  --grid-text: #e5e5e5;
+  --grid-selection-background: rgb(59 130 246 / 18%);
 }
 ```
 
-`@lime-soda/grid/themes/grid.css` provides a light/dark pair, honouring
-`prefers-color-scheme` with a `data-ls-grid-theme="light|dark"` override.
+The defaults come from the design system rather than from this package. Every
+`--grid-*` property is a design token declared in
+`support/tokens/components/grid.json` in terms of the semantic tier, so
+`--grid-border` is `var(--theme-color-border-default)` and inherits the palette,
+the spacing scale and the light/dark pair the rest of the system uses. The host
+adopts those declarations itself, so there is no stylesheet to import here.
+
+Light and dark follow `color-scheme`, because the semantic tier resolves through
+CSS `light-dark()`. Set it the way the design system does — `color-scheme: light`
+or `dark` on an ancestor — and the grid follows without a switch of its own.
+
+The one thing an application must load is the global token stylesheet, which
+defines the semantic tier every component builds on:
+
+```ts
+import '@lime-soda/tokens/variables.css';
+```
 
 Every token maps to one property by the same rule — `selectionBackground` is
-`--ls-grid-selection-background`:
+`--grid-selection-background`:
 
 | Group      | Tokens                                                                        |
 | ---------- | ----------------------------------------------------------------------------- |
@@ -602,7 +616,7 @@ No component uses inline styles — a test walks the source and fails on any, so
 every rule is reachable from a stylesheet. Module-contributed markup is styled
 the same way: a module ships a `styles` stylesheet that is adopted into the
 shadow roots its markup renders in, which is why the tree expander answers to
-`--ls-grid-text-muted` like everything else.
+`--grid-text-muted` like everything else.
 
 For structure rather than colour, the elements expose `::part()`: `scroller`,
 `instance`, `instance-grid`, `placeholder`, `header-cell`, `header-label`,

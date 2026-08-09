@@ -21,7 +21,7 @@ export interface TreeModuleOptions<TData = unknown> extends TreeIndexOptions<TDa
    * deep in the tree stays reachable. On by default.
    */
   retainAncestors?: boolean;
-  /** Indent per depth level, in px. Defaults to 16 via --ls-grid-tree-indent. */
+  /** Indent per depth level, in px. Defaults to 16 via --grid-tree-indent. */
   indentSize?: number;
 }
 
@@ -153,20 +153,20 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
    * Indent depth is the one genuinely per-cell value here, so it travels as a
    * custom property on the element and the width is computed in CSS. Everything
    * else is static and lives in this stylesheet, themeable through the same
-   * `--ls-grid-*` properties as the rest of the grid.
+   * `--grid-*` properties as the rest of the grid.
    */
   static readonly styles = css`
     .ls-grid-tree-indent {
       display: inline-block;
       flex: 0 0 auto;
       /* Set per cell by the decoration; falls back to no indent. */
-      width: calc(var(--ls-grid-tree-depth, 0) * var(--ls-grid-tree-indent, 16px));
+      width: calc(var(--grid-tree-depth, 0) * var(--grid-tree-indent));
     }
 
     .ls-grid-tree-spacer {
       display: inline-block;
       flex: 0 0 auto;
-      width: var(--ls-grid-tree-expander-size, 18px);
+      width: var(--grid-tree-expander-size, 18px);
     }
 
     .ls-grid-expander {
@@ -174,14 +174,14 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
-      width: var(--ls-grid-tree-expander-size, 18px);
+      width: var(--grid-tree-expander-size, 18px);
       padding: 0;
       background: none;
       border: none;
       cursor: pointer;
-      font-size: var(--ls-grid-tree-expander-font-size, 10px);
+      font-size: var(--grid-tree-expander-font-size, 10px);
       line-height: 1;
-      color: var(--ls-grid-text-muted, #666);
+      color: var(--grid-text-muted);
       transition: transform 150ms ease-out;
       transform: rotate(0deg);
     }
@@ -238,12 +238,12 @@ export class TreeModule<TData = unknown> implements GridModule<TData, string[]> 
       classes: ['ls-grid-tree-cell'],
       attributes: { 'data-ls-grid-depth': String(depth) },
       // Depth drives the indent width through CSS rather than a computed pixel
-      // value, so a consumer can change --ls-grid-tree-indent and every level follows.
+      // value, so a consumer can change --grid-tree-indent and every level follows.
       customProperties: {
-        '--ls-grid-tree-depth': String(depth),
+        '--grid-tree-depth': String(depth),
         ...(this.options.indentSize === undefined
           ? {}
-          : { '--ls-grid-tree-indent': `${this.options.indentSize}px` }),
+          : { '--grid-tree-indent': `${this.options.indentSize}px` }),
       },
       prefix: html`
         <span class="ls-grid-tree-indent"></span>

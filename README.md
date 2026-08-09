@@ -58,8 +58,9 @@ DTCG-compliant descriptions.
 
 #### [`@lime-soda/build`](./tools/build/)
 
-Fast component bundler using esbuild with Custom Elements Manifest generation
-support for enhanced component documentation.
+Custom Elements Manifest generation, which pulls each element's CSS custom
+properties out of the design tokens so the manifest documents what is themeable
+without anyone maintaining a second list.
 
 #### [`@lime-soda/cem-plugin-css-properties`](./support/cem-plugin-css-properties/)
 
