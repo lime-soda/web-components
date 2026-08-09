@@ -8,6 +8,9 @@ palette that stays out of the way of coloured data, a type and spacing scale a
 step below the usual, and tabular figures so columns of numbers align. Every
 colour pairing clears WCAG AA in both light and dark.
 
+The packages are published and free to use. The repository is not open to
+contributions at the moment — issues and pull requests are not being taken.
+
 ## Overview
 
 This monorepo contains a complete design system including:
@@ -154,8 +157,9 @@ web-components/
 
 ### Prerequisites
 
-- **Node.js 22+** - Required for experimental TypeScript support
-- **pnpm 9+** - Package manager for monorepo workspace management
+- **Node.js 24+** - Matches `engines`, and the version CI publishes from: OIDC
+  trusted publishing needs npm 11.5.1 or newer, which Node 24 bundles
+- **pnpm 10.34.5** - Pinned by `packageManager`, so corepack selects it
 
 ### Common Commands
 
@@ -228,14 +232,6 @@ styles.props; // :host { --button-sm-padding: 0.375rem 0.75rem; }
 styles.sm.padding; // css`var(--button-sm-padding)`
 styles.primary.backgroundColor; // css`var(--button-primary-background-color)`
 ```
-
-## Contributing
-
-1. **Follow conventions** - Use existing patterns for consistency
-2. **Include tests** - Add Storybook stories with tests for new components
-3. **Update documentation** - Keep READMEs current with changes
-4. **Check your work** - Run `pnpm check` and `pnpm test` before submitting
-5. **Build successfully** - Ensure `pnpm build` completes without errors
 
 ## License
 
