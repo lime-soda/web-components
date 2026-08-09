@@ -1,4 +1,4 @@
-import type { LayoutResult } from '../layout/types.js';
+import type { DisplayRow, LayoutResult } from '../layout/types.js';
 import { type ReadableSignal, type WritableSignal, signal } from '../reactive/index.js';
 
 /** Which band of an instance focus is in. */
@@ -44,6 +44,18 @@ export class FocusController {
     // Only colId is ever read, so that is all this asks for. Taking the full
     // ResolvedColumn would drag TData variance in for no benefit.
     private readonly getColumns: () => readonly { readonly colId: string }[],
+    /**
+     * The columns a given row actually renders, spans collapsed.
+     *
+     * Focus has to agree with what was rendered or it lands on cells that do
+     * not exist: a group row spanning the grid draws one cell, and arrowing
+     * along the row beneath it must not stop three times inside that span.
+     * Defaults to one column per column, which is every grid without spans.
+     */
+    private readonly getSpans: (
+      row: DisplayRow,
+    ) => readonly { colId: string; span: number }[] = () =>
+      this.getColumns().map((column) => ({ colId: column.colId, span: 1 })),
   ) {}
 
   get focused(): ReadableSignal<CellPosition | null> {
@@ -180,7 +192,12 @@ export class FocusController {
 
     const columns = this.getColumns();
     const { instances, instanceIndex, rowIndex, colIndex, section } = located;
-    const next = colIndex + delta;
+
+    // One step is one *cell*, which is not one column where a span covers
+    // several: arrowing along the row under a group heading would otherwise
+    // stop three times inside a heading that draws one cell.
+    const row = section === 'header' ? undefined : instances[instanceIndex]?.rows[rowIndex];
+    const next = row ? this.stepAcrossSpans(row, colIndex, delta) : colIndex + delta;
 
     if (next >= 0 && next < columns.length) {
       const colId = columns[next]!.colId;
@@ -316,8 +333,60 @@ export class FocusController {
     const row = instance?.rows[rowIndex];
     if (!instance || !row) return false;
 
-    this.position.set({ instanceId: instance.id, rowKey: row.id, colId, section: 'body' });
+    this.position.set({
+      instanceId: instance.id,
+      rowKey: row.id,
+      // Snapped to the cell that actually covers this column in this row. Moving
+      // down a column into a row whose group heading spans it would otherwise
+      // point at a cell that was never rendered.
+      colId: this.anchorFor(row, colId),
+      section: 'body',
+    });
     return true;
+  }
+
+  /**
+   * The column index one cell away, stepping over any span in between.
+   *
+   * Rightwards leaves from the end of the current cell; leftwards lands on the
+   * *start* of the previous one, so a single press moves out of a span rather
+   * than into the middle of it.
+   */
+  private stepAcrossSpans(row: DisplayRow, colIndex: number, delta: number): number {
+    const spans = this.getSpans(row);
+
+    let at = 0;
+    const starts: number[] = [];
+    for (const entry of spans) {
+      starts.push(at);
+      at += entry.span;
+    }
+
+    // The last cell starting at or before this column is the one covering it.
+    // Not `findLastIndex`: the shared lib target is ES2022.
+    let current = -1;
+    for (let i = 0; i < starts.length; i += 1) {
+      if (starts[i]! <= colIndex) current = i;
+    }
+    if (current === -1) return colIndex + delta;
+
+    const target = current + delta;
+    if (target < 0 || target >= starts.length) return delta < 0 ? -1 : at;
+    return starts[target]!;
+  }
+
+  /** The colId of the cell covering `colId` in this row — itself, unless spanned. */
+  private anchorFor(row: DisplayRow, colId: string): string {
+    const columns = this.getColumns();
+    const index = columns.findIndex((column) => column.colId === colId);
+    if (index === -1) return colId;
+
+    let at = 0;
+    for (const entry of this.getSpans(row)) {
+      if (index < at + entry.span) return entry.colId;
+      at += entry.span;
+    }
+    return colId;
   }
 
   private commitHeader(instanceIndex: number, colId: string): boolean {

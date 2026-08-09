@@ -1,7 +1,21 @@
 import type { TemplateResult } from 'lit';
 import type { RowNode } from '../store/types.js';
+import type { DisplayRow } from '../layout/types.js';
 
-export interface ValueGetterParams<TData = unknown> {
+/**
+ * What a column function is given, in three tiers.
+ *
+ * They differ by how much of the grid exists when the function runs, which is
+ * not a detail that can be papered over: sort and filter resolve values during
+ * projection, deciding which rows there will be and in what order, so at that
+ * point no row has been laid out and no `DisplayRow` exists. A single flat
+ * context would have to lie about that — either by making `row` optional
+ * everywhere, or by handing render-time callers something they cannot trust.
+ *
+ * Each tier is a superset of the one before, so a function that needs less can
+ * be passed where more is available.
+ */
+export interface CellValueContext<TData = unknown> {
   readonly data: TData;
   readonly node: RowNode<TData>;
   // Deliberately not ResolvedColumn<TData, TValue>. That self-reference put
@@ -12,14 +26,36 @@ export interface ValueGetterParams<TData = unknown> {
   readonly column: ResolvedColumn<TData, any>;
 }
 
-export interface ValueFormatterParams<TData = unknown, TValue = unknown> {
+/** Adds the resolved value, for anything that runs after `valueGetter`. */
+export interface CellFormatContext<
+  TData = unknown,
+  TValue = unknown,
+> extends CellValueContext<TData> {
   /** Undefined when the field is absent or a dot path did not resolve. */
   readonly value: TValue | undefined;
-  readonly data: TData;
-  readonly node: RowNode<TData>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- see ValueGetterParams
-  readonly column: ResolvedColumn<TData, any>;
 }
+
+/**
+ * Adds the row as laid out, for anything that runs while rendering it.
+ *
+ * `row` is what makes per-row decisions possible — `meta.hasChildren` for a
+ * group row, `meta.depth`, whether this is a repeat at the top of a
+ * continuation — so `colSpan` and the cell decorators take this tier.
+ */
+export interface CellContext<TData = unknown, TValue = unknown> extends CellFormatContext<
+  TData,
+  TValue
+> {
+  readonly row: DisplayRow;
+}
+
+/** @deprecated Use {@link CellValueContext}. */
+export type ValueGetterParams<TData = unknown> = CellValueContext<TData>;
+/** @deprecated Use {@link CellFormatContext}. */
+export type ValueFormatterParams<TData = unknown, TValue = unknown> = CellFormatContext<
+  TData,
+  TValue
+>;
 
 export type CellRendererFn<TData = unknown, TValue = unknown> = (
   params: ValueFormatterParams<TData, TValue>,
@@ -77,7 +113,20 @@ export interface ColumnDef<TData = unknown, TValue = unknown> {
   /** A custom element tag name, or a function returning a Lit template. */
   cellRenderer?: string | CellRendererFn<TData, TValue>;
   cellRendererParams?: Record<string, unknown>;
-  cellClass?: string | ((params: ValueFormatterParams<TData, TValue>) => string);
+
+  /**
+   * How many columns this cell covers, from this one rightwards.
+   *
+   * Per row, not per column, which is why it takes a context: a group row
+   * spanning its heading across the whole grid is the common case, and its
+   * children in the same column span nothing. Return 1, or omit it, for the
+   * usual one-column cell.
+   *
+   * The columns covered render no cell of their own, and the grid treats the
+   * span as a single stop when navigating — so a value in a covered column is
+   * not reachable, and should not be somewhere data hides.
+   */
+  colSpan?: number | ((context: CellContext<TData, TValue>) => number);
 }
 
 /** A column after defaults, column types and derived values have been applied. */

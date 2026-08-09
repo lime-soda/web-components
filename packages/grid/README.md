@@ -134,6 +134,27 @@ a separate module, so it stays either way; excluding that would mean splitting
 the element itself. The reason to reach for `@lime-soda/grid/flow` is that it says
 what the application does, not that it saves much.
 
+## Spanning columns
+
+A group row usually wants its heading across the grid rather than squeezed into
+the first column. `colSpan` says how many columns a cell covers, and takes a
+context because the answer is per row — the heading spans, the instruments
+beneath it do not:
+
+```ts
+{ field: 'instrument', colSpan: ({ data }) => (data.isGroup ? 3 : 1) }
+```
+
+The covered columns render no cell, the spanning cell carries `aria-colspan`,
+and arrow navigation treats it as one stop. That last part is the reason not to
+hide data in a covered column: nothing can reach it.
+
+Group rows carry data in every column without any of this. Hierarchy comes from
+the data itself, so a parent is an ordinary row and each column resolves against
+it exactly as for a child — there are no synthesised group rows to special-case.
+What the grid does not do is aggregate: a group showing the sum of its children
+computes that in its own data or a `valueGetter`.
+
 ## Modules
 
 Every feature beyond the core is an additive module with its own entry point.

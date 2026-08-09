@@ -1,3 +1,4 @@
+import { spannedColumns } from '../columns/col-span.js';
 import { CELL_PARTS, forwardedParts } from './part-forwarding.js';
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
@@ -133,17 +134,24 @@ export class GridRow extends SignalWatcher(LitElement) {
       ...decorations.map((d) => d.cellCustomProperties ?? {}),
     ) as Record<string, string>;
 
+    // Spans are resolved per row, so a group heading can cover the grid while
+    // the instrument below it does not. Columns a span covers render no cell.
+    const laidOut = spannedColumns(grid.columns.get(), this.row, node);
+
     return repeat(
-      grid.columns.get(),
-      (column) => column.colId,
-      (column) =>
+      laidOut,
+      ({ column }) => column.colId,
+      ({ column, span }) =>
         html`<ls-grid-cell
           part="cell"
           exportparts=${forwardedParts(CELL_PARTS, grid.registry.moduleParts())}
           role="gridcell"
           aria-colindex=${column.index + 1}
+          aria-colspan=${span > 1 ? span : nothing}
           class=${cellClasses}
-          style=${styleMap(cellProperties)}
+          style=${styleMap(
+            span > 1 ? { ...cellProperties, gridColumn: `span ${span}` } : cellProperties,
+          )}
           .column=${column}
         ></ls-grid-cell>`,
     );

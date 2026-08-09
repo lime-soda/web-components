@@ -1,3 +1,4 @@
+import { spannedColumns } from '../columns/col-span.js';
 import { type CSSResultGroup, type CSSResultOrNative, unsafeCSS } from 'lit';
 import type { ColumnDefs, ResolvedColumn } from '../columns/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
@@ -57,6 +58,13 @@ export class ModuleRegistry<TData = unknown> {
     this.focus = new FocusController(
       () => options.pipeline.layout.get(),
       () => options.getColumns(),
+      // Focus has to agree with what the row rendered. Spans are resolved from
+      // the same function the row uses, so the two cannot drift into disagreeing
+      // about which cells exist.
+      (row) =>
+        spannedColumns(options.getColumns(), row, options.pipeline.store.getRowNode(row.rowId)).map(
+          ({ column, span }) => ({ colId: column.colId, span }),
+        ),
     );
   }
 
