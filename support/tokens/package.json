@@ -24,11 +24,10 @@
   "author": "Phil Parsons",
   "license": "MIT",
   "dependencies": {
-    "style-dictionary": "^5.0.1",
-    "glob": "^13.0.0"
+    "glob": "^13.0.0",
+    "style-dictionary": "^5.0.1"
   },
   "optionalDependencies": {
-    "lit": "^3.3.1"
-  },
-  "devDependencies": {}
+    "lit": "^3.3.3"
+  }
 }
