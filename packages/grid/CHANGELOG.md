@@ -1,5 +1,304 @@
 # @lime-soda/grid
 
+## 0.1.0
+
+### Minor Changes
+
+- 004aa74: Give selection a single accent at the theme level.
+
+  `theme.color.accent` is the colour of a control in its selected state, and
+  `theme.color.accentSubtle` the wash behind a selected row. Both follow the
+  primary by default, so retargeting selection across every component is one
+  value rather than a hunt.
+
+  The token stylesheet also sets `accent-color` on `:root`. That is the one thing
+  a custom property cannot do on its own — nothing else paints the tick inside a
+  native checkbox or the thumb of a range — so an application's own form controls
+  now match the components without wiring anything up per control.
+
+  The grid picks both up. Its checkbox was borrowing `--grid-focus`, which meant a
+  ticked box was the focus-ring colour: a ring says "the keyboard is here" and an
+  accent says "this is on", and they should not be the same statement. Its
+  selected-row wash was mixed from the info blue and is now the accent, at 12% in
+  light and 22% in dark — one figure does not read in both. Text over a selected
+  row clears AA either way, at 16.8:1 and 14.0:1.
+
+- 216ebd5: Rename the package to `@lime-soda/grid` and the elements to the `ls-` prefix.
+
+  The grid was developed in a separate repository as `flow-grid` and reached
+  0.2.0 there, but the release never published: npm normalises `flow-grid` to
+  `flowgrid`, which is taken. Publishing under a scope removes the collision, and
+  the design system's scope is where the grid belongs — it is a web component
+  alongside `@lime-soda/button`.
+
+  Everything user-facing moves with it, so that a consumer sees one vendor rather
+  than two:
+
+  - elements: `<flow-grid>` → `<ls-grid>`, and likewise `ls-grid-instance`,
+    `ls-grid-row`, `ls-grid-cell`, `ls-grid-header-cell`
+  - classes: `FlowGrid` → `Grid`, `FlowRow` → `GridRow`, `FlowCell` → `GridCell`,
+    `FlowInstance` → `GridInstance`, `FlowHeaderCell` → `GridHeaderCell`
+  - events: `flow-grid-ready` → `ls-grid-ready`, `flow-sort-changed` →
+    `ls-grid-sort-changed`, and the rest of the `flow-*` events
+  - custom properties: `--flow-*` → `--ls-grid-*`
+  - theme: `flow-grid/themes/flow-grid.css` → `@lime-soda/grid/themes/grid.css`
+
+  `FlowLayoutEngine` and the `@lime-soda/grid/flow` entry point keep their names:
+  they refer to the horizontal flow layout, which is still what they do.
+
+  Since 0.2.0 was never published there is no upgrade path to write — nothing
+  downstream can be on the old name.
+
+- f603a80: Default to a trading density, and set figures in tabular widths.
+
+  Rows are 24px rather than 32px, cells 12px and headers 11px, so a monitor holds
+  roughly a third more instruments.
+
+  `numericVariant` is a new theme token, resolving to `tabular-nums slashed-zero`.
+  Tabular widths mean every digit takes the same advance, so a column of prices
+  aligns on the decimal without being set in a monospace face, and a number does
+  not visibly reflow as it ticks. The slashed zero is for instrument codes, where
+  `0` and `O` sit next to each other. It replaces a hard-coded
+  `font-variant-numeric: tabular-nums` in the cell, so it is now themeable and
+  documented in the manifest like every other token.
+
+- 786da6d: Let a modified click select, so a pointer can always reach selection.
+
+  `checkboxColumn` defaults on and `clickToSelect` defaults off, which together
+  left a grid configured with no checkbox column selectable by keyboard and inert
+  to a mouse — the pair of defaults was reachable, and broken, without setting
+  anything unusual.
+
+  Ctrl-click, or Cmd-click on macOS, now selects whatever `clickToSelect` says.
+  That keeps the plain click free to mean something else in the application —
+  opening a detail panel, say — which is why the option stays off by default, and
+  it means the option never has to be turned on merely to make selection possible.
+
+  `clickSelects` still reports the plain click alone, since a range module reads
+  it to decide whether to agree with row clicks.
+
+- e50b72d: Take theming from the design system rather than from a stylesheet of its own.
+
+  Every `--grid-*` property is now a design token declared in
+  `support/tokens/components/grid.json` against the semantic tier, so the grid
+  inherits the palette, the spacing scale and the light/dark pair the rest of the
+  system uses. The host adopts those declarations the way the button does.
+
+  Breaking, though nothing is published on the old name:
+
+  - Custom properties are `--grid-*`, not `--ls-grid-*`, matching the convention
+    that names them after the element minus its `ls-` prefix
+  - `@lime-soda/grid/themes/grid.css` is gone, and with it the
+    `prefers-color-scheme` block and the `data-ls-grid-theme` override. Light and
+    dark now follow `color-scheme`, because the semantic tier resolves through CSS
+    `light-dark()`
+  - An application must load `@lime-soda/tokens/variables.css`. The grid used to
+    carry a literal fallback for every colour and size; those are gone, so the
+    tokens are the only source of its appearance
+
+  The `theme` option is unchanged: a `GridTheme` object still overrides any token
+  on the host, and is still validated against the same schema. A test now checks
+  that schema against the design tokens themselves, in both directions, so a token
+  cannot exist on the type with nothing behind it or in the design system with
+  nothing reading it.
+
+  The published manifest describes the elements for the first time — they are
+  registered imperatively rather than with a decorator, so the analyser had no tag
+  names to find — and `ls-grid` documents all 27 themeable properties with their
+  descriptions and defaults.
+
+- 7b8ad6b: Add `colSpan`, and define what a column function is given.
+
+  `colSpan` takes a number or a function and is resolved per row, because that is
+  where the answer lives: a group heading spans the grid and the instrument in the
+  same column beneath it does not. Covered columns render no cell, the spanning
+  cell carries `aria-colspan`, and arrow navigation steps over the span rather
+  than stopping inside a cell that was never drawn — the renderer and the focus
+  controller resolve spans through the same function so they cannot disagree.
+
+  Column function contexts are now three tiers rather than two ad-hoc shapes:
+  `CellValueContext` (data, node, column) for `valueGetter`, which sort and filter
+  call during projection where no laid-out row exists; `CellFormatContext` adds
+  the resolved value; `CellContext` adds the row, for anything running at render
+  time, which is what makes per-row decisions like `colSpan` possible.
+  `ValueGetterParams` and `ValueFormatterParams` remain as deprecated aliases.
+
+  `cellClass` is gone. It was declared on `ColumnDef` and never read by anything,
+  and a class on a cell cannot be reached by page CSS in any case — `::part(cell)`
+  is the way to style structure now that parts are forwarded.
+
+- f603a80: Repoint the base theme at trading interfaces.
+
+  The palette was a bright green and a bright pink — opinionated, and hard to sit
+  in front of all day next to coloured market data. The primary is now a muted
+  teal and the secondary a warm taupe, with a neutral grey ramp in place of the
+  blue-tinted one, so the chrome stays out of the way of the data on top of it.
+
+  Every foreground and background pairing in the semantic tier now clears WCAG AA
+  in both modes, the tightest at 5.48:1. The old white-on-green was 2.27:1. Part
+  of the fix is that the accent label inverts between modes — white on the darker
+  light-mode teal, near-black on the lighter dark-mode one — because white on a
+  light accent cannot pass. The button's Storybook accessibility check is back to
+  failing the build rather than merely reporting.
+
+  Everything is a step denser, which is the point of a trading surface: 13px body
+  text where it was 16px, component spacing from 2px to 16px where it was 4px to
+  32px, and tighter corner radii.
+
+  Breaking: `color.green` and `color.pink` no longer exist, and every `theme.*`
+  value has moved. Anything referencing the primitives by name needs updating;
+  anything referencing the semantic tier keeps working and simply looks different.
+
+- 2593a93: Make arrow-key navigation part of core rather than an optional module.
+
+  The grid announces `role="grid"`, and the ARIA pattern for that role requires
+  arrow navigation: assistive technology tells the user this is a grid and that
+  arrows move around it. With navigation in an optional module, a default grid
+  made that announcement and then ignored every arrow — an incorrect
+  announcement, not a missing convenience.
+
+  Core now handles the four arrows, Tab in reading order, and Escape. Tab is here
+  for a separate reason: it is allowed to run out at either end so focus leaves
+  the grid, and a grid you cannot Tab out of is a keyboard trap under WCAG 2.1.2
+  whatever role it claims.
+
+  The keyboard module keeps everything the pattern lists as optional — Home and
+  End, the page keys, instance jumps, and the skip-row predicate — and is still
+  offered every key first, so installing it replaces the floor rather than
+  competing with it. Nothing changes for a grid that already imports it.
+
+  Core grows 0.2 kB gzipped. The module still costs 0.6 kB.
+
+- 1f65a00: Close the last gaps between the two components' theming.
+
+  The button's focus ring was two hard-coded widths and a colour borrowed from the
+  primary variant; it is now `--button-focus-width`, `--button-focus-offset` and
+  `--button-focus-color`, with the disabled opacity tokenised alongside. No
+  literal values remain in either component's styles.
+
+  The grid's nine control knobs — expander size, sort indicator and badge sizes,
+  filter input width, padding and font size, instance border width and disabled
+  opacity — were literals inlined as `var()` fallbacks, which made them the only
+  part of its appearance the design system could not reach. They are design tokens
+  now and part of the public `GridTheme`, which grows from 27 to 36 tokens. The
+  test that keeps the schema and the design tokens in step covers them, so the
+  exemption list they used to sit on is gone.
+
+### Patch Changes
+
+- c061be6: Document the parts and events in the manifest.
+
+  `::part()` is the supported way to restyle structure and the manifest is what
+  the MCP server and editor integrations read, so the grid publishing sixteen
+  reachable parts and describing none of them meant nobody could find them. The
+  analyser reports what `@csspart` and `@fires` tags tell it, and the grid had
+  neither.
+
+  `ls-grid` now documents all sixteen parts and eight events. Child elements carry
+  their own, and the host repeats the full set deliberately: a consumer writes
+  `ls-grid::part(cell)`, never `ls-grid-row::part(cell)`, so the host is where the
+  whole list belongs.
+
+  Four tests keep it honest, in both directions — every rendered part is
+  documented, everything forwarded is documented, nothing documented has been
+  renamed away, and the host lists the complete set. They read the source rather
+  than the built manifest so they pass on a clean checkout.
+
+- 05050dd: Fix keyboard navigation in the stacked layout when focus is in the header.
+
+  The key handler was bound to the scroller, and the stack renders its header in
+  chrome above the scroller rather than inside it. So arrowing up into a stacked
+  header left focus somewhere no key could reach: the body navigated, the header
+  was inert. It is bound to the host now, so no part of the grid can sit outside
+  the handler, whatever chrome is added later.
+
+- c893589: Make `::part` actually reach the grid's internals.
+
+  The README has always listed parts as the way to restyle structure, but `part`
+  does not cross a shadow boundary on its own — each host in between has to
+  forward it with `exportparts`, and nothing did. So `ls-grid::part(scroller)` and
+  `::part(instance)` worked, being in the grid's own shadow root, while
+  `::part(cell)`, `::part(row)`, `::part(header-cell)`, `::part(cell-content)` and
+  every module part silently matched nothing.
+
+  Forwarding now runs the whole chain — grid → instance → row → cell, and out of
+  cell renderers, which are a shadow root each again. Rows gain a `row` part,
+  which they never had.
+
+  Modules declare their part names through a new optional `parts` on the module
+  contract, because the elements that forward them render before any module
+  markup exists. `tree-expander`, `sort-indicator`, `filter-input` and
+  `selection-checkbox` are reachable as a result.
+
+  Seven browser tests style the grid through the host exactly as a consumer would
+  and read the result off the element, one per depth, so a broken link in the
+  chain fails rather than going quiet.
+
+- 7f573d4: Make the focus ring its own semantic token, and the same colour in both
+  components.
+
+  `theme.color.focus` is blue — `color.blue.600` in light, `400` in dark. It stays
+  deliberately apart from the accent: an accent says "this is selected" and a ring
+  says "the keyboard is here", and a keyboard user needs to tell those apart on
+  the same row.
+
+  It also stops both components borrowing a semantic that means something else.
+  The grid reached through `theme.color.info`, so restyling an informational
+  banner would have moved every focus ring; the button reached through the primary
+  and so had a teal ring where the grid had a blue one. Both now point at the same
+  token.
+
+  The ring clears the WCAG 2.2 non-text threshold of 3:1 everywhere it lands:
+  5.17:1 on the page, 4.95:1 on a raised surface and 4.37:1 on a selected row in
+  light mode, and 7.83 / 6.97 / 5.74 in dark.
+
+- 4660828: Reference tokens through the generated module rather than by writing the
+  property names out, matching how the button consumes its own:
+  `${tokens.borderSubtle}` instead of `var(--grid-border-subtle)`, 56 references
+  across eight files.
+
+  The output is identical — the token exports are `css` literals holding exactly
+  that `var()` — but a mistyped name is now a compile error rather than dead CSS,
+  and the name is written once instead of once per use.
+
+  Raw `var()` remains only for the internal geometry a component sets and reads
+  itself, which has no token behind it: instance width and height, the column
+  template, spacer and sticky heights, scroll offset, scrollbar width and tree
+  depth.
+
+- 2edb37b: Memoise the `exportparts` value instead of rebuilding it per cell.
+
+  Forwarding parts across the shadow boundaries means an `exportparts` string on
+  every row, cell, header cell and cell renderer. It was recomputed on each of
+  them on every render — a `flatMap` for the module parts, then a `Set`, a spread
+  and a `join` — even though the result changes only when the module set does. A
+  ticking cell rebuilt the identical string every frame.
+
+  The registry now hands back an identity-stable array of module parts, and the
+  string is cached against it, so a render after the first is a `WeakMap` lookup.
+  Tests pin it by identity rather than equality, since a correct-but-rebuilt
+  string would pass an equality check and still allocate.
+
+- decdf55: Fix focus and arrow keys on the stacked layout's pinned group band.
+
+  The band is a copy of rows that are also in the body, drawn over them. It was
+  built as an instance with an id of its own — `${id}-sticky` — which the layout
+  did not contain, so a click on one of its cells put focus at a position the
+  focus controller could not locate. Every arrow key afterwards went unhandled,
+  which meant the browser scrolled the body instead of the grid moving, and a
+  group row reached with the keyboard showed no ring because the ring was on the
+  body row hidden underneath the band.
+
+  The band now carries the same id as the instance it echoes, so a position taken
+  from it is a real one, and a new `pinned` flag keeps its cells out of the tab
+  order — the rows it mirrors are already in it. As a side effect the band shows
+  the focus ring for the row it covers, which is the visible element.
+
+- Updated dependencies [004aa74]
+- Updated dependencies [7f573d4]
+- Updated dependencies [f603a80]
+  - @lime-soda/tokens@0.2.0
+
 ## Before publication
 
 The grid was built in a separate repository under the name `flow-grid` and

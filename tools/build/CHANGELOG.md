@@ -1,5 +1,14 @@
 # @lime-soda/build
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [004aa74]
+- Updated dependencies [7f573d4]
+- Updated dependencies [f603a80]
+  - @lime-soda/tokens@0.2.0
+
 ## 0.1.2
 
 ### Patch Changes
