@@ -84,7 +84,7 @@ interface Args {
   selectionMode: 'multi' | 'single';
   checkboxColumn: boolean;
   treeSelectionScope: 'self' | 'children' | 'filteredChildren';
-  clickToSelect: boolean;
+  clickToSelect: 'default' | 'on' | 'off';
 }
 
 /**
@@ -196,8 +196,10 @@ const meta: Meta<Args> = {
       table: { category: 'Selection' },
     },
     clickToSelect: {
-      control: 'boolean',
-      description: 'Select by clicking anywhere in the row, not only the checkbox.',
+      control: 'inline-radio',
+      options: ['default', 'on', 'off'],
+      description:
+        'Select by clicking anywhere in the row, not only the checkbox. Left at `default` it follows the checkbox column: on when there is none, so a pointer can always select, and off when there is, where a row click is free to mean something else. Turn the checkboxes off and leave this at `default` to see that.',
       table: { category: 'Selection' },
     },
   },
@@ -223,7 +225,7 @@ export const BondMarket: StoryObj<Args> = {
     selectionMode: 'multi',
     checkboxColumn: true,
     treeSelectionScope: 'filteredChildren',
-    clickToSelect: false,
+    clickToSelect: 'default',
   },
   render: (args) => {
     const gridRef = createRef<Grid<Bond>>();
@@ -259,7 +261,9 @@ export const BondMarket: StoryObj<Args> = {
     selection.setOptions({
       mode: args.selectionMode,
       checkboxColumn: args.checkboxColumn,
-      clickToSelect: args.clickToSelect,
+      // `undefined` is meaningful here: it lets the module derive the default
+      // from the checkbox column, which passing a boolean would override.
+      clickToSelect: args.clickToSelect === 'default' ? undefined : args.clickToSelect === 'on',
     });
     // Group behaviour belongs to the module that supplies it.
     bondMarketTreeSelection.setOptions({ scope: args.treeSelectionScope });

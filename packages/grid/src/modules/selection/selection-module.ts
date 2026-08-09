@@ -41,8 +41,19 @@ export interface SelectionModuleOptions {
   checkboxColumn?: boolean;
   /** Width of that column in px. Defaults to 28. */
   checkboxColumnWidth?: number;
-  /** Select a row by clicking anywhere in it. Off by default. Works in either mode. */
-  clickToSelect?: boolean;
+  /**
+   * Select a row by clicking anywhere in it.
+   *
+   * Defaults to whether the checkbox column is absent, so there is always some
+   * way to select with a pointer. With checkboxes present a row click is left
+   * alone, since it is free to mean something else — opening a detail panel,
+   * say. Set it explicitly to have both, or neither.
+   *
+   * Explicitly `| undefined` so that setting it back to undefined at runtime
+   * means "derive again" rather than being rejected: `setOptions` merges, so
+   * omitting the key would leave the previous choice in place.
+   */
+  clickToSelect?: boolean | undefined;
 
   /**
    * Make a plain row click add to the selection instead of replacing it, so
@@ -199,7 +210,11 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
 
   /** True when row clicks select, which a range module needs in order to agree. */
   get clickSelects(): boolean {
-    return this.options.clickToSelect ?? false;
+    // Derived, not a flat default: with the checkbox column off and this off,
+    // the module had no pointer affordance at all — selectable by keyboard,
+    // inert to a mouse, which reads as the module being broken rather than as
+    // an option being unset.
+    return this.options.clickToSelect ?? !this.hasCheckboxColumn;
   }
 
   get selectionMode(): SelectionMode {
@@ -493,7 +508,7 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
     // Attached whatever the state. Putting it only on selected rows meant
     // clicking could deselect but never select — the option looked broken
     // because the rows that needed the handler most were the ones without it.
-    const activation = this.options.clickToSelect
+    const activation = this.clickSelects
       ? { onActivate: (event: Event) => this.activate(ctx.row.rowId, event as MouseEvent) }
       : {};
 

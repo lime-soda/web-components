@@ -257,3 +257,31 @@ describe('selection modes', () => {
     expect(activation(clickOnly)).toBeTypeOf('function');
   });
 });
+
+describe('a mouse route to selection always exists', () => {
+  // The module has two affordances — a checkbox column and click-to-select —
+  // and both were opt-out and opt-in respectively. Turn the checkboxes off and
+  // the pair left nothing a mouse could do: the rows were selectable by
+  // keyboard and inert to a pointer, which reads as the module being broken.
+  const rowClickSelects = (options: SelectionModuleOptions) => {
+    const selection = new SelectionModule<Row>(options);
+    return selection.clickSelects;
+  };
+
+  it('selects on row click when there is no checkbox column', () => {
+    expect(rowClickSelects({ checkboxColumn: false })).toBe(true);
+    expect(rowClickSelects({ mode: 'single', checkboxColumn: false })).toBe(true);
+  });
+
+  it('leaves row clicks alone when the checkbox column provides one', () => {
+    // With checkboxes present, a row click is free to mean something else —
+    // opening a detail panel, say — so it stays opt-in.
+    expect(rowClickSelects({})).toBe(false);
+    expect(rowClickSelects({ mode: 'single' })).toBe(false);
+  });
+
+  it('still honours an explicit choice either way', () => {
+    expect(rowClickSelects({ clickToSelect: true })).toBe(true);
+    expect(rowClickSelects({ checkboxColumn: false, clickToSelect: false })).toBe(false);
+  });
+});
