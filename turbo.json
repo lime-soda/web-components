@@ -11,9 +11,11 @@
       "outputs": ["custom-elements.json"]
     },
     "typecheck": {
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "check": {
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "lint": {

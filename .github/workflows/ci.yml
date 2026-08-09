@@ -53,10 +53,16 @@ jobs:
       # serves every package that needs it.
       - run: pnpm --filter @lime-soda/grid exec playwright install --with-deps chromium
 
-      # Formatting, lint and types in one pass.
+      # Build first. `@lime-soda/tokens` is generated — Style Dictionary writes
+      # its only artefacts — so a package importing `@lime-soda/tokens/<name>`
+      # cannot be typechecked until they exist. Turbo runs each package's own
+      # typecheck and check in dependency order on the way.
+      - run: pnpm build
+
+      # Then the whole repo in one pass, which also covers the files that belong
+      # to no package: the root config, the workflow, the docs.
       - run: pnpm check
       - run: pnpm test
-      - run: pnpm build
 
       # Budgets, not timings: these catch an order-of-magnitude regression such
       # as a lost memo or a retained element, not a few ms of runner noise.
