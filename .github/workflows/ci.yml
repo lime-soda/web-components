@@ -122,18 +122,15 @@ jobs:
 
       - uses: pnpm/action-setup@v6
 
+      # Node 24 is load-bearing here, not just current: OIDC trusted publishing
+      # needs npm >= 11.5.1 and Node 24 bundles 11.17. Node 22 still ships
+      # npm 10.9, where the publish does not error on the version — it falls
+      # back to wanting a token and fails on authentication instead.
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
-
-      # Publishing is by OIDC trusted publishing, not a token, and npm only
-      # supports that from 11.5.1. Below it the publish does not error — it
-      # falls back to wanting a token and fails on authentication instead,
-      # which is a confusing way to find out. Node 24 currently bundles a new
-      # enough npm; this makes it independent of that.
-      - run: npm install -g npm@latest
 
       - run: pnpm install --frozen-lockfile
 
