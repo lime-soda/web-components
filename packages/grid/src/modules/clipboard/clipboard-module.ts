@@ -13,13 +13,21 @@ import type { GridModule, ModuleContext } from '../types.js';
  */
 export interface ExportOptions {
   /**
-   * `selected` copies the selected rows, `all` the whole projection.
+   * Which rows to take.
    *
-   * Defaults to `selected` when a module reports a selection and something is
-   * selected, and to `all` otherwise — so Ctrl-C does the obvious thing whether
-   * or not anything is picked out.
+   * - `visible` — the projection: filtered, sorted, and without the children of
+   *   a collapsed group. What is on the screen.
+   * - `all` — every row in the store, in the order it was given, ignoring the
+   *   filter, the sort and any collapsed group. What the grid was handed.
+   * - `selected` — the selection, ordered by the projection where those rows
+   *   appear in it. Rows that are selected but not visible — filtered out, or
+   *   collapsed under a selected group — are still included, because dropping
+   *   them would lose data the user believes they picked.
+   *
+   * Unset means `selected` when something is selected and `visible` when
+   * nothing is, so Ctrl-C does the obvious thing either way.
    */
-  rows?: 'selected' | 'all';
+  rows?: 'selected' | 'visible' | 'all';
   /** Column ids to include, in this order. Defaults to every visible column. */
   columns?: readonly string[];
   /** Prepend the column headings. On by default. */
@@ -163,17 +171,28 @@ export class ClipboardModule<TData = unknown> implements GridModule<TData> {
       .filter((column): column is ResolvedColumn<TData> => column !== undefined);
   }
 
-  /** Row ids to copy, in projection order. */
+  /** Row ids to copy, in the order they should appear. */
   private rowsFor(options: ExportOptions): readonly string[] {
-    const projected = (this.context?.pipeline.projector.rows.get() ?? []).map((row) => row.rowId);
+    if (options.rows === 'all') return this.storedRowIds();
 
-    if (options.rows === 'all') return projected;
+    const projected = this.visibleRowIds();
+    if (options.rows === 'visible') return projected;
 
     const selected = this.selectedRowIds();
-    if (options.rows === 'selected') return ordered(projected, selected);
+    if (options.rows === 'selected') return ordered(projected, selected, this.storedRowIds());
 
-    // Unspecified: whatever is selected, or everything if nothing is.
-    return selected.length > 0 ? ordered(projected, selected) : projected;
+    // Unspecified: whatever is selected, or what is on screen if nothing is.
+    return selected.length > 0 ? ordered(projected, selected, this.storedRowIds()) : projected;
+  }
+
+  /** The projection: filtered, sorted, collapsed groups closed. */
+  private visibleRowIds(): readonly string[] {
+    return (this.context?.pipeline.projector.rows.get() ?? []).map((row) => row.rowId);
+  }
+
+  /** Every row the store holds, in the order it was given. */
+  private storedRowIds(): readonly string[] {
+    return (this.context?.pipeline.store.rows.get() ?? []).map((node) => node.id);
   }
 
   private selectedRowIds(): readonly string[] {
@@ -187,10 +206,25 @@ export class ClipboardModule<TData = unknown> implements GridModule<TData> {
  *
  * Pasting a block that runs bottom to top because that is how it was
  * ctrl-clicked would be its own small betrayal.
+ *
+ * Anything selected but not on screen follows, in store order. A selection can
+ * legitimately reach rows the projection does not show — a filter applied after
+ * selecting, or a collapsed group whose children the tree-selection module
+ * selected on its behalf — and copying fewer rows than the user picked is worse
+ * than copying them out of view.
  */
-function ordered(projected: readonly string[], selected: readonly string[]): readonly string[] {
+function ordered(
+  projected: readonly string[],
+  selected: readonly string[],
+  stored: readonly string[],
+): readonly string[] {
   const wanted = new Set(selected);
-  return projected.filter((rowId) => wanted.has(rowId));
+  const onScreen = projected.filter((rowId) => wanted.has(rowId));
+
+  const seen = new Set(onScreen);
+  const offScreen = stored.filter((rowId) => wanted.has(rowId) && !seen.has(rowId));
+
+  return [...onScreen, ...offScreen];
 }
 
 /** Quotes a field only when it would otherwise break the row. */

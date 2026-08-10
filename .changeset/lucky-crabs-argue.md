@@ -4,9 +4,12 @@
 
 Add `@lime-soda/grid/clipboard`: copy to the clipboard, and CSV or TSV export.
 
-Ctrl-C — Cmd-C on macOS — copies the selection, or the whole projection when
-nothing is selected. `api.getDataAsCsv()`, `getDataAsTsv()` and
-`copyToClipboard()` do the same from code.
+Ctrl-C — Cmd-C on macOS — copies the selection, or the visible rows when nothing
+is selected. `api.getDataAsCsv()`, `getDataAsTsv()` and `copyToClipboard()` do
+the same from code, and take a `rows` option that says which set to take:
+`visible` for the projection as filtered and sorted, `all` for every row the
+store holds regardless of filter or collapsed groups, `selected` for the
+selection. Neither `visible` nor `all` needs anything selected.
 
 What comes out is what is on screen rather than what is underneath: rows in
 projection order, so a filter and a sort are respected, and each cell through

@@ -145,15 +145,37 @@ import { ClipboardModule } from '@lime-soda/grid/clipboard';
 
 grid.gridOptions = { columns, modules: [new ClipboardModule<Quote>()] };
 
-const csv = grid.api.getDataAsCsv();
-await grid.api.copyToClipboard({ rows: 'all' });
+// Everything on screen, no selection needed
+const visible = grid.api.getDataAsCsv({ rows: 'visible' });
+
+// Everything the grid holds, ignoring the filter and any collapsed group
+const everything = grid.api.getDataAsCsv({ rows: 'all' });
+
+await grid.api.copyToClipboard();
 ```
 
-What comes out is what is on screen, not what is underneath: rows in projection
-order so a filter and a sort are respected, and each cell through its own
-`valueFormatter`, so a price copies with the decimals it was displayed with. A
-field containing the delimiter, a quote or a newline is quoted — which is not a
-corner case here, since a formatted size carries thousands separators.
+`rows` says which set to take, and the distinction is deliberate:
+
+|            |                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------- |
+| `visible`  | The projection — filtered, sorted, collapsed groups closed. What is on the screen. |
+| `all`      | Every row in the store, in the order it was given. What the grid was handed.       |
+| `selected` | The selection, in projection order.                                                |
+
+Left unset it copies the selection if there is one and the visible rows if there
+is not, so Ctrl-C does the obvious thing either way. Neither `visible` nor `all`
+needs anything selected.
+
+Each cell goes through its own `valueFormatter`, so a price copies with the
+decimals it was displayed with rather than as a float. A field containing the
+delimiter, a quote or a newline is quoted — not a corner case here, since a
+formatted size carries thousands separators and would otherwise split into three
+columns.
+
+One case worth knowing: a row can be selected and not visible, if a filter was
+applied after selecting or if a collapsed group's children were selected on its
+behalf. Those rows are still copied, after the visible ones, because copying
+fewer rows than the user picked loses data silently.
 
 It composes with selection without depending on it: a selection module declares
 what is selected, and the clipboard module asks whoever provides that. With no

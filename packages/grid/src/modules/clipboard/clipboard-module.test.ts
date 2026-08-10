@@ -148,13 +148,60 @@ describe('ClipboardModule', () => {
 
   it('works with no selection module at all', () => {
     // The point of it being standalone: nothing here declares a selection, and
-    // asking for one falls back to the projection rather than throwing.
+    // asking for one falls back rather than throwing.
     const { clipboard } = setup();
 
     expect(lines(clipboard.toDelimitedText({ rows: 'selected' }))).toHaveLength(1); // headers only
     expect(lines(clipboard.toDelimitedText({ rows: 'all', includeHeaders: false }))).toHaveLength(
       3,
     );
+  });
+
+  it('separates what is on screen from everything the grid holds', () => {
+    // The distinction the api needs: `visible` is the filtered, sorted
+    // projection, `all` is the data as it was given. Exporting a filtered grid
+    // and silently getting only the filtered rows — or only the unfiltered ones
+    // — are both wrong depending on what was asked for.
+    const filter = new FilterModule<Bond>();
+    const { clipboard } = setup([filter]);
+
+    filter.setQuickFilter('UKT');
+
+    expect(
+      lines(clipboard.toDelimitedText({ rows: 'visible', includeHeaders: false })),
+    ).toHaveLength(2);
+    expect(lines(clipboard.toDelimitedText({ rows: 'all', includeHeaders: false }))).toHaveLength(
+      3,
+    );
+  });
+
+  it('exports everything without needing a selection', () => {
+    const selection = new SelectionModule<Bond>();
+    const { clipboard } = setup([selection]);
+
+    selection.setRowSelected('a', true);
+
+    // Something is selected, but `all` overrides the default rather than
+    // intersecting with it.
+    expect(lines(clipboard.toDelimitedText({ rows: 'all', includeHeaders: false }))).toHaveLength(
+      3,
+    );
+  });
+
+  it('keeps selected rows the filter has hidden', () => {
+    // Select, then filter: the rows are still selected and the user still
+    // believes they picked them, so copying fewer than that loses data.
+    const filter = new FilterModule<Bond>();
+    const selection = new SelectionModule<Bond>();
+    const { clipboard } = setup([filter, selection]);
+
+    selection.setRowSelected('c', true); // DBR
+    filter.setQuickFilter('UKT'); // hides it
+
+    const rows = lines(clipboard.toDelimitedText({ rows: 'selected', includeHeaders: false }));
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toContain('DBR 2% 2032');
   });
 
   it('leaves the selection checkbox column out', () => {
