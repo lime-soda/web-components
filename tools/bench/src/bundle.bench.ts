@@ -35,6 +35,7 @@ const MARKERS = {
   // the ARIA pattern still identifies this module.
   keyboard: 'PageDown',
   'cell-flash': 'getDirection',
+  clipboard: 'toDelimitedText',
 } as const;
 
 type ModuleName = keyof typeof MARKERS;
@@ -48,6 +49,7 @@ const ENTRIES: Record<ModuleName, string> = {
   'selection/row-range': 'RowRangeModule',
   keyboard: 'KeyboardModule',
   'cell-flash': 'CellFlashModule',
+  clipboard: 'ClipboardModule',
 };
 
 let sandbox: string;
