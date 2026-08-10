@@ -19,7 +19,7 @@
     "@lime-soda/tsconfig": "workspace:*",
     "esbuild": "^0.28.1",
     "playwright": "^1.56.1",
-    "typescript": "~5.9.3",
+    "typescript": "~7.0.0",
     "vitest": "^4.1.10"
   }
 }

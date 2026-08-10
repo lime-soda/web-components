@@ -44,7 +44,7 @@
     "axe-core": "^4.13.0",
     "lit": "^3.3.3",
     "playwright": "^1.56.1",
-    "typescript": "~5.9.3",
+    "typescript": "~7.0.0",
     "vitest": "^4.1.10"
   },
   "customElements": "custom-elements.json"
