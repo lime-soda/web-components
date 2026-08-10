@@ -26,7 +26,7 @@
     "@storybook/addon-docs": "^10.0.0",
     "@storybook/addon-vitest": "^10.0.0",
     "@storybook/web-components-vite": "^10.0.0",
-    "chromatic": "^16.0.0",
+    "chromatic": "^18.0.0",
     "lit": "^3.3.3",
     "playwright": "^1.54.2",
     "storybook": "^10.0.0",
