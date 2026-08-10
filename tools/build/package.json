@@ -2,7 +2,7 @@
   "name": "@lime-soda/build",
   "private": true,
   "type": "module",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Custom Elements Manifest generation, with design token CSS properties",
   "bin": {
     "build-manifest": "./build-manifest.js"
