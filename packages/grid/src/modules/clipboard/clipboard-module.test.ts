@@ -5,6 +5,7 @@ import { ModuleRegistry } from '../module-registry.js';
 import { SelectionModule } from '../selection/selection-module.js';
 import { SortModule } from '../sort/sort-module.js';
 import { FilterModule } from '../filter/filter-module.js';
+import { TreeModule } from '../tree/tree-module.js';
 import { ClipboardModule } from './clipboard-module.js';
 import type { GridModule } from '../types.js';
 
@@ -157,7 +158,19 @@ describe('ClipboardModule', () => {
     );
   });
 
-  it('separates what is on screen from everything the grid holds', () => {
+  it('includes the children of a collapsed group', () => {
+    // Collapsing is a way of looking at the data, not a statement about which
+    // rows exist. An export that respected it would hand back the headings of a
+    // mostly-collapsed tree and none of its contents.
+    const tree = new TreeModule<Bond>({ getParentId: () => null, defaultExpanded: false });
+    const { clipboard } = setup([tree]);
+
+    const rows = lines(clipboard.toDelimitedText({ rows: 'filtered', includeHeaders: false }));
+
+    expect(rows).toHaveLength(3);
+  });
+
+  it('separates the filtered set from everything the grid holds', () => {
     // The distinction the api needs: `visible` is the filtered, sorted
     // projection, `all` is the data as it was given. Exporting a filtered grid
     // and silently getting only the filtered rows — or only the unfiltered ones
@@ -168,11 +181,39 @@ describe('ClipboardModule', () => {
     filter.setQuickFilter('UKT');
 
     expect(
-      lines(clipboard.toDelimitedText({ rows: 'visible', includeHeaders: false })),
+      lines(clipboard.toDelimitedText({ rows: 'filtered', includeHeaders: false })),
     ).toHaveLength(2);
     expect(lines(clipboard.toDelimitedText({ rows: 'all', includeHeaders: false }))).toHaveLength(
       3,
     );
+  });
+
+  it('keeps the sort when exporting everything', () => {
+    // The rows a filter removed have no position in the projection, so the
+    // order cannot be read off it — the sort is reapplied to the full set.
+    const sort = new SortModule<Bond>();
+    const filter = new FilterModule<Bond>();
+    const { clipboard } = setup([sort, filter]);
+
+    sort.setSortModel([{ colId: 'price', direction: 'desc' }]);
+    filter.setQuickFilter('UKT');
+
+    const rows = lines(clipboard.toDelimitedText({ rows: 'all', includeHeaders: false }));
+
+    expect(rows).toHaveLength(3);
+    // 101.25, then 100.125 — the filtered-out DBR — then 98.5.
+    expect(rows[0]).toContain('UKT 4% 2030');
+    expect(rows[1]).toContain('DBR 2% 2032');
+    expect(rows[2]).toContain('UKT 1% 2041');
+  });
+
+  it('falls back to the order it was given when nothing sorts', () => {
+    const { clipboard } = setup();
+
+    const rows = lines(clipboard.toDelimitedText({ rows: 'all', includeHeaders: false }));
+
+    expect(rows[0]).toContain('UKT 4% 2030');
+    expect(rows[2]).toContain('DBR 2% 2032');
   });
 
   it('exports everything without needing a selection', () => {

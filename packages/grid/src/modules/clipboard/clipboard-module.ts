@@ -1,6 +1,8 @@
 import { formatCellValue } from '../../columns/resolve-columns.js';
 import type { ResolvedColumn } from '../../columns/types.js';
 import type { GridModule, ModuleContext } from '../types.js';
+import type { DisplayRow } from '../../layout/types.js';
+import type { RowNode } from '../../store/types.js';
 
 /**
  * What "copy" means, when it is not simply everything.
@@ -15,19 +17,20 @@ export interface ExportOptions {
   /**
    * Which rows to take.
    *
-   * - `visible` — the projection: filtered, sorted, and without the children of
-   *   a collapsed group. What is on the screen.
-   * - `all` — every row in the store, in the order it was given, ignoring the
-   *   filter, the sort and any collapsed group. What the grid was handed.
-   * - `selected` — the selection, ordered by the projection where those rows
-   *   appear in it. Rows that are selected but not visible — filtered out, or
-   *   collapsed under a selected group — are still included, because dropping
-   *   them would lose data the user believes they picked.
+   * - `filtered` — the rows the filter kept, in the sorted order.
+   * - `all` — every row the store holds, in the sorted order, filter ignored.
+   * - `selected` — the selection.
    *
-   * Unset means `selected` when something is selected and `visible` when
+   * The line between the first two is the filter and nothing else. Both include
+   * the children of a collapsed group: collapsing is a way of looking at the
+   * data, not a statement about which rows there are, and an export that
+   * dropped them would quietly return the headings of a mostly-collapsed tree
+   * and none of its contents.
+   *
+   * Unset means `selected` when something is selected and `filtered` when
    * nothing is, so Ctrl-C does the obvious thing either way.
    */
-  rows?: 'selected' | 'visible' | 'all';
+  rows?: 'selected' | 'filtered' | 'all';
   /** Column ids to include, in this order. Defaults to every visible column. */
   columns?: readonly string[];
   /** Prepend the column headings. On by default. */
@@ -60,6 +63,28 @@ interface SelectedRowsProvider {
 
 const providesSelectedRows = <T>(module: T): module is T & SelectedRowsProvider =>
   typeof (module as Partial<SelectedRowsProvider>).provideSelectedRowIds === 'function';
+
+/** A module that can order rows — the same order the projection is showing. */
+interface RowSortProvider<TData> {
+  provideRowSort(
+    rows: readonly DisplayRow[],
+    getNode: (id: string) => RowNode<TData> | undefined,
+  ): readonly DisplayRow[];
+}
+
+const providesRowSort = <T, TData>(module: T): module is T & RowSortProvider<TData> =>
+  typeof (module as Partial<RowSortProvider<TData>>).provideRowSort === 'function';
+
+/** A module that can drop rows — the same rows the projection is hiding. */
+interface RowFilterProvider<TData> {
+  provideRowFilter(
+    rows: readonly DisplayRow[],
+    getNode: (id: string) => RowNode<TData> | undefined,
+  ): readonly DisplayRow[];
+}
+
+const providesRowFilter = <T, TData>(module: T): module is T & RowFilterProvider<TData> =>
+  typeof (module as Partial<RowFilterProvider<TData>>).provideRowFilter === 'function';
 
 /** Columns that hold controls rather than values. */
 const DEFAULT_EXCLUDED = ['ls-grid-selection'];
@@ -173,26 +198,58 @@ export class ClipboardModule<TData = unknown> implements GridModule<TData> {
 
   /** Row ids to copy, in the order they should appear. */
   private rowsFor(options: ExportOptions): readonly string[] {
-    if (options.rows === 'all') return this.storedRowIds();
+    const everything = () => this.orderedRowIds({ filtered: false });
+    if (options.rows === 'all') return everything();
 
-    const projected = this.visibleRowIds();
-    if (options.rows === 'visible') return projected;
+    const filtered = this.orderedRowIds({ filtered: true });
+    if (options.rows === 'filtered') return filtered;
 
     const selected = this.selectedRowIds();
-    if (options.rows === 'selected') return ordered(projected, selected, this.storedRowIds());
+    if (options.rows === 'selected') return ordered(filtered, selected, everything());
 
-    // Unspecified: whatever is selected, or what is on screen if nothing is.
-    return selected.length > 0 ? ordered(projected, selected, this.storedRowIds()) : projected;
+    // Unspecified: whatever is selected, or the filtered set if nothing is.
+    return selected.length > 0 ? ordered(filtered, selected, everything()) : filtered;
   }
 
-  /** The projection: filtered, sorted, collapsed groups closed. */
-  private visibleRowIds(): readonly string[] {
-    return (this.context?.pipeline.projector.rows.get() ?? []).map((row) => row.rowId);
-  }
+  /**
+   * The store's rows, filtered or not, in the sorted order.
+   *
+   * Built from the store rather than read off the projection, because the
+   * projection has already grouped and collapsed by the time it exists — and
+   * the rows a filter removed have no position in it at all. Running the
+   * filter and sort stages directly gives the set without the grouping.
+   *
+   * Hierarchy is deliberately not reconstructed: grouping is a way of looking
+   * at the data, so an export is a flat list of records, each carrying its own.
+   * With no filter or sort module installed this is simply the order the data
+   * was given in.
+   */
+  private orderedRowIds({ filtered }: { filtered: boolean }): readonly string[] {
+    const store = this.context?.pipeline.store;
+    if (!store) return [];
 
-  /** Every row the store holds, in the order it was given. */
-  private storedRowIds(): readonly string[] {
-    return (this.context?.pipeline.store.rows.get() ?? []).map((node) => node.id);
+    const getNode = (id: string) => store.getRowNode(id);
+    let rows: readonly DisplayRow[] = store.rows
+      .get()
+      .map((node) => ({ id: node.id, rowId: node.id, meta: {} }));
+
+    const modules = this.context?.getModules() ?? [];
+
+    if (filtered) {
+      for (const module of modules) {
+        if (providesRowFilter<typeof module, TData>(module)) {
+          rows = module.provideRowFilter(rows, getNode);
+        }
+      }
+    }
+
+    for (const module of modules) {
+      if (providesRowSort<typeof module, TData>(module)) {
+        rows = module.provideRowSort(rows, getNode);
+      }
+    }
+
+    return rows.map((row) => row.rowId);
   }
 
   private selectedRowIds(): readonly string[] {

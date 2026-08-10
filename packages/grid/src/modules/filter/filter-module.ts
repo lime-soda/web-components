@@ -218,6 +218,21 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   // -- Filtering --------------------------------------------------------------
 
+  /**
+   * Applies the active filter to any list of rows.
+   *
+   * Declared for modules that need the filtered set outside the projection —
+   * export, which wants the rows a filter kept but not the grouping the
+   * projection applies afterwards. The stage below uses the same code, so the
+   * two cannot disagree about what the filter admits.
+   */
+  provideRowFilter(
+    rows: readonly DisplayRow[],
+    getNode: (id: string) => RowNode<TData> | undefined,
+  ): readonly DisplayRow[] {
+    return this.filter(rows, getNode);
+  }
+
   private filter(
     rows: readonly DisplayRow[],
     getNode: (id: string) => RowNode<TData> | undefined,

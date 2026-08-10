@@ -145,10 +145,10 @@ import { ClipboardModule } from '@lime-soda/grid/clipboard';
 
 grid.gridOptions = { columns, modules: [new ClipboardModule<Quote>()] };
 
-// Everything on screen, no selection needed
-const visible = grid.api.getDataAsCsv({ rows: 'visible' });
+// The rows the filter kept, no selection needed
+const shown = grid.api.getDataAsCsv({ rows: 'filtered' });
 
-// Everything the grid holds, ignoring the filter and any collapsed group
+// Every row the grid holds, filter ignored
 const everything = grid.api.getDataAsCsv({ rows: 'all' });
 
 await grid.api.copyToClipboard();
@@ -172,10 +172,9 @@ delimiter, a quote or a newline is quoted — not a corner case here, since a
 formatted size carries thousands separators and would otherwise split into three
 columns.
 
-One case worth knowing: a row can be selected and not visible, if a filter was
-applied after selecting or if a collapsed group's children were selected on its
-behalf. Those rows are still copied, after the visible ones, because copying
-fewer rows than the user picked loses data silently.
+One case worth knowing: a row can be selected and filtered out, if the filter
+was applied after selecting. Those rows are still copied, after the others,
+because copying fewer rows than the user picked loses data silently.
 
 It composes with selection without depending on it: a selection module declares
 what is selected, and the clipboard module asks whoever provides that. With no
