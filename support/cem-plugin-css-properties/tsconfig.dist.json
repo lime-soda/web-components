@@ -1,8 +1,18 @@
 {
   "extends": "@lime-soda/tsconfig",
   "compilerOptions": {
+    // TypeScript 7 no longer infers the common source directory when it emits:
+    // without this it refuses to guess where `dist` should be rooted.
+    "rootDir": "src",
     "noEmit": false,
-    "outDir": "dist"
+    "outDir": "dist",
+    // One pass emits the JavaScript and the declarations, as the component
+    // packages do. `package.json` points `types` at `dist/index.d.ts`, and this
+    // is the only build anything runs — a separate `build:types` script existed
+    // but nothing called it, so the published package promised types it did not
+    // ship.
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src/**/*.ts"]
 }

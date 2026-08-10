@@ -6,6 +6,10 @@
   // other.
   "compilerOptions": {
     "noEmit": false,
+    // The package root, not `src`: `index.ts` sits beside it and is the entry
+    // point, so this is what puts the build at `dist/index.js`. TypeScript 7
+    // no longer infers it.
+    "rootDir": ".",
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true

@@ -1,7 +1,0 @@
-{
-  "extends": "@lime-soda/tsconfig/types",
-  "compilerOptions": {
-    "outDir": "dist"
-  },
-  "include": ["src/**/*.ts"]
-}
