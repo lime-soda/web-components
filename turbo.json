@@ -4,7 +4,11 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build", "typecheck", "check"],
-      "outputs": ["dist/**/*.{js,css,map}", "storybook-static/**"]
+      // `.d.ts` has to be listed. It is not covered by `*.map` or `*.js`, so a
+      // cache hit used to restore a `dist` with the JavaScript and none of the
+      // declarations — invisible locally, where the files were already there,
+      // and a package published without types in CI.
+      "outputs": ["dist/**/*.{js,css,map,ts}", "storybook-static/**"]
     },
     "build:manifest": {
       "dependsOn": ["^build"],
