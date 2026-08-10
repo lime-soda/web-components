@@ -61,7 +61,7 @@ const setup = (modules: GridModule<Bond>[] = []) => {
 const lines = (text: string) => text.split('\n');
 
 describe('ClipboardModule', () => {
-  it('copies every projected row with its headings', () => {
+  it('copies every row with its headings', () => {
     const { clipboard } = setup();
 
     const rows = lines(clipboard.toDelimitedText());
@@ -110,7 +110,7 @@ describe('ClipboardModule', () => {
     expect(clipboard.toDelimitedText()).toContain('"UKT 4% ""on the run"""');
   });
 
-  it('follows the projection, so a filter and a sort come through', () => {
+  it('applies the filter and the sort', () => {
     const sort = new SortModule<Bond>();
     const filter = new FilterModule<Bond>();
     const { clipboard } = setup([sort, filter]);
@@ -171,10 +171,10 @@ describe('ClipboardModule', () => {
   });
 
   it('separates the filtered set from everything the grid holds', () => {
-    // The distinction the api needs: `visible` is the filtered, sorted
-    // projection, `all` is the data as it was given. Exporting a filtered grid
-    // and silently getting only the filtered rows — or only the unfiltered ones
-    // — are both wrong depending on what was asked for.
+    // The distinction the api needs, and the filter is the whole of it.
+    // Exporting a filtered grid and silently getting only the filtered rows —
+    // or only the unfiltered ones — are both wrong depending on what was asked
+    // for.
     const filter = new FilterModule<Bond>();
     const { clipboard } = setup([filter]);
 
