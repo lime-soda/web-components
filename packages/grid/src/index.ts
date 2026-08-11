@@ -47,8 +47,6 @@ export type {
   ResolvedColumn,
   ColumnResolutionOptions,
   CellRendererFn,
-  ValueGetterParams,
-  ValueFormatterParams,
 } from './columns/types.js';
 
 // Data.

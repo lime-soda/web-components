@@ -49,16 +49,8 @@ export interface CellContext<TData = unknown, TValue = unknown> extends CellForm
   readonly row: DisplayRow;
 }
 
-/** @deprecated Use {@link CellValueContext}. */
-export type ValueGetterParams<TData = unknown> = CellValueContext<TData>;
-/** @deprecated Use {@link CellFormatContext}. */
-export type ValueFormatterParams<TData = unknown, TValue = unknown> = CellFormatContext<
-  TData,
-  TValue
->;
-
 export type CellRendererFn<TData = unknown, TValue = unknown> = (
-  params: ValueFormatterParams<TData, TValue>,
+  params: CellFormatContext<TData, TValue>,
 ) => TemplateResult | string;
 
 /**
@@ -108,8 +100,8 @@ export interface ColumnDef<TData = unknown, TValue = unknown> {
   flex?: number;
   /** Names of entries in `columnTypes` to merge in beneath this definition. */
   type?: string | readonly string[];
-  valueGetter?: (params: ValueGetterParams<TData>) => TValue;
-  valueFormatter?: (params: ValueFormatterParams<TData, TValue>) => string;
+  valueGetter?: (params: CellValueContext<TData>) => TValue;
+  valueFormatter?: (params: CellFormatContext<TData, TValue>) => string;
   /** A custom element tag name, or a function returning a Lit template. */
   cellRenderer?: string | CellRendererFn<TData, TValue>;
   cellRendererParams?: Record<string, unknown>;
