@@ -134,6 +134,52 @@ a separate module, so it stays either way; excluding that would mean splitting
 the element itself. The reason to reach for `@lime-soda/grid/flow` is that it says
 what the application does, not that it saves much.
 
+## Getting data out
+
+`@lime-soda/grid/clipboard` copies to the system clipboard and serialises to CSV
+or TSV. Ctrl-C — Cmd-C on macOS — copies the selection, or the whole projection
+when nothing is selected.
+
+```ts
+import { ClipboardModule } from '@lime-soda/grid/clipboard';
+
+grid.gridOptions = { columns, modules: [new ClipboardModule<Quote>()] };
+
+// The rows the filter kept, no selection needed
+const shown = grid.api.getDataAsCsv({ rows: 'filtered' });
+
+// Every row the grid holds, filter ignored
+const everything = grid.api.getDataAsCsv({ rows: 'all' });
+
+await grid.api.copyToClipboard();
+```
+
+`rows` says which set to take, and the distinction is deliberate:
+
+|            |                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------- |
+| `visible`  | The projection — filtered, sorted, collapsed groups closed. What is on the screen. |
+| `all`      | Every row in the store, in the order it was given. What the grid was handed.       |
+| `selected` | The selection, in projection order.                                                |
+
+Left unset it copies the selection if there is one and the visible rows if there
+is not, so Ctrl-C does the obvious thing either way. Neither `visible` nor `all`
+needs anything selected.
+
+Each cell goes through its own `valueFormatter`, so a price copies with the
+decimals it was displayed with rather than as a float. A field containing the
+delimiter, a quote or a newline is quoted — not a corner case here, since a
+formatted size carries thousands separators and would otherwise split into three
+columns.
+
+One case worth knowing: a row can be selected and filtered out, if the filter
+was applied after selecting. Those rows are still copied, after the others,
+because copying fewer rows than the user picked loses data silently.
+
+It composes with selection without depending on it: a selection module declares
+what is selected, and the clipboard module asks whoever provides that. With no
+selection module installed it copies the projection and nothing breaks.
+
 ## Spanning columns
 
 A group row usually wants its heading across the grid rather than squeezed into
@@ -169,6 +215,7 @@ Every feature beyond the core is an additive module with its own entry point.
 | `@lime-soda/grid/selection/row-range` | Shift-click spans over contiguous rows                      |
 | `@lime-soda/grid/cell-flash`          | Directional flash on value change                           |
 | `@lime-soda/grid/keyboard`            | Home/End, page keys, instance jumps, skipping rows          |
+| `@lime-soda/grid/clipboard`           | Copy to the clipboard, and CSV or TSV export                |
 
 ```ts
 import { TreeModule } from '@lime-soda/grid/tree';
@@ -188,7 +235,7 @@ Measured with esbuild, minified and gzipped:
 
 | Imports               | Wire size |
 | --------------------- | --------- |
-| core only             | 28.7 kB   |
+| core only             | 30.2 kB   |
 | + selection/row-range | +0.4 kB   |
 | + keyboard            | +0.6 kB   |
 | + cell-flash          | +0.7 kB   |
@@ -197,7 +244,8 @@ Measured with esbuild, minified and gzipped:
 | + filter              | +1.5 kB   |
 | + tree                | +1.9 kB   |
 | + selection           | +2.4 kB   |
-| everything            | 37.1 kB   |
+| + clipboard           | +0.7 kB   |
+| everything            | 39.3 kB   |
 
 A bundle-composition check in CI asserts that an unimported module leaves no
 trace in the output, so this cannot quietly regress.

@@ -247,6 +247,21 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
 
   // -- Sorting ----------------------------------------------------------------
 
+  /**
+   * Applies the active sort to any list of rows.
+   *
+   * Declared for modules that need the order outside the projection — export,
+   * which has to sort rows the filter removed and so cannot read the order off
+   * the projection at all. The stage below uses the same code, so the two
+   * cannot disagree about what sorted means.
+   */
+  provideRowSort(
+    rows: readonly DisplayRow[],
+    getNode: (id: string) => RowNode<TData> | undefined,
+  ): readonly DisplayRow[] {
+    return this.sort(rows, getNode);
+  }
+
   private sort(
     rows: readonly DisplayRow[],
     getNode: (id: string) => RowNode<TData> | undefined,

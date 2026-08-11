@@ -252,6 +252,14 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    * With group membership installed these are the leaves — the instruments,
    * not the headings above them, which is what you would send to a basket.
    */
+  /**
+   * Declared for any module that needs to know what is selected — the clipboard
+   * module, for one — so it can find the capability rather than this class.
+   */
+  provideSelectedRowIds(): readonly string[] {
+    return this.getSelectedRows();
+  }
+
   getSelectedRows(): readonly string[] {
     const resolved = new Set<string>();
     for (const id of this.selected) {

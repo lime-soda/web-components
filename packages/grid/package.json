@@ -104,6 +104,11 @@
       "types": "./dist/modules/cell-flash/index.d.ts",
       "development": "./src/modules/cell-flash/index.ts",
       "default": "./dist/modules/cell-flash/index.js"
+    },
+    "./clipboard": {
+      "types": "./dist/modules/clipboard/index.d.ts",
+      "development": "./src/modules/clipboard/index.ts",
+      "default": "./dist/modules/clipboard/index.js"
     }
   },
   "scripts": {
