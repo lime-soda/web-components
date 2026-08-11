@@ -1,5 +1,14 @@
 # @lime-soda/storybook
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [a274376]
+- Updated dependencies [86b8b98]
+  - @lime-soda/grid@0.2.0
+  - @lime-soda/button@0.2.1
+
 ## 0.1.1
 
 ### Patch Changes

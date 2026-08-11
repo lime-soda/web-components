@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- b3606aa: Ship the type declarations the package already promised.
+
+  `package.json` pointed `types` at `dist/index.d.ts`, but the build emitted only
+  JavaScript — declarations came from a separate `build:types` script that nothing
+  ran. The one build now emits both, as the component packages do.
+
 ## 0.3.0
 
 ### Minor Changes
