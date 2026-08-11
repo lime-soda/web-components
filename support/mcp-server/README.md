@@ -31,7 +31,7 @@ TOKENS_PATH=design-system/tokens
 ## Development
 
 ```bash
-# Start development server with MCP inspector (opens web UI)
+# Start development server with hot reload
 pnpm run dev
 
 # Build for production
@@ -39,17 +39,27 @@ pnpm run build
 
 # Run built server
 pnpm run start
+
+# Build, then inspect the running server in a web UI
+pnpm run build && pnpm run debug
 ```
 
 ### MCP Inspector
 
-The development server includes the MCP Inspector, which provides a web-based
-interface for testing and debugging MCP tools. When you run `pnpm run dev`, it
-will:
+`pnpm run debug` runs the built server under the MCP Inspector, a web-based
+interface for testing and debugging MCP tools.
 
-1. Start the MCP server with hot reload
-2. Launch the MCP Inspector web interface
-3. Automatically connect the inspector to your server
+It is fetched on demand with `pnpm dlx` rather than installed as a dependency.
+Vite arrives here through `vite-plus` → `vitest`, which depends on it across
+`^6 || ^7 || ^8`, and pnpm resolves one copy for the whole workspace. The
+inspector is a web application that needs Vite as well, so as a dependency it
+got a vote on that single version — and its v2 release, which wants `^8.1.5`,
+moved the component tests onto a different bundler.
+
+Pinning Vite would only trade the problem: the inspector's web UI needs the
+Vite 8 internals `@vitejs/plugin-react` imports, so held at 7 it does not start.
+It wants a different Vite than the test suite, and nothing here needs it at
+build time, so it stays out of the graph entirely.
 
 The inspector allows you to:
 
