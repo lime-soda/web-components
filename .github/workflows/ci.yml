@@ -147,7 +147,7 @@ jobs:
       # Opens a "Version Packages" PR while changesets are pending, and
       # publishes once that PR is merged. Nothing happens until a changeset
       # exists, so an ordinary commit to main is a no-op here.
-      - uses: changesets/action@v1
+      - uses: changesets/action@v2.0.0
         with:
           # Changesets rewrites code fences in the changelog with its own
           # defaults, which disagree with ours — so the generated file failed
