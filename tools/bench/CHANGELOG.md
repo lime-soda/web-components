@@ -1,5 +1,13 @@
 # @lime-soda/bench
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [a274376]
+- Updated dependencies [86b8b98]
+  - @lime-soda/grid@0.2.0
+
 ## 0.0.1
 
 ### Patch Changes
