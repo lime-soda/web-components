@@ -26,13 +26,49 @@ import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../../..');
 
-/** Everything with a public `exports` map. */
-const PACKAGES = ['packages/grid', 'packages/button'] as const;
+/** Every package that gets published. */
+const PACKAGES = [
+  'packages/grid',
+  'packages/button',
+  'support/tokens',
+  'support/mcp-server',
+  'support/cem-plugin-css-properties',
+] as const;
+
+/** Where provenance expects each package to say it came from. */
+const REPOSITORY = 'https://github.com/lime-soda/web-components';
+
+/** A subpath maps either straight to a file or to a set of conditions. */
+type ExportEntry = string | Record<string, string>;
 
 interface Packed {
-  manifest: { exports?: Record<string, Record<string, string>> };
+  manifest: {
+    exports?: Record<string, ExportEntry>;
+    repository?: { url?: string; directory?: string };
+  };
   files: Set<string>;
 }
+
+const conditionsOf = (entry: ExportEntry): Record<string, string> =>
+  typeof entry === 'string' ? { default: entry } : entry;
+
+const escape = (segment: string): string => segment.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Whether the tarball holds something a target can resolve to.
+ *
+ * A subpath pattern stands for a set of files rather than one, so `*` has to
+ * match a run of path segments. Requiring at least one hit is the useful
+ * assertion: a pattern resolving to nothing at all is the same mistake as a
+ * literal path that was never shipped.
+ */
+const shipped = (target: string, files: Set<string>): boolean => {
+  const path = target.replace(/^\.\//, '');
+  if (!path.includes('*')) return files.has(path);
+
+  const pattern = new RegExp(`^${path.split('*').map(escape).join('.+')}$`);
+  return [...files].some((file) => pattern.test(file));
+};
 
 let out: string;
 const packed = new Map<string, Packed>();
@@ -76,10 +112,9 @@ describe('published exports', () => {
     const { manifest, files } = packed.get(pkg)!;
     const missing: string[] = [];
 
-    for (const [subpath, conditions] of Object.entries(manifest.exports ?? {})) {
-      for (const [condition, target] of Object.entries(conditions)) {
-        const path = target.replace(/^\.\//, '');
-        if (!files.has(path)) missing.push(`${subpath} [${condition}] -> ${target}`);
+    for (const [subpath, entry] of Object.entries(manifest.exports ?? {})) {
+      for (const [condition, target] of Object.entries(conditionsOf(entry))) {
+        if (!shipped(target, files)) missing.push(`${subpath} [${condition}] -> ${target}`);
       }
     }
 
@@ -93,9 +128,21 @@ describe('published exports', () => {
     const { manifest } = packed.get(pkg)!;
 
     const leaked = Object.entries(manifest.exports ?? {})
-      .filter(([, conditions]) => 'development' in conditions)
+      .filter(([, entry]) => 'development' in conditionsOf(entry))
       .map(([subpath]) => subpath);
 
     expect(leaked, `development leaked into: ${leaked.join(', ')}`).toEqual([]);
+  });
+
+  it.each(PACKAGES)('%s says where it came from', (pkg) => {
+    // Publishing from CI signs a provenance statement naming the repository that
+    // built it, and npm rejects the upload if the manifest disagrees. A missing
+    // `repository` reads as "" and fails the comparison — which only surfaces at
+    // the publish itself, after the version bump and tags have already landed.
+    const { manifest } = packed.get(pkg)!;
+
+    expect(manifest.repository?.url ?? '').toContain(REPOSITORY);
+    // Without it npm points every package at the repository root.
+    expect(manifest.repository?.directory).toBe(pkg);
   });
 });

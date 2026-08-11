@@ -2,6 +2,11 @@
   "name": "@lime-soda/button",
   "version": "0.2.1",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lime-soda/web-components.git",
+    "directory": "packages/button"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

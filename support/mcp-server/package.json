@@ -22,6 +22,11 @@
   ],
   "author": "Phil Parsons",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lime-soda/web-components.git",
+    "directory": "support/mcp-server"
+  },
   "dependencies": {
     "@lime-soda/tokens": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.30.0",

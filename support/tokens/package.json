@@ -23,6 +23,11 @@
   "keywords": [],
   "author": "Phil Parsons",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lime-soda/web-components.git",
+    "directory": "support/tokens"
+  },
   "dependencies": {
     "glob": "^13.0.0",
     "style-dictionary": "^5.0.1"

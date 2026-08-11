@@ -39,5 +39,10 @@
   "peerDependencies": {
     "@custom-elements-manifest/analyzer": ">= 0.10.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lime-soda/web-components.git",
+    "directory": "support/cem-plugin-css-properties"
+  }
 }
