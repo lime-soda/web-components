@@ -47,5 +47,13 @@
     "typescript": "~7.0.0",
     "vitest": "^4.1.10"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  }
 }

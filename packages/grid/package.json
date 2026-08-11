@@ -35,7 +35,61 @@
     "./src/stack.ts"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./layouts": {
+        "types": "./dist/layouts.d.ts",
+        "default": "./dist/layouts.js"
+      },
+      "./flow": {
+        "types": "./dist/flow.d.ts",
+        "default": "./dist/flow.js"
+      },
+      "./stack": {
+        "types": "./dist/stack.d.ts",
+        "default": "./dist/stack.js"
+      },
+      "./tree": {
+        "types": "./dist/modules/tree/index.d.ts",
+        "default": "./dist/modules/tree/index.js"
+      },
+      "./sort": {
+        "types": "./dist/modules/sort/index.d.ts",
+        "default": "./dist/modules/sort/index.js"
+      },
+      "./filter": {
+        "types": "./dist/modules/filter/index.d.ts",
+        "default": "./dist/modules/filter/index.js"
+      },
+      "./selection": {
+        "types": "./dist/modules/selection/index.d.ts",
+        "default": "./dist/modules/selection/index.js"
+      },
+      "./selection/tree": {
+        "types": "./dist/modules/selection/tree/index.d.ts",
+        "default": "./dist/modules/selection/tree/index.js"
+      },
+      "./selection/row-range": {
+        "types": "./dist/modules/selection/row-range/index.d.ts",
+        "default": "./dist/modules/selection/row-range/index.js"
+      },
+      "./keyboard": {
+        "types": "./dist/modules/keyboard/index.d.ts",
+        "default": "./dist/modules/keyboard/index.js"
+      },
+      "./cell-flash": {
+        "types": "./dist/modules/cell-flash/index.d.ts",
+        "default": "./dist/modules/cell-flash/index.js"
+      },
+      "./clipboard": {
+        "types": "./dist/modules/clipboard/index.d.ts",
+        "default": "./dist/modules/clipboard/index.js"
+      }
+    }
   },
   "customElements": "custom-elements.json",
   "files": [
