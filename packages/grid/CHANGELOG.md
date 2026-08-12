@@ -1,5 +1,16 @@
 # @lime-soda/grid
 
+## 0.3.0
+
+### Minor Changes
+
+- f4dc3ab: Remove the deprecated `ValueGetterParams` and `ValueFormatterParams` aliases.
+
+  They were kept for one release when the cell contexts were split into three
+  tiers. Use `CellValueContext` for a `valueGetter` and `CellFormatContext` for a
+  `valueFormatter` — the aliases pointed at exactly these, so the change is a
+  rename.
+
 ## 0.2.0
 
 ### Minor Changes
