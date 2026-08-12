@@ -86,7 +86,9 @@ export class GridController<TData = unknown> {
       const resolution: ColumnResolutionOptions<TData> = {};
       if (current.defaultColDef !== undefined) resolution.defaultColDef = current.defaultColDef;
       if (current.columnTypes !== undefined) resolution.columnTypes = current.columnTypes;
-      return resolveColumns<TData>(defs, resolution);
+      // Modules rewrite the resolved list — order, widths, pinning — after every
+      // column exists, so one that moves columns can see the ones another added.
+      return this.registry.transformColumns(resolveColumns<TData>(defs, resolution));
     });
 
     for (const module of options.modules ?? []) this.registry.register(module);

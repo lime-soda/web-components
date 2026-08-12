@@ -119,6 +119,20 @@ export class ModuleRegistry<TData = unknown> {
     );
   }
 
+  /**
+   * Runs the resolved columns through every module that rewrites them.
+   *
+   * Threaded rather than collected: each module sees what the previous one
+   * produced, so reordering and then pinning compose instead of racing.
+   */
+  transformColumns(columns: readonly ResolvedColumn<TData>[]): readonly ResolvedColumn<TData>[] {
+    let result = columns;
+    for (const module of this.orderedModules()) {
+      result = module.transformColumns?.(result) ?? result;
+    }
+    return result;
+  }
+
   cellDecorations(ctx: CellContext<TData>): readonly CellDecoration[] {
     return this.collect((module) => module.cellDecorator?.(ctx));
   }

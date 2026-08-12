@@ -97,7 +97,10 @@ jobs:
 
       - run: pnpm build
 
-      - uses: chromaui/action@latest
+      # Pinned, not `@latest`: this is the job that holds the Chromatic token,
+      # and a floating tag means an upstream push runs with it unreviewed.
+      # Renovate can offer the bumps now that there is a version to compare.
+      - uses: chromaui/action@v18.1.0
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: support/storybook
@@ -158,10 +161,14 @@ jobs:
           # shell, so `changeset version && pnpm format` was handed to changesets
           # as arguments, it refused the lot, and the action pushed an
           # unversioned branch anyway.
-          version: pnpm run changeset:version
-          publish: pnpm run release
-          commit: 'chore(release): version packages'
-          title: 'chore(release): version packages'
+          #
+          # v2 renamed all four of these. The old names are not merely ignored:
+          # the action fails outright when it sees them, so a release cannot be
+          # cut until they are updated.
+          version-script: pnpm run changeset:version
+          publish-script: pnpm run release
+          commit-message: 'chore(release): version packages'
+          pr-title: 'chore(release): version packages'
         env:
           # No npm credentials: the registry authenticates the runner itself
           # through OIDC, which is why `id-token: write` is granted above. That

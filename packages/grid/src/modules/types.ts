@@ -171,6 +171,20 @@ export interface GridModule<TData = unknown, TState = unknown> {
 
   /** Columns the module owns, such as selection's checkbox column. */
   provideColumns?(): ColumnDefs<TData>;
+  /**
+   * Rewrites the resolved columns, after every module has contributed its own.
+   *
+   * Where `provideColumns` adds a column, this changes the ones already there:
+   * their order, their widths, whether they are pinned. It runs on the resolved
+   * list rather than the definitions so a module sees the concrete width the
+   * layout will use, not an optional one it would have to default itself.
+   *
+   * Modules run in registration order and each sees the previous one's output,
+   * so two modules rewriting the same property is last-wins rather than a
+   * conflict. Returning the input unchanged is free — the signal only
+   * recomputes when the registry version or the options change.
+   */
+  transformColumns?(columns: readonly ResolvedColumn<TData>[]): readonly ResolvedColumn<TData>[];
   headerSlot?(ctx: HeaderSlotContext<TData>): TemplateResult | null;
   headerDecorator?(ctx: HeaderSlotContext<TData>): HeaderDecoration | null;
   cellDecorator?(ctx: CellContext<TData>): CellDecoration | null;
