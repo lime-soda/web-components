@@ -2,6 +2,7 @@ import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { LitElement, css, html, nothing } from 'lit';
 import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
+import { applyPinning } from './apply-pinning.js';
 import { property } from 'lit/decorators.js';
 import type { ResolvedColumn } from '../columns/types.js';
 import type { LayoutInstance } from '../layout/types.js';
@@ -41,6 +42,32 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
 
     :host(:last-of-type) {
       border-right: none;
+    }
+
+    /*
+     * Pinned, matching the body cells below to the pixel.
+     *
+     * Not sticky like those cells, because the stack header band lives outside
+     * the scroller and follows it with a transform — there is no scrollport for
+     * a sticky element to stick to, so it simply rode along and left the column
+     * split between a held cell and a moving heading.
+     *
+     * Cancelling that transform is what holds it still: the band moves by minus
+     * the scroll offset, this moves back by plus the same, and the inline left
+     * then stacks the pinned columns exactly as the sticky offsets do below.
+     */
+    :host([data-pinned]) {
+      position: relative;
+      z-index: 2;
+      transform: translateX(var(--grid-scroll-left, 0px));
+    }
+
+    :host([data-pinned='left'][data-pin-edge]) {
+      border-right: 1px solid ${tokens.border};
+    }
+
+    :host([data-pinned='right'][data-pin-edge]) {
+      border-left: 1px solid ${tokens.border};
     }
 
     /*
@@ -151,6 +178,8 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     registry?.version.get();
 
     this.setAttribute('aria-colindex', String(this.column.index + 1));
+
+    applyPinning(this, this.grid?.pinning.get().get(this.column.colId));
 
     const focused = this.isFocusedHeader();
     this.toggleAttribute('data-focused', focused && this.gridHasFocus());

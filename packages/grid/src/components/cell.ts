@@ -1,4 +1,5 @@
 import { NONE, forwardedParts } from './part-forwarding.js';
+import { applyPinning } from './apply-pinning.js';
 import * as tokens from '@lime-soda/tokens/grid';
 import { consume, provide } from '@lit/context';
 import { instanceContext } from '../context/index.js';
@@ -41,6 +42,29 @@ export class GridCell extends SignalWatcher(LitElement) {
 
     :host([data-numeric]) {
       justify-content: flex-end;
+    }
+
+    /*
+     * A pinned column holds its place while the rest scroll under it.
+     *
+     * Opaque on purpose: cells are transparent by default and let the instance
+     * background through, which for a sticky cell means the rows sliding beneath
+     * it show through too. Declared above the selection and hover rules so those
+     * still win — a pinned cell in a selected row stays visibly selected.
+     */
+    :host([data-pinned]) {
+      position: sticky;
+      z-index: 1;
+      background: ${tokens.background};
+    }
+
+    /* Only the column that meets the scrolling ones marks the seam. */
+    :host([data-pinned='left'][data-pin-edge]) {
+      border-right: 1px solid ${tokens.border};
+    }
+
+    :host([data-pinned='right'][data-pin-edge]) {
+      border-left: 1px solid ${tokens.border};
     }
 
     /*
@@ -135,6 +159,8 @@ export class GridCell extends SignalWatcher(LitElement) {
 
     // See ls-grid-header-cell: keeps module-contributed decorations current.
     this.grid?.registry.version.get();
+
+    applyPinning(this, this.grid?.pinning.get().get(this.column.colId));
 
     this.tabIndex = this.isTabbableCell() ? 0 : -1;
     // Only while the grid has focus: a remembered position is where Tab would

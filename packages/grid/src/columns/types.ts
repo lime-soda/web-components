@@ -119,6 +119,14 @@ export interface ColumnDef<TData = unknown, TValue = unknown> {
    * not reachable, and should not be somewhere data hides.
    */
   colSpan?: number | ((context: CellContext<TData, TValue>) => number);
+  /**
+   * Holds the column against an edge while the rest scroll under it.
+   *
+   * Stack layout only. A flow instance is sized to its own columns and the
+   * scroller moves between instances, so nothing slides out from under the
+   * viewport for a pinned column to stay in front of — see `pinPlacements`.
+   */
+  pinned?: 'left' | 'right';
 }
 
 /** A column after defaults, column types and derived values have been applied. */
