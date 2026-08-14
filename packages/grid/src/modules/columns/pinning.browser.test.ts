@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import '../index.js';
-import '../layouts.js';
-import type { Grid } from '../components/grid.js';
-import type { ColumnDef } from './types.js';
-import type { GridOptions } from '../controller/grid-controller.js';
+import '../../index.js';
+import '../../layouts.js';
+import { ColumnsModule } from './index.js';
+import type { Grid } from '../../components/grid.js';
+import type { ColumnDef } from '../../columns/types.js';
+import type { GridOptions } from '../../controller/grid-controller.js';
 
 /**
  * Pinning, as the browser actually resolves it.
@@ -49,7 +50,14 @@ async function mount(options: Partial<GridOptions<Quote>> = {}): Promise<Grid<Qu
   document.body.append(host);
 
   const grid = document.createElement('ls-grid') as Grid<Quote>;
-  grid.gridOptions = { columns, layout: 'stack', rowHeight: 32, headerHeight: 40, ...options };
+  grid.gridOptions = {
+    columns,
+    layout: 'stack',
+    rowHeight: 32,
+    headerHeight: 40,
+    modules: [new ColumnsModule<Quote>()],
+    ...options,
+  };
   grid.rowData = quotes;
   host.append(grid);
 
@@ -170,6 +178,6 @@ describe('pinned columns in the browser', () => {
     const pinned = cellsAt(grid, 0)[0]!;
 
     expect(getComputedStyle(pinned).position).not.toBe('sticky');
-    expect(pinned.hasAttribute('data-pinned')).toBe(false);
+    expect(pinned.classList.contains('ls-grid-pinned')).toBe(false);
   });
 });

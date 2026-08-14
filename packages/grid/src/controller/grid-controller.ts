@@ -1,6 +1,4 @@
 import type { CoreGridApi, GridApi, GridState } from '../api/types.js';
-import { pinPlacements } from '../columns/pinning.js';
-import type { PinPlacement } from '../columns/pinning.js';
 import { resolveColumns } from '../columns/resolve-columns.js';
 import type { ColumnDefs, ColumnResolutionOptions, ResolvedColumn } from '../columns/types.js';
 import type { FocusController } from './focus-controller.js';
@@ -55,14 +53,6 @@ export class GridController<TData = unknown> {
   readonly registry: ModuleRegistry<TData>;
   readonly api: GridApi<TData>;
   readonly columns: ReadableSignal<readonly ResolvedColumn<TData>[]>;
-  /**
-   * Where each pinned column rests, by column id.
-   *
-   * Computed once per column change rather than per cell: every cell in a
-   * monitor-wide grid would otherwise walk the whole column list to find its
-   * own offset.
-   */
-  readonly pinning: ReadableSignal<ReadonlyMap<string, PinPlacement>>;
 
   private readonly optionsSignal: WritableSignal<GridOptions<TData>>;
   private readonly containerSignal: WritableSignal<{ width: number; height: number }>;
@@ -100,10 +90,6 @@ export class GridController<TData = unknown> {
       // column exists, so one that moves columns can see the ones another added.
       return this.registry.transformColumns(resolveColumns<TData>(defs, resolution));
     });
-
-    this.pinning = computed(() =>
-      pinPlacements(this.columns.get(), this.optionsSignal.get().layout ?? 'flow'),
-    );
 
     for (const module of options.modules ?? []) this.registry.register(module);
     this.registry.start();

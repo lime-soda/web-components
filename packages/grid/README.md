@@ -136,6 +136,37 @@ what the application does, not that it saves much.
 
 ## Getting data out
 
+## Arranging columns
+
+`@lime-soda/grid/columns` lets the user resize, reorder and pin columns, and
+hands you the arrangement back to store.
+
+```ts
+import { ColumnsModule } from '@lime-soda/grid/columns';
+
+modules: [new ColumnsModule({ minWidth: 60 })];
+```
+
+Each header gains a grip to drag the column and a handle on its trailing edge to
+resize it. Both are buttons and both take arrow keys, because a drag is not an
+affordance everyone can use and a column ellipsised to nothing is unreadable
+rather than merely inconvenient. A column opts out with `resizable: false` or
+`reorderable: false`; the whole feature does with the matching module option.
+
+`api.getColumnState()` returns the arrangement and `setColumnState()` restores
+it, which is the pair persistence needs.
+
+### Pinning is stack-only
+
+`pinned: 'left' | 'right'` holds a column against an edge while the rest scroll
+under it — and does nothing at all in the flow layout, deliberately.
+
+A flow instance is a fixed-width block sized to its own columns, and the
+scroller moves between instances. No column ever slides out from under the
+viewport, so there is nothing for a pinned one to stay in front of. Rather than
+gather it to the edge and fail to hold it there, flow ignores the request
+outright: the column stays exactly where it was declared.
+
 `@lime-soda/grid/clipboard` copies to the system clipboard and serialises to CSV
 or TSV. Ctrl-C — Cmd-C on macOS — copies the selection, or the whole projection
 when nothing is selected.
@@ -216,6 +247,7 @@ Every feature beyond the core is an additive module with its own entry point.
 | `@lime-soda/grid/cell-flash`          | Directional flash on value change                           |
 | `@lime-soda/grid/keyboard`            | Home/End, page keys, instance jumps, skipping rows          |
 | `@lime-soda/grid/clipboard`           | Copy to the clipboard, and CSV or TSV export                |
+| `@lime-soda/grid/columns`             | Resize, reorder and pin columns                             |
 
 ```ts
 import { TreeModule } from '@lime-soda/grid/tree';

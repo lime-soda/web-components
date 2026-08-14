@@ -36,6 +36,7 @@ const MARKERS = {
   keyboard: 'PageDown',
   'cell-flash': 'getDirection',
   clipboard: 'toDelimitedText',
+  columns: 'ls-grid-resize-handle',
 } as const;
 
 type ModuleName = keyof typeof MARKERS;
@@ -50,6 +51,7 @@ const ENTRIES: Record<ModuleName, string> = {
   keyboard: 'KeyboardModule',
   'cell-flash': 'CellFlashModule',
   clipboard: 'ClipboardModule',
+  columns: 'ColumnsModule',
 };
 
 let sandbox: string;

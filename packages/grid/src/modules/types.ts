@@ -130,6 +130,15 @@ export interface RowDecoration {
 export interface HeaderDecoration {
   readonly classes?: readonly string[];
   readonly attributes?: Readonly<Record<string, string>>;
+  /**
+   * CSS custom properties set on the header cell.
+   *
+   * The same contract as `CellDecoration.customProperties`, and here for the
+   * same reason: a header often has to line up with the cells beneath it to the
+   * pixel — a pinned column's offset, a resize handle's position — and a
+   * measurement cannot be spelled as a class.
+   */
+  readonly customProperties?: Readonly<Record<string, string>>;
   readonly onActivate?: (event: Event) => void;
 }
 
