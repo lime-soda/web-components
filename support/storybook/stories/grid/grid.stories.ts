@@ -12,6 +12,7 @@ import { TreeSelectionModule } from '@lime-soda/grid/selection/tree';
 import { RowRangeModule } from '@lime-soda/grid/selection/row-range';
 import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
+import { ColumnsModule } from '@lime-soda/grid/columns';
 import '@lime-soda/button';
 import type { Button } from '@lime-soda/button';
 import { type Bond, generateBonds, tick } from './bond-data.js';
@@ -121,6 +122,12 @@ const bondMarketTree = new TreeModule<Bond>({
 });
 let lastExpandByDefault: boolean | undefined;
 const bondMarketKeyboard = new KeyboardModule<Bond>();
+
+/**
+ * Held outside render for the reason the others are: Storybook re-runs render
+ * on every control change, and the grid keeps the modules it started with.
+ */
+const arrangeableColumns = new ColumnsModule<Bond>({ minWidth: 60 });
 
 const meta: Meta<Args> = {
   title: 'Grid/Bond market',
@@ -442,6 +449,75 @@ export const StackLayout: StoryObj<Args> = {
         </div>
         <div class="demo__grid">
           <ls-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></ls-grid>
+        </div>
+      </div>
+    `;
+  },
+};
+
+/**
+ * Reordered, resized and pinned by hand.
+ *
+ * Stack layout, because pinning only means something where columns scroll out
+ * of view: a flow instance is sized to its own columns and the scroller moves
+ * between instances, so nothing ever slides under a pinned column.
+ */
+export const ArrangeableColumns: StoryObj<Args> = {
+  args: { ...BondMarket.args!, groups: 6, instruments: 8 },
+  // Held to the gate rather than inheriting the suite's `todo`: the stack
+  // layout renders one instance, so there are no repeated headers or ancestor
+  // rows, and the `aria-hidden-focus` finding that forced `todo` cannot arise.
+  parameters: { a11y: { test: 'error' } },
+  render: (args) => {
+    const gridRef = createRef<Grid<Bond>>();
+    const data = generateBonds(args.groups, args.instruments);
+    const api = () => gridRef.value?.api;
+
+    const options: GridOptions<Bond> = {
+      // Wider than the frame on purpose, so there is something to scroll under
+      // the pinned column.
+      columns: columns.map((column) =>
+        column.field === 'instrument'
+          ? { ...column, width: 260, pinned: 'left' as const }
+          : { ...column, width: 160 },
+      ),
+      layout: 'stack',
+      rowHeight: args.rowHeight,
+      headerHeight: args.rowHeight,
+      modules: [
+        arrangeableColumns,
+        new TreeModule<Bond>({
+          getParentId: (bond) => bond.parentId,
+          defaultExpanded: (bond) => bond.parentId === null,
+        }),
+      ],
+    };
+
+    return html`
+      <div class="demo">
+        <div class="demo__toolbar">
+          <span class="demo__stat">
+            Drag a header grip to move a column, or its trailing edge to resize. Both take arrow
+            keys.
+          </span>
+          <ls-button
+            size="sm"
+            variant="outline"
+            @click=${() => api()?.setColumnPinned('price', 'right')}
+          >
+            Pin price right
+          </ls-button>
+          <ls-button size="sm" variant="outline" @click=${() => api()?.resetColumnState()}>
+            Reset
+          </ls-button>
+        </div>
+        <div class="demo__grid">
+          <ls-grid
+            ${ref(gridRef)}
+            .gridOptions=${options}
+            .rowData=${data}
+            style="height: 100%"
+          ></ls-grid>
         </div>
       </div>
     `;
