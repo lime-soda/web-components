@@ -187,11 +187,36 @@ export function activeElement(): Element | null {
  * pointer drags, tabbing — goes through `userEvent`, which handles shadow roots
  * because it works from coordinates and real focus.
  */
-export async function pressKey(key: string, init: KeyboardEventInit = {}): Promise<void> {
+export async function pressKey(key: string, init: KeyboardEventInit = {}): Promise<boolean> {
   const target = activeElement() ?? document.body;
   const shared = { key, bubbles: true, composed: true, cancelable: true, ...init };
 
-  target.dispatchEvent(new KeyboardEvent('keydown', shared));
+  const event = new KeyboardEvent('keydown', shared);
+  target.dispatchEvent(event);
   target.dispatchEvent(new KeyboardEvent('keyup', shared));
   await new Promise((resolve) => requestAnimationFrame(resolve));
+
+  // Whether anything claimed the key. A synthetic event cannot make the browser
+  // perform its own default — moving focus out of the grid on Tab, say — so
+  // this is how a test sees that the grid declined to handle it and left the
+  // browser to.
+  return event.defaultPrevented;
+}
+
+/**
+ * Puts focus where Tab would put it.
+ *
+ * `userEvent.tab()` walks the document's focusable elements and cannot see into
+ * a shadow root, so it steps straight past the grid to whatever follows —
+ * focus never enters at all. A browser does traverse shadow trees, landing on
+ * the one cell holding the roving tabindex, which is what this focuses.
+ */
+export function tabInto(root: ParentNode): HTMLElement {
+  for (const element of deepElements(root)) {
+    if (element.getAttribute('tabindex') === '0') {
+      (element as HTMLElement).focus();
+      return element as HTMLElement;
+    }
+  }
+  throw new Error('Nothing in this tree holds the roving tabindex.');
 }
