@@ -219,12 +219,25 @@ export class GridInstance extends SignalWatcher(LitElement) {
         style=${styleMap({ '--grid-column-template': template })}
       >
         ${
+          /*
+           * A continuation's header is real, not a hidden copy.
+           *
+           * It used to be aria-hidden, which was a contradiction: focus goes to
+           * each instance's own header on purpose — that is what sits above
+           * these rows — and once the reader has scrolled right, every header
+           * on screen is a continuation. Hiding them put sorting and filtering
+           * beyond both the mouse and the keyboard while leaving them
+           * focusable, which is the `aria-hidden-focus` finding.
+           *
+           * Each instance is its own rowgroup, so having a heading row is
+           * honest. Only the first claims `aria-rowindex`, since exactly one
+           * element should say it is row 1 of the grid.
+           */
           showHeader
             ? html`<div
                 class="header"
                 role="row"
-                aria-rowindex="1"
-                aria-hidden=${this.instance.index > 0 ? 'true' : nothing}
+                aria-rowindex=${this.instance.index === 0 ? '1' : nothing}
               >
                 ${repeat(
                   columns,

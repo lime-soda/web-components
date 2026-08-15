@@ -108,15 +108,24 @@ export class GridRow extends SignalWatcher(LitElement) {
   }
 
   override render(): unknown {
-    // A repeat carries no index and is hidden: it is the same row appearing
-    // again at the top of a continuation, and reading it twice would be a lie
-    // about how many rows there are.
+    // A repeat carries no index and is inert: it is the same row appearing again
+    // at the top of a continuation, and reading it twice would be a lie about
+    // how many rows there are.
+    //
+    // `inert` rather than `aria-hidden` alone. Hidden but still focusable is a
+    // contradiction — it is exactly the `aria-hidden-focus` finding — and the
+    // things inside a repeat are focusable: an expander is a button, a
+    // selection checkbox is an input. Inert takes the whole subtree out of the
+    // a11y tree, out of the tab order and out of reach of a click, so the copy
+    // cannot be operated while the row it copies still can be.
     if (this.rowIndex > 0) {
       this.setAttribute('aria-rowindex', String(this.rowIndex));
       this.removeAttribute('aria-hidden');
+      this.inert = false;
     } else {
       this.removeAttribute('aria-rowindex');
       this.setAttribute('aria-hidden', 'true');
+      this.inert = true;
     }
 
     const grid = this.grid;

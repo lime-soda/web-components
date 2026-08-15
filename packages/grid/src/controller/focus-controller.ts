@@ -162,7 +162,7 @@ export class FocusController {
     if (located.section === 'header') {
       // Down out of a header is into its own rows; up is out of the instance
       // entirely, to the end of the one before it.
-      if (delta > 0) return this.commit(instanceIndex, 0, colId);
+      if (delta > 0) return this.commit(instanceIndex, this.firstRealRow(instanceIndex), colId);
 
       const previous = instanceIndex - 1;
       const target = instances[previous];
@@ -173,13 +173,24 @@ export class FocusController {
     let nextInstance = instanceIndex;
     let nextRow = located.rowIndex + delta;
 
-    while (nextRow < 0 || nextRow >= (instances[nextInstance]?.rows.length ?? 0)) {
-      if (nextRow < 0) return this.commitHeader(nextInstance, colId);
+    // A repeated ancestor is skipped in whichever direction we are travelling.
+    // It is the same row already sitting in an earlier instance, so stopping on
+    // it would visit one row of data twice — and it is inert, so there would be
+    // nothing there to operate once we arrived.
+    for (;;) {
+      while (nextRow < 0 || nextRow >= (instances[nextInstance]?.rows.length ?? 0)) {
+        if (nextRow < 0) return this.commitHeader(nextInstance, colId);
 
-      const length = instances[nextInstance]!.rows.length;
-      if (nextInstance === instances.length - 1) return false;
-      nextInstance += 1;
-      nextRow -= length;
+        const length = instances[nextInstance]!.rows.length;
+        if (nextInstance === instances.length - 1) return false;
+        nextInstance += 1;
+        nextRow -= length;
+      }
+
+      if (!isRepeat(instances[nextInstance]?.rows[nextRow])) break;
+      // Downwards steps past it; upwards keeps going and falls out of the top
+      // of this instance, which is where the row it copies actually lives.
+      nextRow += delta < 0 ? -1 : 1;
     }
 
     return this.commit(nextInstance, nextRow, colId);
@@ -328,6 +339,18 @@ export class FocusController {
     }
   }
 
+  /**
+   * The first row of an instance that is not a repeated ancestor.
+   *
+   * Entering an instance from its header lands on data rather than on the
+   * heading copied down from the instance before it.
+   */
+  private firstRealRow(instanceIndex: number): number {
+    const rows = this.getLayout().instances[instanceIndex]?.rows ?? [];
+    const index = rows.findIndex((row) => !isRepeat(row));
+    return index === -1 ? 0 : index;
+  }
+
   private commit(instanceIndex: number, rowIndex: number, colId: string): boolean {
     const instance = this.getLayout().instances[instanceIndex];
     const row = instance?.rows[rowIndex];
@@ -435,4 +458,15 @@ export class FocusController {
 
     return { instances, instanceIndex, rowIndex, colIndex, colId: current.colId, section: 'body' };
   }
+}
+
+/**
+ * Whether a row is a second drawing of one that already has a place.
+ *
+ * The flag is a module's — the tree module sets it when the flow layout
+ * re-emits an ancestor at a break — so this reads it the way the components do
+ * rather than knowing what a group is.
+ */
+function isRepeat(row: { meta?: Readonly<Record<string, unknown>> } | undefined): boolean {
+  return row?.meta?.['isRepeat'] === true;
 }

@@ -165,6 +165,16 @@ describe('with tree data', () => {
   });
 });
 
+const repeating: Bond[] = [
+  { id: 'g', parentId: null, name: 'Gilts', price: 0 },
+  ...Array.from({ length: 40 }, (_, i) => ({
+    id: `g-${i}`,
+    parentId: 'g',
+    name: `Bond ${i}`,
+    price: i,
+  })),
+];
+
 describe('across instances', () => {
   /**
    * The point of the aggregate model: a row's number means its place in the
@@ -205,29 +215,27 @@ describe('across instances', () => {
     expect(labels[1]).not.toBe(labels[0]);
   });
 
-  it('shows the header once, not once per instance', async () => {
+  it('gives every instance a real header, indexed only once', async () => {
+    // A continuation's header used to be aria-hidden while staying focusable,
+    // which is a contradiction and the `aria-hidden-focus` finding. Focus goes
+    // to each instance's own header deliberately, and once the reader has
+    // scrolled right every header on screen is a continuation — hiding them put
+    // sort and filter out of reach of both the mouse and the keyboard.
+    //
+    // Each instance is its own rowgroup, so a heading row is honest. Only the
+    // first says it is row 1 of the grid.
     const grid = await mount(many);
     await waitFor(() => instances(grid).length > 1);
 
-    const headers = instances(grid).map((panel) =>
-      panel.shadowRoot!.querySelector('.header')?.getAttribute('aria-hidden'),
-    );
+    const headers = instances(grid).map((panel) => panel.shadowRoot!.querySelector('.header')!);
 
-    expect(headers[0]).toBeNull();
-    expect(headers[1]).toBe('true');
+    expect(headers.every((header) => header.getAttribute('aria-hidden') === null)).toBe(true);
+    expect(headers[0]!.getAttribute('aria-rowindex')).toBe('1');
+    expect(headers[1]!.getAttribute('aria-rowindex')).toBeNull();
   });
 
   it('hides a repeated ancestor, which is a row read once already', async () => {
-    const deep: Bond[] = [
-      { id: 'g', parentId: null, name: 'Gilts', price: 0 },
-      ...Array.from({ length: 40 }, (_, i) => ({
-        id: `g-${i}`,
-        parentId: 'g',
-        name: `Bond ${i}`,
-        price: i,
-      })),
-    ];
-    const grid = await mount(deep, [
+    const grid = await mount(repeating, [
       new TreeModule<Bond>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
     ]);
     await waitFor(() => instances(grid).length > 1);
@@ -236,5 +244,51 @@ describe('across instances', () => {
 
     expect(repeated.getAttribute('aria-hidden')).toBe('true');
     expect(repeated.hasAttribute('aria-rowindex')).toBe(false);
+  });
+
+  it('puts a repeated ancestor out of reach as well as out of the reading order', async () => {
+    // Hidden but still operable is the contradiction that `aria-hidden-focus`
+    // reports: an expander is a button and a checkbox is an input, so a copy of
+    // a row could be clicked and tabbed into while claiming not to exist.
+    const grid = await mount(repeating, [
+      new TreeModule<Bond>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
+    ]);
+    await waitFor(() => instances(grid).length > 1);
+
+    const repeated = rowsOf(instances(grid)[1]!)[0]! as HTMLElement;
+
+    expect(repeated.inert).toBe(true);
+    // Nothing inside can take focus, which is what axe is asserting.
+    const cells = [...repeated.shadowRoot!.querySelectorAll('ls-grid-cell')] as HTMLElement[];
+    for (const cell of cells) {
+      cell.focus();
+      expect(document.activeElement === cell).toBe(false);
+    }
+  });
+
+  it('steps over a repeated ancestor when arrowing between instances', async () => {
+    // It is the same row already visited in the instance before, so stopping on
+    // it would walk one row of data twice — and there would be nothing to
+    // operate once we arrived.
+    const grid = await mount(repeating, [
+      new TreeModule<Bond>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
+    ]);
+    await waitFor(() => instances(grid).length > 1);
+
+    const focus = grid.controller!.focus;
+    const layout = grid.controller!.layout.get();
+    const repeatKey = layout.instances[1]!.rows[0]!.id;
+    expect(layout.instances[1]!.rows[0]!.meta?.['isRepeat']).toBe(true);
+
+    // Walk down from the top; the repeat must never be a resting place.
+    focus.focusFirst();
+    const visited: string[] = [];
+    for (let i = 0; i < 80 && focus.moveRow(1); i += 1) {
+      visited.push(focus.focused.get()?.rowKey ?? '');
+    }
+
+    expect(visited).not.toContain(repeatKey);
+    // ...and the walk did reach the second instance, or this proves nothing.
+    expect(visited).toContain(layout.instances[1]!.rows[1]!.id);
   });
 });

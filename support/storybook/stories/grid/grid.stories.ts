@@ -136,13 +136,11 @@ const meta: Meta<Args> = {
   parameters: {
     layout: 'fullscreen',
     controls: { expanded: true },
-    // Known, unfixed: a continuation instance repeats the header and the
-    // ancestor rows, and marks the copies `aria-hidden` so they are not counted
-    // twice. Their sort activators, checkboxes and expanders stay natively
-    // focusable, which axe reports as `aria-hidden-focus`. The fix is a
-    // decision about the repeats — inert (and so unclickable), or reachable and
-    // not hidden — not something to settle in passing.
-    a11y: { test: 'todo' },
+    // A continuation repeats the header and the ancestor rows above its own.
+    // The headers are real and operable, since focus goes to each instance's
+    // own; the ancestor copies are inert and skipped, since the rows they
+    // copy are reachable where they actually live.
+    a11y: { test: 'error' },
   },
   argTypes: {
     groups: {
@@ -464,10 +462,6 @@ export const StackLayout: StoryObj<Args> = {
  */
 export const ArrangeableColumns: StoryObj<Args> = {
   args: { ...BondMarket.args!, groups: 6, instruments: 8 },
-  // Held to the gate rather than inheriting the suite's `todo`: the stack
-  // layout renders one instance, so there are no repeated headers or ancestor
-  // rows, and the `aria-hidden-focus` finding that forced `todo` cannot arise.
-  parameters: { a11y: { test: 'error' } },
   render: (args) => {
     const gridRef = createRef<Grid<Bond>>();
     const data = generateBonds(args.groups, args.instruments);
