@@ -415,6 +415,18 @@ export const CoreOnly: StoryObj<Args> = {
   },
 };
 
+/**
+ * Groups closed, which is a different shape for assistive tech to describe.
+ *
+ * A collapsed group hides its children while the heading keeps its expander and
+ * its aria-expanded, and the flow layout repeats fewer ancestors — enough
+ * difference from the expanded story to be worth gating on its own.
+ */
+export const CollapsedGroups: StoryObj<Args> = {
+  args: { ...BondMarket.args!, expandByDefault: false },
+  render: (args) => BondMarket.render!(args, {} as never),
+};
+
 /** The same data in conventional vertical layout, for comparison. */
 export const StackLayout: StoryObj<Args> = {
   args: { ...BondMarket.args! },
