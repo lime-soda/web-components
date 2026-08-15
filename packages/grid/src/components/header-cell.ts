@@ -152,6 +152,15 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
 
     this.setAttribute('aria-colindex', String(this.column.index + 1));
 
+    // The column's name, and only that.
+    //
+    // A columnheader takes its name from its contents, so every control a
+    // module puts in the header joins it: with sorting and column arranging
+    // installed, "Price" was announced as "Price Move Price Resize Price".
+    // Naming it explicitly stops the affordances describing the data.
+    if (this.column.headerName) this.setAttribute('aria-label', this.column.headerName);
+    else this.removeAttribute('aria-label');
+
     const focused = this.isFocusedHeader();
     this.toggleAttribute('data-focused', focused && this.gridHasFocus());
     // A header is only reachable by arrowing up into it, so it is never the

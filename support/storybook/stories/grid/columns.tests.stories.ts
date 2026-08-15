@@ -1,18 +1,33 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
-import { expect } from 'storybook/test';
+import { expect, userEvent } from 'storybook/test';
 import { html } from 'lit';
-import type { ColumnDef, Grid, GridOptions } from '@lime-soda/grid';
+import type { ColumnDef, GridOptions } from '@lime-soda/grid';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
 import { ColumnsModule } from '@lime-soda/grid/columns';
+import {
+  accessibleName,
+  cellsOf,
+  dataRows,
+  findAllByRole,
+  getAllByRole,
+  getByRole,
+  pressKey,
+  queryAllByRole,
+} from './shadow-queries.js';
 
 /**
- * Behaviour, kept out of the demo stories.
+ * Arranging columns, driven the way a user drives it.
  *
- * These exist to be run, not read: each one mounts the narrowest grid that can
- * show the thing it asserts, which makes for poor documentation and precise
- * tests. The demo stories next door are the opposite, and the two spoil each
- * other when mixed.
+ * Nothing here reaches for the grid's api or its module objects, and nothing
+ * asserts on internal state: a column is wider because its heading measures
+ * wider, and a column moved because the headings now read in a different order.
+ * That is the only version of these tests that can fail for the reason a user
+ * would notice.
+ *
+ * Elements are found by role. Testing Library stops at a shadow root and this
+ * grid nests four, so the queries come from `./shadow-queries`, which walks the
+ * composed tree the way the accessibility tree does.
  */
 
 interface Quote {
@@ -36,8 +51,9 @@ const rows: Quote[] = Array.from({ length: 6 }, (_, i) => ({
 }));
 
 interface Args {
-  module: ColumnsModule<Quote>;
   columns: ColumnDef<Quote>[];
+  moduleOptions: ConstructorParameters<typeof ColumnsModule>[0];
+  layout: 'flow' | 'stack';
   width: number;
 }
 
@@ -45,20 +61,20 @@ const meta: Meta<Args> = {
   title: 'Grid/Tests/Columns',
   parameters: {
     layout: 'fullscreen',
-    // Behaviour, not appearance. Several of these end mid-interaction, where a
-    // snapshot is a picture of a drag in progress rather than a baseline worth
-    // diffing.
+    // Behaviour, not appearance. Several end mid-interaction, where a snapshot
+    // is a picture of a drag in progress rather than a baseline worth diffing.
     chromatic: { disableSnapshot: true },
     docs: { disable: true },
     a11y: { test: 'error' },
   },
+  args: { columns, moduleOptions: {}, layout: 'stack', width: 700 },
   render: (args) => {
     const options: GridOptions<Quote> = {
       columns: args.columns,
-      layout: 'stack',
+      layout: args.layout,
       rowHeight: 32,
       headerHeight: 40,
-      modules: [args.module],
+      modules: [new ColumnsModule<Quote>(args.moduleOptions)],
     };
     return html`
       <div style=${`width:${args.width}px;height:280px`}>
@@ -73,204 +89,243 @@ type Story = StoryObj<Args>;
 
 // --- helpers ---------------------------------------------------------------
 
-const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
 
-/** Waits for the grid to have mounted an instance with header cells. */
-async function ready(canvasElement: HTMLElement): Promise<Grid<Quote>> {
-  const grid = canvasElement.querySelector('ls-grid') as Grid<Quote>;
-  await grid.updateComplete;
-  for (let i = 0; i < 20 && headers(grid).length === 0; i += 1) await frame();
-  await frame();
-  return grid;
-}
+/** The column headings, in the order they are drawn. */
+const headingOrder = (canvas: HTMLElement): string[] =>
+  getAllByRole(canvas, 'columnheader').map(accessibleName);
 
-const headers = (grid: Grid<Quote>): HTMLElement[] =>
-  [...grid.shadowRoot!.querySelectorAll('ls-grid-instance')].flatMap((instance) => [
-    ...instance.shadowRoot!.querySelectorAll('ls-grid-header-cell'),
-  ]) as HTMLElement[];
+const heading = (canvas: HTMLElement, name: string): HTMLElement =>
+  getByRole(canvas, 'columnheader', { name });
 
-const cellsAt = (grid: Grid<Quote>, index: number): HTMLElement[] =>
-  [...grid.shadowRoot!.querySelectorAll('ls-grid-instance')].flatMap((instance) =>
-    [...instance.shadowRoot!.querySelectorAll('ls-grid-row')].map(
-      (row) => [...row.shadowRoot!.querySelectorAll('ls-grid-cell')][index] as HTMLElement,
-    ),
-  );
-
-const control = (header: HTMLElement, selector: string) =>
-  header.shadowRoot!.querySelector(selector) as HTMLElement | null;
+const widthOf = (element: HTMLElement) => element.getBoundingClientRect().width;
 
 /**
- * A pointer drag.
+ * Drags from one point to another with the pointer.
  *
- * Capture is stubbed: `setPointerCapture` rejects a pointerId that never
- * belonged to a real pointer, and a synthetic PointerEvent cannot create one.
- * The events therefore reach the handle directly, so what is under test is what
- * the handlers do with the positions — not the capture call itself.
+ * Through `userEvent` rather than dispatched events, so the sequence is the one
+ * a browser produces — including the moves between, which is what a handler
+ * tracking a drag actually reads.
  */
-async function drag(element: HTMLElement, fromX: number, toX: number, y: number): Promise<void> {
-  const shared = { bubbles: true, composed: true, pointerId: 1, pointerType: 'mouse' };
-  element.setPointerCapture = () => {};
-  element.releasePointerCapture = () => {};
+const dragTo = (target: HTMLElement, from: { x: number; y: number }, toX: number) =>
+  userEvent.pointer([
+    { keys: '[MouseLeft>]', target, coords: { clientX: from.x, clientY: from.y } },
+    { coords: { clientX: (from.x + toX) / 2, clientY: from.y } },
+    { coords: { clientX: toX, clientY: from.y } },
+    { keys: '[/MouseLeft]', coords: { clientX: toX, clientY: from.y } },
+  ]);
 
-  element.dispatchEvent(new PointerEvent('pointerdown', { ...shared, clientX: fromX, clientY: y }));
-  for (const x of [fromX + (toX - fromX) / 2, toX]) {
-    element.dispatchEvent(new PointerEvent('pointermove', { ...shared, clientX: x, clientY: y }));
-    await frame();
-  }
-  element.dispatchEvent(new PointerEvent('pointerup', { ...shared, clientX: toX, clientY: y }));
-  await frame();
-}
-
-const press = (element: HTMLElement, key: string) =>
-  element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, composed: true }));
+const grabPoint = (element: HTMLElement) => {
+  const box = element.getBoundingClientRect();
+  return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+};
 
 // --- resize ----------------------------------------------------------------
 
-export const ResizeHandlePlacement: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns, width: 700 },
+export const ResizeByDragging: Story = {
   play: async ({ canvasElement }) => {
-    // Positioned against the header cell, not against whatever ancestor happens
-    // to be positioned — the failure there is a handle floating elsewhere.
-    const grid = await ready(canvasElement);
-    const header = headers(grid)[0]!;
-    const handle = control(header, '.ls-grid-resize-handle')!;
+    await settled(canvasElement);
+    const instrument = heading(canvasElement, 'Instrument');
+    const handle = getByRole(canvasElement, 'button', { name: 'Resize Instrument' });
+    const before = widthOf(instrument);
 
-    const headerBox = header.getBoundingClientRect();
-    const handleBox = handle.getBoundingClientRect();
+    await dragTo(handle, grabPoint(handle), grabPoint(handle).x + 100);
 
-    await expect(handleBox.height).toBeGreaterThan(0);
-    await expect(Math.abs(handleBox.right - headerBox.right)).toBeLessThanOrEqual(4);
+    await expect(widthOf(instrument)).toBeCloseTo(before + 100, -1);
   },
 };
 
-export const ResizeByDrag: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns, width: 700 },
-  play: async ({ canvasElement, args }) => {
-    const grid = await ready(canvasElement);
-    const handle = control(headers(grid)[0]!, '.ls-grid-resize-handle')!;
-    const box = handle.getBoundingClientRect();
+export const ResizeFollowsThePointerFarFromTheHandle: Story = {
+  play: async ({ canvasElement }) => {
+    // The pointer leaves the handle on the first move of any real drag, so the
+    // width has to keep following it well outside those few pixels.
+    await settled(canvasElement);
+    const instrument = heading(canvasElement, 'Instrument');
+    const handle = getByRole(canvasElement, 'button', { name: 'Resize Instrument' });
+    const before = widthOf(instrument);
 
-    await drag(handle, box.left + 3, box.left + 103, box.top + 5);
-    await grid.updateComplete;
+    await dragTo(handle, grabPoint(handle), grabPoint(handle).x + 250);
 
-    const width = args.module.getColumnState().find((c) => c.colId === 'instrument')?.width;
-    await expect(width).toBeCloseTo(300, -1);
+    await expect(widthOf(instrument)).toBeGreaterThan(before + 200);
   },
 };
 
-export const ResizeFollowsPointerBeyondTheHandle: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns, width: 700 },
-  play: async ({ canvasElement, args }) => {
-    // The width follows the pointer wherever it goes, well outside the 7px
-    // handle — which is why the real thing captures the pointer.
-    const grid = await ready(canvasElement);
-    const handle = control(headers(grid)[0]!, '.ls-grid-resize-handle')!;
-    const box = handle.getBoundingClientRect();
-
-    await drag(handle, box.left + 3, box.left + 250, box.top + 5);
-
-    const width = args.module.getColumnState().find((c) => c.colId === 'instrument')!.width!;
-    await expect(width).toBeGreaterThan(400);
-  },
-};
-
-export const ResizeByKeyboard: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns, width: 700 },
-  play: async ({ canvasElement, args }) => {
+export const ResizeFromTheKeyboard: Story = {
+  play: async ({ canvasElement }) => {
     // A drag is not an affordance everyone can use, and a column of numbers
     // ellipsised to nothing is unreadable rather than merely inconvenient.
-    const grid = await ready(canvasElement);
-    press(control(headers(grid)[0]!, '.ls-grid-resize-handle')!, 'ArrowRight');
-    await grid.updateComplete;
+    await settled(canvasElement);
+    const instrument = heading(canvasElement, 'Instrument');
+    const before = widthOf(instrument);
 
-    await expect(args.module.getColumnState().find((c) => c.colId === 'instrument')?.width).toBe(
-      210,
-    );
+    getByRole(canvasElement, 'button', { name: 'Resize Instrument' }).focus();
+    await pressKey('ArrowRight');
+
+    await expect(widthOf(instrument)).toBe(before + 10);
   },
 };
 
 // --- reorder ---------------------------------------------------------------
 
-export const ReorderByDrag: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns, width: 700 },
-  play: async ({ canvasElement, args }) => {
-    const grid = await ready(canvasElement);
-    const grip = control(headers(grid)[0]!, '.ls-grid-column-grip')!;
-    const third = headers(grid)[2]!.getBoundingClientRect();
-    const gripBox = grip.getBoundingClientRect();
+export const ReorderByDragging: Story = {
+  play: async ({ canvasElement }) => {
+    await settled(canvasElement);
+    await expect(headingOrder(canvasElement)).toEqual(['Instrument', 'Price', 'Size']);
 
-    await drag(grip, gripBox.left, third.left + third.width / 2, gripBox.top + 5);
-    await grid.updateComplete;
-    await frame();
+    const grip = getByRole(canvasElement, 'button', { name: 'Move Instrument' });
+    const size = heading(canvasElement, 'Size');
 
-    await expect(args.module.getColumnState().map((c) => c.colId)).toEqual([
-      'price',
-      'size',
-      'instrument',
-    ]);
+    await dragTo(grip, grabPoint(grip), grabPoint(size).x);
+
+    await expect(headingOrder(canvasElement)).toEqual(['Price', 'Size', 'Instrument']);
   },
 };
 
-export const ReorderByKeyboard: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns, width: 700 },
-  play: async ({ canvasElement, args }) => {
-    const grid = await ready(canvasElement);
-    press(control(headers(grid)[0]!, '.ls-grid-column-grip')!, 'ArrowRight');
-    await grid.updateComplete;
+export const ReorderFromTheKeyboard: Story = {
+  play: async ({ canvasElement }) => {
+    await settled(canvasElement);
 
-    await expect(args.module.getColumnState().map((c) => c.colId)).toEqual([
-      'price',
-      'instrument',
-      'size',
-    ]);
+    getByRole(canvasElement, 'button', { name: 'Move Instrument' }).focus();
+    await pressKey('ArrowRight');
+
+    await expect(headingOrder(canvasElement)).toEqual(['Price', 'Instrument', 'Size']);
+  },
+};
+
+export const ReorderMovesTheDataWithTheHeading: Story = {
+  play: async ({ canvasElement }) => {
+    // The heading is only half of it: the values have to travel with it, or the
+    // grid is showing prices under a heading that says Instrument.
+    await settled(canvasElement);
+    const firstRow = () => cellsOf(dataRows(canvasElement)[0]!).map(accessibleName);
+    await expect(firstRow()[0]).toBe('INS0');
+
+    getByRole(canvasElement, 'button', { name: 'Move Instrument' }).focus();
+    await pressKey('ArrowRight');
+
+    await expect(headingOrder(canvasElement)[1]).toBe('Instrument');
+    await expect(firstRow()[1]).toBe('INS0');
   },
 };
 
 // --- opting out ------------------------------------------------------------
 
 export const NoHandlesWhenDisabled: Story = {
-  args: {
-    module: new ColumnsModule<Quote>({ resizable: false, reorderable: false }),
-    columns,
-    width: 700,
-  },
+  args: { moduleOptions: { resizable: false, reorderable: false } },
   play: async ({ canvasElement }) => {
-    // The affordance has to actually disappear: a visible handle that does
-    // nothing is worse than none.
-    const grid = await ready(canvasElement);
-    const header = headers(grid)[0]!;
+    // The affordance has to actually disappear: a control that does nothing is
+    // worse than none, and a screen reader announces it either way.
+    await settled(canvasElement);
 
-    await expect(control(header, '.ls-grid-resize-handle')).toBeNull();
-    await expect(control(header, '.ls-grid-column-grip')).toBeNull();
+    await expect(queryAllByRole(canvasElement, 'button', { name: /^Resize/ })).toHaveLength(0);
+    await expect(queryAllByRole(canvasElement, 'button', { name: /^Move/ })).toHaveLength(0);
   },
 };
 
-export const ColumnOptsOut: Story = {
-  args: {
-    module: new ColumnsModule<Quote>(),
-    columns: [{ ...columns[0]!, resizable: false }, ...columns.slice(1)],
-    width: 700,
-  },
+export const ColumnOptsOutOfResizing: Story = {
+  args: { columns: [{ ...columns[0]!, resizable: false }, ...columns.slice(1)] },
   play: async ({ canvasElement }) => {
-    const grid = await ready(canvasElement);
+    await settled(canvasElement);
 
-    await expect(control(headers(grid)[0]!, '.ls-grid-resize-handle')).toBeNull();
-    await expect(control(headers(grid)[1]!, '.ls-grid-resize-handle')).not.toBeNull();
+    await expect(
+      queryAllByRole(canvasElement, 'button', { name: 'Resize Instrument' }),
+    ).toHaveLength(0);
+    await expect(queryAllByRole(canvasElement, 'button', { name: 'Resize Price' })).toHaveLength(1);
   },
 };
 
 // --- pinning ---------------------------------------------------------------
 
-const pinned: ColumnDef<Quote>[] = [
+const pinnedColumns: ColumnDef<Quote>[] = [
   { ...columns[0]!, pinned: 'left' },
   { ...columns[1]!, width: 300 },
   { ...columns[2]!, width: 300 },
 ];
 
-const scroller = (grid: Grid<Quote>) => grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
+/**
+ * Walks right with the arrow keys until the grid has scrolled.
+ *
+ * A real user reaches a column off the right edge by moving to it, and the
+ * browser brings it into view. Setting `scrollLeft` would be the test reaching
+ * past the interface to arrange the thing it then measures.
+ */
+async function arrowRightUntilScrolled(canvas: HTMLElement): Promise<void> {
+  const first = cellsOf(dataRows(canvas)[0]!)[0]!;
+  await userEvent.click(first);
+  for (let i = 0; i < 6; i += 1) await pressKey('ArrowRight');
+}
 
-/** The deepest element painted at a point — `elementFromPoint` stops at each host. */
-const deepestAt = (x: number, y: number): Element | null => {
+export const PinnedColumnStaysWhileTheRestScroll: Story = {
+  args: { columns: pinnedColumns, width: 500 },
+  play: async ({ canvasElement }) => {
+    await settled(canvasElement);
+    const held = heading(canvasElement, 'Instrument');
+    const free = heading(canvasElement, 'Price');
+    const before = {
+      held: held.getBoundingClientRect().left,
+      free: free.getBoundingClientRect().left,
+    };
+
+    await arrowRightUntilScrolled(canvasElement);
+
+    const after = {
+      held: held.getBoundingClientRect().left,
+      free: free.getBoundingClientRect().left,
+    };
+
+    await expect(after.free).toBeLessThan(before.free);
+    await expect(Math.abs(after.held - before.held)).toBeLessThanOrEqual(1);
+  },
+};
+
+export const PinnedHeadingStaysWithItsColumn: Story = {
+  args: { columns: pinnedColumns, width: 500 },
+  play: async ({ canvasElement }) => {
+    // Heading and cells are separate elements in separate rows. A column that
+    // stops in two places reads as a rendering fault, not as one pinned column.
+    await settled(canvasElement);
+    const held = heading(canvasElement, 'Instrument');
+
+    await arrowRightUntilScrolled(canvasElement);
+
+    const cell = cellsOf(dataRows(canvasElement)[0]!)[0]!;
+    await expect(
+      Math.abs(held.getBoundingClientRect().left - cell.getBoundingClientRect().left),
+    ).toBeLessThanOrEqual(1);
+  },
+};
+
+export const PinnedColumnStaysReadable: Story = {
+  args: { columns: pinnedColumns, width: 500 },
+  play: async ({ canvasElement }) => {
+    // The point of pinning: the instrument is still legible after scrolling,
+    // rather than having rows slide visibly beneath a transparent column.
+    await settled(canvasElement);
+    const cell = cellsOf(dataRows(canvasElement)[0]!)[0]!;
+    await expect(accessibleName(cell)).toBe('INS0');
+
+    await arrowRightUntilScrolled(canvasElement);
+
+    const box = cell.getBoundingClientRect();
+    const painted = deepestAt(box.left + box.width / 2, box.top + box.height / 2);
+    await expect(belongsTo(cell, painted)).toBe(true);
+  },
+};
+
+export const PinningDoesNothingInFlow: Story = {
+  args: { columns: pinnedColumns, width: 500, layout: 'flow' },
+  play: async ({ canvasElement }) => {
+    // An instance is sized to its own columns and the scroller moves between
+    // instances, so nothing slides under a pinned column for it to stay in
+    // front of. The columns read in their declared order, unmoved.
+    await settled(canvasElement);
+
+    await expect(headingOrder(canvasElement).slice(0, 3)).toEqual(['Instrument', 'Price', 'Size']);
+  },
+};
+
+/** The deepest element painted at a point; `elementFromPoint` stops at each host. */
+function deepestAt(x: number, y: number): Element | null {
   let element = document.elementFromPoint(x, y);
   while (element?.shadowRoot) {
     const inner = element.shadowRoot.elementFromPoint(x, y);
@@ -278,105 +333,13 @@ const deepestAt = (x: number, y: number): Element | null => {
     element = inner;
   }
   return element;
-};
+}
 
-const belongsTo = (owner: Element, node: Element | null): boolean => {
+function belongsTo(owner: Element, node: Element | null): boolean {
   let current: Element | null = node;
   while (current) {
     if (current === owner) return true;
     current = current.parentElement ?? (current.getRootNode() as ShadowRoot).host ?? null;
   }
   return false;
-};
-
-export const PinnedColumnHoldsItsPlace: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns: pinned, width: 500 },
-  play: async ({ canvasElement }) => {
-    const grid = await ready(canvasElement);
-    const held = cellsAt(grid, 0)[0]!;
-    const free = cellsAt(grid, 1)[0]!;
-    const before = {
-      held: held.getBoundingClientRect().left,
-      free: free.getBoundingClientRect().left,
-    };
-
-    scroller(grid).scrollLeft = 250;
-    await frame();
-    await frame();
-
-    const after = {
-      held: held.getBoundingClientRect().left,
-      free: free.getBoundingClientRect().left,
-    };
-
-    await expect(Math.round(before.free - after.free)).toBe(250);
-    await expect(Math.abs(after.held - before.held)).toBeLessThanOrEqual(1);
-  },
-};
-
-export const PinnedHeaderTracksItsCells: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns: pinned, width: 500 },
-  play: async ({ canvasElement }) => {
-    // Separate elements in separate rows: a column that stops in two different
-    // places reads as a rendering fault rather than as one pinned column.
-    const grid = await ready(canvasElement);
-    const header = headers(grid)[0]!;
-    const cell = cellsAt(grid, 0)[0]!;
-
-    scroller(grid).scrollLeft = 250;
-    await frame();
-    await frame();
-
-    await expect(
-      Math.abs(header.getBoundingClientRect().left - cell.getBoundingClientRect().left),
-    ).toBeLessThanOrEqual(1);
-  },
-};
-
-export const PinnedColumnPaintsOverTheRest: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns: pinned, width: 500 },
-  play: async ({ canvasElement }) => {
-    // A transparent sticky cell shows the rows sliding beneath it, which no
-    // assertion about position would catch.
-    const grid = await ready(canvasElement);
-    const held = cellsAt(grid, 0)[0]!;
-
-    scroller(grid).scrollLeft = 250;
-    await frame();
-
-    const style = getComputedStyle(held);
-    await expect(style.position).toBe('sticky');
-    await expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-
-    const box = held.getBoundingClientRect();
-    const painted = deepestAt(box.left + box.width / 2, box.top + box.height / 2);
-    await expect(belongsTo(held, painted)).toBe(true);
-  },
-};
-
-export const PinningIsInertInFlow: Story = {
-  args: { module: new ColumnsModule<Quote>(), columns: pinned, width: 500 },
-  render: (args) => {
-    const options: GridOptions<Quote> = {
-      columns: args.columns,
-      layout: 'flow',
-      rowHeight: 32,
-      headerHeight: 40,
-      modules: [args.module],
-    };
-    return html`
-      <div style=${`width:${args.width}px;height:280px`}>
-        <ls-grid .gridOptions=${options} .rowData=${rows} style="height:100%"></ls-grid>
-      </div>
-    `;
-  },
-  play: async ({ canvasElement }) => {
-    // Nothing slides out from under the viewport there, so a sticky column would
-    // only detach itself from the rows it belongs to.
-    const grid = await ready(canvasElement);
-    const first = cellsAt(grid, 0)[0]!;
-
-    await expect(getComputedStyle(first).position).not.toBe('sticky');
-    await expect(first.classList.contains('ls-grid-pinned')).toBe(false);
-  },
-};
+}

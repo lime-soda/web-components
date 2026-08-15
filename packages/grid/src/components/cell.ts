@@ -195,6 +195,15 @@ export class GridCell extends SignalWatcher(LitElement) {
   private appliedProperties = new Set<string>();
   private pendingEffects: ((cell: HTMLElement) => void)[] = [];
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    // A grid whose rows contain unroled elements is not a grid: the cells have
+    // to say what they are or assistive tech reads a row of nothing. Set here
+    // rather than in render so it is true before the first paint, matching the
+    // row and the header cell.
+    this.setAttribute('role', 'gridcell');
+  }
+
   override firstUpdated(): void {
     // Module markup renders in this shadow root, where page CSS cannot reach it.
     adoptModuleStyles(this.shadowRoot, this.grid?.registry.moduleStyles() ?? []);
