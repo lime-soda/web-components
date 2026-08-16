@@ -47,7 +47,11 @@ const meta: Meta<Args> = {
   title: 'Grid/Tests/Cell focus',
   parameters: {
     layout: 'fullscreen',
-    chromatic: { disableSnapshot: true },
+    // Snapshots on, unlike the other test stories: the defect these exist for
+    // is a cell that holds focus and looks like it does not, and that is a
+    // question about pixels. Each story ends on a settled, deterministic state
+    // — a cell focused, a row selected — so the image is worth diffing.
+    chromatic: {},
     docs: { disable: true },
     a11y: { test: 'error' },
   },
@@ -81,17 +85,6 @@ type Story = StoryObj<Args>;
 
 const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
 
-/**
- * Whether the grid is drawing its focus ring on this cell.
- *
- * Both halves matter: `outline-width` keeps its declared value when the style
- * is `none`, so width alone reports a ring on every cell in the grid.
- */
-const ringed = (cell: Element) => {
-  const style = getComputedStyle(cell);
-  return style.outlineStyle !== 'none' && Number.parseFloat(style.outlineWidth) > 0;
-};
-
 const rowAt = (canvas: HTMLElement, index: number) => dataRows(canvas)[index]!;
 const cellAt = (canvas: HTMLElement, row: number, column: number) =>
   cellsOf(rowAt(canvas, row))[column]!;
@@ -111,7 +104,9 @@ export const ClickingACellFocusesIt: Story = {
     await userEvent.click(cell);
 
     await expect(activeElement()).toBe(cell);
-    await expect(ringed(cell)).toBe(true);
+    // Whether the ring is drawn is Chromatic's to judge; this story is the
+    // interaction that puts the grid in the state worth photographing.
+    await expect(cell.hasAttribute('data-focused')).toBe(true);
   },
 };
 
@@ -124,8 +119,8 @@ export const ClickingElsewhereMovesTheRing: Story = {
     await userEvent.click(first);
     await userEvent.click(second);
 
-    await expect(ringed(first)).toBe(false);
-    await expect(ringed(second)).toBe(true);
+    await expect(activeElement()).toBe(second);
+    await expect(first.hasAttribute('data-focused')).toBe(false);
   },
 };
 
@@ -216,11 +211,11 @@ export const RingGoesWhenFocusLeavesTheGrid: Story = {
     await settled(canvasElement);
     const cell = cellAt(canvasElement, 1, 1);
     await userEvent.click(cell);
-    await expect(ringed(cell)).toBe(true);
+    await expect(cell.hasAttribute('data-focused')).toBe(true);
 
     await userEvent.click(document.querySelector('#elsewhere') as HTMLElement);
 
-    await expect(ringed(cell)).toBe(false);
+    await expect(cell.hasAttribute('data-focused')).toBe(false);
   },
 };
 
@@ -234,7 +229,9 @@ export const FocusComesBackToTheSameCell: Story = {
     tabInto(canvasElement);
 
     await expect(activeElement()).toBe(cell);
-    await expect(ringed(cell)).toBe(true);
+    // Whether the ring is drawn is Chromatic's to judge; this story is the
+    // interaction that puts the grid in the state worth photographing.
+    await expect(cell.hasAttribute('data-focused')).toBe(true);
   },
 };
 
@@ -248,9 +245,10 @@ export const RingFollowsFocusBetweenCells: Story = {
 
     const now = activeElement()!;
     await expect(now).not.toBe(start);
-    await expect(ringed(start)).toBe(false);
-    await expect(ringed(now)).toBe(true);
-    // Exactly one cell wears it: two rings is worse than none.
-    await expect(getAllByRole(canvasElement, 'gridcell').filter(ringed)).toHaveLength(1);
+    // Exactly one cell is marked at a time: two rings is worse than none, and
+    // that is the invariant, not the paint.
+    await expect(
+      getAllByRole(canvasElement, 'gridcell').filter((cell) => cell.hasAttribute('data-focused')),
+    ).toEqual([now]);
   },
 };
