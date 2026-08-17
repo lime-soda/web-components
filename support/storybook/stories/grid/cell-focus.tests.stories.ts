@@ -89,6 +89,17 @@ const rowAt = (canvas: HTMLElement, index: number) => dataRows(canvas)[index]!;
 const cellAt = (canvas: HTMLElement, row: number, column: number) =>
   cellsOf(rowAt(canvas, row))[column]!;
 
+/**
+ * The cell the grid would hand focus to on Tab.
+ *
+ * The roving tabindex is the ARIA grid pattern: exactly one cell is the tab
+ * stop and the rest are -1, which is how a browser and a screen reader both
+ * find their way back in. It is the grid's remembered position, stated in the
+ * DOM rather than in an attribute of the grid's own invention.
+ */
+const tabStops = (canvas: HTMLElement) =>
+  getAllByRole(canvas, 'gridcell').filter((cell) => cell.getAttribute('tabindex') === '0');
+
 const selectedRows = (canvas: HTMLElement) =>
   dataRows(canvas).filter((row) => row.getAttribute('aria-selected') === 'true');
 
@@ -103,14 +114,15 @@ export const ClickingACellFocusesIt: Story = {
 
     await userEvent.click(cell);
 
+    // Focus itself, and the tab stop moving with it. Whether a ring is drawn is
+    // Chromatic's to judge; this story is the interaction that puts the grid in
+    // the state worth photographing.
     await expect(activeElement()).toBe(cell);
-    // Whether the ring is drawn is Chromatic's to judge; this story is the
-    // interaction that puts the grid in the state worth photographing.
-    await expect(cell.hasAttribute('data-focused')).toBe(true);
+    await expect(tabStops(canvasElement)).toEqual([cell]);
   },
 };
 
-export const ClickingElsewhereMovesTheRing: Story = {
+export const ClickingElsewhereMovesFocus: Story = {
   play: async ({ canvasElement }) => {
     await settled(canvasElement);
     const first = cellAt(canvasElement, 1, 1);
@@ -120,7 +132,7 @@ export const ClickingElsewhereMovesTheRing: Story = {
     await userEvent.click(second);
 
     await expect(activeElement()).toBe(second);
-    await expect(first.hasAttribute('data-focused')).toBe(false);
+    await expect(tabStops(canvasElement)).toEqual([second]);
   },
 };
 
@@ -204,18 +216,19 @@ export const SpaceWorksFromAnyCellWithoutACheckboxColumn: Story = {
 
 // --- focus leaving and coming back -----------------------------------------
 
-export const RingGoesWhenFocusLeavesTheGrid: Story = {
+export const FocusCanLeaveTheGrid: Story = {
   play: async ({ canvasElement }) => {
     // A remembered position is where Tab would return to, not somewhere that is
     // focused now — so the grid stops drawing on it.
     await settled(canvasElement);
     const cell = cellAt(canvasElement, 1, 1);
     await userEvent.click(cell);
-    await expect(cell.hasAttribute('data-focused')).toBe(true);
 
     await userEvent.click(document.querySelector('#elsewhere') as HTMLElement);
 
-    await expect(cell.hasAttribute('data-focused')).toBe(false);
+    // Focus really left, and the grid kept the cell as its way back in.
+    await expect(activeElement()).not.toBe(cell);
+    await expect(tabStops(canvasElement)).toEqual([cell]);
   },
 };
 
@@ -228,14 +241,15 @@ export const FocusComesBackToTheSameCell: Story = {
 
     tabInto(canvasElement);
 
+    // Focus itself, and the tab stop moving with it. Whether a ring is drawn is
+    // Chromatic's to judge; this story is the interaction that puts the grid in
+    // the state worth photographing.
     await expect(activeElement()).toBe(cell);
-    // Whether the ring is drawn is Chromatic's to judge; this story is the
-    // interaction that puts the grid in the state worth photographing.
-    await expect(cell.hasAttribute('data-focused')).toBe(true);
+    await expect(tabStops(canvasElement)).toEqual([cell]);
   },
 };
 
-export const RingFollowsFocusBetweenCells: Story = {
+export const OneTabStopFollowsFocus: Story = {
   play: async ({ canvasElement }) => {
     await settled(canvasElement);
     const start = cellAt(canvasElement, 1, 1);
@@ -245,10 +259,8 @@ export const RingFollowsFocusBetweenCells: Story = {
 
     const now = activeElement()!;
     await expect(now).not.toBe(start);
-    // Exactly one cell is marked at a time: two rings is worse than none, and
-    // that is the invariant, not the paint.
-    await expect(
-      getAllByRole(canvasElement, 'gridcell').filter((cell) => cell.hasAttribute('data-focused')),
-    ).toEqual([now]);
+    // One tab stop at a time. Two would leave a keyboard user re-entering the
+    // grid somewhere they never were.
+    await expect(tabStops(canvasElement)).toEqual([now]);
   },
 };
