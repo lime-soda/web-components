@@ -9,8 +9,8 @@ import {
   activeElement,
   cellsOf,
   dataRows,
-  findAllByRole,
   getAllByRole,
+  gridReady,
   pressKey,
   tabInto,
 } from './shadow-queries.js';
@@ -76,7 +76,7 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
+const settled = (canvas: HTMLElement) => gridReady(canvas);
 
 const groupRow = (canvas: HTMLElement) => dataRows(canvas)[0]!;
 const childRow = (canvas: HTMLElement) => dataRows(canvas)[1]!;

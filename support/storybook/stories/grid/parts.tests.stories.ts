@@ -7,8 +7,8 @@ import '@lime-soda/grid/layouts';
 import { TreeModule } from '@lime-soda/grid/tree';
 import { SortModule } from '@lime-soda/grid/sort';
 import { SelectionModule } from '@lime-soda/grid/selection';
-import { deepElements, findAllByRole, getByRole } from './shadow-queries.js';
 import { expect } from 'storybook/test';
+import { deepElements, getByRole, gridReady } from './shadow-queries.js';
 
 /**
  * Restyling the grid from page CSS, which is what `::part` is for.
@@ -150,7 +150,7 @@ export const ModuleParts: Story = {
       ls-grid::part(sort-indicator) { outline: 2px solid #2563eb; color: #2563eb; }
     `),
   play: async ({ canvasElement }) => {
-    await findAllByRole(canvasElement, 'gridcell');
+    await gridReady(canvasElement);
     // Sorted the way a user sorts: the heading's own control, which is what
     // takes the click. The header cell around it is not the button, and
     // clicking that sorted nothing at all.

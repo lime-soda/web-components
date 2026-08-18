@@ -4,7 +4,7 @@ import { html } from 'lit';
 import type { GridOptions } from '@lime-soda/grid';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
-import { findAllByRole, getAllByRole, queryAllByRole } from './shadow-queries.js';
+import { getAllByRole, gridReady, queryAllByRole } from './shadow-queries.js';
 
 /**
  * How the flow layout arranges rows, and how little of it is real at a time.
@@ -75,7 +75,7 @@ const meta: Meta<Args> = {
 export default meta;
 type Story = StoryObj<Args>;
 
-const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
+const settled = (canvas: HTMLElement) => gridReady(canvas);
 
 const shadow = (canvas: HTMLElement) => canvas.querySelector('ls-grid')!.shadowRoot!;
 

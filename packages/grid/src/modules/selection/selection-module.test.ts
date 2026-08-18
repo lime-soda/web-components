@@ -189,7 +189,11 @@ describe('SelectionModule', () => {
     });
 
     it('offers none in single mode, where select-all is meaningless', () => {
-      expect(headerFor(setup(rows(3), { mode: 'single' }).selection)).toBeNull();
+      // The heading is still rendered for its hidden name; what is absent is
+      // any binding, because there is no control to bind.
+      const heading = headerFor(setup(rows(3), { mode: 'single' }).selection);
+
+      expect((heading as unknown as { values: unknown[] }).values).toHaveLength(0);
     });
 
     it('selects everything visible when nothing is selected', () => {

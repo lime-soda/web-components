@@ -354,8 +354,11 @@ describe('tree selection', () => {
       const slot = selection.headerSlot({
         column: { colId: 'ls-grid-selection', headerName: '', width: 28, index: 0 },
       } as never);
-      // The template's bound properties carry the tri-state.
-      const values = (slot as unknown as { values: unknown[] }).values;
+      // The heading is the column's hidden name followed by the select-all
+      // control, so the control is the second binding and its own bindings
+      // carry the tri-state.
+      const [, control] = (slot as unknown as { values: unknown[] }).values;
+      const values = (control as { values: unknown[] }).values;
       return { checked: values[0] as boolean, indeterminate: values[1] as boolean };
     };
 

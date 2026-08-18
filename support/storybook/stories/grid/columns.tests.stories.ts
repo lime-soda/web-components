@@ -9,9 +9,9 @@ import {
   accessibleName,
   cellsOf,
   dataRows,
-  findAllByRole,
   getAllByRole,
   getByRole,
+  gridReady,
   pressKey,
   queryAllByRole,
 } from './shadow-queries.js';
@@ -89,7 +89,7 @@ type Story = StoryObj<Args>;
 
 // --- helpers ---------------------------------------------------------------
 
-const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
+const settled = (canvas: HTMLElement) => gridReady(canvas);
 
 /** The column headings, in the order they are drawn. */
 const headingOrder = (canvas: HTMLElement): string[] =>

@@ -383,6 +383,19 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
   // -- Rendering --------------------------------------------------------------
 
   static readonly styles = css`
+    /* Read aloud, never drawn: clipped to a single pixel and taken out of flow. */
+    .ls-grid-visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .ls-grid-checkbox {
       cursor: pointer;
       margin: 0;
@@ -433,8 +446,24 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    * Never in single mode: selecting everything is not a thing single selection
    * can express, so the header stays empty even though the column is there.
    */
+  /**
+   * The checkbox column's heading, named for anyone who cannot see it.
+   *
+   * A word above a column of tickboxes is noise, so the column carries no
+   * visible text — which left its heading with no name at all, and axe
+   * reporting `empty-table-header`. In multi mode the select-all control
+   * happened to supply one; in single mode there is no such control and the
+   * heading was simply anonymous.
+   *
+   * Text rather than an `aria-label`, because the rule asks for content and an
+   * attribute does not satisfy it. Hidden the usual way: clipped to nothing,
+   * still read aloud.
+   */
   headerSlot(ctx: HeaderSlotContext<TData>) {
-    if (ctx.column.colId !== SELECTION_COL_ID || this.mode === 'single') return null;
+    if (ctx.column.colId !== SELECTION_COL_ID) return null;
+
+    const name = html`<span class="ls-grid-visually-hidden">Row selection</span>`;
+    if (this.mode === 'single') return name;
 
     const leaves = this.membership.allLeaves();
     // Coverage, not membership of the set: with a hierarchy installed, a leaf
@@ -449,10 +478,10 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
           ? 'checked'
           : 'indeterminate';
 
-    return selectionCheckboxTemplate(state, leaves.length === 0, () => {
+    return html`${name}${selectionCheckboxTemplate(state, leaves.length === 0, () => {
       if (state === 'checked') this.clearSelection();
       else this.selectAll();
-    });
+    })}`;
   }
 
   /**

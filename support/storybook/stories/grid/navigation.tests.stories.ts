@@ -9,7 +9,7 @@ import {
   activeElement,
   cellsOf,
   dataRows,
-  findAllByRole,
+  gridReady,
   pressKey,
   tabInto,
 } from './shadow-queries.js';
@@ -86,7 +86,7 @@ const meta: Meta<Args> = {
 export default meta;
 type Story = StoryObj<Args>;
 
-const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
+const settled = (canvas: HTMLElement) => gridReady(canvas);
 
 /** The instances the layout drew, which is what makes flow flow. */
 const instances = (canvas: HTMLElement): Element[] => [

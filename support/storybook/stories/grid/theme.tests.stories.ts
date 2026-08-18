@@ -7,7 +7,7 @@ import '@lime-soda/grid/layouts';
 import { TreeModule } from '@lime-soda/grid/tree';
 import { SortModule } from '@lime-soda/grid/sort';
 import { SelectionModule } from '@lime-soda/grid/selection';
-import { findAllByRole, getAllByRole } from './shadow-queries.js';
+import { getAllByRole, gridReady } from './shadow-queries.js';
 
 /**
  * Theme tokens reaching everything they have to reach.
@@ -179,7 +179,7 @@ export const SelectionHighlightIsThemed: Story = {
   render: () => gridWith({ ...forest, selectionBackground: '#fca5a5' }),
   play: async ({ canvasElement }) => {
     // Selected the way a user selects: ticking an instrument's checkbox.
-    await findAllByRole(canvasElement, 'gridcell');
+    await gridReady(canvasElement);
     await userEvent.click(getAllByRole(canvasElement, 'checkbox', { name: 'Select' })[1]!);
   },
 };
@@ -213,7 +213,7 @@ export const ThemeCanBeReplacedLive: Story = {
   globals: { theme: 'light' },
   render: () => gridWith(forest),
   play: async ({ canvasElement }) => {
-    await findAllByRole(canvasElement, 'gridcell');
+    await gridReady(canvasElement);
     const grid = canvasElement.querySelector('ls-grid') as Grid<Bond>;
     // The same property a consumer sets, not a way into the grid's insides.
     grid.gridOptions = { ...grid.gridOptions!, theme: midnight };

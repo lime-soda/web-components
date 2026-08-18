@@ -220,3 +220,33 @@ export function tabInto(root: ParentNode): HTMLElement {
   }
   throw new Error('Nothing in this tree holds the roving tabindex.');
 }
+
+/**
+ * Waits until every Lit element in the tree has finished rendering.
+ *
+ * A cell exists before the custom element inside it does: the grid renders the
+ * cell, the cell renders its renderer, and each is a separate update. Querying
+ * after the cells appear therefore finds a grid whose controls are still being
+ * built — five selection checkboxes with one input between them — and a story
+ * that measures that is measuring a half-drawn grid.
+ *
+ * Repeated because settling one level reveals the next: awaiting the cells lets
+ * the renderers start, and those have their own updates to finish.
+ */
+export async function settleRenders(root: ParentNode, passes = 5): Promise<void> {
+  for (let pass = 0; pass < passes; pass += 1) {
+    const pending = [...deepElements(root)]
+      .map((element) => (element as { updateComplete?: Promise<unknown> }).updateComplete)
+      .filter((update): update is Promise<unknown> => update !== undefined);
+
+    if (pending.length === 0) break;
+    await Promise.all(pending);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+}
+
+/** The grid mounted and fully drawn: cells present, and their contents with them. */
+export async function gridReady(root: ParentNode): Promise<void> {
+  await findAllByRole(root, 'gridcell');
+  await settleRenders(root);
+}

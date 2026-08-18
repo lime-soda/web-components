@@ -93,10 +93,13 @@ describe('selection modes', () => {
 
     it('never appears in single mode, even with the column shown', () => {
       // Selecting everything is not something single selection can express.
+      // The heading still renders — it carries the column's hidden name, which
+      // is what stops it being an anonymous table header — but nothing is bound
+      // into it, because there is no control there.
       const { selection } = setup({ mode: 'single', checkboxColumn: true });
 
       expect(hasCheckboxColumn(selection)).toBe(true);
-      expect(headerSlot(selection)).toBeNull();
+      expect((headerSlot(selection) as unknown as { values: unknown[] }).values).toHaveLength(0);
     });
   });
 

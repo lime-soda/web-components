@@ -10,21 +10,25 @@ import {
   activeElement,
   cellsOf,
   dataRows,
-  findAllByRole,
   getAllByRole,
+  gridReady,
   pressKey,
-  queryAllByRole,
   tabInto,
 } from './shadow-queries.js';
 
 /**
- * Reaching a cell with the mouse, and acting on it with the keyboard.
+ * Where focus is, and where it goes back to.
  *
- * Both were once broken in ways no unit test could see. The focus ring was
- * `:focus-visible`, which by design never matches a mouse click, so a clicked
- * cell was genuinely focused and looked exactly like an unfocused one. And a
- * focused cell had no way to select its row, because focus sits on the cell
- * rather than on the checkbox inside it.
+ * Core's, not a module's: a grid with nothing installed still has to say which
+ * cell is current and hold a way back in. Selection used to be tested here too,
+ * on the grounds that both involve a focused cell — which meant this file owned
+ * half of another module's behaviour and neither could say what it covered.
+ * That half is next door now.
+ *
+ * The ring itself was once `:focus-visible`, which by design never matches a
+ * mouse click, so a clicked cell was genuinely focused and looked exactly like
+ * an unfocused one. Chromatic judges whether it is drawn; these fix where it
+ * belongs.
  */
 
 interface Row {
@@ -40,6 +44,7 @@ const data: Row[] = Array.from({ length: 5 }, (_, i) => ({
 }));
 
 interface Args {
+  /** Kept, because a cell with a control in it is the harder case for focus. */
   checkboxColumn: boolean;
 }
 
@@ -83,7 +88,7 @@ const meta: Meta<Args> = {
 export default meta;
 type Story = StoryObj<Args>;
 
-const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
+const settled = (canvas: HTMLElement) => gridReady(canvas);
 
 const rowAt = (canvas: HTMLElement, index: number) => dataRows(canvas)[index]!;
 const cellAt = (canvas: HTMLElement, row: number, column: number) =>
@@ -99,9 +104,6 @@ const cellAt = (canvas: HTMLElement, row: number, column: number) =>
  */
 const tabStops = (canvas: HTMLElement) =>
   getAllByRole(canvas, 'gridcell').filter((cell) => cell.getAttribute('tabindex') === '0');
-
-const selectedRows = (canvas: HTMLElement) =>
-  dataRows(canvas).filter((row) => row.getAttribute('aria-selected') === 'true');
 
 // --- the mouse -------------------------------------------------------------
 
@@ -133,84 +135,6 @@ export const ClickingElsewhereMovesFocus: Story = {
 
     await expect(activeElement()).toBe(second);
     await expect(tabStops(canvasElement)).toEqual([second]);
-  },
-};
-
-// --- selecting from the keyboard -------------------------------------------
-
-export const SpaceSelectsTheFocusedRow: Story = {
-  play: async ({ canvasElement }) => {
-    // Focus sits on the cell, not on the checkbox inside it, so the row had no
-    // way to be selected from the keyboard at all.
-    await settled(canvasElement);
-    await userEvent.click(cellAt(canvasElement, 1, 0));
-
-    await pressKey(' ');
-
-    await expect(selectedRows(canvasElement)).toHaveLength(1);
-    await expect(queryAllByRole(canvasElement, 'checkbox', { name: 'Deselect' })).toHaveLength(1);
-  },
-};
-
-export const EnterSelectsTheFocusedRow: Story = {
-  play: async ({ canvasElement }) => {
-    await settled(canvasElement);
-    await userEvent.click(cellAt(canvasElement, 1, 0));
-
-    await pressKey('Enter');
-
-    await expect(selectedRows(canvasElement)).toHaveLength(1);
-  },
-};
-
-export const SpaceTogglesTheRowOffAgain: Story = {
-  play: async ({ canvasElement }) => {
-    await settled(canvasElement);
-    await userEvent.click(cellAt(canvasElement, 1, 0));
-
-    await pressKey(' ');
-    await expect(selectedRows(canvasElement)).toHaveLength(1);
-
-    await pressKey(' ');
-    await expect(selectedRows(canvasElement)).toHaveLength(0);
-  },
-};
-
-export const SpaceDoesNotScrollThePage: Story = {
-  play: async ({ canvasElement }) => {
-    // Space is the page-down of the web. Claiming it is what stops the whole
-    // page jumping every time a trader selects a row.
-    await settled(canvasElement);
-    await userEvent.click(cellAt(canvasElement, 1, 0));
-
-    await expect(await pressKey(' ')).toBe(true);
-  },
-};
-
-export const SpaceIsTheCheckboxColumnsWhenThereIsOne: Story = {
-  play: async ({ canvasElement }) => {
-    // With a checkbox column present it owns selection, so Space in a value
-    // cell is free for whatever a future module wants of it.
-    await settled(canvasElement);
-    await userEvent.click(cellAt(canvasElement, 1, 2));
-
-    await pressKey(' ');
-
-    await expect(selectedRows(canvasElement)).toHaveLength(0);
-  },
-};
-
-export const SpaceWorksFromAnyCellWithoutACheckboxColumn: Story = {
-  args: { checkboxColumn: false },
-  play: async ({ canvasElement }) => {
-    // Without the column there is nothing else Space could mean, and a keyboard
-    // user would otherwise have no way to select at all.
-    await settled(canvasElement);
-    await userEvent.click(cellAt(canvasElement, 1, 1));
-
-    await pressKey(' ');
-
-    await expect(selectedRows(canvasElement)).toHaveLength(1);
   },
 };
 
