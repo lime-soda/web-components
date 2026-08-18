@@ -8,6 +8,10 @@ import { TreeModule } from '@lime-soda/grid/tree';
 import { SortModule } from '@lime-soda/grid/sort';
 import { SelectionModule } from '@lime-soda/grid/selection';
 import { getAllByRole, gridReady } from './shadow-queries.js';
+import { type Instrument, columns, grouped, visualStoryParameters } from './fixtures.js';
+
+/** One group of four, which exercises a heading, an indent and a hierarchy. */
+const data = grouped(1, 4);
 
 /**
  * Theme tokens reaching everything they have to reach.
@@ -30,23 +34,6 @@ import { getAllByRole, gridReady } from './shadow-queries.js';
  * it looks broken, and it makes the picture useless for spotting the day one of
  * those tokens genuinely stops arriving.
  */
-
-interface Bond {
-  id: string;
-  parentId: string | null;
-  name: string;
-  price: number;
-}
-
-const data: Bond[] = [
-  { id: 'g', parentId: null, name: 'Gilts', price: 0 },
-  ...Array.from({ length: 4 }, (_, i) => ({
-    id: `g-${i}`,
-    parentId: 'g',
-    name: `UKT ${i}% 2030`,
-    price: 100 + i,
-  })),
-];
 
 /** A complete theme, so nothing is left half-styled. */
 const forest: GridTheme = {
@@ -79,21 +66,18 @@ const midnight: GridTheme = {
   focus: '#f59e0b',
 };
 
-const gridWith = (theme: GridTheme, extra: Partial<GridOptions<Bond>> = {}) => {
-  const options: GridOptions<Bond> = {
-    columns: [
-      { field: 'name', headerName: 'Instrument', width: 240 },
-      { field: 'price', headerName: 'Price', width: 110 },
-    ],
+const gridWith = (theme: GridTheme, extra: Partial<GridOptions<Instrument>> = {}) => {
+  const options: GridOptions<Instrument> = {
+    columns,
     getRowId: (row) => row.id,
     layout: 'stack',
     rowHeight: 32,
     headerHeight: 40,
     theme,
     modules: [
-      new TreeModule<Bond>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
-      new SortModule<Bond>(),
-      new SelectionModule<Bond>({ mode: 'multi', checkboxColumn: true }),
+      new TreeModule<Instrument>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
+      new SortModule<Instrument>(),
+      new SelectionModule<Instrument>({ mode: 'multi', checkboxColumn: true }),
     ],
     ...extra,
   };
@@ -108,11 +92,7 @@ const gridWith = (theme: GridTheme, extra: Partial<GridOptions<Bond>> = {}) => {
 
 const meta: Meta = {
   title: 'Grid/Tests/Theming',
-  parameters: {
-    layout: 'centered',
-    docs: { disable: true },
-    a11y: { test: 'error' },
-  },
+  parameters: visualStoryParameters,
 };
 
 export default meta;
@@ -214,7 +194,7 @@ export const ThemeCanBeReplacedLive: Story = {
   render: () => gridWith(forest),
   play: async ({ canvasElement }) => {
     await gridReady(canvasElement);
-    const grid = canvasElement.querySelector('ls-grid') as Grid<Bond>;
+    const grid = canvasElement.querySelector('ls-grid') as Grid<Instrument>;
     // The same property a consumer sets, not a way into the grid's insides.
     grid.gridOptions = { ...grid.gridOptions!, theme: midnight };
     await grid.updateComplete;

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { expect } from 'storybook/test';
 import { html } from 'lit';
-import type { GridOptions } from '@lime-soda/grid';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
 import {
@@ -13,6 +12,7 @@ import {
   pressKey,
   tabInto,
 } from './shadow-queries.js';
+import { instruments, mountGrid, rowsPerInstance, testStoryParameters } from './fixtures.js';
 
 /**
  * The keyboard floor a grid has with no modules at all.
@@ -25,68 +25,32 @@ import {
  * hold with nothing imported, or the role is a lie again.
  */
 
-interface Row {
-  id: string;
-  name: string;
-  price: number;
-}
-
 /**
  * Enough rows to break across instances.
  *
- * Eight fit an instance at this height, so thirty fills four of them. Six
- * filled one, which made every story here a test of the stack layout wearing
- * the flow layout's name.
- *
- * That the layout breaks at all belongs to the layout stories. What these need
- * is a boundary to exist so there is something for the arrow keys to cross.
+ * Ten fit an instance at this height, so forty fills four of them. That the
+ * layout breaks at all belongs to the layout stories; what these need is a
+ * boundary to exist so the arrow keys have something to cross.
  */
-const data: Row[] = Array.from({ length: 30 }, (_, i) => ({
-  id: `r${i}`,
-  name: `Row ${i}`,
-  price: i,
-}));
+const data = instruments(40);
 
-interface Args {
-  layout: 'flow' | 'stack';
-}
+const grid = (layout: 'flow' | 'stack') =>
+  // The trailing button is load-bearing: it is what Tab reaches when the grid
+  // lets go, and without something after it there is nowhere to land.
+  mountGrid({
+    data,
+    options: { layout },
+    after: html`<button id="after">After the grid</button>`,
+  });
 
-const meta: Meta<Args> = {
+const meta: Meta = {
   title: 'Grid/Tests/Navigation',
-  parameters: {
-    layout: 'fullscreen',
-    chromatic: { disableSnapshot: true },
-    docs: { disable: true },
-    a11y: { test: 'error' },
-  },
-  args: { layout: 'flow' },
-  render: (args) => {
-    const options: GridOptions<Row> = {
-      columns: [
-        { field: 'name', headerName: 'Name', width: 200 },
-        { field: 'price', headerName: 'Price', width: 120 },
-      ],
-      getRowId: (row) => row.id,
-      layout: args.layout,
-      rowHeight: 32,
-      headerHeight: 40,
-      modules: [],
-    };
-    // The trailing button is load-bearing: it is what Tab has to reach when the
-    // grid lets go, and without something after it there is nowhere to land.
-    return html`
-      <div style="width:600px;height:300px">
-        <ls-grid .gridOptions=${options} .rowData=${data} style="height:100%"></ls-grid>
-      </div>
-      <button id="after">After the grid</button>
-    `;
-  },
+  parameters: testStoryParameters,
+  render: () => grid('flow'),
 };
 
 export default meta;
-type Story = StoryObj<Args>;
-
-const settled = (canvas: HTMLElement) => gridReady(canvas);
+type Story = StoryObj;
 
 /** The instances the layout drew, which is what makes flow flow. */
 const instances = (canvas: HTMLElement): Element[] => [
@@ -127,20 +91,20 @@ function focusedCell(canvas: HTMLElement): { row: number; column: number; name: 
 
 /** Enters the grid the way Tab does, then reports where focus landed. */
 async function tabIn(canvas: HTMLElement) {
-  await settled(canvas);
+  await gridReady(canvas);
   tabInto(canvas);
   return focusedCell(canvas);
 }
 
 export const TabEntersTheGrid: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await expect(focusedCell(canvasElement)).toBeNull();
 
     const landed = await tabIn(canvasElement);
 
     await expect(landed).not.toBeNull();
-    await expect(landed!.name).toBe('Row 0');
+    await expect(landed!.name).toBe('INS 0');
   },
 };
 
@@ -179,7 +143,7 @@ export const TabStepsOneCellAtATime: Story = {
     await expect(focusedCell(canvasElement)).toEqual({
       row: start!.row,
       column: start!.column + 1,
-      name: '0',
+      name: '100',
     });
   },
 };
@@ -205,7 +169,7 @@ export const TabLetsGoAtTheLastCell: Story = {
 };
 
 export const NavigatesTheStackLayout: Story = {
-  args: { layout: 'stack' },
+  render: () => grid('stack'),
   play: async ({ canvasElement }) => {
     // The stack renders its header outside the scroller, which is the sort of
     // asymmetry that leaves one layout navigable and the other not.
@@ -235,15 +199,15 @@ export const ArrowingDownCarriesIntoTheNextInstance: Story = {
   play: async ({ canvasElement }) => {
     // The rows are one list drawn in columns, so walking off the bottom of one
     // instance continues at the top of the next rather than stopping.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await tabIn(canvasElement);
 
     await expect(instanceHolding(canvasElement, activeElement())).toBe(0);
 
-    // Eight rows fit, so nine presses must have left the first instance.
-    for (let i = 0; i < 9; i += 1) await pressKey('ArrowDown');
+    // Ten rows fit, so eleven presses must have left the first instance.
+    for (let i = 0; i < 11; i += 1) await pressKey('ArrowDown');
 
-    await expect(positionOf(canvasElement)!.name).toBe('Row 9');
+    await expect(positionOf(canvasElement)!.name).toBe('INS 11');
     await expect(instanceHolding(canvasElement, activeElement())).toBe(1);
   },
 };
@@ -252,19 +216,20 @@ export const ArrowingRightAtTheLastColumnCrossesInstances: Story = {
   play: async ({ canvasElement }) => {
     // Off the right edge is the neighbouring instance at its left edge, on the
     // same row — the eye follows the value across.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await tabIn(canvasElement);
     const start = positionOf(canvasElement)!;
 
     await expect(instanceHolding(canvasElement, activeElement())).toBe(0);
 
-    await pressKey('ArrowRight'); // to Price, the last column
+    await pressKey('ArrowRight'); // Price
+    await pressKey('ArrowRight'); // Size, the last column
     await pressKey('ArrowRight'); // off the edge
 
     const landed = positionOf(canvasElement)!;
     await expect(landed.column).toBe(0);
     await expect(instanceHolding(canvasElement, activeElement())).toBe(1);
     // The same row across the join, so the eye follows the value.
-    await expect(landed.index - start.index).toBe(8);
+    await expect(landed.index - start.index).toBe(rowsPerInstance(360));
   },
 };

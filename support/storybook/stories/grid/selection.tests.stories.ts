@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { expect, userEvent } from 'storybook/test';
-import { html } from 'lit';
-import type { GridOptions } from '@lime-soda/grid';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
 import { SelectionModule } from '@lime-soda/grid/selection';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
 import { cellsOf, dataRows, getAllByRole, gridReady, pressKey } from './shadow-queries.js';
+import { type Instrument, instruments, mountGrid, testStoryParameters } from './fixtures.js';
 
 /**
  * Picking rows, with the mouse and from the keyboard.
@@ -23,59 +22,30 @@ import { cellsOf, dataRows, getAllByRole, gridReady, pressKey } from './shadow-q
  * still fails.
  */
 
-interface Row {
-  id: string;
-  name: string;
-  price: number;
-}
+const data = instruments(5);
 
-const data: Row[] = Array.from({ length: 5 }, (_, i) => ({
-  id: `r${i}`,
-  name: `Row ${i}`,
-  price: i,
-}));
-
-interface Args {
-  checkboxColumn: boolean;
-  mode: 'single' | 'multi';
-}
-
-const meta: Meta<Args> = {
-  title: 'Grid/Tests/Selection',
-  parameters: {
-    layout: 'centered',
-    chromatic: { disableSnapshot: true },
-    docs: { disable: true },
-    a11y: { test: 'error' },
-  },
-  args: { checkboxColumn: true, mode: 'multi' },
-  render: (args) => {
-    const options: GridOptions<Row> = {
-      columns: [
-        { field: 'name', headerName: 'Name', width: 200 },
-        { field: 'price', headerName: 'Price', width: 120 },
-      ],
-      getRowId: (row) => row.id,
+const withSelection = (mode: 'single' | 'multi' = 'multi', checkboxColumn = true) =>
+  mountGrid({
+    data,
+    options: {
       layout: 'stack',
-      rowHeight: 32,
-      headerHeight: 40,
       modules: [
-        new SelectionModule<Row>({ mode: args.mode, checkboxColumn: args.checkboxColumn }),
-        new KeyboardModule<Row>(),
+        new SelectionModule<Instrument>({ mode, checkboxColumn }),
+        new KeyboardModule<Instrument>(),
       ],
-    };
-    return html`
-      <div style="width:420px;height:236px">
-        <ls-grid .gridOptions=${options} .rowData=${data} style="height:100%"></ls-grid>
-      </div>
-    `;
-  },
+    },
+    width: 500,
+    height: 236,
+  });
+
+const meta: Meta = {
+  title: 'Grid/Tests/Selection',
+  parameters: testStoryParameters,
+  render: () => withSelection(),
 };
 
 export default meta;
-type Story = StoryObj<Args>;
-
-const settled = (canvas: HTMLElement) => gridReady(canvas);
+type Story = StoryObj;
 
 const selectedRows = (canvas: HTMLElement) =>
   dataRows(canvas).filter((row) => row.getAttribute('aria-selected') === 'true');
@@ -89,7 +59,7 @@ const checkboxes = (canvas: HTMLElement) => getAllByRole(canvas, 'checkbox');
 
 export const TickingACheckboxSelectsItsRow: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     // The header's checkbox is first; the rows' follow.
     const row = checkboxes(canvasElement)[1]!;
 
@@ -103,7 +73,7 @@ export const TickingACheckboxSelectsItsRow: Story = {
 
 export const TickingAgainDeselects: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const row = checkboxes(canvasElement)[1]!;
 
     await userEvent.click(row);
@@ -115,9 +85,9 @@ export const TickingAgainDeselects: Story = {
 };
 
 export const SingleModeKeepsOneRow: Story = {
-  args: { mode: 'single' },
+  render: () => withSelection('single'),
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
 
     await userEvent.click(checkboxes(canvasElement)[1]!);
     await userEvent.click(checkboxes(canvasElement)[2]!);
@@ -132,7 +102,7 @@ export const SpaceSelectsTheFocusedRow: Story = {
   play: async ({ canvasElement }) => {
     // Focus sits on the cell, not on the checkbox inside it, so without this a
     // keyboard user has no way to select at all.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await userEvent.click(cellAt(canvasElement, 1, 0));
 
     await pressKey(' ');
@@ -143,7 +113,7 @@ export const SpaceSelectsTheFocusedRow: Story = {
 
 export const EnterSelectsTheFocusedRow: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await userEvent.click(cellAt(canvasElement, 1, 0));
 
     await pressKey('Enter');
@@ -154,7 +124,7 @@ export const EnterSelectsTheFocusedRow: Story = {
 
 export const SpaceTogglesTheRowOffAgain: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await userEvent.click(cellAt(canvasElement, 1, 0));
 
     await pressKey(' ');
@@ -169,7 +139,7 @@ export const SpaceDoesNotScrollThePage: Story = {
   play: async ({ canvasElement }) => {
     // Space is the page-down of the web. Claiming it is what stops the whole
     // page jumping every time a trader picks a row.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await userEvent.click(cellAt(canvasElement, 1, 0));
 
     await expect(await pressKey(' ')).toBe(true);
@@ -180,7 +150,7 @@ export const SpaceBelongsToTheCheckboxColumnWhenThereIsOne: Story = {
   play: async ({ canvasElement }) => {
     // With the column present it owns selection, so Space in a value cell is
     // free for whatever a later module wants of it.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await userEvent.click(cellAt(canvasElement, 1, 2));
 
     await pressKey(' ');
@@ -190,11 +160,11 @@ export const SpaceBelongsToTheCheckboxColumnWhenThereIsOne: Story = {
 };
 
 export const SpaceWorksAnywhereWithoutACheckboxColumn: Story = {
-  args: { checkboxColumn: false },
+  render: () => withSelection('multi', false),
   play: async ({ canvasElement }) => {
     // Nothing else Space could mean here, and a keyboard user would otherwise
     // have no way to select.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await userEvent.click(cellAt(canvasElement, 1, 1));
 
     await pressKey(' ');

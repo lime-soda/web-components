@@ -9,6 +9,10 @@ import { SortModule } from '@lime-soda/grid/sort';
 import { SelectionModule } from '@lime-soda/grid/selection';
 import { expect } from 'storybook/test';
 import { deepElements, getByRole, gridReady } from './shadow-queries.js';
+import { type Instrument, columns, grouped, visualStoryParameters } from './fixtures.js';
+
+/** One group of four, which exercises a heading, an indent and a hierarchy. */
+const data = grouped(1, 4);
 
 /**
  * Restyling the grid from page CSS, which is what `::part` is for.
@@ -29,36 +33,16 @@ import { deepElements, getByRole, gridReady } from './shadow-queries.js';
  * narrower question than the one being asked.
  */
 
-interface Bond {
-  id: string;
-  parentId: string | null;
-  name: string;
-  price: number;
-}
-
-const data: Bond[] = [
-  { id: 'g', parentId: null, name: 'Gilts', price: 0 },
-  ...Array.from({ length: 4 }, (_, i) => ({
-    id: `g-${i}`,
-    parentId: 'g',
-    name: `UKT ${i}% 2030`,
-    price: 100 + i,
-  })),
-];
-
-const options: GridOptions<Bond> = {
-  columns: [
-    { field: 'name', headerName: 'Instrument', width: 240 },
-    { field: 'price', headerName: 'Price', width: 110 },
-  ],
+const options: GridOptions<Instrument> = {
+  columns,
   getRowId: (row) => row.id,
   layout: 'stack',
   rowHeight: 32,
   headerHeight: 40,
   modules: [
-    new TreeModule<Bond>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
-    new SortModule<Bond>(),
-    new SelectionModule<Bond>({ mode: 'multi', checkboxColumn: true }),
+    new TreeModule<Instrument>({ getParentId: (bond) => bond.parentId, defaultExpanded: true }),
+    new SortModule<Instrument>(),
+    new SelectionModule<Instrument>({ mode: 'multi', checkboxColumn: true }),
   ],
 };
 
@@ -74,11 +58,7 @@ const styled = (css: string) => html`
 
 const meta: Meta = {
   title: 'Grid/Tests/Parts',
-  parameters: {
-    layout: 'centered',
-    docs: { disable: true },
-    a11y: { test: 'error' },
-  },
+  parameters: visualStoryParameters,
   // Pinned, because the grid's own colours resolve through `light-dark()` and a
   // baseline taken in one scheme is a failure in the other.
   globals: { theme: 'light' },

@@ -1,7 +1,6 @@
+import { html } from 'lit';
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { expect, userEvent } from 'storybook/test';
-import { html } from 'lit';
-import type { GridOptions } from '@lime-soda/grid';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
 import { SelectionModule } from '@lime-soda/grid/selection';
@@ -15,6 +14,7 @@ import {
   pressKey,
   tabInto,
 } from './shadow-queries.js';
+import { type Instrument, instruments, mountGrid, testStoryParameters } from './fixtures.js';
 
 /**
  * Where focus is, and where it goes back to.
@@ -31,64 +31,31 @@ import {
  * belongs.
  */
 
-interface Row {
-  id: string;
-  name: string;
-  price: number;
-}
+const data = instruments(5);
 
-const data: Row[] = Array.from({ length: 5 }, (_, i) => ({
-  id: `r${i}`,
-  name: `Row ${i}`,
-  price: i,
-}));
-
-interface Args {
-  /** Kept, because a cell with a control in it is the harder case for focus. */
-  checkboxColumn: boolean;
-}
-
-const meta: Meta<Args> = {
+const meta: Meta = {
   title: 'Grid/Tests/Cell focus',
-  parameters: {
-    layout: 'fullscreen',
-    // Snapshots on, unlike the other test stories: the defect these exist for
-    // is a cell that holds focus and looks like it does not, and that is a
-    // question about pixels. Each story ends on a settled, deterministic state
-    // — a cell focused, a row selected — so the image is worth diffing.
-    chromatic: {},
-    docs: { disable: true },
-    a11y: { test: 'error' },
-  },
-  args: { checkboxColumn: true },
-  render: (args) => {
-    const options: GridOptions<Row> = {
-      columns: [
-        { field: 'name', headerName: 'Name', width: 200 },
-        { field: 'price', headerName: 'Price', width: 120 },
-      ],
-      getRowId: (row) => row.id,
-      layout: 'stack',
-      rowHeight: 32,
-      headerHeight: 40,
-      modules: [
-        new SelectionModule<Row>({ mode: 'multi', checkboxColumn: args.checkboxColumn }),
-        new KeyboardModule<Row>(),
-      ],
-    };
-    return html`
-      <div style="width:600px;height:280px">
-        <ls-grid .gridOptions=${options} .rowData=${data} style="height:100%"></ls-grid>
-      </div>
-      <button id="elsewhere">Elsewhere</button>
-    `;
-  },
+  parameters: testStoryParameters,
+  // A checkbox column is kept: a cell with a control in it is the harder case
+  // for focus, and the one that used to be wrong.
+  render: () =>
+    mountGrid({
+      data,
+      options: {
+        layout: 'stack',
+        modules: [
+          new SelectionModule<Instrument>({ mode: 'multi', checkboxColumn: true }),
+          new KeyboardModule<Instrument>(),
+        ],
+      },
+      width: 500,
+      height: 236,
+      after: html`<button id="elsewhere">Elsewhere</button>`,
+    }),
 };
 
 export default meta;
-type Story = StoryObj<Args>;
-
-const settled = (canvas: HTMLElement) => gridReady(canvas);
+type Story = StoryObj;
 
 const rowAt = (canvas: HTMLElement, index: number) => dataRows(canvas)[index]!;
 const cellAt = (canvas: HTMLElement, row: number, column: number) =>
@@ -111,7 +78,7 @@ export const ClickingACellFocusesIt: Story = {
   play: async ({ canvasElement }) => {
     // `:focus-visible` never matches a click, so this looked identical to an
     // unfocused cell while genuinely holding focus.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const cell = cellAt(canvasElement, 1, 1);
 
     await userEvent.click(cell);
@@ -126,7 +93,7 @@ export const ClickingACellFocusesIt: Story = {
 
 export const ClickingElsewhereMovesFocus: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const first = cellAt(canvasElement, 1, 1);
     const second = cellAt(canvasElement, 2, 1);
 
@@ -144,7 +111,7 @@ export const FocusCanLeaveTheGrid: Story = {
   play: async ({ canvasElement }) => {
     // A remembered position is where Tab would return to, not somewhere that is
     // focused now — so the grid stops drawing on it.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const cell = cellAt(canvasElement, 1, 1);
     await userEvent.click(cell);
 
@@ -158,7 +125,7 @@ export const FocusCanLeaveTheGrid: Story = {
 
 export const FocusComesBackToTheSameCell: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const cell = cellAt(canvasElement, 2, 1);
     await userEvent.click(cell);
     await userEvent.click(document.querySelector('#elsewhere') as HTMLElement);
@@ -175,7 +142,7 @@ export const FocusComesBackToTheSameCell: Story = {
 
 export const OneTabStopFollowsFocus: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const start = cellAt(canvasElement, 1, 1);
     await userEvent.click(start);
 

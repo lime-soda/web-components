@@ -1,10 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
 import { expect } from 'storybook/test';
-import { html } from 'lit';
-import type { GridOptions } from '@lime-soda/grid';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
 import { getAllByRole, gridReady, queryAllByRole } from './shadow-queries.js';
+import { COLUMN_WIDTHS, instruments, mountGrid, testStoryParameters } from './fixtures.js';
 
 /**
  * How the flow layout arranges rows, and how little of it is real at a time.
@@ -19,63 +18,18 @@ import { getAllByRole, gridReady, queryAllByRole } from './shadow-queries.js';
  * file's. Proving the first inside the second left neither owning it.
  */
 
-interface Quote {
-  id: string;
-  instrument: string;
-  price: number;
-}
-
-const quotes = (count: number): Quote[] =>
-  Array.from({ length: count }, (_, i) => ({
-    id: `q${i}`,
-    instrument: `INS${i}`,
-    price: 100 + i,
-  }));
-
-interface Args {
-  rows: number;
-  width: number;
-  height: number;
-}
-
-const meta: Meta<Args> = {
+/**
+ * A frame 360px tall holds ten rows, so twenty-five need three instances.
+ * Four hundred need forty, which is what makes virtualisation observable.
+ */
+const meta: Meta = {
   title: 'Grid/Tests/Layout',
-  parameters: {
-    layout: 'centered',
-    chromatic: { disableSnapshot: true },
-    docs: { disable: true },
-    a11y: { test: 'error' },
-  },
-  args: { rows: 25, width: 700, height: 360 },
-  render: (args) => {
-    const options: GridOptions<Quote> = {
-      columns: [
-        { field: 'instrument', headerName: 'Instrument', width: 200 },
-        { field: 'price', headerName: 'Price', width: 100 },
-      ],
-      getRowId: (row) => row.id,
-      layout: 'flow',
-      rowHeight: 32,
-      headerHeight: 40,
-      instanceGap: 16,
-      modules: [],
-    };
-    return html`
-      <div id="frame" style=${`width:${args.width}px;height:${args.height}px`}>
-        <ls-grid
-          .gridOptions=${options}
-          .rowData=${quotes(args.rows)}
-          style="height:100%"
-        ></ls-grid>
-      </div>
-    `;
-  },
+  parameters: testStoryParameters,
+  render: () => mountGrid({ data: instruments(25) }),
 };
 
 export default meta;
-type Story = StoryObj<Args>;
-
-const settled = (canvas: HTMLElement) => gridReady(canvas);
+type Story = StoryObj;
 
 const shadow = (canvas: HTMLElement) => canvas.querySelector('ls-grid')!.shadowRoot!;
 
@@ -101,7 +55,7 @@ export const RowsFillAnInstanceThenStartAnother: Story = {
   play: async ({ canvasElement }) => {
     // 360px tall with a 40px header and 32px rows holds ten; twenty-five rows
     // therefore need three instances.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
 
     await expect(slots(canvasElement)).toHaveLength(3);
   },
@@ -111,20 +65,20 @@ export const EveryInstanceCarriesItsOwnHeader: Story = {
   play: async ({ canvasElement }) => {
     // What makes the layout readable: a trader looking at the fourth instance
     // across still sees what each column means.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const built = mounted(canvasElement);
 
     // Asserted, because iterating an empty list would pass regardless.
     await expect(built.length).toBeGreaterThan(0);
     for (const instance of built) {
-      await expect(queryAllByRole(instance, 'columnheader')).toHaveLength(2);
+      await expect(queryAllByRole(instance, 'columnheader')).toHaveLength(3);
     }
   },
 };
 
 export const ResizingTheContainerReflows: Story = {
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     await expect(slots(canvasElement)).toHaveLength(3);
 
     // Taller frame, so more rows fit each instance and fewer are needed.
@@ -138,22 +92,22 @@ export const ColumnsAreLaidOutAtTheirDeclaredWidths: Story = {
   play: async ({ canvasElement }) => {
     // Measured rather than read off the template, so this stays true however
     // the tracks are expressed.
-    await settled(canvasElement);
-    const [instrument, price] = getAllByRole(canvasElement, 'columnheader');
+    await gridReady(canvasElement);
+    const [name, price] = getAllByRole(canvasElement, 'columnheader');
 
-    await expect(instrument!.getBoundingClientRect().width).toBeCloseTo(200, 0);
-    await expect(price!.getBoundingClientRect().width).toBeCloseTo(100, 0);
+    await expect(name!.getBoundingClientRect().width).toBeCloseTo(COLUMN_WIDTHS.name, 0);
+    await expect(price!.getBoundingClientRect().width).toBeCloseTo(COLUMN_WIDTHS.price, 0);
   },
 };
 
 // --- virtualisation ---------------------------------------------------------
 
 export const OnlyInstancesNearTheViewportAreBuilt: Story = {
-  args: { rows: 400 },
+  render: () => mountGrid({ data: instruments(400) }),
   play: async ({ canvasElement }) => {
     // 700px holds two 300px instances; the rest sit beyond the prefetch margin
     // and stay as placeholders. Building all forty would defeat the layout.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
 
     await expect(slots(canvasElement).length).toBeGreaterThan(10);
     await expect(mounted(canvasElement).length).toBeLessThan(slots(canvasElement).length);
@@ -161,7 +115,7 @@ export const OnlyInstancesNearTheViewportAreBuilt: Story = {
 };
 
 export const PlaceholdersHoldTheScrollbarStill: Story = {
-  args: { rows: 400 },
+  render: () => mountGrid({ data: instruments(400) }),
   parameters: {
     // Reported rather than gated, because it is a real finding and not a fault
     // in this story: once scrolling releases the instance holding the roving
@@ -177,7 +131,7 @@ export const PlaceholdersHoldTheScrollbarStill: Story = {
     // An unbuilt instance still occupies its width. Without that the scrollbar
     // would grow and shrink as instances mounted, and the grid would shift
     // under the reader's hand.
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const before = scroller(canvasElement).scrollWidth;
     const wereMounted = mounted(canvasElement).map((instance) => instance.parentElement);
 
@@ -192,7 +146,7 @@ export const PlaceholdersHoldTheScrollbarStill: Story = {
 };
 
 export const ScrollingBuildsAndReleasesInstances: Story = {
-  args: { rows: 400 },
+  render: () => mountGrid({ data: instruments(400) }),
   parameters: {
     // Reported rather than gated, because it is a real finding and not a fault
     // in this story: once scrolling releases the instance holding the roving
@@ -205,7 +159,7 @@ export const ScrollingBuildsAndReleasesInstances: Story = {
   },
 
   play: async ({ canvasElement }) => {
-    await settled(canvasElement);
+    await gridReady(canvasElement);
     const first = (slots(canvasElement)[0] as HTMLElement).dataset['instanceId'];
     const ids = () =>
       mounted(canvasElement).map((i) => (i.parentElement as HTMLElement).dataset['instanceId']);
