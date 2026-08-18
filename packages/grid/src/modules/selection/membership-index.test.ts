@@ -42,29 +42,63 @@ describe('flat membership lookup', () => {
     expect(membership.leavesOf('r5')).toEqual(['r5']);
   });
 
-  it('does not slow down as rows are added ahead of the one asked for', () => {
-    const time = (count: number): number => {
-      const projection = rows(count);
-      const membership = new FlatMembership(
-        () => projection,
-        () => true,
-      );
-      const last = count - 40;
-      membership.leavesOf(`r${last}`); // pay for the index once
+  /**
+   * Counts how many times something walks the projection.
+   *
+   * A scan and an index are told apart by how often the list is traversed, not
+   * by how long the traversal takes. This used to be timed — fifty thousand
+   * rows against a thousand, with a factor-of-eight allowance — which made the
+   * result depend on what else the machine was doing and flaked under a loaded
+   * test run.
+   */
+  const counting = (projection: readonly DisplayRow[]) => {
+    let passes = 0;
+    const watched = new Proxy(projection, {
+      get(target, property, receiver) {
+        if (property === Symbol.iterator) passes += 1;
+        return Reflect.get(target, property, receiver) as unknown;
+      },
+    });
+    return { watched, passes: () => passes };
+  };
 
-      const start = performance.now();
-      for (let pass = 0; pass < 20; pass += 1) {
-        for (let i = 0; i < 40; i += 1) membership.leavesOf(`r${last + i}`);
-      }
-      return performance.now() - start;
-    };
+  it('walks the rows once, however many lookups follow', () => {
+    const { watched, passes } = counting(rows(50_000));
+    const membership = new FlatMembership(
+      () => watched,
+      () => true,
+    );
 
-    const small = time(1_000);
-    const large = time(50_000);
+    membership.leavesOf('r0');
+    const afterFirst = passes();
+    for (let i = 0; i < 500; i += 1) membership.leavesOf(`r${i}`);
 
-    // Fifty times the rows. A scan took ~40x longer; an index takes about the
-    // same. Loose enough not to flake, tight enough to catch a scan coming back.
-    expect(large).toBeLessThan(Math.max(small, 1) * 8);
+    // The index is paid for once and answers everything after it.
+    expect(afterFirst).toBe(1);
+    expect(passes()).toBe(afterFirst);
+  });
+
+  it('walks it once again when the projection is replaced, and only then', () => {
+    // The cache is keyed on the array's identity, so a new projection has to
+    // rebuild and an unchanged one must not — a tick produces the same array.
+    const first = counting(rows(100));
+    const second = counting(rows(100));
+    let current: readonly DisplayRow[] = first.watched;
+    const membership = new FlatMembership(
+      () => current,
+      () => true,
+    );
+
+    membership.leavesOf('r0');
+    membership.leavesOf('r1');
+    expect(first.passes()).toBe(1);
+
+    current = second.watched;
+    membership.leavesOf('r0');
+    membership.leavesOf('r1');
+
+    expect(second.passes()).toBe(1);
+    expect(first.passes()).toBe(1);
   });
 
   it('still refuses a row the consumer excludes', () => {

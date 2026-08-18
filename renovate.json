@@ -9,6 +9,11 @@
     {
       "matchDepTypes": ["devDependencies"],
       "automerge": true
+    },
+    {
+      "description": "Majors are never merged unattended, whatever kind of dependency they are. Two have landed on main unreviewed under the devDependencies rule above: TypeScript 7, which needed the build fixing before anything compiled, and changesets v2, which renamed every input the release job passes and so stopped releases outright. Both were found after the fact.",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
     }
   ]
 }
