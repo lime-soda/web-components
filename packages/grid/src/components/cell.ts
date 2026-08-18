@@ -39,8 +39,21 @@ export class GridCell extends SignalWatcher(LitElement) {
       font-variant-numeric: ${tokens.numericVariant};
     }
 
-    :host([data-numeric]) {
+    /*
+     * Which edge the value sits against, from the column's value type.
+     *
+     * There was a data-numeric rule here that nothing ever set: the styling
+     * for a right-aligned number existed and no column could reach it, so every
+     * column of prices read down its left edge.
+     */
+    :host([data-align='end']) {
       justify-content: flex-end;
+      text-align: right;
+    }
+
+    :host([data-align='center']) {
+      justify-content: center;
+      text-align: center;
     }
 
     /*
@@ -135,6 +148,11 @@ export class GridCell extends SignalWatcher(LitElement) {
 
     // See ls-grid-header-cell: keeps module-contributed decorations current.
     this.grid?.registry.version.get();
+
+    // `start` is the default and needs no attribute, so the common column
+    // carries nothing extra.
+    if (this.column.align === 'start') this.removeAttribute('data-align');
+    else this.setAttribute('data-align', this.column.align);
 
     this.tabIndex = this.isTabbableCell() ? 0 : -1;
     // Only while the grid has focus: a remembered position is where Tab would

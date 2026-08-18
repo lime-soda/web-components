@@ -136,6 +136,39 @@ what the application does, not that it saves much.
 
 ## Getting data out
 
+## What a column holds
+
+`valueType` tells the grid what a column contains, which decides two things it
+would otherwise be told twice: which edge the value sits against, and how it
+reads when nothing formats it.
+
+```ts
+columns: [
+  { field: 'instrument' }, // text, left, as written
+  { field: 'price', valueType: 'number' }, // right, with separators
+  { field: 'traded', valueType: 'date' }, // left, the reader's format
+  { field: 'settled', valueType: 'boolean' }, // centred, Yes or No
+];
+```
+
+|           | aligned | reads as                                                  |
+| --------- | ------- | --------------------------------------------------------- |
+| `text`    | left    | the value, unchanged                                      |
+| `number`  | right   | `toLocaleString()` — separators, the reader's format      |
+| `date`    | left    | `toLocaleDateString()`, from a Date, an epoch or a string |
+| `boolean` | centred | Yes or No                                                 |
+
+Numbers go right so a column of them can be read downwards: digits of the same
+magnitude line up, and an outlier is visible without reading a single value.
+That only works if the heading goes with them, so it does.
+
+A `valueFormatter` still wins — the default is what to do when nobody said —
+and `align` overrides the edge on its own, for the cases the type cannot know:
+an account number is held as a number and reads as a label.
+
+Booleans read as words rather than a tick, because a mark that means _false_ by
+being absent leaves a screen reader with nothing to announce.
+
 ## Arranging columns
 
 `@lime-soda/grid/columns` lets the user resize, reorder and pin columns, and

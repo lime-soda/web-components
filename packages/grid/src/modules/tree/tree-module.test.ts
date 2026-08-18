@@ -42,6 +42,8 @@ const setup = (data: Bond[], options: Partial<TreeModuleOptions<Bond>> = {}) => 
         width: 100,
         sizing: 'fixed',
         flex: 0,
+        valueType: 'text',
+        align: 'start',
         index: 0,
       },
     ],

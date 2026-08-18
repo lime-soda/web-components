@@ -70,19 +70,9 @@ jobs:
 
   # Visual regression. Runs after verify so a broken build does not burn
   # snapshots, and on both PRs and main so Chromatic has a baseline to diff.
-  #
-  # Allowed to fail while the account is out of snapshot credit. Without this
-  # every push is red for a reason unrelated to the change, which is the state
-  # in which a genuine failure goes unnoticed — and the checks that gate a
-  # release all live in `verify`, which this job does not affect either way.
-  #
-  # Put back to a hard failure when credit is restored: until then nothing is
-  # comparing the theming and `::part` stories against a baseline, and those are
-  # the two suites whose only assertion is the picture.
   chromatic:
     name: Chromatic
     needs: verify
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

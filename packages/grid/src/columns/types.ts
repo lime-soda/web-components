@@ -70,6 +70,20 @@ export type CellRendererFn<TData = unknown, TValue = unknown> = (
  * }
  * ```
  */
+/**
+ * What a column holds.
+ *
+ * Two things follow from it, and both are wrong often enough by hand to be
+ * worth deriving: which edge the value sits against, and how it reads when no
+ * formatter says otherwise. A column of prices left-aligned is unreadable at a
+ * glance — the digits that matter no longer line up — and it is the sort of
+ * thing that gets fixed on the columns someone looked at and missed on the rest.
+ */
+export type ColumnValueType = 'text' | 'number' | 'date' | 'boolean';
+
+/** Which edge a cell's content sits against. */
+export type ColumnAlign = 'start' | 'center' | 'end';
+
 export interface ColumnDef<TData = unknown, TValue = unknown> {
   colId?: string;
   /**
@@ -100,6 +114,22 @@ export interface ColumnDef<TData = unknown, TValue = unknown> {
   flex?: number;
   /** Names of entries in `columnTypes` to merge in beneath this definition. */
   type?: string | readonly string[];
+  /**
+   * What the column holds. Defaults to `text`, which changes nothing.
+   *
+   * Declaring it aligns the column and gives it a default reading — a number
+   * to the right with its thousands separators, a date as the reader's locale
+   * writes one. A `valueFormatter` still wins: the default is what to do when
+   * nobody said.
+   */
+  valueType?: ColumnValueType;
+  /**
+   * Which edge the content sits against, overriding the value type's choice.
+   *
+   * For the cases the type cannot know: an identifier held as a number that
+   * should read as a label, a status column centred to break up a wall of text.
+   */
+  align?: ColumnAlign;
   valueGetter?: (params: CellValueContext<TData>) => TValue;
   valueFormatter?: (params: CellFormatContext<TData, TValue>) => string;
   /** A custom element tag name, or a function returning a Lit template. */
@@ -136,6 +166,10 @@ export interface ResolvedColumn<TData = unknown, TValue = unknown> extends Omit<
    * resolve.
    */
   readonly width: number;
+  /** Always concrete: `text` unless the definition said otherwise. */
+  readonly valueType: ColumnValueType;
+  /** Always concrete: the definition's, or the one its value type implies. */
+  readonly align: ColumnAlign;
   /** How the column is sized when the layout can offer leftover space. */
   readonly sizing: 'fixed' | 'flex';
   /** Share of the leftover space. Only meaningful when `sizing` is `flex`. */

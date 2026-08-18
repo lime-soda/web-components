@@ -6,7 +6,15 @@ import { CellRendererElement } from '@lime-soda/grid';
 import type { Grid } from '@lime-soda/grid';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
-import { cellText, cellsOf, dataRows, gridReady, queryAllByRole } from './shadow-queries.js';
+import {
+  cellText,
+  cellsOf,
+  dataRows,
+  deepElements,
+  getByRole,
+  gridReady,
+  queryAllByRole,
+} from './shadow-queries.js';
 import {
   type Instrument,
   columns,
@@ -122,3 +130,75 @@ export class TestPriceTag extends CellRendererElement<Instrument, number> {
     return this.value === undefined ? nothing : html`<span>${this.value}</span>`;
   }
 }
+
+// --- value types ------------------------------------------------------------
+
+/**
+ * The columns a value type decides for.
+ *
+ * Declared once per column rather than as a formatter and an alignment on each,
+ * which is the pairing that drifts: someone fixes the alignment on the columns
+ * they were looking at and the rest keep reading down their left edge.
+ */
+const typed = () =>
+  mountGrid({
+    data,
+    height: 300,
+    options: {
+      columns: [
+        { field: 'name', headerName: 'Instrument', width: 200 },
+        { field: 'price', headerName: 'Price', width: 120, valueType: 'number' },
+        { field: 'size', headerName: 'Size', width: 120, valueType: 'number' },
+      ],
+    },
+  });
+
+export const ANumberColumnSitsAgainstItsRightEdge: Story = {
+  render: () => typed(),
+  play: async ({ canvasElement }) => {
+    // Measured, not read off a class: what matters is that the digits end where
+    // the column ends, however that is arranged.
+    await gridReady(canvasElement);
+    const [name, price] = cellsOf(dataRows(canvasElement)[0]!);
+
+    // The text itself, not the box around it: the content span is flex:1 and
+    // fills the cell whichever edge the words are pushed to, so measuring the
+    // span reports the same numbers for every alignment.
+    const distance = (cell: HTMLElement) => {
+      const box = cell.getBoundingClientRect();
+      const span = [...deepElements(cell)].find(
+        (element) => element.getAttribute('part') === 'cell-content',
+      )!;
+      const range = document.createRange();
+      range.selectNodeContents(span);
+      const text = range.getBoundingClientRect();
+      return { left: text.left - box.left, right: box.right - text.right };
+    };
+
+    // Text hugs the left; the number hugs the right.
+    await expect(distance(name!).left).toBeLessThan(distance(name!).right);
+    await expect(distance(price!).right).toBeLessThan(distance(price!).left);
+  },
+};
+
+export const ANumberColumnReadsWithItsSeparators: Story = {
+  render: () => typed(),
+  play: async ({ canvasElement }) => {
+    // 1000 is unreadable beside 1000000 without them.
+    await gridReady(canvasElement);
+    const size = cellsOf(dataRows(canvasElement)[0]!)[2]!;
+
+    await expect(cellText(size)).toBe((1000).toLocaleString());
+  },
+};
+
+export const TheHeadingSitsOverItsColumn: Story = {
+  render: () => typed(),
+  play: async ({ canvasElement }) => {
+    // A right-aligned column under a left-aligned heading reads as two columns.
+    await gridReady(canvasElement);
+    const heading = getByRole(canvasElement, 'columnheader', { name: 'Price' });
+
+    await expect(heading.getAttribute('data-align')).toBe('end');
+  },
+};

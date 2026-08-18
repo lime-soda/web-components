@@ -43,6 +43,17 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
       border-right: none;
     }
 
+    /* A heading sits over its column, so it takes the same edge. */
+    :host([data-align='end']) .label {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    :host([data-align='center']) .label {
+      justify-content: center;
+      text-align: center;
+    }
+
     /*
      * The grid's own focus, for the same reason as the body cell: a header
      * reached with the mouse never matches :focus-visible and would show
@@ -151,6 +162,9 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     registry?.version.get();
 
     this.setAttribute('aria-colindex', String(this.column.index + 1));
+
+    if (this.column.align === 'start') this.removeAttribute('data-align');
+    else this.setAttribute('data-align', this.column.align);
 
     // The column's name, and only that.
     //

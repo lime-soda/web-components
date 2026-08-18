@@ -1,7 +1,59 @@
 import type { RowNode } from '../store/types.js';
-import type { ColumnDef, ColumnDefs, ColumnResolutionOptions, ResolvedColumn } from './types.js';
+import type {
+  ColumnAlign,
+  ColumnDef,
+  ColumnDefs,
+  ColumnResolutionOptions,
+  ColumnValueType,
+  ResolvedColumn,
+} from './types.js';
 
 const DEFAULT_WIDTH = 100;
+
+/**
+ * Where each kind of value sits by default.
+ *
+ * Numbers to the right, so digits of the same magnitude line up and a column
+ * can be read down rather than across. Dates and text to the left, where the
+ * eye starts. Booleans centred, because a lone mark against either edge reads
+ * as belonging to the column beside it.
+ */
+const ALIGNMENT: Record<ColumnValueType, ColumnAlign> = {
+  text: 'start',
+  number: 'end',
+  date: 'start',
+  boolean: 'center',
+};
+
+/**
+ * How a value reads when no formatter says otherwise.
+ *
+ * Deliberately the reader's locale rather than a fixed format: a grid for a
+ * trading desk is read by people who write their numbers and dates differently
+ * from each other. Anything a column cares about precisely — a price to three
+ * decimal places, a date without its year — declares a `valueFormatter`, and
+ * this is what happens in its absence.
+ */
+const DEFAULTS: Record<ColumnValueType, (value: unknown) => string> = {
+  text: (value) => String(value),
+  number: (value) => (typeof value === 'number' ? value.toLocaleString() : String(value)),
+  date: (value) => {
+    const date = asDate(value);
+    return date === undefined ? String(value) : date.toLocaleDateString();
+  },
+  // Words rather than a tick: a mark that means "false" by being absent leaves
+  // a screen reader with nothing at all to read.
+  boolean: (value) => (value ? 'Yes' : 'No'),
+};
+
+/** A Date, an epoch, or a string one of the two was written down as. */
+function asDate(value: unknown): Date | undefined {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value;
+  if (typeof value !== 'number' && typeof value !== 'string') return undefined;
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
 
 /**
  * Merges each column definition over its column types and the grid defaults, then
@@ -28,6 +80,8 @@ export function resolveColumns<TData = unknown>(
     const flex = sizing === 'flex' ? (merged.flex ?? 1) : 0;
     const width = Math.max(merged.width ?? DEFAULT_WIDTH, merged.minWidth ?? 0);
 
+    const valueType = merged.valueType ?? 'text';
+
     return {
       ...merged,
       colId,
@@ -35,6 +89,8 @@ export function resolveColumns<TData = unknown>(
       width,
       sizing,
       flex,
+      valueType,
+      align: merged.align ?? ALIGNMENT[valueType],
       headerName: merged.headerName ?? humanise(lastSegment(merged.field)),
     } as ResolvedColumn<TData>;
   });
@@ -68,7 +124,8 @@ export function formatCellValue<TData, TValue = unknown>(
   }
 
   // Empty rather than "null"/"undefined": a missing quote should read as blank.
-  return value === null || value === undefined ? '' : String(value);
+  if (value === null || value === undefined) return '';
+  return DEFAULTS[column.valueType ?? 'text'](value);
 }
 
 function mergeDefinition<TData>(
