@@ -10,9 +10,18 @@ import {
   dataRows,
   gridReady,
   pressKey,
+  queryAllByRole,
   tabInto,
 } from './shadow-queries.js';
-import { instruments, mountGrid, rowsPerInstance, testStoryParameters } from './fixtures.js';
+import {
+  type Instrument,
+  grouped,
+  instruments,
+  mountGrid,
+  rowsPerInstance,
+  testStoryParameters,
+} from './fixtures.js';
+import { TreeModule } from '@lime-soda/grid/tree';
 
 /**
  * The keyboard floor a grid has with no modules at all.
@@ -231,5 +240,44 @@ export const ArrowingRightAtTheLastColumnCrossesInstances: Story = {
     await expect(instanceHolding(canvasElement, activeElement())).toBe(1);
     // The same row across the join, so the eye follows the value.
     await expect(landed.index - start.index).toBe(rowsPerInstance(360));
+  },
+};
+
+export const ArrowingStepsOverARepeatedHeading: Story = {
+  render: () =>
+    mountGrid({
+      data: grouped(1, 40),
+      options: {
+        modules: [
+          new TreeModule<Instrument>({ getParentId: (row) => row.parentId, defaultExpanded: true }),
+        ],
+      },
+      after: html`<button id="after">After the grid</button>`,
+    }),
+  play: async ({ canvasElement }) => {
+    // A continued group redraws its heading at the top of the next instance.
+    // That copy is the same row already visited, so walking never rests on it —
+    // and it is inert, so there would be nothing there to operate.
+    await gridReady(canvasElement);
+    const repeats = queryAllByRole(canvasElement, 'row', { includeHidden: true }).filter(
+      (row) => row.getAttribute('aria-hidden') === 'true',
+    );
+    await expect(repeats.length).toBeGreaterThan(0);
+
+    tabInto(canvasElement);
+    const visited: Element[] = [];
+    for (let i = 0; i < 80 && (await pressKey('ArrowDown')); i += 1) {
+      const cell = activeElement();
+      if (cell) visited.push(cell);
+    }
+
+    // ...and the walk did leave the first instance, or this proves nothing.
+    await expect(
+      new Set(visited.map((c) => instanceHolding(canvasElement, c))).size,
+    ).toBeGreaterThan(1);
+    for (const cell of visited) {
+      const row = cell.getRootNode() as ShadowRoot;
+      await expect(repeats).not.toContain(row.host);
+    }
   },
 };

@@ -23,6 +23,11 @@ const IMPLICIT: Record<string, string> = {
 function implicitInputRole(element: HTMLInputElement): string {
   if (element.type === 'checkbox') return 'checkbox';
   if (element.type === 'radio') return 'radio';
+  // A search input is a searchbox, not a textbox. Answering `textbox` here
+  // meant a query for the filter box found nothing and a query for a text box
+  // found the filter, both quietly.
+  if (element.type === 'search') return 'searchbox';
+  if (element.type === 'number') return 'spinbutton';
   return 'textbox';
 }
 
