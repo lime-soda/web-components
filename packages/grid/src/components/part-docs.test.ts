@@ -67,6 +67,38 @@ describe('part documentation', () => {
     expect(phantom, `documented but never rendered: ${phantom.join(', ')}`).toEqual([]);
   });
 
+  it('forwards every part rendered below the host', () => {
+    // A part that stops being forwarded still renders. Nothing looks wrong
+    // until a consumer tries to style it and finds their rule does nothing —
+    // and since the visual side of this now lives in Chromatic, where a diff
+    // waits for a human, this is the check that fails a build.
+    //
+    // Read from the elements that own them: whatever `ls-grid-cell` marks has
+    // to be in CELL_PARTS to escape its shadow root, and so on outwards.
+    const partsIn = (file: string): string[] => [
+      ...new Set(
+        [...readFileSync(join(COMPONENTS, file), 'utf8').matchAll(/part="([a-z-]+)"/g)].map(
+          (match) => match[1]!,
+        ),
+      ),
+    ];
+
+    const escapes: [string, string, readonly string[]][] = [
+      ['cell.ts', 'CELL_PARTS', CELL_PARTS],
+      ['header-cell.ts', 'HEADER_CELL_PARTS', HEADER_CELL_PARTS],
+    ];
+
+    for (const [file, name, list] of escapes) {
+      // The element's own `part` attribute is put on it by its parent, so only
+      // what it marks inside its own shadow root has to be forwarded.
+      const missing = partsIn(file).filter((part) => !list.includes(part));
+      expect(
+        missing,
+        `${file} renders ${missing.join(', ')} but ${name} does not carry it`,
+      ).toEqual([]);
+    }
+  });
+
   it('gathers the child elements’ parts onto the host', () => {
     // A consumer writes `ls-grid::part(cell)`, never
     // `ls-grid-row::part(cell)` — the host is where they look, so the host is
