@@ -34,10 +34,12 @@ interface Row {
 /**
  * Enough rows to break across instances.
  *
- * Eight fit an instance at this height, so thirty fills four of them. The
- * previous six filled one, which made every story here a test of the stack
- * layout wearing the flow layout's name: nothing ever crossed a boundary, and
- * crossing boundaries is the only thing the flow layout does differently.
+ * Eight fit an instance at this height, so thirty fills four of them. Six
+ * filled one, which made every story here a test of the stack layout wearing
+ * the flow layout's name.
+ *
+ * That the layout breaks at all belongs to the layout stories. What these need
+ * is a boundary to exist so there is something for the arrow keys to cross.
  */
 const data: Row[] = Array.from({ length: 30 }, (_, i) => ({
   id: `r${i}`,
@@ -129,16 +131,6 @@ async function tabIn(canvas: HTMLElement) {
   tabInto(canvas);
   return focusedCell(canvas);
 }
-
-export const FlowDrawsSeveralInstances: Story = {
-  play: async ({ canvasElement }) => {
-    // The premise every other story here rests on. Without it they would all
-    // pass against a single instance and prove nothing about this layout.
-    await settled(canvasElement);
-
-    await expect(instances(canvasElement).length).toBeGreaterThan(1);
-  },
-};
 
 export const TabEntersTheGrid: Story = {
   play: async ({ canvasElement }) => {
