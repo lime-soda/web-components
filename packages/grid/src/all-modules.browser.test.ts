@@ -15,12 +15,15 @@ import { CellFlashModule } from './modules/cell-flash/index.js';
 import { KeyboardModule } from './modules/keyboard/index.js';
 
 /**
- * Every v1 module installed at once.
+ * What every module installed at once does that no user can see.
  *
- * Each module has its own suite, but those run one module at a time and so say
- * nothing about collisions. The two real bugs found by hand — the tree expander
- * landing in the selection module's checkbox column, and group rows being
- * unselectable — both needed exactly this combination to appear.
+ * How the modules behave together — which column owns the expander, what a
+ * filter leaves a group to select, whether the keyboard walks into a control —
+ * is driven through the interface in `Grid/Tests/All modules`. What is left
+ * here is the part with no gesture behind it: that the registry holds them all,
+ * that their state survives a round trip through save and restore, and that
+ * pulling the grid out of the document with all of them installed tears down
+ * without throwing.
  */
 
 interface Bond {
@@ -104,12 +107,6 @@ async function mount(overrides: Partial<GridOptions<Bond>> = {}): Promise<Grid<B
   return grid;
 }
 
-const instances = (grid: Grid<Bond>) => [
-  ...(grid.shadowRoot?.querySelectorAll('ls-grid-instance') ?? []),
-];
-const rowsOf = (grid: Grid<Bond>) =>
-  instances(grid).flatMap((instance) => [...instance.shadowRoot!.querySelectorAll('ls-grid-row')]);
-const cellsOf = (row: Element) => [...row.shadowRoot!.querySelectorAll('ls-grid-cell')];
 const settle = () => new Promise((resolve) => setTimeout(resolve, 60));
 
 afterEach(() => {
@@ -124,134 +121,6 @@ describe('all v1 modules together', () => {
     for (const id of ['tree', 'sort', 'filter', 'selection', 'cell-flash', 'keyboard']) {
       expect(grid.api.getModule(id), id).toBeDefined();
     }
-  });
-
-  describe('column ownership', () => {
-    it('puts the selection checkbox first and the expander on the first data column', async () => {
-      // The collision that shipped once: the expander defaulted to columns[0],
-      // which selection had just prepended.
-      const grid = await mount();
-      const groupRow = rowsOf(grid)[0]!;
-      const [selectionCell, instrumentCell] = cellsOf(groupRow);
-
-      expect(grid.api.getColumns()[0]!.colId).toBe('ls-grid-selection');
-      expect(selectionCell!.shadowRoot!.querySelector('[part="tree-expander"]')).toBeNull();
-      expect(instrumentCell!.shadowRoot!.querySelector('[part="tree-expander"]')).not.toBeNull();
-    });
-
-    it('renders a usable checkbox in every row', async () => {
-      const grid = await mount();
-
-      for (const row of rowsOf(grid)) {
-        const cell = cellsOf(row)[0]!;
-        const box = cell.shadowRoot!.querySelector('ls-grid-selection-checkbox');
-        const input = box?.shadowRoot?.querySelector('input');
-        expect(input, row.getAttribute('role') ?? '').toBeTruthy();
-
-        // Inside the cell's bounds, not clipped out of it.
-        const cellRect = cell.getBoundingClientRect();
-        const inputRect = input!.getBoundingClientRect();
-        expect(inputRect.left).toBeGreaterThanOrEqual(cellRect.left - 1);
-        expect(inputRect.right).toBeLessThanOrEqual(cellRect.right + 1);
-      }
-    });
-
-    it('keeps the selection column out of sorting and filtering', async () => {
-      const grid = await mount();
-      const [selectionColumn] = grid.api.getColumns();
-
-      expect(selectionColumn!.sortable).toBe(false);
-      expect(selectionColumn!.filterable).toBe(false);
-    });
-  });
-
-  describe('modules cooperating', () => {
-    it('sorts siblings inside groups without flattening the tree', async () => {
-      const grid = await mount();
-
-      grid.api.setSortModel([{ colId: 'price', direction: 'desc' }]);
-      await settle();
-
-      const ids = grid.api.getLayout().instances.flatMap((i) => i.rows.map((r) => r.rowId));
-      // Groups stay in place; children descend within each.
-      expect(ids.slice(0, 5)).toEqual(['g0', 'g0-i3', 'g0-i2', 'g0-i1', 'g0-i0']);
-    });
-
-    it('keeps a group heading visible when only a descendant matches a filter', async () => {
-      const grid = await mount();
-
-      grid.api.setQuickFilter('B instrument 2');
-      await settle();
-
-      const ids = grid.api.getLayout().instances.flatMap((i) => i.rows.map((r) => r.rowId));
-      expect(ids).toEqual(['g1', 'g1-i2']);
-    });
-
-    it('selects only filtered children when a group is ticked', async () => {
-      const grid = await mount();
-      grid.api.setQuickFilter('instrument 1');
-      await settle();
-
-      grid.api.setRowSelected('g0', true);
-      await settle();
-
-      expect(grid.api.getSelectedRows()).toEqual(['g0-i1']);
-      expect(grid.api.getRowSelectionState('g0')).toBe('checked');
-    });
-
-    it('flashes a cell on a tick while every other module is installed', async () => {
-      const grid = await mount();
-      const priceCell = cellsOf(rowsOf(grid)[1]!)[2]!;
-
-      grid.api.applyTransaction({
-        update: [{ id: 'g0-i0', parentId: 'g0', instrument: 'A instrument 0', price: 999 }],
-      });
-      await settle();
-
-      expect(priceCell.getAnimations().length).toBeGreaterThan(0);
-      expect(priceCell.shadowRoot?.textContent).toContain('999.00');
-    });
-
-    it('leaves the layout untouched by a tick even with six modules installed', async () => {
-      const grid = await mount();
-      const before = grid.api.getLayout();
-
-      grid.api.applyTransaction({
-        update: [{ id: 'g0-i0', parentId: 'g0', instrument: 'A instrument 0', price: 555 }],
-      });
-      await settle();
-
-      expect(grid.api.getLayout()).toBe(before);
-    });
-
-    it('navigates by keyboard without the checkbox or expander stealing focus', async () => {
-      const grid = await mount();
-      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
-      const send = (key: string) =>
-        scroller.dispatchEvent(
-          new KeyboardEvent('keydown', { key, bubbles: true, composed: true }),
-        );
-
-      send('ArrowDown');
-      send('ArrowDown');
-      await settle();
-
-      const focused = grid.controller!.focus.focused.get();
-      expect(focused?.colId).toBe('ls-grid-selection');
-      expect(focused?.rowKey).toBe('g0-i0');
-    });
-
-    it('collapsing a group reflows the layout and drops its children', async () => {
-      const grid = await mount();
-      const before = grid.api.getLayout().instances.flatMap((i) => i.rows).length;
-
-      grid.api.collapseAll();
-      await settle();
-
-      const after = grid.api.getLayout().instances.flatMap((i) => i.rows).length;
-      expect(after).toBe(3);
-      expect(after).toBeLessThan(before);
-    });
   });
 
   describe('module state', () => {
