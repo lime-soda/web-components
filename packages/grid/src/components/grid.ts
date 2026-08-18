@@ -254,6 +254,9 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
     this.virtualizer = new InstanceVirtualizer(
       (visible) => {
         this.visibleInstances = new Set(visible);
+        // Focus needs the same answer this render does. It picks the grid's one
+        // tab stop, and an instance that has been released cannot hold it.
+        this.controller?.focus.setMounted(this.visibleInstances);
       },
       { root: scroller },
     );

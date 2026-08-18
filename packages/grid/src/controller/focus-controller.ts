@@ -39,6 +39,22 @@ export class FocusController {
 
   private readonly inside: WritableSignal<boolean> = signal(false);
 
+  /**
+   * Which instances are actually built, as opposed to laid out.
+   *
+   * The flow layout virtualises instances, so most of what the layout describes
+   * is a placeholder with no cells in it. Focus has to agree with what was
+   * rendered — the tab stop is one cell, and naming a cell that does not exist
+   * leaves the grid with no tab stop at all.
+   *
+   * Empty means nobody is reporting: a layout that never releases an instance,
+   * or the moment before the observer first fires. Everything laid out is then
+   * taken to be built, which is true in both cases.
+   */
+  private readonly mounted: WritableSignal<ReadonlySet<string>> = signal<ReadonlySet<string>>(
+    new Set(),
+  );
+
   constructor(
     private readonly getLayout: () => LayoutResult,
     // Only colId is ever read, so that is all this asks for. Taking the full
@@ -79,6 +95,11 @@ export class FocusController {
     this.inside.set(inside);
   }
 
+  /** Reports which instances are built. See {@link mounted}. */
+  setMounted(instanceIds: ReadonlySet<string>): void {
+    this.mounted.set(new Set(instanceIds));
+  }
+
   /**
    * Whether this cell is the grid's tab stop.
    *
@@ -88,13 +109,47 @@ export class FocusController {
    * appeared not to exist.
    */
   isTabbable(instanceId: string, rowKey: string, colId: string): boolean {
-    if (this.position.get() !== null) return this.isFocused(instanceId, rowKey, colId);
-
-    const instance = this.getLayout().instances[0];
-    const column = this.getColumns()[0];
+    const stop = this.tabStop();
     return (
-      instance?.id === instanceId && instance.rows[0]?.id === rowKey && column?.colId === colId
+      stop !== null &&
+      stop.section === 'body' &&
+      stop.instanceId === instanceId &&
+      stop.rowKey === rowKey &&
+      stop.colId === colId
     );
+  }
+
+  /**
+   * Which cell carries the tab stop, which is not always the remembered one.
+   *
+   * Scrolling the flow layout far enough releases the instance focus was left
+   * in. The position is kept — it is where Tab returns to once that instance is
+   * on screen again — but it cannot be the tab stop while nothing renders it,
+   * or the scroller holds no focusable content and a keyboard user cannot get
+   * into what they are looking at.
+   *
+   * So the stop falls back to the first cell that is actually on screen. Tab
+   * enters the grid where the reader has scrolled to, rather than hauling the
+   * viewport back to a cell they deliberately scrolled away from.
+   */
+  private tabStop(): CellPosition | null {
+    const position = this.position.get();
+    if (position !== null && this.isMounted(position.instanceId)) return position;
+
+    // A set naming none of the current instances is stale rather than empty —
+    // the layout changed under it, and nothing unobserves a released slot. The
+    // first instance is the right answer for any grid that keeps them all.
+    const instances = this.getLayout().instances;
+    const instance = instances.find((candidate) => this.isMounted(candidate.id)) ?? instances[0];
+    const rowKey = instance?.rows[0]?.id;
+    const colId = this.getColumns()[0]?.colId;
+    if (instance === undefined || rowKey === undefined || colId === undefined) return null;
+    return { instanceId: instance.id, rowKey, colId, section: 'body' };
+  }
+
+  private isMounted(instanceId: string): boolean {
+    const ids = this.mounted.get();
+    return ids.size === 0 || ids.has(instanceId);
   }
 
   isFocused(instanceId: string, rowKey: string, colId: string): boolean {

@@ -116,17 +116,6 @@ export const OnlyInstancesNearTheViewportAreBuilt: Story = {
 
 export const PlaceholdersHoldTheScrollbarStill: Story = {
   render: () => mountGrid({ data: instruments(400) }),
-  parameters: {
-    // Reported rather than gated, because it is a real finding and not a fault
-    // in this story: once scrolling releases the instance holding the roving
-    // tabindex, the scroller has no keyboard-focusable content left and axe
-    // says so — `scrollable-region-focusable`. A keyboard user who scrolls this
-    // far cannot tab into what is on screen. The fix is a decision about where
-    // the tab stop goes when its instance is released, which is the focus
-    // controller's to make, so it is not being settled inside a layout story.
-    a11y: { test: 'todo' },
-  },
-
   play: async ({ canvasElement }) => {
     // An unbuilt instance still occupies its width. Without that the scrollbar
     // would grow and shrink as instances mounted, and the grid would shift
@@ -147,17 +136,6 @@ export const PlaceholdersHoldTheScrollbarStill: Story = {
 
 export const ScrollingBuildsAndReleasesInstances: Story = {
   render: () => mountGrid({ data: instruments(400) }),
-  parameters: {
-    // Reported rather than gated, because it is a real finding and not a fault
-    // in this story: once scrolling releases the instance holding the roving
-    // tabindex, the scroller has no keyboard-focusable content left and axe
-    // says so — `scrollable-region-focusable`. A keyboard user who scrolls this
-    // far cannot tab into what is on screen. The fix is a decision about where
-    // the tab stop goes when its instance is released, which is the focus
-    // controller's to make, so it is not being settled inside a layout story.
-    a11y: { test: 'todo' },
-  },
-
   play: async ({ canvasElement }) => {
     await gridReady(canvasElement);
     const first = (slots(canvasElement)[0] as HTMLElement).dataset['instanceId'];

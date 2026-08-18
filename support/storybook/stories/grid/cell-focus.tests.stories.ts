@@ -155,3 +155,79 @@ export const OneTabStopFollowsFocus: Story = {
     await expect(tabStops(canvasElement)).toEqual([now]);
   },
 };
+
+// --- the way back in, after scrolling ---------------------------------------
+
+/**
+ * The flow layout releases instances as they leave the viewport, and the tab
+ * stop is a single cell. Anchored to a released instance it names nothing that
+ * is rendered, so the grid loses its only way in: axe reports the scroller as a
+ * scrollable region with no focusable content, and a keyboard user who has
+ * scrolled cannot reach what they are looking at.
+ */
+const scrolled = () => mountGrid({ data: instruments(400) });
+
+const scrollerOf = (canvas: HTMLElement) =>
+  canvas.querySelector('ls-grid')!.shadowRoot!.querySelector('.scroller') as HTMLElement;
+
+const untilReleased = async (canvas: HTMLElement, gone: string) => {
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const here = [
+      ...canvas.querySelector('ls-grid')!.shadowRoot!.querySelectorAll('ls-grid-instance'),
+    ].map((instance) => (instance.parentElement as HTMLElement).dataset['instanceId']);
+    if (here.length > 0 && !here.includes(gone)) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error(`${gone} was never released`);
+};
+
+export const TabReachesTheGridAfterScrollingPastItsFirstInstance: Story = {
+  render: scrolled,
+  play: async ({ canvasElement }) => {
+    await gridReady(canvasElement);
+    const slots = canvasElement
+      .querySelector('ls-grid')!
+      .shadowRoot!.querySelectorAll('.instance-slot');
+    const first = (slots[0] as HTMLElement).dataset['instanceId']!;
+
+    scrollerOf(canvasElement).scrollLeft = 4000;
+    await untilReleased(canvasElement, first);
+    await gridReady(canvasElement);
+
+    // Throws if nothing holds the roving tabindex, which is the bug itself.
+    const stop = tabInto(canvasElement);
+
+    // And it is a cell the reader can actually see, not one off to the left.
+    const view = scrollerOf(canvasElement).getBoundingClientRect();
+    const cell = stop.getBoundingClientRect();
+    await expect(stop.getAttribute('role')).toBe('gridcell');
+    await expect(cell.right).toBeGreaterThan(view.left);
+    await expect(cell.left).toBeLessThan(view.right);
+  },
+};
+
+export const ScrollingBackRestoresTheCellFocusWasLeftIn: Story = {
+  render: scrolled,
+  play: async ({ canvasElement }) => {
+    // The position is remembered, not discarded — only the tab stop moves while
+    // the instance holding it is away.
+    await gridReady(canvasElement);
+    const left = tabInto(canvasElement);
+    const name = cellsOf(dataRows(canvasElement)[0]!)[0]!;
+    await expect(left).toBe(name);
+
+    scrollerOf(canvasElement).scrollLeft = 4000;
+    await untilReleased(
+      canvasElement,
+      (
+        canvasElement
+          .querySelector('ls-grid')!
+          .shadowRoot!.querySelectorAll('.instance-slot')[0] as HTMLElement
+      ).dataset['instanceId']!,
+    );
+    scrollerOf(canvasElement).scrollLeft = 0;
+    await gridReady(canvasElement);
+
+    await expect(tabInto(canvasElement)).toBe(cellsOf(dataRows(canvasElement)[0]!)[0]!);
+  },
+};

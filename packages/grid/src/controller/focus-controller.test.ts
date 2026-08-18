@@ -328,3 +328,79 @@ describe('FocusController', () => {
     expect(focus.focused.get()).toBeNull();
   });
 });
+
+/**
+ * The flow layout builds only the instances near the viewport, so most of what
+ * the layout describes is a placeholder. The tab stop is a single cell, and one
+ * named inside a placeholder is no tab stop at all: the scroller ends up with
+ * no focusable content and a keyboard user cannot reach what is on screen.
+ */
+describe('FocusController with instances released', () => {
+  const mounted = (focus: FocusController, ...ids: string[]) => focus.setMounted(new Set(ids));
+
+  it('takes every instance to be built until something says otherwise', () => {
+    // A grid that never releases one, and the moment before the observer fires.
+    const { focus, layout } = setup();
+
+    expect(focus.isTabbable('instance-0', layout.instances[0]!.rows[0]!.id, 'a')).toBe(true);
+  });
+
+  it('moves the tab stop to the first instance on screen', () => {
+    const { focus, layout } = setup();
+    mounted(focus, 'instance-1', 'instance-2');
+
+    expect(focus.isTabbable('instance-0', layout.instances[0]!.rows[0]!.id, 'a')).toBe(false);
+    expect(focus.isTabbable('instance-1', layout.instances[1]!.rows[0]!.id, 'a')).toBe(true);
+  });
+
+  it('leaves the tab stop where focus is while that instance is on screen', () => {
+    const { focus, layout } = setup();
+    const row = layout.instances[1]!.rows[3]!;
+    focus.focus({ instanceId: 'instance-1', rowKey: row.id, colId: 'b', section: 'body' });
+    mounted(focus, 'instance-0', 'instance-1');
+
+    expect(focus.isTabbable('instance-1', row.id, 'b')).toBe(true);
+    expect(focus.isTabbable('instance-0', layout.instances[0]!.rows[0]!.id, 'a')).toBe(false);
+  });
+
+  it('hands the tab stop to what is on screen once focus is scrolled away from', () => {
+    // The whole point: scrolling releases the instance focus was left in, and
+    // the grid must still be reachable by Tab.
+    const { focus, layout } = setup();
+    focus.focus({ instanceId: 'instance-0', rowKey: 'r0', colId: 'a', section: 'body' });
+    mounted(focus, 'instance-2');
+
+    expect(focus.isTabbable('instance-0', 'r0', 'a')).toBe(false);
+    expect(focus.isTabbable('instance-2', layout.instances[2]!.rows[0]!.id, 'a')).toBe(true);
+  });
+
+  it('remembers where focus was, so Tab returns there when it is back', () => {
+    // The position is not discarded — only the tab stop moves.
+    const { focus } = setup();
+    focus.focus({ instanceId: 'instance-0', rowKey: 'r0', colId: 'a', section: 'body' });
+
+    mounted(focus, 'instance-2');
+    mounted(focus, 'instance-0', 'instance-1');
+
+    expect(at(focus)).toBe('instance-0/r0/a');
+    expect(focus.isTabbable('instance-0', 'r0', 'a')).toBe(true);
+  });
+
+  it('gives no body cell the tab stop while a header on screen has focus', () => {
+    const { focus, layout } = setup();
+    focus.focusHeader('instance-0', 'a');
+    mounted(focus, 'instance-0', 'instance-1');
+
+    expect(focus.isTabbable('instance-0', layout.instances[0]!.rows[0]!.id, 'a')).toBe(false);
+  });
+
+  it('ignores a set that names none of the current instances', () => {
+    // Nothing unobserves a released slot, so switching layout leaves the set
+    // describing instances that no longer exist. Believing it would leave the
+    // grid with no tab stop at all.
+    const { focus, layout } = setup();
+    mounted(focus, 'stack-instance-0');
+
+    expect(focus.isTabbable('instance-0', layout.instances[0]!.rows[0]!.id, 'a')).toBe(true);
+  });
+});
