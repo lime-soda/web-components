@@ -74,6 +74,7 @@ const deskTheme: GridTheme = {
 };
 
 interface Args {
+  layout: 'flow' | 'stack';
   groups: number;
   instruments: number;
   rowHeight: number;
@@ -124,13 +125,25 @@ let lastExpandByDefault: boolean | undefined;
 const bondMarketKeyboard = new KeyboardModule<Bond>();
 
 /**
- * Held outside render for the reason the others are: Storybook re-runs render
- * on every control change, and the grid keeps the modules it started with.
+ * Held outside render like the others: Storybook re-runs render on every
+ * control change, and the grid keeps the modules it started with.
  */
 const arrangeableColumns = new ColumnsModule<Bond>({ minWidth: 60 });
 
+/**
+ * The one story with controls.
+ *
+ * Everything else under `Grid/Tests` exists to be run and asserts against a
+ * fixture it fixes; this exists to be played with. Every module is installed
+ * and every option that changes what the grid does is a control, including the
+ * layout — so the vertical arrangement is a switch here rather than a second
+ * story that drifts from the first.
+ *
+ * The data is a bond market because the grid is built for trading desks and a
+ * demo should look like the thing it is for. The story is named for the grid.
+ */
 const meta: Meta<Args> = {
-  title: 'Grid/Bond market',
+  title: 'Grid/Demo',
   // The grid fills its container, and the point of the flow layout is a wide
   // one: padded, centred docs canvas would show a single instance.
   parameters: {
@@ -143,6 +156,12 @@ const meta: Meta<Args> = {
     a11y: { test: 'error' },
   },
   argTypes: {
+    layout: {
+      control: { type: 'inline-radio' },
+      options: ['flow', 'stack'],
+      description: 'Rows flowing into columns across the width, or one long list.',
+      table: { category: 'Layout' },
+    },
     groups: {
       control: { type: 'range', min: 1, max: 50, step: 1 },
       table: { category: 'Data' },
@@ -216,7 +235,7 @@ export default meta;
  * left to right across the full width of the monitor. Scroll sideways — a group
  * that does not fit reappears as a heading atop the next instance.
  */
-export const BondMarket: StoryObj<Args> = {
+export const Demo: StoryObj<Args> = {
   args: {
     groups: 25,
     instruments: 5000,
@@ -274,6 +293,7 @@ export const BondMarket: StoryObj<Args> = {
 
     const options: GridOptions<Bond> = {
       columns,
+      layout: args.layout,
       rowHeight: args.rowHeight,
       headerHeight: args.rowHeight,
       enableScrollJacking: args.enableScrollJacking,
@@ -292,6 +312,9 @@ export const BondMarket: StoryObj<Args> = {
         selection,
         bondMarketTreeSelection,
         bondMarketRowRange,
+        // Drag a heading's grip to move a column, or its trailing edge to
+        // resize. Pinning is stack-only, so it does nothing in the flow layout.
+        arrangeableColumns,
       ],
     };
 
@@ -373,149 +396,6 @@ export const BondMarket: StoryObj<Args> = {
               })}
             ></span>
           </span>
-        </div>
-        <div class="demo__grid">
-          <ls-grid
-            ${ref(gridRef)}
-            .gridOptions=${options}
-            .rowData=${data}
-            style="height: 100%"
-          ></ls-grid>
-        </div>
-      </div>
-    `;
-  },
-};
-
-/**
- * Core with nothing installed. No tree module, so no hierarchy, no expander — the
- * rows flow in insertion order and the grid still works.
- */
-export const CoreOnly: StoryObj<Args> = {
-  args: { ...BondMarket.args! },
-  render: (args) => {
-    const data = generateBonds(args.groups, args.instruments).filter((b) => b.parentId !== null);
-    const options: GridOptions<Bond> = {
-      columns,
-      rowHeight: args.rowHeight,
-      headerHeight: args.rowHeight,
-      enableScrollJacking: args.enableScrollJacking,
-    };
-
-    return html`
-      <div class="demo">
-        <div class="demo__toolbar">
-          <span class="demo__stat">Core only — no modules imported</span>
-        </div>
-        <div class="demo__grid">
-          <ls-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></ls-grid>
-        </div>
-      </div>
-    `;
-  },
-};
-
-/**
- * Groups closed, which is a different shape for assistive tech to describe.
- *
- * A collapsed group hides its children while the heading keeps its expander and
- * its aria-expanded, and the flow layout repeats fewer ancestors — enough
- * difference from the expanded story to be worth gating on its own.
- */
-export const CollapsedGroups: StoryObj<Args> = {
-  args: { ...BondMarket.args!, expandByDefault: false },
-  render: (args) => BondMarket.render!(args, {} as never),
-};
-
-/** The same data in conventional vertical layout, for comparison. */
-export const StackLayout: StoryObj<Args> = {
-  args: { ...BondMarket.args! },
-  render: (args) => {
-    const data = generateBonds(args.groups, args.instruments);
-    // Instrument flexes to fill the width; the numeric columns stay pinned.
-    // Omitting `width` is what makes a column flexible.
-    const stackColumns = columns.map((column) => {
-      if (column.field !== 'instrument') return column;
-      const { width: _width, ...flexible } = column;
-      return { ...flexible, minWidth: 240 };
-    });
-    const options: GridOptions<Bond> = {
-      columns: stackColumns,
-      layout: 'stack',
-      rowHeight: args.rowHeight,
-      headerHeight: args.rowHeight,
-      modules: [
-        new TreeModule<Bond>({
-          getParentId: (bond) => bond.parentId,
-          defaultExpanded: (bond) => bond.parentId === null,
-        }),
-      ],
-    };
-
-    return html`
-      <div class="demo">
-        <div class="demo__toolbar">
-          <span class="demo__stat">Vertical layout — same data, same core</span>
-        </div>
-        <div class="demo__grid">
-          <ls-grid .gridOptions=${options} .rowData=${data} style="height: 100%"></ls-grid>
-        </div>
-      </div>
-    `;
-  },
-};
-
-/**
- * Reordered, resized and pinned by hand.
- *
- * Stack layout, because pinning only means something where columns scroll out
- * of view: a flow instance is sized to its own columns and the scroller moves
- * between instances, so nothing ever slides under a pinned column.
- */
-export const ArrangeableColumns: StoryObj<Args> = {
-  args: { ...BondMarket.args!, groups: 6, instruments: 8 },
-  render: (args) => {
-    const gridRef = createRef<Grid<Bond>>();
-    const data = generateBonds(args.groups, args.instruments);
-    const api = () => gridRef.value?.api;
-
-    const options: GridOptions<Bond> = {
-      // Wider than the frame on purpose, so there is something to scroll under
-      // the pinned column.
-      columns: columns.map((column) =>
-        column.field === 'instrument'
-          ? { ...column, width: 260, pinned: 'left' as const }
-          : { ...column, width: 160 },
-      ),
-      layout: 'stack',
-      rowHeight: args.rowHeight,
-      headerHeight: args.rowHeight,
-      modules: [
-        arrangeableColumns,
-        new TreeModule<Bond>({
-          getParentId: (bond) => bond.parentId,
-          defaultExpanded: (bond) => bond.parentId === null,
-        }),
-      ],
-    };
-
-    return html`
-      <div class="demo">
-        <div class="demo__toolbar">
-          <span class="demo__stat">
-            Drag a header grip to move a column, or its trailing edge to resize. Both take arrow
-            keys.
-          </span>
-          <ls-button
-            size="sm"
-            variant="outline"
-            @click=${() => api()?.setColumnPinned('price', 'right')}
-          >
-            Pin price right
-          </ls-button>
-          <ls-button size="sm" variant="outline" @click=${() => api()?.resetColumnState()}>
-            Reset
-          </ls-button>
         </div>
         <div class="demo__grid">
           <ls-grid
