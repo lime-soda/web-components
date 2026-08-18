@@ -8,7 +8,6 @@ import type { Grid } from './grid.js';
 import type { GridModule } from '../modules/types.js';
 import type { ColumnDef } from '../columns/types.js';
 import type { GridOptions } from '../controller/grid-controller.js';
-import { KeyboardModule } from '../modules/keyboard/keyboard-module.js';
 
 interface Quote {
   id: string;
@@ -76,11 +75,6 @@ const slots = (grid: Grid<Quote>) =>
 const instances = (grid: Grid<Quote>) =>
   grid.shadowRoot?.querySelectorAll('ls-grid-instance') ?? [];
 
-const cellsOf = (grid: Grid<Quote>) =>
-  [...instances(grid)].flatMap((instance) => [
-    ...(instance.shadowRoot?.querySelectorAll('ls-grid-row') ?? []),
-  ]);
-
 /**
  * A row's visible text. Each cell keeps its content in its own shadow root, so
  * reading `row.shadowRoot.textContent` returns nothing — the cells have no light
@@ -91,17 +85,6 @@ const rowText = (row: Element): string =>
     .map((cell) => cell.shadowRoot?.textContent ?? '')
     .join(' ');
 
-/**
- * Every cell in the grid. Cells live inside ls-grid-row's shadow root, not
- * ls-grid-instance's, so a single querySelectorAll from the instance finds none.
- */
-const allCells = (grid: Grid<Quote>) =>
-  [...instances(grid)].flatMap((instance) =>
-    [...instance.shadowRoot!.querySelectorAll('ls-grid-row')].flatMap((row) => [
-      ...row.shadowRoot!.querySelectorAll('ls-grid-cell'),
-    ]),
-  );
-
 const firstRow = (grid: Grid<Quote>): Element =>
   instances(grid)[0]!.shadowRoot!.querySelector('ls-grid-row')!;
 
@@ -110,112 +93,16 @@ afterEach(() => {
   host = undefined;
 });
 
+/**
+ * What the grid does that no gesture reaches.
+ *
+ * How it lays out, what it draws, how focus moves and what a module contributes
+ * to the surface are all driven through the interface in `Grid/Tests/*`. What is
+ * left here needs a browser and has no user action behind it: that a value tick
+ * never reaches the layout engine, that a repeated row shares one signal with
+ * the row it copies, and the events and api calls an application makes.
+ */
 describe('<ls-grid>', () => {
-  describe('layout', () => {
-    it('lays rows into instances sized to the measured container', async () => {
-      // 360px tall, 40px header, 32px rows: 10 rows per instance, 25 rows -> 3.
-      const grid = await mount();
-
-      expect(slots(grid)).toHaveLength(3);
-    });
-
-    it('reflows when the container is resized', async () => {
-      const grid = await mount();
-      expect(slots(grid)).toHaveLength(3);
-
-      host!.style.height = '680px';
-      await waitFor(() => slots(grid).length === 2, { description: 'the reflow to 2 instances' });
-
-      expect(slots(grid)).toHaveLength(2);
-    });
-
-    it('gives every instance its own header, so far-right columns stay readable', async () => {
-      const grid = await mount();
-      const mounted = [...instances(grid)];
-
-      // Asserted, because iterating an empty list would pass regardless.
-      expect(mounted.length).toBeGreaterThan(0);
-      for (const instance of mounted) {
-        expect(instance.shadowRoot?.querySelectorAll('ls-grid-header-cell')).toHaveLength(2);
-      }
-    });
-
-    it('aligns cells to the column widths declared on the definitions', async () => {
-      const grid = await mount();
-      const gridEl = instances(grid)[0]!.shadowRoot!.querySelector('.grid') as HTMLElement;
-
-      expect(getComputedStyle(gridEl).gridTemplateColumns).toBe('200px 100px');
-    });
-  });
-
-  describe('virtualisation', () => {
-    it('renders only the instances near the viewport', async () => {
-      // 700px wide holds two 300px instances; the rest sit beyond the prefetch
-      // margin and must stay as placeholders.
-      const grid = await mount({}, quotes(400));
-
-      expect(slots(grid).length).toBeGreaterThan(10);
-      expect(instances(grid).length).toBeLessThan(slots(grid).length);
-    });
-
-    it('keeps a correctly sized placeholder for offscreen instances so the scrollbar is stable', async () => {
-      const grid = await mount({}, quotes(400));
-      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
-      const widthBefore = scroller.scrollWidth;
-
-      const mountedBefore = [...instances(grid)].map((i) => i.parentElement);
-      scroller.scrollLeft = 2000;
-      await waitFor(
-        () => [...instances(grid)].some((i) => !mountedBefore.includes(i.parentElement)),
-        { description: 'the observer to mount a new instance after scrolling' },
-      );
-
-      expect(scroller.scrollWidth).toBe(widthBefore);
-    });
-
-    it('mounts instances that scroll into view', async () => {
-      const grid = await mount({}, quotes(400));
-      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
-      const firstId = slots(grid)[0]!.dataset['instanceId'];
-
-      const mountedIds = () =>
-        [...instances(grid)].map((i) => (i.parentElement as HTMLElement).dataset['instanceId']);
-
-      scroller.scrollLeft = 4000;
-      await waitFor(() => mountedIds().length > 0 && !mountedIds().includes(firstId), {
-        description: 'the first instance to unmount after scrolling away',
-      });
-
-      const mounted = mountedIds();
-      expect(mounted).not.toContain(firstId);
-      expect(mounted.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('rendering values', () => {
-    it('renders the formatted value', async () => {
-      const grid = await mount();
-      const cell = instances(grid)[0]!
-        .shadowRoot!.querySelector('ls-grid-row')!
-        .shadowRoot!.querySelectorAll('ls-grid-cell')[1]!;
-
-      expect(cell.shadowRoot?.textContent).toContain('100.00');
-    });
-
-    it('renders a custom element cell renderer and gives it the value from context', async () => {
-      const grid = await mount({
-        columns: [{ field: 'price', width: 120, cellRenderer: 'test-price-tag' }],
-      });
-
-      // The renderer lives inside the cell's shadow root, not the row's.
-      const renderer = firstRow(grid)
-        .shadowRoot!.querySelector('ls-grid-cell')!
-        .shadowRoot!.querySelector('test-price-tag');
-
-      expect(renderer?.shadowRoot?.textContent).toContain('100');
-    });
-  });
-
   describe('a price tick', () => {
     it('repaints the cell without re-running the layout', async () => {
       const grid = await mount();
@@ -276,24 +163,6 @@ describe('<ls-grid>', () => {
       for (const copy of copies) {
         expect(rowText(copy)).toContain('RENAMED');
       }
-    });
-  });
-
-  describe('core without modules', () => {
-    it('renders a working grid with nothing installed', async () => {
-      const grid = await mount();
-
-      expect(instances(grid).length).toBeGreaterThan(0);
-      expect(cellsOf(grid).length).toBeGreaterThan(0);
-    });
-
-    it('renders no expander, no checkbox and no sort affordance', async () => {
-      const grid = await mount();
-      const instance = instances(grid)[0]!;
-
-      expect(instance.shadowRoot?.querySelector('button')).toBeNull();
-      expect(instance.shadowRoot?.querySelector('input')).toBeNull();
-      expect(instance.shadowRoot?.querySelector('[part="header-slots"]')).toBeNull();
     });
   });
 
@@ -365,61 +234,6 @@ describe('<ls-grid>', () => {
       const grid = await mount({ modules: [module] });
 
       expect((grid.api as unknown as { countRows(): number }).countRows()).toBe(42);
-    });
-  });
-
-  describe('keyboard navigation', () => {
-    it('gives the focused cell DOM focus and a roving tabindex', async () => {
-      const grid = await mount({ modules: [new KeyboardModule<Quote>()] });
-      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
-
-      // Focus first: a key press can only reach the grid if something inside it
-      // has focus, and the ring is painted only while it does.
-      allCells(grid)[0]!.focus();
-      await grid.updateComplete;
-
-      scroller.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }),
-      );
-      await grid.updateComplete;
-      await Promise.all(allCells(grid).map((cell) => cell.updateComplete));
-
-      // Exactly one cell is tabbable, and it holds real focus.
-      const tabbable = allCells(grid).filter((cell) => cell.tabIndex === 0);
-      expect(tabbable).toHaveLength(1);
-      expect(tabbable[0]!.matches(':focus')).toBe(true);
-    });
-
-    it('moves focus across instances, following the layout rather than the DOM order', async () => {
-      const grid = await mount({ modules: [new KeyboardModule<Quote>()] });
-      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
-      const send = (key: string, init: KeyboardEventInit = {}) =>
-        scroller.dispatchEvent(
-          new KeyboardEvent('keydown', { key, bubbles: true, composed: true, ...init }),
-        );
-
-      send('ArrowDown');
-      send('ArrowRight', { ctrlKey: true });
-      await grid.updateComplete;
-
-      expect(grid.controller!.focus.focused.get()?.instanceId).toBe('instance-1');
-    });
-
-    it('still navigates without the keyboard module', async () => {
-      // This used to assert the opposite, and asserting it was the bug: the
-      // grid announces role="grid", which tells assistive technology the arrows
-      // move around it. The module adds the optional half of that pattern — the
-      // page keys, instance jumps, row skipping — not the part the role
-      // promises. See navigation-floor.browser.test.ts for the whole floor.
-      const grid = await mount();
-      const scroller = grid.shadowRoot!.querySelector('.scroller') as HTMLElement;
-
-      scroller.dispatchEvent(
-        new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }),
-      );
-      await grid.updateComplete;
-
-      expect(grid.controller!.focus.focused.get()).not.toBeNull();
     });
   });
 
