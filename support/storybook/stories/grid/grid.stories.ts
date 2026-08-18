@@ -19,6 +19,16 @@ import { type Bond, generateBonds, tick } from './bond-data.js';
 import './depth-bar.js';
 import './demo.css';
 
+/**
+ * A category row carries no quote of its own, so its numeric cells are empty.
+ *
+ * Returned as undefined rather than formatted to an empty string: a missing
+ * value is already blank, and saying so here leaves the column's value type to
+ * decide how the numbers that do exist should read.
+ */
+const quoted = (field: 'bidSize' | 'price' | 'askSize') => (params: { data: Bond }) =>
+  params.data.parentId === null ? undefined : params.data[field];
+
 const columns: ColumnDef<Bond>[] = [
   { field: 'instrument', headerName: 'Instrument', width: 260 },
   {
@@ -29,25 +39,30 @@ const columns: ColumnDef<Bond>[] = [
     enableCellFlash: false,
   },
   {
+    // Right-aligned with its separators, both from the value type.
     field: 'bidSize',
     headerName: 'Bid Size',
     width: 100,
-    valueFormatter: ({ value, node }) =>
-      node.data.parentId === null ? '' : (value as number).toLocaleString(),
+    valueType: 'number',
+    valueGetter: quoted('bidSize'),
   },
   {
+    // The type aligns it; the formatter overrides how it reads, because three
+    // decimal places is a thing this column cares about and a locale default
+    // cannot know.
     field: 'price',
     headerName: 'Price',
     width: 100,
-    valueFormatter: ({ value, node }) =>
-      node.data.parentId === null ? '' : (value as number).toFixed(3),
+    valueType: 'number',
+    valueGetter: quoted('price'),
+    valueFormatter: ({ value }) => (value === undefined ? '' : (value as number).toFixed(3)),
   },
   {
     field: 'askSize',
     headerName: 'Ask Size',
     width: 100,
-    valueFormatter: ({ value, node }) =>
-      node.data.parentId === null ? '' : (value as number).toLocaleString(),
+    valueType: 'number',
+    valueGetter: quoted('askSize'),
   },
   {
     field: 'askDepth',
