@@ -31,7 +31,15 @@ interface Row {
   price: number;
 }
 
-const data: Row[] = Array.from({ length: 6 }, (_, i) => ({
+/**
+ * Enough rows to break across instances.
+ *
+ * Eight fit an instance at this height, so thirty fills four of them. The
+ * previous six filled one, which made every story here a test of the stack
+ * layout wearing the flow layout's name: nothing ever crossed a boundary, and
+ * crossing boundaries is the only thing the flow layout does differently.
+ */
+const data: Row[] = Array.from({ length: 30 }, (_, i) => ({
   id: `r${i}`,
   name: `Row ${i}`,
   price: i,
@@ -78,6 +86,30 @@ type Story = StoryObj<Args>;
 
 const settled = (canvas: HTMLElement) => findAllByRole(canvas, 'gridcell');
 
+/** The instances the layout drew, which is what makes flow flow. */
+const instances = (canvas: HTMLElement): Element[] => [
+  ...canvas.querySelector('ls-grid')!.shadowRoot!.querySelectorAll('ls-grid-instance'),
+];
+
+/**
+ * Which instance a cell belongs to.
+ *
+ * Asserting on the row's position in the whole grid is not enough: row nine is
+ * row nine whether the layout drew one instance or four, so a story claiming a
+ * boundary was crossed would pass without one existing.
+ */
+function instanceHolding(canvas: HTMLElement, cell: Element | null): number {
+  // Climbed rather than `contains`: a cell sits in the row's shadow root, which
+  // sits in the instance's, and containment does not cross either boundary.
+  for (let node = cell; node; node = parentOf(node)) {
+    if (node.tagName === 'LS-GRID-INSTANCE') return instances(canvas).indexOf(node);
+  }
+  return -1;
+}
+
+const parentOf = (element: Element): Element | null =>
+  element.parentElement ?? (element.getRootNode() as ShadowRoot).host ?? null;
+
 /** Where focus is, described the way the grid presents it. */
 function focusedCell(canvas: HTMLElement): { row: number; column: number; name: string } | null {
   const cell = activeElement();
@@ -97,6 +129,16 @@ async function tabIn(canvas: HTMLElement) {
   tabInto(canvas);
   return focusedCell(canvas);
 }
+
+export const FlowDrawsSeveralInstances: Story = {
+  play: async ({ canvasElement }) => {
+    // The premise every other story here rests on. Without it they would all
+    // pass against a single instance and prove nothing about this layout.
+    await settled(canvasElement);
+
+    await expect(instances(canvasElement).length).toBeGreaterThan(1);
+  },
+};
 
 export const TabEntersTheGrid: Story = {
   play: async ({ canvasElement }) => {
@@ -162,7 +204,7 @@ export const TabLetsGoAtTheLastCell: Story = {
     await tabIn(canvasElement);
     await expect(await pressKey('Tab')).toBe(true);
 
-    for (let i = 0; i < 40; i += 1) {
+    for (let i = 0; i < 200; i += 1) {
       if (!(await pressKey('Tab'))) break;
     }
 
@@ -183,5 +225,54 @@ export const NavigatesTheStackLayout: Story = {
 
     await pressKey('ArrowRight');
     await expect(focusedCell(canvasElement)!.column).toBe(start!.column + 1);
+  },
+};
+
+/** Where the row index sits in the whole grid, counting across instances. */
+function positionOf(canvas: HTMLElement) {
+  const cell = activeElement();
+  const rows = dataRows(canvas);
+  for (const [index, row] of rows.entries()) {
+    const column = cellsOf(row).indexOf(cell as HTMLElement);
+    if (column !== -1) return { index, column, name: accessibleName(cell!) };
+  }
+  return null;
+}
+
+export const ArrowingDownCarriesIntoTheNextInstance: Story = {
+  play: async ({ canvasElement }) => {
+    // The rows are one list drawn in columns, so walking off the bottom of one
+    // instance continues at the top of the next rather than stopping.
+    await settled(canvasElement);
+    await tabIn(canvasElement);
+
+    await expect(instanceHolding(canvasElement, activeElement())).toBe(0);
+
+    // Eight rows fit, so nine presses must have left the first instance.
+    for (let i = 0; i < 9; i += 1) await pressKey('ArrowDown');
+
+    await expect(positionOf(canvasElement)!.name).toBe('Row 9');
+    await expect(instanceHolding(canvasElement, activeElement())).toBe(1);
+  },
+};
+
+export const ArrowingRightAtTheLastColumnCrossesInstances: Story = {
+  play: async ({ canvasElement }) => {
+    // Off the right edge is the neighbouring instance at its left edge, on the
+    // same row — the eye follows the value across.
+    await settled(canvasElement);
+    await tabIn(canvasElement);
+    const start = positionOf(canvasElement)!;
+
+    await expect(instanceHolding(canvasElement, activeElement())).toBe(0);
+
+    await pressKey('ArrowRight'); // to Price, the last column
+    await pressKey('ArrowRight'); // off the edge
+
+    const landed = positionOf(canvasElement)!;
+    await expect(landed.column).toBe(0);
+    await expect(instanceHolding(canvasElement, activeElement())).toBe(1);
+    // The same row across the join, so the eye follows the value.
+    await expect(landed.index - start.index).toBe(8);
   },
 };

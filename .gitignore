@@ -34,3 +34,4 @@ playwright-report/
 __screenshots__/
 .vitest-attachments/
 .screenshots/
+.audit/
