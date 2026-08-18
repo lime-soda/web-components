@@ -153,6 +153,17 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
         top: 0;
         z-index: 1;
         margin-bottom: calc(-1 * var(--grid-sticky-height, 0px));
+
+        /*
+         * The band's own bottom edge would be a second line.
+         *
+         * It keeps its sides, which continue the body's outline through the row
+         * it covers — dropping those left a gap in the grid's left and right
+         * edges for exactly one row's height. What it does not need is a bottom:
+         * the row inside it already draws a separator, and an instance border
+         * beneath that is a heavier line one pixel lower.
+         */
+        border-bottom: none;
       }
     `,
   ];
@@ -429,6 +440,7 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
               role="presentation"
               part="instance-sticky"
               parts="rows"
+              sticky
               exportparts=${forwardedParts(INSTANCE_PARTS, this.moduleParts())}
               .instance=${stickyInstance}
               style=${styleMap({

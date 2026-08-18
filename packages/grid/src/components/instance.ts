@@ -110,6 +110,15 @@ export class GridInstance extends SignalWatcher(LitElement) {
   @property({ reflect: true })
   accessor parts: InstanceParts = 'full';
 
+  /**
+   * A copy pinned over the body rather than a band of it.
+   *
+   * The rows inside are told, because the rule about a container's last row not
+   * drawing a separator does not hold for a band that floats over other rows.
+   */
+  @property({ type: Boolean, reflect: true })
+  accessor sticky = false;
+
   @consume({ context: gridContext, subscribe: true })
   accessor grid: GridController | undefined;
 
@@ -261,6 +270,7 @@ export class GridInstance extends SignalWatcher(LitElement) {
                   html`<ls-grid-row
                     part="row"
                     exportparts=${forwardedParts(ROW_PARTS, moduleParts)}
+                    ?sticky=${this.sticky}
                     .row=${row}
                     .rowIndex=${indices.get(row) ?? 0}
                   ></ls-grid-row>`,

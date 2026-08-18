@@ -126,7 +126,11 @@ export const mountGrid = ({
  * back on rather than every behavioural story producing one.
  */
 export const testStoryParameters = {
-  layout: 'centered',
+  // Padded rather than centred. Every story here mounts a frame of a fixed
+  // size, and centring one in a viewport-sized canvas puts it adrift in white
+  // space with its edges nowhere near anything — which is exactly where the
+  // borders these stories are judging live.
+  layout: 'padded',
   controls: { disable: true },
   docs: { disable: true },
   chromatic: { disableSnapshot: true },

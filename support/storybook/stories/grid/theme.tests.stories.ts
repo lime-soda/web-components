@@ -8,10 +8,19 @@ import { TreeModule } from '@lime-soda/grid/tree';
 import { SortModule } from '@lime-soda/grid/sort';
 import { SelectionModule } from '@lime-soda/grid/selection';
 import { getAllByRole, gridReady } from './shadow-queries.js';
-import { type Instrument, columns, grouped, visualStoryParameters } from './fixtures.js';
+import {
+  COLUMN_WIDTHS,
+  type Instrument,
+  columns,
+  grouped,
+  visualStoryParameters,
+} from './fixtures.js';
 
 /** One group of four, which exercises a heading, an indent and a hierarchy. */
 const data = grouped(1, 4);
+
+/** The selection module's default, and the `+ 2` below is the instance border. */
+const CHECKBOX_COLUMN = 28;
 
 /**
  * Theme tokens reaching everything they have to reach.
@@ -82,9 +91,13 @@ const gridWith = (theme: GridTheme, extra: Partial<GridOptions<Instrument>> = {}
     ...extra,
   };
   // Sized to the content: a snapshot that is mostly empty canvas hides the
-  // change it exists to show.
+  // change it exists to show — and one narrower than its columns hides the
+  // right-hand border it is meant to be judging. The frame was left at 420px
+  // when the shared fixture widened, so every picture here was cut off mid
+  // column with no right edge to check.
+  const width = CHECKBOX_COLUMN + COLUMN_WIDTHS.name + COLUMN_WIDTHS.price + COLUMN_WIDTHS.size + 2;
   return html`
-    <div style="width:420px;height:236px">
+    <div style=${`width:${width}px;height:236px`}>
       <ls-grid .gridOptions=${options} .rowData=${data} style="height:100%"></ls-grid>
     </div>
   `;

@@ -34,9 +34,25 @@ export class GridCell extends SignalWatcher(LitElement) {
       box-sizing: border-box;
       overflow: hidden;
       padding: 0 ${tokens.cellPaddingX};
+      border-right: 1px solid ${tokens.borderSubtle};
       border-bottom: 1px solid ${tokens.borderSubtle};
       color: ${tokens.text};
       font-variant-numeric: ${tokens.numericVariant};
+    }
+
+    /*
+     * The column rule runs the height of the grid, not just the heading.
+     *
+     * Headings carried one and the cells beneath them did not, so the columns
+     * were ruled apart for forty pixels and then dissolved — which reads as a
+     * header belonging to a different table from its body. This is the same
+     * rule the heading draws, in the same token.
+     *
+     * The last column stops, as the last heading does: past it is the
+     * instance's own edge, and a rule there would be a second line against it.
+     */
+    :host(:last-of-type) {
+      border-right: none;
     }
 
     /*

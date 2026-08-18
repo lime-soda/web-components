@@ -44,6 +44,27 @@ export class GridRow extends SignalWatcher(LitElement) {
       grid-column: 1 / -1;
       grid-template-columns: subgrid;
     }
+
+    /*
+     * The last row of a container draws no separator beneath it.
+     *
+     * A cell's bottom border separates one row from the next, so on the final
+     * row it has nothing to separate — and it lands exactly where the instance
+     * draws its own bottom edge. Two lines a pixel apart read as one thick,
+     * slightly wrong one, at the foot of every instance and of the stack
+     * layout's body.
+     *
+     * Written from out here rather than in the cell, which cannot know where it
+     * sits: an outer rule beats the cell's own :host, and a row does know it is
+     * last.
+     *
+     * The sticky band is the exception, and says so. Its last row is not at a
+     * container edge — it floats over the body, and that separator is the only
+     * thing dividing the pinned heading from the rows moving under it.
+     */
+    :host(:last-of-type:not([sticky])) ls-grid-cell {
+      border-bottom: none;
+    }
   `;
 
   @property({ attribute: false })
@@ -52,6 +73,10 @@ export class GridRow extends SignalWatcher(LitElement) {
   /** 1-based position within this instance, the header row being 1. */
   @property({ attribute: false })
   accessor rowIndex = 0;
+
+  /** Set by a sticky band, which keeps its separator. See the styles above. */
+  @property({ type: Boolean, reflect: true })
+  accessor sticky = false;
 
   @consume({ context: gridContext, subscribe: true })
   accessor grid: GridController | undefined;
