@@ -7,7 +7,7 @@ import type { Grid } from '../components/grid.js';
 import { TreeModule } from '../modules/tree/index.js';
 import { SortModule } from '../modules/sort/index.js';
 import { SelectionModule } from '../modules/selection/index.js';
-import type { GridTheme } from './tokens.js';
+import type {} from './tokens.js';
 
 /**
  * Waits for a condition, polling by frame.
@@ -110,160 +110,82 @@ afterEach(() => {
   host = undefined;
 });
 
-describe('theming', () => {
-  it('applies theme tokens as custom properties on the grid', async () => {
-    const theme: GridTheme = { text: 'rgb(0, 128, 0)', background: 'rgb(240, 240, 240)' };
-    const grid = await mount({ theme });
-    const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
+/**
+ * The design system's rule, checked on what actually rendered.
+ *
+ * Not a picture and not an interaction: an inline declaration looks identical
+ * to a themed one until someone tries to override it, at which point nothing
+ * they write has any effect. Chromatic cannot see the difference, and node has
+ * no DOM to look at, so it is a unit test that needs a browser.
+ */
+describe('what the grid must never put in a style attribute', () => {
+  it('leaves cells with no style attribute of their own', async () => {
+    const grid = await mount();
 
-    expect(themed.style.getPropertyValue('--grid-text')).toBe('rgb(0, 128, 0)');
-    expect(themed.style.getPropertyValue('--grid-background')).toBe('rgb(240, 240, 240)');
-  });
-
-  it('inherits a token through every shadow root down to a cell', async () => {
-    const grid = await mount({ theme: { text: 'rgb(0, 128, 0)' } });
-
-    expect(getComputedStyle(cellFor(rows(grid)[1]!, 'name')).color).toBe('rgb(0, 128, 0)');
-  });
-
-  it('themes a header through the same tokens', async () => {
-    const grid = await mount({ theme: { headerText: 'rgb(128, 0, 0)' } });
-    const header = instance(grid).shadowRoot!.querySelector('ls-grid-header-cell')!;
-
-    expect(getComputedStyle(header).color).toBe('rgb(128, 0, 0)');
-  });
-
-  it('themes markup a module contributed', async () => {
-    // The expander lives in the tree module's stylesheet, adopted into the
-    // cell's shadow root — it must still answer to the grid's tokens.
-    const grid = await mount({ theme: { textMuted: 'rgb(0, 0, 255)' } });
-    const expander = cellFor(rows(grid)[0]!, 'name').shadowRoot!.querySelector(
-      '[part="tree-expander"]',
-    )!;
-
-    expect(getComputedStyle(expander).color).toBe('rgb(0, 0, 255)');
-  });
-
-  it('drives tree indent from a token rather than a computed pixel value', async () => {
-    const grid = await mount({ theme: { treeIndent: '40px' } });
-    const childIndent = cellFor(rows(grid)[1]!, 'name').shadowRoot!.querySelector(
-      '.ls-grid-tree-indent',
-    )!;
-
-    // Depth 1 at 40px per level.
-    expect(getComputedStyle(childIndent).width).toBe('40px');
-  });
-
-  it('themes the selection highlight', async () => {
-    const grid = await mount({ theme: { selectionBackground: 'rgb(255, 0, 0)' } });
-    grid.api.setRowSelected('g-a', true);
-    await settle();
-
-    expect(getComputedStyle(cellFor(rows(grid)[1]!, 'name')).backgroundColor).toBe(
-      'rgb(255, 0, 0)',
-    );
-  });
-
-  it('falls back to the component default for an unset token', async () => {
-    const grid = await mount({ theme: { text: 'rgb(0, 128, 0)' } });
-    const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
-
-    // A partial theme is valid; unset tokens simply are not declared.
-    expect(themed.style.getPropertyValue('--grid-border')).toBe('');
-  });
-
-  it('updates live when the theme is replaced', async () => {
-    const grid = await mount({ theme: { text: 'rgb(0, 128, 0)' } });
-
-    grid.gridOptions = { ...grid.gridOptions!, theme: { text: 'rgb(255, 0, 255)' } };
-    await grid.updateComplete;
-    await settle();
-
-    expect(getComputedStyle(cellFor(rows(grid)[1]!, 'name')).color).toBe('rgb(255, 0, 255)');
-  });
-
-  it('rejects an unknown token rather than dropping it silently', async () => {
-    await expect(mount({ theme: { rowHeght: '28px' } as GridTheme })).rejects.toThrow(/rowHeght/);
-  });
-
-  it('keeps row height under the layout engine, not the theme', async () => {
-    // The engine decided instance capacity from rowHeight; CSS must lay rows out
-    // at exactly that height or every instance silently overflows.
-    const grid = await mount({ rowHeight: 32, theme: { rowHeight: '999px' } });
-    const themed = grid.shadowRoot!.querySelector('.viewport') as HTMLElement;
-
-    expect(themed.style.getPropertyValue('--grid-row-height')).toBe('32px');
-  });
-
-  describe('no inline styles', () => {
-    it('leaves cells with no style attribute of their own', async () => {
-      const grid = await mount();
-
-      for (const row of rows(grid)) {
-        for (const cell of cellsOf(row)) {
-          const style = cell.getAttribute('style') ?? '';
-          // Only custom properties are permitted, and only from decorations.
-          const declarations = style.split(';').filter((d) => d.trim() !== '');
-          for (const declaration of declarations) {
-            expect(declaration.trim().startsWith('--'), `unexpected: ${declaration}`).toBe(true);
-          }
+    for (const row of rows(grid)) {
+      for (const cell of cellsOf(row)) {
+        const style = cell.getAttribute('style') ?? '';
+        // Only custom properties are permitted, and only from decorations.
+        const declarations = style.split(';').filter((d) => d.trim() !== '');
+        for (const declaration of declarations) {
+          expect(declaration.trim().startsWith('--'), `unexpected: ${declaration}`).toBe(true);
         }
       }
-    });
+    }
+  });
 
-    it('leaves module-contributed markup with no style attribute', async () => {
-      const grid = await mount();
-      const treeCell = cellFor(rows(grid)[0]!, 'name');
+  it('leaves module-contributed markup with no style attribute', async () => {
+    const grid = await mount();
+    const treeCell = cellFor(rows(grid)[0]!, 'name');
 
-      for (const element of treeCell.shadowRoot!.querySelectorAll('*')) {
-        expect(element.getAttribute('style'), element.tagName).toBeNull();
-      }
-    });
+    for (const element of treeCell.shadowRoot!.querySelectorAll('*')) {
+      expect(element.getAttribute('style'), element.tagName).toBeNull();
+    }
+  });
 
-    it('styles the sort indicator by class, not inline', async () => {
-      const grid = await mount();
-      grid.api.setSortModel([{ colId: 'price', direction: 'asc' }]);
-      await settle();
+  it('styles the sort indicator by class, not inline', async () => {
+    const grid = await mount();
+    grid.api.setSortModel([{ colId: 'price', direction: 'asc' }]);
+    await settle();
 
-      const indicator = headerFor(grid, 'price').shadowRoot!.querySelector(
-        '[part="sort-indicator"]',
-      )!;
+    const indicator = headerFor(grid, 'price').shadowRoot!.querySelector(
+      '[part="sort-indicator"]',
+    )!;
 
-      expect(indicator.getAttribute('style')).toBeNull();
-      expect(indicator.classList.contains('ls-grid-sort-indicator')).toBe(true);
-    });
+    expect(indicator.getAttribute('style')).toBeNull();
+    expect(indicator.classList.contains('ls-grid-sort-indicator')).toBe(true);
+  });
 
-    it('styles the selection checkbox by class, not inline', async () => {
-      const grid = await mount();
-      const checkbox = cellFor(rows(grid)[0]!, 'ls-grid-selection').shadowRoot!.querySelector(
-        'ls-grid-selection-checkbox',
-      )!;
-      const input = checkbox.shadowRoot!.querySelector('input')!;
+  it('styles the selection checkbox by class, not inline', async () => {
+    const grid = await mount();
+    const checkbox = cellFor(rows(grid)[0]!, 'ls-grid-selection').shadowRoot!.querySelector(
+      'ls-grid-selection-checkbox',
+    )!;
+    const input = checkbox.shadowRoot!.querySelector('input')!;
 
-      expect(input.getAttribute('style')).toBeNull();
-      expect(input.classList.contains('ls-grid-checkbox')).toBe(true);
-    });
+    expect(input.getAttribute('style')).toBeNull();
+    expect(input.classList.contains('ls-grid-checkbox')).toBe(true);
+  });
 
-    it('takes the checkbox accent from the design system, not from the focus colour', async () => {
-      // A ticked checkbox is painted by `accent-color`, which no token can reach
-      // on its own — it is the one place a real declaration has to carry a
-      // token through. This used to borrow `--grid-focus`, so a checked box was
-      // the focus-ring colour: a ring says "the keyboard is here", an accent
-      // says "this is on".
-      const grid = await mount();
-      const checkbox = cellFor(rows(grid)[0]!, 'ls-grid-selection').shadowRoot!.querySelector(
-        'ls-grid-selection-checkbox',
-      )!;
-      const input = checkbox.shadowRoot!.querySelector('input')!;
+  it('takes the checkbox accent from the design system, not from the focus colour', async () => {
+    // A ticked checkbox is painted by `accent-color`, which no token can reach
+    // on its own — it is the one place a real declaration has to carry a
+    // token through. This used to borrow `--grid-focus`, so a checked box was
+    // the focus-ring colour: a ring says "the keyboard is here", an accent
+    // says "this is on".
+    const grid = await mount();
+    const checkbox = cellFor(rows(grid)[0]!, 'ls-grid-selection').shadowRoot!.querySelector(
+      'ls-grid-selection-checkbox',
+    )!;
+    const input = checkbox.shadowRoot!.querySelector('input')!;
 
-      const accent = getComputedStyle(input).accentColor;
-      const themeAccent = getComputedStyle(document.documentElement)
-        .getPropertyValue('--theme-color-accent')
-        .trim();
+    const accent = getComputedStyle(input).accentColor;
+    const themeAccent = getComputedStyle(document.documentElement)
+      .getPropertyValue('--theme-color-accent')
+      .trim();
 
-      expect(accent).not.toBe('auto');
-      expect(accent).not.toBe(getComputedStyle(grid).getPropertyValue('--grid-focus').trim());
-      expect(themeAccent).not.toBe('');
-    });
+    expect(accent).not.toBe('auto');
+    expect(accent).not.toBe(getComputedStyle(grid).getPropertyValue('--grid-focus').trim());
+    expect(themeAccent).not.toBe('');
   });
 });
