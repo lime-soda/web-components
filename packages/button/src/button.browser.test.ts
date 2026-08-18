@@ -12,7 +12,6 @@ import type { Button } from './Button.js';
  * activation, and what the element exposes to assistive technology.
  */
 
-const SIZES = ['sm', 'md', 'lg'] as const;
 const VARIANTS = ['primary', 'secondary', 'outline', 'ghost'] as const;
 
 let host: HTMLDivElement | undefined;
@@ -54,16 +53,9 @@ afterEach(() => {
 });
 
 describe('axe', () => {
-  for (const size of SIZES) {
-    for (const variant of VARIANTS) {
-      it(`finds nothing wrong with ${variant} at ${size}`, async () => {
-        const button = mount({ size, variant });
-        await button.updateComplete;
-
-        expect(await violationsIn(button)).toEqual([]);
-      });
-    }
-  }
+  // Every size and variant is swept by the `All combinations` story, which the
+  // Storybook a11y gate runs axe over. Repeating the sweep here checked the
+  // same markup twice and reported it in only one place.
 
   it('finds nothing wrong with an unlabelled button', async () => {
     // A button with no text content is an empty target, and axe should say so
@@ -113,22 +105,10 @@ describe('behaviour', () => {
     expect(inner(button).classList.contains('secondary')).toBe(true);
   });
 
-  it('puts focus on the inner button, and clicking it fires from the host', async () => {
-    const button = mount();
-    await button.updateComplete;
+  // Clicking and focusing are driven through the interface by the Button
+  // stories, whose play functions click the control and tab onto it. Doing it
+  // again here asserted the same thing without the story to look at.
 
-    let clicks = 0;
-    button.addEventListener('click', () => (clicks += 1));
-
-    inner(button).focus();
-    expect(button.shadowRoot!.activeElement).toBe(inner(button));
-
-    inner(button).click();
-    expect(clicks).toBe(1);
-  });
-});
-
-describe('geometry', () => {
   it('gives every variant the same box for the same label and size', async () => {
     // The border has to be part of every variant's box, not only the outline
     // one. A button is intrinsically sized, so a border on one variant alone
