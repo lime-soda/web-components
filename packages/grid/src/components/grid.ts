@@ -39,6 +39,7 @@ import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
  * @csspart sort-indicator - The sort direction arrow (sort module)
  * @csspart filter-input - A per-column filter input (filter module)
  * @csspart selection-checkbox - A selection checkbox (selection module)
+ * @csspart cell-editor - The input inside a cell being edited (edit module)
  * @csspart column-resize-handle - The drag target on a header's trailing edge (columns module)
  * @csspart column-move-grip - The grip that drags a column to a new position (columns module)
  *

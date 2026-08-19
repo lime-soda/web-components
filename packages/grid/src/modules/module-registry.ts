@@ -1,5 +1,5 @@
 import { spannedColumns } from '../columns/col-span.js';
-import { type CSSResultGroup, type CSSResultOrNative, unsafeCSS } from 'lit';
+import { type CSSResultGroup, type CSSResultOrNative, type TemplateResult, unsafeCSS } from 'lit';
 import type { ColumnDefs, ResolvedColumn } from '../columns/types.js';
 import type { GridPipeline } from '../pipeline/grid-pipeline.js';
 import { FocusController } from '../controller/focus-controller.js';
@@ -135,6 +135,15 @@ export class ModuleRegistry<TData = unknown> {
 
   cellDecorations(ctx: CellContext<TData>): readonly CellDecoration[] {
     return this.collect((module) => module.cellDecorator?.(ctx));
+  }
+
+  /** The content a module has taken over, if any. First claim wins. */
+  cellContent(ctx: CellContext<TData>): TemplateResult | null {
+    for (const module of this.orderedModules()) {
+      const content = module.cellContent?.(ctx);
+      if (content !== null && content !== undefined) return content;
+    }
+    return null;
   }
 
   rowDecorations(ctx: RowContextInfo<TData>): readonly RowDecoration[] {

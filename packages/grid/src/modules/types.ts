@@ -197,6 +197,25 @@ export interface GridModule<TData = unknown, TState = unknown> {
   headerSlot?(ctx: HeaderSlotContext<TData>): TemplateResult | null;
   headerDecorator?(ctx: HeaderSlotContext<TData>): HeaderDecoration | null;
   cellDecorator?(ctx: CellContext<TData>): CellDecoration | null;
+  /**
+   * Takes over a cell's content, for the one cell being edited.
+   *
+   * The exception to `cellDecorator`, and deliberately a separate hook rather
+   * than a field on `CellDecoration`. Decoration brackets a cell's content so
+   * that several modules can contribute to the same cell without fighting —
+   * the tree's expander and selection's checkbox coexist precisely because
+   * neither replaces anything. Replacement cannot work that way: two modules
+   * putting an editor in one cell is not a layout to reconcile, it is a
+   * mistake, and the shape of the hook should say so.
+   *
+   * So at most one module may claim a cell. The first to claim it wins, and
+   * core does not arbitrate beyond that — a second module returning markup for
+   * a cell someone else has taken is a bug in the pair of them.
+   *
+   * Returning null for every cell, which is the normal case, costs a call and
+   * nothing else.
+   */
+  cellContent?(ctx: CellContext<TData>): TemplateResult | null;
   rowDecorator?(ctx: RowContextInfo<TData>): RowDecoration | null;
   /**
    * Handles a key pressed inside the grid. Return true when handled, which

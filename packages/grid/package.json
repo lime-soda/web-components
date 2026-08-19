@@ -32,7 +32,9 @@
     "./dist/stack.js",
     "./src/layouts.ts",
     "./src/flow.ts",
-    "./src/stack.ts"
+    "./src/stack.ts",
+    "./dist/modules/edit/editors.js",
+    "./src/modules/edit/editors.ts"
   ],
   "publishConfig": {
     "access": "public",
@@ -92,6 +94,10 @@
       "./clipboard": {
         "types": "./dist/modules/clipboard/index.d.ts",
         "default": "./dist/modules/clipboard/index.js"
+      },
+      "./edit": {
+        "types": "./dist/modules/edit/index.d.ts",
+        "default": "./dist/modules/edit/index.js"
       }
     }
   },
@@ -172,6 +178,11 @@
       "types": "./dist/modules/clipboard/index.d.ts",
       "development": "./src/modules/clipboard/index.ts",
       "default": "./dist/modules/clipboard/index.js"
+    },
+    "./edit": {
+      "types": "./dist/modules/edit/index.d.ts",
+      "development": "./src/modules/edit/index.ts",
+      "default": "./dist/modules/edit/index.js"
     }
   },
   "scripts": {

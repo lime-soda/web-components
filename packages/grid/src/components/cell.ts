@@ -201,6 +201,17 @@ export class GridCell extends SignalWatcher(LitElement) {
   }
 
   private renderContent(value: unknown, node: NonNullable<RowContextValue['node']>): unknown {
+    // A module may have taken the cell over — an open editor is the case this
+    // exists for. Asked before the column's own renderer, because the point is
+    // to replace what the column would otherwise show.
+    const claimed = this.grid?.registry.cellContent({
+      row: this.row!.displayRow,
+      node,
+      column: this.column,
+      value,
+    });
+    if (claimed) return claimed;
+
     const renderer = this.column.cellRenderer;
 
     if (typeof renderer === 'string') {
