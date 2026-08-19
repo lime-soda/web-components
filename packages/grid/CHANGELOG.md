@@ -1,5 +1,60 @@
 # @lime-soda/grid
 
+## 0.5.0
+
+### Minor Changes
+
+- 6e3b640: Add `valueType` to a column: `text`, `number`, `date` or `boolean`.
+
+  It decides which edge the value sits against and how it reads when nothing
+  formats it — numbers to the right with their separators, dates in the reader's
+  format, booleans centred and in words. A `valueFormatter` still wins, and
+  `align` overrides the edge on its own.
+
+  Declaring nothing keeps the current behaviour, so this changes no existing grid.
+
+  Fixes a right-alignment rule that had been in the cell's stylesheet with nothing
+  able to set it: every column of numbers read down its left edge.
+
+- c4cf0a9: Draw each border once, and rule the columns the whole way down.
+
+  A row separator is a cell's bottom border, so on the last row of a container it
+  had nothing to separate and landed on the container's own bottom edge — two
+  lines a pixel apart at the foot of every instance and of the stack layout's
+  body. The last row no longer draws one. The stack layout's sticky group band is
+  the exception and says so: its last row is not at a container edge, and that
+  separator is the only thing dividing the pinned heading from the rows moving
+  under it. The band drops its own bottom border instead, keeping its sides so the
+  body's outline runs unbroken through the row it covers.
+
+  Cells now carry the column rule their headings already had. It stopped at the
+  bottom of the header, so a grid was ruled into columns for forty pixels and then
+  dissolved.
+
+### Patch Changes
+
+- cac02cb: Keep the flow layout reachable by Tab after scrolling.
+
+  The grid's single tab stop was anchored to one instance, and the flow layout
+  releases instances as they leave the viewport. Scroll far enough and the anchor
+  named a placeholder: no rendered cell was tabbable, the scroller held no
+  focusable content — `scrollable-region-focusable` — and a keyboard user could
+  not reach what was on screen.
+
+  The tab stop now falls back to the first cell that is actually built. The
+  remembered position is kept, so Tab still returns to the cell you left once its
+  instance is back on screen; only the stop moves while it is away.
+
+- 7ad4fdb: Give the selection column's heading a name.
+
+  A word above a column of tickboxes is noise, so the column carries no visible
+  text — which left its heading with no accessible name at all, and axe reporting
+  `empty-table-header`. In multi mode the select-all control happened to supply
+  one; in single mode there is no such control and the heading was anonymous.
+
+  It now carries its name as visually hidden text, read aloud and never drawn. An
+  `aria-label` does not satisfy the rule, which asks for content.
+
 ## 0.4.1
 
 ### Patch Changes
