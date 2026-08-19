@@ -16,6 +16,19 @@ jobs:
   verify:
     name: Verify
     runs-on: ubuntu-latest
+
+    # Playwright's own image, which already has Chromium and every system
+    # library it needs. Installing those per run is what hung: `--with-deps`
+    # shells out to apt, and apt waiting on something has no deadline of its
+    # own — a job sat there for four hours looking like work in progress.
+    #
+    # The tag must match the Playwright version pnpm-lock.yaml resolves to, or
+    # the browser in the image is not the build the tests look for.
+    container: mcr.microsoft.com/playwright:v1.62.1-noble
+
+    # And a deadline regardless. Without one GitHub's default of 360 applies,
+    # so the next thing that hangs costs six hours rather than twenty minutes.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
 
@@ -36,23 +49,6 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-${{ runner.os }}-
 
-      # Chromium is ~100MB and does not change between runs; only the Playwright
-      # version invalidates it.
-      - uses: actions/cache@v6
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      # Component tests drive a real Chromium: shadow DOM, focus and layout
-      # measurement have no useful answer in jsdom, and the flow layout also
-      # needs a real IntersectionObserver. `--with-deps` still runs, since the
-      # system libraries it installs are not part of the cached browser.
-      #
-      # Run through the package that declares playwright rather than from the
-      # root, which does not. The browser lands in a shared cache, so one install
-      # serves every package that needs it.
-      - run: pnpm --filter @lime-soda/grid exec playwright install --with-deps chromium
-
       # Build first. `@lime-soda/tokens` is generated — Style Dictionary writes
       # its only artefacts — so a package importing `@lime-soda/tokens/<name>`
       # cannot be typechecked until they exist. Turbo runs each package's own
@@ -72,6 +68,7 @@ jobs:
   # snapshots, and on both PRs and main so Chromatic has a baseline to diff.
   chromatic:
     name: Chromatic
+    timeout-minutes: 20
     needs: verify
     runs-on: ubuntu-latest
     steps:
@@ -112,6 +109,7 @@ jobs:
   # not finished — or had failed.
   release:
     name: Release
+    timeout-minutes: 20
     needs: verify
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
