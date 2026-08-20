@@ -42,6 +42,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The container runs as root and the checkout is not root's, so git
+      # refuses to read the repository — "dubious ownership". Nothing fails
+      # outright: turbo simply cannot run `git diff`, says so in a warning, and
+      # falls back to a weaker cache key. Cheap to state, and the alternative is
+      # a cache that quietly stops working.
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - uses: pnpm/action-setup@v6
 
       - uses: actions/setup-node@v7
@@ -130,6 +137,13 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7
+
+      # The container runs as root and the checkout is not root's, so git
+      # refuses to read the repository — "dubious ownership". Nothing fails
+      # outright: turbo simply cannot run `git diff`, says so in a warning, and
+      # falls back to a weaker cache key. Cheap to state, and the alternative is
+      # a cache that quietly stops working.
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - uses: pnpm/action-setup@v6
 
