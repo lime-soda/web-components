@@ -26,6 +26,16 @@ jobs:
     # the browser in the image is not the build the tests look for.
     container: mcr.microsoft.com/playwright:v1.62.1-noble
 
+    # Stated again, though the image already sets it.
+    #
+    # The browsers live at /ms-playwright, and the image says so in its own ENV.
+    # A job step does not get that: Actions builds the step environment itself
+    # and overrides HOME to /github/home, so Playwright fell back to its default
+    # of $HOME/.cache/ms-playwright, found nothing, and told us to install
+    # browsers that were already sitting in the image.
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+
     # And a deadline regardless. Without one GitHub's default of 360 applies,
     # so the next thing that hangs costs six hours rather than twenty minutes.
     timeout-minutes: 20
