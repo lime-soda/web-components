@@ -17,37 +17,11 @@ jobs:
     name: Verify
     runs-on: ubuntu-latest
 
-    # Playwright's own image, which already has Chromium and every system
-    # library it needs. Installing those per run is what hung: `--with-deps`
-    # shells out to apt, and apt waiting on something has no deadline of its
-    # own — a job sat there for four hours looking like work in progress.
-    #
-    # The tag must match the Playwright version pnpm-lock.yaml resolves to, or
-    # the browser in the image is not the build the tests look for.
-    container: mcr.microsoft.com/playwright:v1.62.1-noble
-
-    # Stated again, though the image already sets it.
-    #
-    # The browsers live at /ms-playwright, and the image says so in its own ENV.
-    # A job step does not get that: Actions builds the step environment itself
-    # and overrides HOME to /github/home, so Playwright fell back to its default
-    # of $HOME/.cache/ms-playwright, found nothing, and told us to install
-    # browsers that were already sitting in the image.
-    env:
-      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-
-    # And a deadline regardless. Without one GitHub's default of 360 applies,
-    # so the next thing that hangs costs six hours rather than twenty minutes.
+    # Without a deadline GitHub's default of 360 applies, so anything that hangs
+    # costs six hours rather than twenty minutes looking like work in progress.
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-
-      # The container runs as root and the checkout is not root's, so git
-      # refuses to read the repository — "dubious ownership". Nothing fails
-      # outright: turbo simply cannot run `git diff`, says so in a warning, and
-      # falls back to a weaker cache key. Cheap to state, and the alternative is
-      # a cache that quietly stops working.
-      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - uses: pnpm/action-setup@v6
 
@@ -75,18 +49,79 @@ jobs:
       # Then the whole repo in one pass, which also covers the files that belong
       # to no package: the root config, the workflow, the docs.
       - run: pnpm check
-      - run: pnpm test
+
+      # Everything that does not need a browser. The rest is a job of its own,
+      # below, because only that part needs anything unusual to run.
+      - run: pnpm test:node
 
       # Budgets, not timings: these catch an order-of-magnitude regression such
       # as a lost memo or a retained element, not a few ms of runner noise.
-      - run: pnpm bench
+      - run: pnpm bench:node
+
+  # The browser half, and nothing else.
+  #
+  # This is the only job that needs Chromium, so it is the only one that pays
+  # for it. Putting the whole of `verify` in the image meant every step ran as
+  # root inside a container — which is where the git ownership warnings and the
+  # HOME override came from, none of which has anything to do with running a
+  # browser.
+  browser:
+    name: Browser tests
+    needs: verify
+    runs-on: ubuntu-latest
+
+    # Playwright's own image, which already has Chromium and every system
+    # library it needs. Installing them per run is what hung for four hours:
+    # `--with-deps` shells out to apt, and apt waiting on something has no
+    # deadline of its own.
+    #
+    # The tag must match the Playwright version pnpm-lock.yaml resolves to, or
+    # the browsers in the image are not the builds the tests look for.
+    container: mcr.microsoft.com/playwright:v1.62.1-noble
+
+    # Stated again, though the image sets it too. A job step does not inherit
+    # the image's ENV: Actions builds the step environment itself and overrides
+    # HOME to /github/home, so Playwright looked in $HOME/.cache/ms-playwright,
+    # found nothing, and asked us to install browsers already in the image.
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      # The container runs as root and the checkout is not root's, so git
+      # refuses the repository — "dubious ownership". Nothing fails outright:
+      # turbo cannot run `git diff`, warns, and falls back to a weaker cache
+      # key, which is the sort of thing that quietly stops working.
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Restores what `verify` built, so the build these depend on is a cache
+      # hit rather than a second full one.
+      - uses: actions/cache@v6
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - run: pnpm test:browser
+      - run: pnpm bench:browser
 
   # Visual regression. Runs after verify so a broken build does not burn
   # snapshots, and on both PRs and main so Chromatic has a baseline to diff.
   chromatic:
     name: Chromatic
     timeout-minutes: 20
-    needs: verify
+    needs: [verify, browser]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -127,7 +162,7 @@ jobs:
   release:
     name: Release
     timeout-minutes: 20
-    needs: verify
+    needs: [verify, browser]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -137,13 +172,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7
-
-      # The container runs as root and the checkout is not root's, so git
-      # refuses to read the repository — "dubious ownership". Nothing fails
-      # outright: turbo simply cannot run `git diff`, says so in a warning, and
-      # falls back to a weaker cache key. Cheap to state, and the alternative is
-      # a cache that quietly stops working.
-      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - uses: pnpm/action-setup@v6
 

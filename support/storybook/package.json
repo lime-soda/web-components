@@ -8,7 +8,8 @@
     "build": "storybook build",
     "dev": "storybook dev -p 6006",
     "lint": "vp lint",
-    "test": "vp test run --project storybook"
+    "test": "vp test run --project storybook",
+    "test:browser": "vp test run --project storybook"
   },
   "keywords": [
     "storybook",

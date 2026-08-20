@@ -1,6 +1,19 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+
+  /*
+   * Turbo 2 runs tasks in strict env mode: a task only receives the variables
+   * declared here, and everything else is stripped before the command starts.
+   *
+   * That is what broke CI's browser tests. The job sets PLAYWRIGHT_BROWSERS_PATH
+   * so Playwright finds the browsers baked into its image, the variable is
+   * plainly there in the shell, and turbo removed it on the way to vitest — so
+   * Playwright fell back to $HOME/.cache and reported browsers missing that were
+   * installed the whole time. Running the same suite through pnpm directly
+   * worked, which is exactly what made it look like the job was already fixed.
+   */
+  "globalPassThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "typecheck", "check"],
@@ -38,6 +51,16 @@
       "outputs": []
     },
     "bench": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": []
+    },
+    "bench:node": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": []
+    },
+    "bench:browser": {
       "dependsOn": ["^build"],
       "cache": false,
       "outputs": []

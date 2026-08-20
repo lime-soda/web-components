@@ -16,7 +16,7 @@ code in this repository.
 - `pnpm test` - Run every package's tests (`test:node` / `test:browser` to pick
   one half)
 - `pnpm test:browsers` - Install the Chromium the browser tests drive. Needed
-  once per machine; CI does not run it, because the Verify job runs inside
+  once per machine; CI does not run it, because its browser job runs inside
   Playwright's own image
 - `pnpm bench` - Run the grid's performance budgets
 - `pnpm check` - Formatting, lint and types in one pass (`check:fix` to fix)

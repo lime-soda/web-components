@@ -16,6 +16,8 @@
     "test:browser": "turbo run test:browser",
     "test:browsers": "pnpm --filter @lime-soda/grid exec playwright install --with-deps chromium",
     "bench": "turbo run bench",
+    "bench:node": "turbo run bench:node",
+    "bench:browser": "turbo run bench:browser",
     "typecheck": "turbo run typecheck",
     "lint": "vp lint",
     "lint:fix": "vp lint --fix",
