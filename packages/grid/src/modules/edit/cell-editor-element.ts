@@ -51,6 +51,17 @@ export abstract class CellEditorElement<TValue = unknown> extends LitElement {
   accessor initialInput: string | undefined;
 
   /**
+   * What the reader is editing, for the editor's accessible name.
+   *
+   * The column's heading. A cell announces itself by its content, and once that
+   * content is a text box the announcement is whatever the box is named — so an
+   * unnamed one leaves a screen reader user typing into "edit text, blank",
+   * with nothing to say which column they are in.
+   */
+  @property({ attribute: false })
+  accessor label = '';
+
+  /**
    * Called by the editor when its value changes. The module keeps the latest.
    *
    * Reported as it changes rather than only at the end, so committing does not

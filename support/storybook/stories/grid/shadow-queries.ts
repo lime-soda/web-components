@@ -225,6 +225,51 @@ export async function pressKey(key: string, init: KeyboardEventInit = {}): Promi
 }
 
 /**
+ * Types into a text box, character by character.
+ *
+ * `userEvent.type` sends its keystrokes to `document.activeElement`, which for
+ * a web component is the host and not the element inside the shadow root. It
+ * reaches a filter box three roots down; a cell editor is five, and there the
+ * keystrokes land on the host and the input never sees them. Nothing throws —
+ * the box simply keeps the value it opened with, so only a test that checks the
+ * value afterwards notices. `userEvent.clear` fails the same way but loudly:
+ * "the element to be cleared could not be focused".
+ *
+ * This is the sequence a browser performs, addressed at the input itself:
+ * keydown, the value edit the keystroke causes, an `input` event describing it,
+ * keyup. Existing text is selected first, because that is the state opening an
+ * editor leaves the box in and typing over a selection replaces it.
+ *
+ * The same compromise as `pressKey`, for the same reason, and the two should be
+ * read together.
+ */
+export async function typeInto(input: HTMLInputElement, text: string): Promise<void> {
+  input.focus();
+  input.setSelectionRange(0, input.value.length);
+
+  for (const character of text) {
+    const shared = { key: character, bubbles: true, composed: true, cancelable: true };
+    input.dispatchEvent(new KeyboardEvent('keydown', shared));
+
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? start;
+    input.value = input.value.slice(0, start) + character + input.value.slice(end);
+    input.setSelectionRange(start + 1, start + 1);
+
+    input.dispatchEvent(
+      new InputEvent('input', {
+        bubbles: true,
+        composed: true,
+        data: character,
+        inputType: 'insertText',
+      }),
+    );
+    input.dispatchEvent(new KeyboardEvent('keyup', shared));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+}
+
+/**
  * Puts focus where Tab would put it.
  *
  * `userEvent.tab()` walks the document's focusable elements and cannot see into

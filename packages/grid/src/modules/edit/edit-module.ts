@@ -105,6 +105,19 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
   private draft: { value: unknown } | undefined;
   private initialInput: string | undefined;
   /**
+   * The cell waiting to be given focus, once it next renders.
+   *
+   * Closing an editor destroys the element holding focus and the browser hands
+   * it to the body, so the reader's place in the grid is gone and Tab starts
+   * again from the top of the page. The module has no handle on a cell, so it
+   * waits for one to report itself through `onRendered`.
+   *
+   * Read from the focus controller rather than remembered from the edit,
+   * because Enter and Tab move on purpose: restoring the cell that was being
+   * edited would drag focus back out of the one they just stepped to.
+   */
+  private restoreFocusTo: EditingCell | null = null;
+  /**
    * Elements already carrying a listener, so each attaches once.
    *
    * Both `onRendered` and a `ref` run on every update, and an element that
@@ -177,6 +190,7 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
     // something no formatter promises is possible.
     return staticHtml`<${tag}
       exportparts="cell-editor"
+      .label=${ctx.column.headerName}
       .value=${ctx.value}
       .initialInput=${this.initialInput}
       .commitValue=${this.report}
@@ -196,7 +210,10 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
     if (!node || !this.isEditable(ctx.column, node)) return null;
 
     return {
-      onRendered: (cell) => this.wireDoubleClick(cell, ctx.row.rowId, ctx.column.colId),
+      onRendered: (cell) => {
+        this.wireDoubleClick(cell, ctx.row.rowId, ctx.column.colId);
+        this.restoreFocus(cell, ctx.row.rowId, ctx.column.colId);
+      },
     };
   }
 
@@ -225,16 +242,19 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
     switch (event.key) {
       case 'Escape':
         this.stopEditing(false);
+        this.focusCurrentCell();
         return true;
       case 'Enter':
         this.stopEditing(true);
         // Down a row, as a spreadsheet does, so a column can be filled in
         // without reaching for the mouse.
         this.ctx?.focus.moveRow(1);
+        this.focusCurrentCell();
         return true;
       case 'Tab':
         this.stopEditing(true);
         this.ctx?.focus.moveColumn(event.shiftKey ? -1 : 1);
+        this.focusCurrentCell();
         return true;
       default:
         // Everything else belongs to the editor. Arrows move the caret rather
@@ -327,6 +347,30 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
       if (this.editing) this.stopEditing(true);
     });
   };
+
+  /**
+   * Marks wherever the grid's focus now is as needing the caret.
+   *
+   * Only the keyboard paths ask for this. Focus leaving on its own has already
+   * gone somewhere the reader chose — possibly out of the grid entirely — and
+   * pulling it back would be taking it from them.
+   */
+  private focusCurrentCell(): void {
+    const position = this.ctx?.focus.focused.get();
+    if (!position || position.section !== 'body') return;
+    const rowId = this.rowIdOf(position.rowKey);
+    if (rowId === undefined) return;
+    this.restoreFocusTo = { rowId, colId: position.colId };
+    this.ctx?.requestRender();
+  }
+
+  /** Hands focus to the cell that asked for it, once and only once. */
+  private restoreFocus(cell: HTMLElement, rowId: string, colId: string): void {
+    const pending = this.restoreFocusTo;
+    if (pending === null || pending.rowId !== rowId || pending.colId !== colId) return;
+    this.restoreFocusTo = null;
+    cell.focus();
+  }
 
   private wireDoubleClick(cell: HTMLElement, rowId: string, colId: string): void {
     if ((this.options.editOnDoubleClick ?? true) === false || this.wired.has(cell)) return;

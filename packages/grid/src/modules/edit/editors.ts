@@ -50,6 +50,7 @@ export class TextEditor extends CellEditorElement<string> {
     return html`<input
       type="text"
       part="cell-editor"
+      aria-label=${this.label}
       .value=${this.startingText}
       @input=${this.handleInput}
     />`;
@@ -83,6 +84,7 @@ export class NumberEditor extends CellEditorElement<number> {
       type="text"
       inputmode="decimal"
       part="cell-editor"
+      aria-label=${this.label}
       .value=${this.startingText}
       @input=${this.handleInput}
     />`;
