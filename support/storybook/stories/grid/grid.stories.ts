@@ -12,6 +12,7 @@ import { TreeSelectionModule } from '@lime-soda/grid/selection/tree';
 import { RowRangeModule } from '@lime-soda/grid/selection/row-range';
 import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
+import { EditModule } from '@lime-soda/grid/edit';
 import { ColumnsModule } from '@lime-soda/grid/columns';
 import '@lime-soda/button';
 import type { Button } from '@lime-soda/button';
@@ -29,6 +30,15 @@ import './demo.css';
 const quoted = (field: 'bidSize' | 'price' | 'askSize') => (params: { data: Bond }) =>
   params.data.parentId === null ? undefined : params.data[field];
 
+/**
+ * A category row is a heading, not a quote, so there is nothing on it to edit.
+ *
+ * The predicate form exists for exactly this: editability is a property of the
+ * row as much as the column, and the module has no idea which rows are
+ * headings — that is the tree's convention and therefore the story's to apply.
+ */
+const quotable = ({ data }: { data: Bond }) => data.parentId !== null;
+
 const columns: ColumnDef<Bond>[] = [
   { field: 'instrument', headerName: 'Instrument', width: 260 },
   {
@@ -45,6 +55,7 @@ const columns: ColumnDef<Bond>[] = [
     width: 100,
     valueType: 'number',
     valueGetter: quoted('bidSize'),
+    editable: quotable,
   },
   {
     // The type aligns it; the formatter overrides how it reads, because three
@@ -56,6 +67,7 @@ const columns: ColumnDef<Bond>[] = [
     valueType: 'number',
     valueGetter: quoted('price'),
     valueFormatter: ({ value }) => (value === undefined ? '' : (value as number).toFixed(3)),
+    editable: quotable,
   },
   {
     field: 'askSize',
@@ -63,6 +75,7 @@ const columns: ColumnDef<Bond>[] = [
     width: 100,
     valueType: 'number',
     valueGetter: quoted('askSize'),
+    editable: quotable,
   },
   {
     field: 'askDepth',
@@ -102,6 +115,9 @@ interface Args {
   checkboxColumn: boolean;
   treeSelectionScope: 'self' | 'children' | 'filteredChildren';
   clickToSelect: boolean;
+  editable: boolean;
+  editOnTyping: boolean;
+  editOnDoubleClick: boolean;
 }
 
 /**
@@ -138,6 +154,16 @@ const bondMarketTree = new TreeModule<Bond>({
 });
 let lastExpandByDefault: boolean | undefined;
 const bondMarketKeyboard = new KeyboardModule<Bond>();
+
+/**
+ * Held outside `render` like the rest, and driven by `setOptions`.
+ *
+ * Editing is off in the args by default: this story ticks fifty rows a frame,
+ * and a book writing itself while someone types into it is a poor first
+ * impression of an editor. Turn it on, then stop the ticking if a value moving
+ * under the caret is distracting.
+ */
+const bondMarketEdit = new EditModule<Bond>();
 
 /**
  * Held outside render like the others: Storybook re-runs render on every
@@ -234,6 +260,23 @@ const meta: Meta<Args> = {
         'What ticking a category means: itself alone, every instrument beneath it, or only those the quick filter left visible. Type in the filter first — the last two are identical without one.',
       table: { category: 'Selection' },
     },
+    editable: {
+      control: 'boolean',
+      description:
+        'Whether the quote columns — bid size, price, ask size — accept an edit. Enter, F2 or a double click opens one; Enter commits and steps down, Tab commits and steps across, Escape discards, and clicking away commits. Category headings never open: they carry no quote, and the column says so with a predicate rather than the module guessing.',
+      table: { category: 'Editing' },
+    },
+    editOnTyping: {
+      control: 'boolean',
+      description:
+        'Open an editor by typing over a focused cell, seeded with the character. Off leaves the letter keys free for an application that wants them for its own shortcuts.',
+      table: { category: 'Editing' },
+    },
+    editOnDoubleClick: {
+      control: 'boolean',
+      description: 'Open an editor on double click. Off leaves editing to the keyboard.',
+      table: { category: 'Editing' },
+    },
     clickToSelect: {
       control: 'boolean',
       description:
@@ -264,6 +307,9 @@ export const Demo: StoryObj<Args> = {
     checkboxColumn: true,
     treeSelectionScope: 'filteredChildren',
     clickToSelect: false,
+    editable: false,
+    editOnTyping: true,
+    editOnDoubleClick: true,
   },
   render: (args) => {
     const gridRef = createRef<Grid<Bond>>();
@@ -290,6 +336,14 @@ export const Demo: StoryObj<Args> = {
     }
 
     bondMarketSort.setOptions({ resortOnValueChange: args.resortOnValueChange });
+    // `editable: false` on the module leaves the columns' own `editable` in
+    // charge, so the switch has to say the columns are off rather than merely
+    // not say they are on.
+    bondMarketEdit.setOptions({
+      editable: args.editable,
+      editOnTyping: args.editOnTyping,
+      editOnDoubleClick: args.editOnDoubleClick,
+    });
     // The predicate is the application's: the module has no idea what a parent row is.
     bondMarketKeyboard.setOptions({
       skipRow: args.skipParentRows ? ({ meta }) => meta['hasChildren'] === true : undefined,
@@ -320,6 +374,7 @@ export const Demo: StoryObj<Args> = {
         new FilterModule<Bond>(),
         new CellFlashModule<Bond>(),
         bondMarketKeyboard,
+        bondMarketEdit,
         // Row selection is flat on its own. The tree selection module is what makes
         // ticking a category select the instruments beneath it, respecting the
         // current filter and showing indeterminate while only some are; the

@@ -125,7 +125,22 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
    */
   private readonly wired = new WeakSet<Element>();
 
-  constructor(private readonly options: EditModuleOptions = {}) {}
+  constructor(private options: EditModuleOptions = {}) {}
+
+  /**
+   * Changes the module's options after it is registered.
+   *
+   * A grid keeps the modules it was given, so a consumer that rebuilds one to
+   * change a setting finds the new instance is not the one in use. Every other
+   * module offers this for the same reason.
+   */
+  setOptions(next: Partial<EditModuleOptions>): void {
+    this.options = { ...this.options, ...next };
+    // An open edit was opened under the old rules; a column that is no longer
+    // editable should not stay open because it was.
+    if (this.editing) this.stopEditing(false);
+    this.ctx?.requestRender();
+  }
 
   init(ctx: ModuleContext<TData>): void {
     this.ctx = ctx;
