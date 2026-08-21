@@ -98,6 +98,10 @@
       "./edit": {
         "types": "./dist/modules/edit/index.d.ts",
         "default": "./dist/modules/edit/index.js"
+      },
+      "./range": {
+        "types": "./dist/modules/range/index.d.ts",
+        "default": "./dist/modules/range/index.js"
       }
     }
   },
@@ -183,6 +187,11 @@
       "types": "./dist/modules/edit/index.d.ts",
       "development": "./src/modules/edit/index.ts",
       "default": "./dist/modules/edit/index.js"
+    },
+    "./range": {
+      "types": "./dist/modules/range/index.d.ts",
+      "development": "./src/modules/range/index.ts",
+      "default": "./dist/modules/range/index.js"
     }
   },
   "scripts": {

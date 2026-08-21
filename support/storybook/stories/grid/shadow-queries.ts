@@ -225,6 +225,38 @@ export async function pressKey(key: string, init: KeyboardEventInit = {}): Promi
 }
 
 /**
+ * Pointer gestures, addressed at the element rather than at a coordinate.
+ *
+ * `userEvent.pointer` cannot be used on anything inside a shadow root: it
+ * compares document positions with a `Range`, and a node in another tree throws
+ * `WrongDocumentError: The node provided and the Range are not in the same
+ * tree`. Its `click` is fine — that works from real coordinates — but a press,
+ * a drag and a release are not, which is every gesture that draws a range.
+ *
+ * The same compromise as `pressKey` and `typeInto`, and the third instance of
+ * it: the sequence a browser performs, dispatched where the browser would.
+ * `pointerenter` does not bubble, so it goes to the cell being entered.
+ */
+export function pointerDownOn(element: Element, init: PointerEventInit = {}): void {
+  const shared = { bubbles: true, composed: true, cancelable: true, ...init };
+  element.dispatchEvent(new PointerEvent('pointerdown', shared));
+  element.dispatchEvent(new MouseEvent('mousedown', shared));
+}
+
+/** Moves the pointer onto a cell mid-drag. */
+export function pointerOver(element: Element): void {
+  element.dispatchEvent(new PointerEvent('pointerenter', { composed: true }));
+  element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, composed: true }));
+}
+
+/** Releases, wherever the button happens to come up. */
+export function pointerUpOn(target: EventTarget = globalThis): void {
+  const shared = { bubbles: true, composed: true };
+  target.dispatchEvent(new PointerEvent('pointerup', shared));
+  target.dispatchEvent(new MouseEvent('mouseup', shared));
+}
+
+/**
  * Types into a text box, character by character.
  *
  * `userEvent.type` sends its keystrokes to `document.activeElement`, which for

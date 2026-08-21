@@ -13,6 +13,7 @@ import { RowRangeModule } from '@lime-soda/grid/selection/row-range';
 import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
 import { EditModule } from '@lime-soda/grid/edit';
+import { RangeModule } from '@lime-soda/grid/range';
 import { ColumnsModule } from '@lime-soda/grid/columns';
 import '@lime-soda/button';
 import type { Button } from '@lime-soda/button';
@@ -118,6 +119,7 @@ interface Args {
   editable: boolean;
   editOnTyping: boolean;
   editOnDoubleClick: boolean;
+  cellRange: boolean;
 }
 
 /**
@@ -164,6 +166,16 @@ const bondMarketKeyboard = new KeyboardModule<Bond>();
  * under the caret is distracting.
  */
 const bondMarketEdit = new EditModule<Bond>();
+
+/**
+ * Held outside `render` like the rest.
+ *
+ * Coexists with row selection rather than replacing it: ticking instruments and
+ * marking out a block of numbers are different statements, and Ctrl-C takes the
+ * block when there is one because drawing a rectangle is the more specific of
+ * the two.
+ */
+const bondMarketRange = new RangeModule<Bond>();
 
 /**
  * Held outside render like the others: Storybook re-runs render on every
@@ -260,6 +272,12 @@ const meta: Meta<Args> = {
         'What ticking a category means: itself alone, every instrument beneath it, or only those the quick filter left visible. Type in the filter first — the last two are identical without one.',
       table: { category: 'Selection' },
     },
+    cellRange: {
+      control: 'boolean',
+      description:
+        'Drag across cells, or hold shift with the arrows, to mark out a rectangle. Ctrl-C copies that block and only its columns — the half a row-based export cannot do. Independent of row selection: both can be set at once, and the rectangle wins the copy because it is the more specific.',
+      table: { category: 'Selection' },
+    },
     editable: {
       control: 'boolean',
       description:
@@ -310,6 +328,7 @@ export const Demo: StoryObj<Args> = {
     editable: false,
     editOnTyping: true,
     editOnDoubleClick: true,
+    cellRange: true,
   },
   render: (args) => {
     const gridRef = createRef<Grid<Bond>>();
@@ -339,6 +358,8 @@ export const Demo: StoryObj<Args> = {
     // `editable: false` on the module leaves the columns' own `editable` in
     // charge, so the switch has to say the columns are off rather than merely
     // not say they are on.
+    bondMarketRange.setOptions({ dragToSelect: args.cellRange });
+    if (!args.cellRange) bondMarketRange.clearCellRange();
     bondMarketEdit.setOptions({
       editable: args.editable,
       editOnTyping: args.editOnTyping,
@@ -375,6 +396,7 @@ export const Demo: StoryObj<Args> = {
         new CellFlashModule<Bond>(),
         bondMarketKeyboard,
         bondMarketEdit,
+        bondMarketRange,
         // Row selection is flat on its own. The tree selection module is what makes
         // ticking a category select the instruments beneath it, respecting the
         // current filter and showing indeterminate while only some are; the

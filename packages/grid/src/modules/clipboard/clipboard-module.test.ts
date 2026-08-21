@@ -7,6 +7,7 @@ import { SortModule } from '../sort/sort-module.js';
 import { FilterModule } from '../filter/filter-module.js';
 import { TreeModule } from '../tree/tree-module.js';
 import { ClipboardModule } from './clipboard-module.js';
+import { RangeModule } from '../range/range-module.js';
 import type { GridModule } from '../types.js';
 
 /**
@@ -261,5 +262,81 @@ describe('ClipboardModule', () => {
       .split('\n')[0];
 
     expect(header).toBe('Price,Instrument');
+  });
+});
+
+/**
+ * A rectangle narrows both directions.
+ *
+ * The half a row-based export cannot do: take three instruments and, from them,
+ * only the two columns being quoted. The range module is registered here rather
+ * than faked, because what is being tested is that the two agree — the clipboard
+ * looks for a capability and the range module declares it, neither importing the
+ * other.
+ */
+describe('ClipboardModule with a cell range', () => {
+  const withRange = () => {
+    const range = new RangeModule<Bond>();
+    const { clipboard, pipeline, registry } = setup([range]);
+    return { clipboard, pipeline, registry, range };
+  };
+
+  /** Draws a rectangle. The gesture that produces one is the stories' concern. */
+  const draw = (range: RangeModule<Bond>, rows: [number, number], columns: [number, number]) =>
+    range.setCellRange({
+      anchorRow: rows[0],
+      anchorColumn: columns[0],
+      headRow: rows[1],
+      headColumn: columns[1],
+    });
+
+  it('copies only the rows and columns the rectangle covers', () => {
+    const { clipboard, range } = withRange();
+    // Rows b and c; the Instrument and Size columns.
+    draw(range, [1, 2], [0, 1]);
+
+    const rows = lines(clipboard.toDelimitedText());
+
+    expect(rows[0]).toBe('Instrument,Size');
+    expect(rows).toHaveLength(3);
+    expect(rows[1]).toContain('UKT 1% 2041');
+  });
+
+  it('is what an unqualified copy takes, over a row selection', () => {
+    // Having drawn a rectangle is a clearer statement of intent than having
+    // ticked some rows earlier, so Ctrl-C means the rectangle.
+    const { clipboard, range } = withRange();
+    draw(range, [0, 0], [2, 2]);
+
+    const rows = lines(clipboard.toDelimitedText({ includeHeaders: false }));
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toBe('101.250');
+  });
+
+  it('takes nothing when a range was asked for and none is drawn', () => {
+    // Rather than silently widening to the whole grid, which is the opposite of
+    // what asking for a range means.
+    const { clipboard } = withRange();
+
+    expect(clipboard.toDelimitedText({ rows: 'range', includeHeaders: false })).toBe('');
+  });
+
+  it('still exports the whole grid when asked for it explicitly', () => {
+    const { clipboard, range } = withRange();
+    draw(range, [0, 0], [0, 0]);
+
+    expect(lines(clipboard.toDelimitedText({ rows: 'all' }))).toHaveLength(4);
+  });
+
+  it('lets an explicit column list overrule the rectangle', () => {
+    // A caller that named columns meant them.
+    const { clipboard, range } = withRange();
+    draw(range, [0, 1], [0, 0]);
+
+    const rows = lines(clipboard.toDelimitedText({ columns: ['price'] }));
+
+    expect(rows[0]).toBe('Price');
+    expect(rows).toHaveLength(3);
   });
 });

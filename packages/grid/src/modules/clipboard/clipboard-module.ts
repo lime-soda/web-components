@@ -27,10 +27,16 @@ export interface ExportOptions {
    * dropped them would quietly return the headings of a mostly-collapsed tree
    * and none of its contents.
    *
-   * Unset means `selected` when something is selected and `filtered` when
-   * nothing is, so Ctrl-C does the obvious thing either way.
+   * - `range` — the selected rectangle of cells, which also narrows the
+   *   columns to the ones it spans.
+   *
+   * Unset takes the most specific thing the reader has expressed: a cell range
+   * if there is one, then a row selection, then the filtered set. Ctrl-C over a
+   * block of prices should be that block, not the whole book, and having drawn
+   * a rectangle is a clearer statement of intent than having ticked some rows
+   * earlier.
    */
-  rows?: 'selected' | 'filtered' | 'all';
+  rows?: 'selected' | 'filtered' | 'all' | 'range';
   /** Column ids to include, in this order. Defaults to every visible column. */
   columns?: readonly string[];
   /** Prepend the column headings. On by default. */
@@ -55,6 +61,25 @@ export interface ClipboardModuleOptions {
    */
   excludeColumns?: readonly string[];
 }
+
+/**
+ * A module that can say which cells are in the selected rectangle.
+ *
+ * Declared rather than imported, exactly as the selection provider is: the
+ * clipboard has no business knowing whether a range module is installed, and
+ * this is what lets one exist without the other.
+ */
+interface SelectedCellRange {
+  readonly rowIds: readonly string[];
+  readonly colIds: readonly string[];
+}
+
+interface CellRangeProvider {
+  provideCellRange(): SelectedCellRange | null;
+}
+
+const providesCellRange = <T>(module: T): module is T & CellRangeProvider =>
+  typeof (module as Partial<CellRangeProvider>).provideCellRange === 'function';
 
 /** A module that can say which rows are selected. Declared, not reached into. */
 interface SelectedRowsProvider {
@@ -187,6 +212,18 @@ export class ClipboardModule<TData = unknown> implements GridModule<TData> {
     const all = this.context?.getColumns() ?? [];
     const excluded = new Set(this.options.excludeColumns ?? DEFAULT_EXCLUDED);
 
+    // A rectangle says which columns as well as which rows, and saying only the
+    // rows would widen the copy to the whole book — the opposite of what
+    // drawing a rectangle asked for. An explicit list still wins: a caller that
+    // named columns meant them.
+    if (!options.columns && this.rangeScopeApplies(options)) {
+      const range = this.cellRange();
+      if (range) {
+        const wanted = new Set(range.colIds);
+        return all.filter((column) => wanted.has(column.colId) && !excluded.has(column.colId));
+      }
+    }
+
     if (!options.columns) return all.filter((column) => !excluded.has(column.colId));
 
     // Explicit order wins, and an unknown id is dropped rather than throwing:
@@ -204,11 +241,27 @@ export class ClipboardModule<TData = unknown> implements GridModule<TData> {
     const filtered = this.orderedRowIds({ filtered: true });
     if (options.rows === 'filtered') return filtered;
 
+    const range = this.rangeScopeApplies(options) ? this.cellRange() : null;
+    if (range) return range.rowIds;
+    // Asked for explicitly and there is no rectangle: nothing, rather than
+    // silently widening to the whole grid.
+    if (options.rows === 'range') return [];
+
     const selected = this.selectedRowIds();
     if (options.rows === 'selected') return ordered(filtered, selected, everything());
 
     // Unspecified: whatever is selected, or the filtered set if nothing is.
     return selected.length > 0 ? ordered(filtered, selected, everything()) : filtered;
+  }
+
+  /** Whether a rectangle should decide the scope: asked for, or nothing narrower said. */
+  private rangeScopeApplies(options: ExportOptions): boolean {
+    return options.rows === 'range' || options.rows === undefined;
+  }
+
+  private cellRange(): SelectedCellRange | null {
+    const provider = (this.context?.getModules() ?? []).find(providesCellRange);
+    return provider?.provideCellRange() ?? null;
   }
 
   /**
