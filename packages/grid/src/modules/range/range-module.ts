@@ -178,12 +178,10 @@ export class RangeModule<TData = unknown> implements GridModule<TData> {
     const delta = ARROWS[event.key];
     if (!delta) return false;
 
-    if (!event.shiftKey) {
-      // A plain arrow is a move, not a range operation. The range goes, and the
-      // key is left to the navigation that owns it.
-      this.clearCellRange();
-      return false;
-    }
+    // An unshifted arrow is a move, and belongs to whatever owns navigation.
+    // Declining it also clears the range, though not from here: the caret ends
+    // up outside the rectangle, and that is what `currentRange` reads.
+    if (!event.shiftKey) return false;
 
     const from = this.focusCoordinates();
     if (!from) return false;
@@ -226,6 +224,16 @@ export class RangeModule<TData = unknown> implements GridModule<TData> {
     cell.addEventListener('pointerdown', (event) => {
       const at = this.coordinatesOf(ctx.row, ctx.column);
       if (!at) return;
+
+      // The caret goes where the gesture started, which is what a click does
+      // anyway — the cell's own focus handler tells the controller. Left out,
+      // focus stayed wherever it had been, `currentRange` found it outside the
+      // rectangle just drawn, and cleared it on the way to being painted.
+      //
+      // Only on the press. A drag moves the head while the caret stays at the
+      // anchor, and the anchor is a corner of the rectangle, so it never falls
+      // outside the thing it is anchoring.
+      cell.focus();
 
       if ((event as PointerEvent).shiftKey && this.range) {
         // Shift-click re-cuts from the existing anchor, as it does everywhere.
@@ -270,6 +278,25 @@ export class RangeModule<TData = unknown> implements GridModule<TData> {
    */
   private currentRange(): CellRange | null {
     if (!this.range) return null;
+
+    // The caret has moved out of the rectangle, so the rectangle is stale.
+    //
+    // Read from where focus is rather than from a key press, because the key
+    // never arrives: the registry offers a press to each module until one
+    // reports it handled, and the keyboard module handles a plain arrow. This
+    // module was clearing on a key it was never given, so a range stayed drawn
+    // while the caret walked away from it. Focus is the state both agree on,
+    // and it does not care which of them moved it.
+    //
+    // Moving *within* the rectangle leaves it alone. A spreadsheet would
+    // collapse it to the cell, but there is nothing to collapse to that the
+    // focus ring is not already showing.
+    const at = this.focusCoordinates();
+    if (at && !contains(this.range, at.row, at.column)) {
+      this.range = null;
+      return null;
+    }
+
     return clamp(this.range, this.rows().length, this.columns().length);
   }
 

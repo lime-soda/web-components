@@ -9,6 +9,8 @@ import { SelectionModule } from '@lime-soda/grid/selection';
 import { TreeSelectionModule } from '@lime-soda/grid/selection/tree';
 import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
+import { RangeModule } from '@lime-soda/grid/range';
+import type { Grid } from '@lime-soda/grid';
 import {
   cellText,
   activeElement,
@@ -46,6 +48,7 @@ const everything = () => [
   new TreeSelectionModule<Instrument>({ getParentId: (row) => row.parentId }),
   new CellFlashModule<Instrument>(),
   new KeyboardModule<Instrument>(),
+  new RangeModule<Instrument>(),
 ];
 
 const meta: Meta = {
@@ -176,6 +179,53 @@ export const KeyboardWalksPastTheControlsRatherThanIntoThem: Story = {
 
     for (let i = 0; i < 4; i += 1) await pressKey('ArrowDown');
 
+    await expect(activeElement()?.tagName).toBe('LS-GRID-CELL');
+  },
+};
+
+export const ShiftArrowExtendsARangeRatherThanNavigating: Story = {
+  play: async ({ canvasElement }) => {
+    // The collision this file exists for, and one that shipped: the keyboard
+    // module claimed every arrow key and reported it handled, so the range
+    // module — registered after it — was never offered the press. Shift-arrow
+    // moved the caret and drew nothing. The range stories could not see it,
+    // because that fixture installs no keyboard module.
+    //
+    // Focus goes to a cell directly rather than by tabbing in: with every
+    // module installed the first tab stop is a control a module contributed
+    // and not a cell, so the first arrow would be spent entering the grid
+    // instead of extending anything. The instrument column, since selection has
+    // prepended a checkbox one ahead of it.
+    await gridReady(canvasElement);
+    cellsOf(dataRows(canvasElement)[1]!)[1]!.focus();
+
+    await pressKey('ArrowDown', { shiftKey: true });
+
+    const range = (canvasElement.querySelector('ls-grid') as Grid<Instrument>).api.getCellRange();
+    await expect(range?.rowIds).toHaveLength(2);
+    await expect(range?.colIds).toEqual(['name']);
+  },
+};
+
+export const APlainArrowNavigatesAndDropsTheRange: Story = {
+  play: async ({ canvasElement }) => {
+    // The mirror of the bug above, and the reason the range no longer decides
+    // this from a key press: the keyboard module handles an unshifted arrow, so
+    // the range module is never offered it and cannot clear on it. It reads
+    // where the caret ended up instead, which is state both agree on however it
+    // got there.
+    await gridReady(canvasElement);
+    const grid = canvasElement.querySelector('ls-grid') as Grid<Instrument>;
+    cellsOf(dataRows(canvasElement)[1]!)[1]!.focus();
+    await pressKey('ArrowDown', { shiftKey: true });
+    await expect(grid.api.getCellRange()?.rowIds).toHaveLength(2);
+
+    // Out of the rectangle, so there is nothing left for it to describe.
+    await pressKey('ArrowDown');
+    await pressKey('ArrowDown');
+
+    await expect(grid.api.getCellRange()).toBeNull();
+    // ...and the arrow still did its own job.
     await expect(activeElement()?.tagName).toBe('LS-GRID-CELL');
   },
 };

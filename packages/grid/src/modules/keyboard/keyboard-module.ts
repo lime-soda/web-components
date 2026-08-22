@@ -92,6 +92,19 @@ export class KeyboardModule<TData = unknown> implements GridModule<TData> {
       return true;
     }
 
+    // A shifted arrow is not navigation. It extends something — a cell range,
+    // and whatever else grows a selection later — and this module knows nothing
+    // about any of that, so it declines rather than consuming the key and
+    // leaving the feature that does understand it wondering why it never
+    // arrives. Declining also keeps the two independent of registration order,
+    // which is the failure this replaced: the range module happened to be
+    // registered after this one, so shift-arrow moved the caret and drew
+    // nothing.
+    //
+    // With nothing installed to extend, the key falls through to core's
+    // navigation floor and still moves, as it always did.
+    if (event.shiftKey && NAVIGATION_KEYS.has(event.key)) return false;
+
     const jump = (this.options.instanceJump ?? true) && (event.ctrlKey || event.metaKey);
 
     switch (event.key) {
