@@ -149,7 +149,7 @@ jobs:
       # Pinned, not `@latest`: this is the job that holds the Chromatic token,
       # and a floating tag means an upstream push runs with it unreviewed.
       # Renovate can offer the bumps now that there is a version to compare.
-      - uses: chromaui/action@v18.1.0
+      - uses: chromaui/action@v18.5.0
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: support/storybook
