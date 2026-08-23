@@ -1,4 +1,4 @@
-import { LitElement } from 'lit';
+import { LitElement, css } from 'lit';
 import { property } from 'lit/decorators.js';
 
 /**
@@ -29,6 +29,30 @@ import { property } from 'lit/decorators.js';
  * ```
  */
 export abstract class CellEditorElement<TValue = unknown> extends LitElement {
+  /**
+   * An editor is the cell while it is open, so it fills it.
+   *
+   * On the base class because it is true of any editor, and because a custom
+   * element defaults to `display: inline` — which leaves whatever is inside it
+   * sized to its content and floating in the middle of the row. A subclass that
+   * declares its own `styles` takes this over and is on its own.
+   */
+  static override styles = css`
+    :host {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      /*
+       * Stretch rather than a percentage height. A cell takes its height from
+       * the grid's row track, so it has no definite height of its own for a
+       * percentage to resolve against — the editor fell back to its content and
+       * sat half-height in the middle of the row. Stretching along the cell's
+       * cross axis needs no such resolution.
+       */
+      align-self: stretch;
+    }
+  `;
+
   /**
    * The value the edit started from, after `valueGetter` and before formatting.
    *

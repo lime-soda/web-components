@@ -33,8 +33,19 @@ const read = (paths: string[]) => paths.map((path) => readFileSync(path, 'utf8')
 const componentSource = read(sources(COMPONENTS));
 const allSource = componentSource + read(sources(MODULES));
 
-/** Part names any element actually puts in its markup. */
-const rendered = new Set([...allSource.matchAll(/part="([a-z-]+)"/g)].map((match) => match[1]!));
+/**
+ * Part names any element actually puts in its markup.
+ *
+ * Including the ones exposed by renaming. `exportparts="field: cell-editor"`
+ * publishes `cell-editor` just as surely as writing `part="cell-editor"` does —
+ * a shared component names its part for itself, and whoever puts it somewhere
+ * renames it to what the grid calls that place. Counting only the literal form
+ * marked both of those as documented-but-never-rendered.
+ */
+const rendered = new Set([
+  ...[...allSource.matchAll(/\bpart="([a-z-]+)"/g)].map((match) => match[1]!),
+  ...[...allSource.matchAll(/exportparts="[a-z-]+:\s*([a-z-]+)"/g)].map((match) => match[1]!),
+]);
 
 /** Part names documented anywhere with a `@csspart` tag. */
 const documented = new Set(

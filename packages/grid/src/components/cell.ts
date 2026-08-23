@@ -186,21 +186,6 @@ export class GridCell extends SignalWatcher(LitElement) {
 
     this.applyDecorations(decorations);
 
-    const hasRenderer = this.column.cellRenderer !== undefined;
-    // Element renderers own their box; function renderers and plain values are
-    // content and keep the cell's gutter.
-    this.toggleAttribute('data-ls-grid-renderer', typeof this.column.cellRenderer === 'string');
-
-    return html`
-      ${decorations.map((d) => (d.prefix ? html`<span class="affix">${d.prefix}</span>` : nothing))}
-      <span class=${hasRenderer ? 'renderer' : 'content'} part="cell-content">
-        ${this.renderContent(value, node)}
-      </span>
-      ${decorations.map((d) => (d.suffix ? html`<span class="affix">${d.suffix}</span>` : nothing))}
-    `;
-  }
-
-  private renderContent(value: unknown, node: NonNullable<RowContextValue['node']>): unknown {
     // A module may have taken the cell over — an open editor is the case this
     // exists for. Asked before the column's own renderer, because the point is
     // to replace what the column would otherwise show.
@@ -210,8 +195,27 @@ export class GridCell extends SignalWatcher(LitElement) {
       column: this.column,
       value,
     });
-    if (claimed) return claimed;
 
+    // Whatever owns the box gets the whole box. An element renderer already did;
+    // so does a module that has claimed the cell, and for the same reason given
+    // on `.renderer` below — an editor stretched to a text-height parent
+    // collapses to text height and sits floating in the middle of the row.
+    const ownsBox = claimed != null || typeof this.column.cellRenderer === 'string';
+    const hasRenderer = claimed != null || this.column.cellRenderer !== undefined;
+    // Element renderers own their box; function renderers and plain values are
+    // content and keep the cell's gutter.
+    this.toggleAttribute('data-ls-grid-renderer', ownsBox);
+
+    return html`
+      ${decorations.map((d) => (d.prefix ? html`<span class="affix">${d.prefix}</span>` : nothing))}
+      <span class=${hasRenderer ? 'renderer' : 'content'} part="cell-content">
+        ${claimed ?? this.renderContent(value, node)}
+      </span>
+      ${decorations.map((d) => (d.suffix ? html`<span class="affix">${d.suffix}</span>` : nothing))}
+    `;
+  }
+
+  private renderContent(value: unknown, node: NonNullable<RowContextValue['node']>): unknown {
     const renderer = this.column.cellRenderer;
 
     if (typeof renderer === 'string') {

@@ -5,6 +5,7 @@ import type { ResolvedColumn } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
 import type { ProjectionStage } from '../../projection/types.js';
 import type { RowNode } from '../../store/types.js';
+import '../../components/text-field.js';
 import type { GridModule, HeaderSlotContext, ModuleContext } from '../types.js';
 import {
   type ColumnFilter,
@@ -158,27 +159,15 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   // -- Header -----------------------------------------------------------------
 
+  /*
+   * Only the width. Everything else a box you type into looks like — its
+   * padding, its border, the ring, the treatment when it holds something — is
+   * the shared text field's, so the filter and the cell editor cannot drift
+   * apart in some detail nobody notices.
+   */
   static readonly styles = css`
     .ls-grid-filter-input {
       width: ${tokens.filterInputWidth};
-      min-width: 0;
-      font: inherit;
-      font-size: ${tokens.filterFontSize};
-      padding: ${tokens.filterPadding};
-      border-radius: ${tokens.radius};
-      border: 1px solid ${tokens.border};
-      background: transparent;
-      color: inherit;
-    }
-
-    /* An active filter is worth seeing at a glance across a wide monitor. */
-    .ls-grid-filter-input[data-ls-grid-active] {
-      border-color: ${tokens.focus};
-    }
-
-    .ls-grid-filter-input:focus-visible {
-      outline: ${tokens.focusWidth} solid ${tokens.focus};
-      outline-offset: -1px;
     }
   `;
 
@@ -192,18 +181,25 @@ export class FilterModule<TData = unknown> implements GridModule<
     const current = this.model[ctx.column.colId];
     const value = current && 'value' in current ? String(current.value ?? '') : '';
 
-    return html`<input
+    // `type="search"`, so it is announced as a searchbox rather than a text
+    // box. The difference is real to a reader and to anything looking for it.
+    //
+    // Clicks and keys stop here. A click on a header sorts it, and the grid's
+    // navigation would take the arrow keys out of the box the reader is typing
+    // in — neither is something the field itself can know.
+    return html`<ls-grid-text-field
       class="ls-grid-filter-input"
-      part="filter-input"
+      exportparts="field: filter-input"
+      appearance="boxed"
       type="search"
-      aria-label=${`Filter ${ctx.column.headerName}`}
-      .value=${value}
       placeholder="Filter"
-      ?data-ls-grid-active=${current !== undefined}
+      .label=${`Filter ${ctx.column.headerName}`}
+      .value=${value}
+      ?active=${current !== undefined}
       @click=${(event: Event) => event.stopPropagation()}
       @keydown=${(event: Event) => event.stopPropagation()}
-      @input=${(event: Event) => {
-        const text = (event.target as HTMLInputElement).value;
+      @ls-input=${(event: CustomEvent<string>) => {
+        const text = event.detail;
         this.setColumnFilter(
           ctx.column.colId,
           text === ''
@@ -213,7 +209,7 @@ export class FilterModule<TData = unknown> implements GridModule<
               : { type: 'text', operator: 'contains', value: text },
         );
       }}
-    />`;
+    ></ls-grid-text-field>`;
   }
 
   // -- Filtering --------------------------------------------------------------

@@ -34,7 +34,9 @@
     "./src/flow.ts",
     "./src/stack.ts",
     "./dist/modules/edit/editors.js",
-    "./src/modules/edit/editors.ts"
+    "./src/modules/edit/editors.ts",
+    "./dist/components/text-field.js",
+    "./src/components/text-field.ts"
   ],
   "publishConfig": {
     "access": "public",
