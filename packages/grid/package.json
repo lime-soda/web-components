@@ -1,6 +1,6 @@
 {
   "name": "@lime-soda/grid",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Horizontal-flow data grid web component for trading platforms. Minimal core, additive modules.",
   "keywords": [
     "grid",
