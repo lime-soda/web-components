@@ -55,6 +55,31 @@ export class RangeModule<TData = unknown> implements GridModule<TData> {
     }
 
     /*
+     * The active cell, in the range's own colours.
+     *
+     * Exactly one cell in a range is where the caret is — where typing goes and
+     * where shift-arrow measures from. Two things were making it shout. It was
+     * tinted as well as ringed, so a heavy outline sat on top of a fill; and the
+     * outline is the design system's focus colour while the range is drawn in
+     * the accent, so the caret arrived in a different hue from the block it was
+     * sitting in and read as something else entirely.
+     *
+     * So: no tint, and the ring recoloured to the accent. What is left is a
+     * heavier line in the same colour as the rectangle, which is how a
+     * spreadsheet marks its active cell — of a piece with the selection rather
+     * than competing with it.
+     *
+     * Only the colour changes. Dropping the ring would leave a focused cell with
+     * no focus indicator whenever a range happened to be drawn, and the reader
+     * who most needs to know where the caret is is the one who cannot see the
+     * tint either.
+     */
+    :host(.ls-grid-in-range[data-focused]) {
+      background: none;
+      outline-color: ${tokens.accent};
+    }
+
+    /*
      * Only the cells on an edge draw that edge, so the outline belongs to the
      * rectangle. Every cell drawing its own box gives a lattice instead.
      */
@@ -148,6 +173,11 @@ export class RangeModule<TData = unknown> implements GridModule<TData> {
     return this.getCellRange();
   }
 
+  /** A rectangle is more than one cell, so the grid says it is multiselectable. */
+  provideMultiSelection(): boolean {
+    return true;
+  }
+
   // --- decoration -----------------------------------------------------------
 
   cellDecorator(ctx: CellContext<TData>): CellDecoration | null {
@@ -161,6 +191,11 @@ export class RangeModule<TData = unknown> implements GridModule<TData> {
 
     const edges = edgesOf(range, at.row, at.column);
     return {
+      // Announced, not merely drawn. `gridcell` takes `aria-selected`, and
+      // without it a reader working through the grid is told nothing at all
+      // about a block someone has marked out — the rectangle exists only for
+      // people who can see the tint.
+      attributes: { 'aria-selected': 'true' },
       classes: [
         'ls-grid-in-range',
         ...(edges.top ? ['ls-grid-range-top'] : []),

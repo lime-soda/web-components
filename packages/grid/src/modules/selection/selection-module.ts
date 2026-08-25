@@ -256,6 +256,11 @@ export class SelectionModule<TData = unknown> implements GridModule<TData, strin
    * Declared for any module that needs to know what is selected — the clipboard
    * module, for one — so it can find the capability rather than this class.
    */
+  /** Multi mode is exactly the case `aria-multiselectable` describes. */
+  provideMultiSelection(): boolean {
+    return (this.options.mode ?? 'single') === 'multi';
+  }
+
   provideSelectedRowIds(): readonly string[] {
     return this.getSelectedRows();
   }

@@ -337,6 +337,14 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
     this.setAttribute('role', controller.registry.gridRole());
     this.setAttribute('aria-rowcount', String(controller.pipeline.projector.rows.get().length + 1));
     this.setAttribute('aria-colcount', String(controller.columns.get().length));
+    // Only when something installed can actually hold more than one selection.
+    // Announcing it on a grid that cannot is a promise to a reader that the
+    // grid then fails to keep.
+    if (controller.registry.multiSelectable()) {
+      this.setAttribute('aria-multiselectable', 'true');
+    } else {
+      this.removeAttribute('aria-multiselectable');
+    }
     // On the grid itself. It used to label the scroller, from when each
     // instance was its own grid — and a labelled div is exposed rather than
     // passed through, so it stood between the grid and its rows as a child no

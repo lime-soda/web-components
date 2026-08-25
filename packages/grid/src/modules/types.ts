@@ -23,6 +23,20 @@ export interface GridRoleProvider {
 export const providesGridRole = <T>(module: T): module is T & GridRoleProvider =>
   typeof (module as Partial<GridRoleProvider>).provideGridRole === 'function';
 
+/**
+ * A module through which more than one thing can be selected at a time.
+ *
+ * `aria-multiselectable` belongs on the grid, but only a module knows whether
+ * anything can be multiply selected — rows in multi mode, or a rectangle of
+ * cells. Declared rather than inferred, for the same reason the role is.
+ */
+export interface MultiSelectionProvider {
+  provideMultiSelection(): boolean;
+}
+
+export const providesMultiSelection = <T>(module: T): module is T & MultiSelectionProvider =>
+  typeof (module as Partial<MultiSelectionProvider>).provideMultiSelection === 'function';
+
 /** What a module is handed at init. Its whole view of the grid. */
 export interface ModuleContext<TData = unknown> {
   readonly pipeline: GridPipeline<TData>;

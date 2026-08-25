@@ -177,7 +177,68 @@ export const NothingIsSelectedToStartWith: Story = {
   },
 };
 
+// --- what it announces ------------------------------------------------------
+
+export const ASelectedCellSaysSo: Story = {
+  play: async ({ canvasElement }) => {
+    // The tint is for people who can see it. `gridcell` takes `aria-selected`,
+    // and without it a reader working through the grid is told nothing about a
+    // block someone has marked out.
+    await gridReady(canvasElement);
+    tabInto(canvasElement);
+    await pressKey('ArrowDown', { shiftKey: true });
+
+    const selected = dataRows(canvasElement).flatMap((row) =>
+      cellsOf(row).filter((cell) => cell.getAttribute('aria-selected') === 'true'),
+    );
+    await expect(selected).toHaveLength(2);
+  },
+};
+
+export const NothingSaysSelectedWithoutARange: Story = {
+  play: async ({ canvasElement }) => {
+    await gridReady(canvasElement);
+
+    const selected = dataRows(canvasElement).flatMap((row) =>
+      cellsOf(row).filter((cell) => cell.getAttribute('aria-selected') !== null),
+    );
+    await expect(selected).toHaveLength(0);
+  },
+};
+
+export const TheGridSaysMoreThanOneCanBeSelected: Story = {
+  play: async ({ canvasElement }) => {
+    // On the grid rather than the cells, and only because something installed
+    // can hold more than one selection at a time.
+    await gridReady(canvasElement);
+
+    await expect(canvasElement.querySelector('ls-grid')!.getAttribute('aria-multiselectable')).toBe(
+      'true',
+    );
+  },
+};
+
 // --- the outline ------------------------------------------------------------
+
+export const TheActiveCellIsTheOneWithoutTheTint: Story = {
+  play: async ({ canvasElement }) => {
+    // A spreadsheet leaves the caret's cell unfilled inside the tinted block, so
+    // the focus ring is not sitting on top of a fill and competing with it.
+    // Asserted as a class rather than a colour: which cell is exempt is the
+    // structure, and the colour is Chromatic's to judge.
+    await gridReady(canvasElement);
+    tabInto(canvasElement);
+    await pressKey('ArrowDown', { shiftKey: true });
+
+    const [anchor, head] = [cellAt(canvasElement, 0, 0), cellAt(canvasElement, 1, 0)];
+    // Focus follows the head, so that is the cell exempted.
+    await expect(head.hasAttribute('data-focused')).toBe(true);
+    await expect(anchor.hasAttribute('data-focused')).toBe(false);
+    // Both are in the range; only one is the active cell.
+    await expect(anchor.classList.contains('ls-grid-in-range')).toBe(true);
+    await expect(head.classList.contains('ls-grid-in-range')).toBe(true);
+  },
+};
 
 export const TheOutlineBelongsToTheRectangle: Story = {
   play: async ({ canvasElement }) => {

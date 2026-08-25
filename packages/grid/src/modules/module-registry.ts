@@ -14,7 +14,7 @@ import type {
   RowContextInfo,
   RowDecoration,
 } from './types.js';
-import { providesGridRole } from './types.js';
+import { providesGridRole, providesMultiSelection } from './types.js';
 import type { GridRole } from './types.js';
 
 export interface ModuleRegistryOptions<TData> {
@@ -135,6 +135,13 @@ export class ModuleRegistry<TData = unknown> {
 
   cellDecorations(ctx: CellContext<TData>): readonly CellDecoration[] {
     return this.collect((module) => module.cellDecorator?.(ctx));
+  }
+
+  /** Whether anything installed lets more than one thing be selected at once. */
+  multiSelectable(): boolean {
+    return this.orderedModules()
+      .filter(providesMultiSelection)
+      .some((module) => module.provideMultiSelection());
   }
 
   /** The content a module has taken over, if any. First claim wins. */
