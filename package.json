@@ -41,6 +41,6 @@
     "@lime-soda/tsconfig": "workspace:*",
     "turbo": "^2.10.9",
     "typescript": "~7.0.0",
-    "vite-plus": "^0.2.7"
+    "vite-plus": "^0.3.0"
   }
 }
