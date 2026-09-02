@@ -23,15 +23,15 @@
     "@lime-soda/button": "workspace:*",
     "@lime-soda/grid": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
-    "@storybook/addon-a11y": "^10.0.0",
-    "@storybook/addon-docs": "^10.0.0",
-    "@storybook/addon-vitest": "^10.0.0",
-    "@storybook/web-components-vite": "^10.0.0",
-    "chromatic": "^18.0.0",
+    "@storybook/addon-a11y": "^10.5.10",
+    "@storybook/addon-docs": "^10.5.10",
+    "@storybook/addon-vitest": "^10.5.10",
+    "@storybook/web-components-vite": "^10.5.10",
+    "chromatic": "^18.7.2",
     "lit": "^3.3.3",
     "playwright": "^1.54.2",
-    "storybook": "^10.0.0",
+    "storybook": "^10.5.10",
     "vite-tsconfig-paths": "^6.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "4.1.10"
   }
 }

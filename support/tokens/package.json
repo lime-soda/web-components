@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "glob": "^13.0.0",
-    "style-dictionary": "^5.0.1"
+    "style-dictionary": "^5.5.2"
   },
   "optionalDependencies": {
     "lit": "^3.3.3"
