@@ -152,7 +152,7 @@ importers:
     dependencies:
       '@chromatic-com/storybook':
         specifier: ^5.0.0
-        version: 5.3.0(storybook@10.6.0(@types/react@19.1.8)(prettier@3.9.6)(react@19.2.8)(vite-plus@0.2.9(@types/node@25.9.3)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.2)(tsx@4.23.13)(typescript@5.9.3)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))(yaml@2.9.0)))
+        version: 5.3.1(storybook@10.6.0(@types/react@19.1.8)(prettier@3.9.6)(react@19.2.8)(vite-plus@0.2.9(@types/node@25.9.3)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.2)(tsx@4.23.13)(typescript@5.9.3)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))(yaml@2.9.0)))
       '@lime-soda/button':
         specifier: workspace:*
         version: link:../../packages/button
@@ -351,11 +351,11 @@ packages:
     resolution: {integrity: sha512-q/ThtP9gcnEP6xlv7LrY26C2mHqdGBti/MmOVngt/M/oIGYkssmQGxPK9WzBNt2juVcH/vml2WQ+ra8LXYOTaA==}
     engines: {node: ^22.11 || ^24 || >=26}
 
-  '@chromatic-com/storybook@5.3.0':
-    resolution: {integrity: sha512-gMAfVYJnF/tjdY8C3Q54KYz/low2NFjPIZMpCqSFuMUiTJ2DNWCTb7mFhuuzZ1iduWFDhewlJyilFmvKcEDYRA==}
+  '@chromatic-com/storybook@5.3.1':
+    resolution: {integrity: sha512-eUcbR9CddVmKAnjOiBCOz5rNdT096jiXIjR+qaWbUuTlgRdpc9yjTrk4/hiPAAykZrPYVNJN11p6rJgW9KNpKg==}
     engines: {node: '>=20.0.0', yarn: '>=1.22.18'}
     peerDependencies:
-      storybook: ^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0 || ^10.5.0-0 || ^10.6.0-0
+      storybook: ^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0 || ^10.5.0-0 || ^10.6.0-0 || ^11.0.0-0
 
   '@clack/core@1.4.3':
     resolution: {integrity: sha512-/kr3UWNtdJfxZtPgDqUOmG2pvwlmcLGheex5yiZKdwbzZJxhV+HMNR9QNmyY5cGwTNV6LrR7Jtp+KjhUAP1qBQ==}
@@ -2785,8 +2785,8 @@ packages:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
     engines: {node: '>=8'}
 
-  ansi-regex@6.2.2:
-    resolution: {integrity: sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg==}
+  ansi-regex@6.3.0:
+    resolution: {integrity: sha512-WpDfL7NO6j7tH88IDBNVdUJxDh9nmCteAVW9dsep846XdwF4naCBK+/tGLX3KJgcpgMRXCFlTM2hKGoK9FsdrQ==}
     engines: {node: '>=12'}
 
   ansi-styles@4.3.0:
@@ -4779,7 +4779,7 @@ snapshots:
       '@changesets/types': 7.0.0
       human-id: 4.2.1
 
-  '@chromatic-com/storybook@5.3.0(storybook@10.6.0(@types/react@19.1.8)(prettier@3.9.6)(react@19.2.8)(vite-plus@0.2.9(@types/node@25.9.3)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.2)(tsx@4.23.13)(typescript@5.9.3)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))(yaml@2.9.0)))':
+  '@chromatic-com/storybook@5.3.1(storybook@10.6.0(@types/react@19.1.8)(prettier@3.9.6)(react@19.2.8)(vite-plus@0.2.9(@types/node@25.9.3)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.2)(tsx@4.23.13)(typescript@5.9.3)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))(yaml@2.9.0)))':
     dependencies:
       '@neoconfetti/react': 1.0.0
       chromatic: 18.7.2
@@ -6511,7 +6511,7 @@ snapshots:
 
   ansi-regex@5.0.1: {}
 
-  ansi-regex@6.2.2: {}
+  ansi-regex@6.3.0: {}
 
   ansi-styles@4.3.0:
     dependencies:
@@ -8111,7 +8111,7 @@ snapshots:
 
   strip-ansi@7.2.0:
     dependencies:
-      ansi-regex: 6.2.2
+      ansi-regex: 6.3.0
 
   strip-indent@3.0.0:
     dependencies:
