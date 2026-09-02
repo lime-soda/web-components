@@ -45,12 +45,12 @@
   "devDependencies": {
     "@lime-soda/build": "workspace:*",
     "@lime-soda/tsconfig": "workspace:*",
-    "@vitest/browser-playwright": "4.1.10",
+    "@vitest/browser-playwright": "4.1.11",
     "axe-core": "^4.13.0",
     "lit": "^3.3.3",
     "playwright": "^1.56.1",
     "typescript": "~7.0.0",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "customElements": "custom-elements.json",
   "publishConfig": {
