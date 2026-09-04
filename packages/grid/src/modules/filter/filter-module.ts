@@ -16,15 +16,28 @@ import {
 
 export interface FilterModuleOptions {
   /**
-   * Show a filter box inside each filterable column header. Off by default.
+   * Show a filter box inside each filterable column header, beside its label.
    *
    * A trading grid's columns are often 80-100px, and an input crammed beside the
    * label crushes it to an initial — the header stops saying what the column is,
-   * which costs more than the filter gains. Drive filters from the api instead,
-   * or turn this on for grids with wide columns. A dedicated floating-filter row
-   * is the better answer and is not built yet.
+   * which costs more than the filter gains. Prefer `floatingFilter`, which gives
+   * the boxes a strip of their own and leaves the headings alone.
    */
   headerUi?: boolean;
+  /**
+   * Show a strip of filter boxes beneath the column headings. Off by default.
+   *
+   * The answer to the problem `headerUi` has: a column of any width can hold a
+   * filter box when the box is not competing with the heading for the same
+   * line. Costs a row's height of vertical space, which is why it is opt-in on
+   * a surface whose currency is rows on screen.
+   *
+   * The two are independent, and turning both on puts a box in each place. That
+   * is a configuration mistake rather than something to forbid.
+   */
+  floatingFilter?: boolean;
+  /** Height of the floating filter strip, in px. */
+  floatingFilterHeight?: number;
 }
 
 /**
@@ -34,6 +47,9 @@ export interface FilterModuleOptions {
  * hierarchy. When the tree module is installed it restores the ancestors of
  * surviving rows, which is what keeps a deep match reachable rather than orphaned.
  */
+/** Tall enough for the boxed field and its focus ring, and no taller. */
+const DEFAULT_FLOATING_HEIGHT = 30;
+
 export class FilterModule<TData = unknown> implements GridModule<
   TData,
   { model: FilterModel; quickFilter: string }
@@ -173,8 +189,37 @@ export class FilterModule<TData = unknown> implements GridModule<
 
   readonly styles = FilterModule.styles;
 
+  /**
+   * How tall the strip is, or zero when it is off.
+   *
+   * Declared rather than measured because the layout engine needs it before
+   * anything is drawn — it decides how many rows fit an instance from the
+   * viewport height less the header.
+   */
+  provideHeaderBandHeight(): number {
+    if ((this.options.floatingFilter ?? false) === false) return 0;
+    return this.options.floatingFilterHeight ?? DEFAULT_FLOATING_HEIGHT;
+  }
+
+  /** The strip's box for one column. Same control as the header's, wider. */
+  renderHeaderBand(ctx: HeaderSlotContext<TData>) {
+    if ((this.options.floatingFilter ?? false) === false) return null;
+    return this.filterField(ctx, 'floating');
+  }
+
   headerSlot(ctx: HeaderSlotContext<TData>) {
     if ((this.options.headerUi ?? false) === false) return null;
+    return this.filterField(ctx, 'header');
+  }
+
+  /**
+   * One filter box, wherever it is going.
+   *
+   * The two placements differ only in width — in the strip a box has the column
+   * to itself, in a heading it is sharing. Everything else about them has to
+   * stay identical, so there is one of these rather than two that drift.
+   */
+  private filterField(ctx: HeaderSlotContext<TData>, placement: 'header' | 'floating') {
     if (ctx.column.filterable === false) return null;
     if (!ctx.column.field && !ctx.column.valueGetter) return null;
 
@@ -188,7 +233,7 @@ export class FilterModule<TData = unknown> implements GridModule<
     // navigation would take the arrow keys out of the box the reader is typing
     // in — neither is something the field itself can know.
     return html`<ls-grid-text-field
-      class="ls-grid-filter-input"
+      class=${placement === 'floating' ? 'ls-grid-floating-filter' : 'ls-grid-filter-input'}
       exportparts="field: filter-input"
       appearance="boxed"
       type="search"

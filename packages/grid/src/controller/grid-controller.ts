@@ -136,7 +136,11 @@ export class GridController<TData = unknown> {
     const options = this.optionsSignal.get();
     const container = this.containerSignal.get();
     const rowHeight = options.rowHeight ?? DEFAULTS.rowHeight;
-    const headerHeight = options.headerHeight ?? DEFAULTS.headerHeight;
+    // Plus whatever a module has put beneath the headings. The engine sizes
+    // instances from this, so a band the layout did not know about would push
+    // the last row of every instance below the fold.
+    const headerHeight =
+      (options.headerHeight ?? DEFAULTS.headerHeight) + this.registry.headerBandHeight();
 
     const metrics: ViewportMetrics = {
       width: container.width,

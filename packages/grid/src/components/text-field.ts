@@ -74,7 +74,14 @@ export class TextField extends LitElement {
       padding: ${tokens.filterPadding};
       border: 1px solid ${tokens.border};
       border-radius: ${tokens.radius};
-      background: transparent;
+      /*
+       * A well, not a transparent patch. Transparent was survivable in a header
+       * cell, where the box sat on the same background as everything else; in a
+       * band of its own the border resolves to the very colour behind it in dark
+       * mode, and the box disappears entirely. Filling it means the control
+       * reads as somewhere to type wherever it is put.
+       */
+      background: ${tokens.background};
       font-size: ${tokens.filterFontSize};
     }
 

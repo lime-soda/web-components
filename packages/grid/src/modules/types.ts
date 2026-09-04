@@ -37,6 +37,26 @@ export interface MultiSelectionProvider {
 export const providesMultiSelection = <T>(module: T): module is T & MultiSelectionProvider =>
   typeof (module as Partial<MultiSelectionProvider>).provideMultiSelection === 'function';
 
+/**
+ * A module that adds a band of its own beneath the column headings.
+ *
+ * The height is declared rather than measured because the layout engine needs
+ * it before anything is drawn: it decides how many rows fit an instance from
+ * the viewport height less the header, so a band that appeared only in the DOM
+ * would push the last row of every instance out of view.
+ *
+ * Returning 0 is how a module that can contribute a band says it is not
+ * contributing one now.
+ */
+export interface HeaderBandProvider<TData = unknown> {
+  provideHeaderBandHeight(): number;
+  /** The band's content for one column. Null leaves the cell empty. */
+  renderHeaderBand(ctx: HeaderSlotContext<TData>): TemplateResult | null;
+}
+
+export const providesHeaderBand = <T, TData>(module: T): module is T & HeaderBandProvider<TData> =>
+  typeof (module as Partial<HeaderBandProvider<TData>>).provideHeaderBandHeight === 'function';
+
 /** What a module is handed at init. Its whole view of the grid. */
 export interface ModuleContext<TData = unknown> {
   readonly pipeline: GridPipeline<TData>;

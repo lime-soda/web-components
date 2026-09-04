@@ -378,10 +378,20 @@ export class Grid<TData = unknown> extends SignalWatcher(LitElement) {
     if (!controller) return {};
 
     const viewport = controller.pipeline.viewport;
+    const bandHeight = controller.registry.headerBandHeight();
     return {
       ...themeToCustomProperties(controller.options.theme ?? {}),
       '--grid-row-height': `${viewport.rowHeight}px`,
-      '--grid-header-height': `${viewport.headerHeight}px`,
+      /*
+       * The heading row alone, not the whole header.
+       *
+       * `viewport.headerHeight` is the sum — headings plus any band a module
+       * added — because that is what the layout engine needs in order to know
+       * how many rows fit. The heading row itself must not grow by the band's
+       * height as well, or the header is charged for it twice.
+       */
+      '--grid-header-height': `${viewport.headerHeight - bandHeight}px`,
+      '--grid-header-band-height': `${bandHeight}px`,
       '--grid-instance-gap': `${viewport.instanceGap}px`,
       '--grid-scroll-left': `${this.bodyScrollLeft}px`,
       '--grid-scrollbar-width': `${this.scrollbarWidth}px`,

@@ -14,7 +14,7 @@ import type {
   RowContextInfo,
   RowDecoration,
 } from './types.js';
-import { providesGridRole, providesMultiSelection } from './types.js';
+import { providesGridRole, providesHeaderBand, providesMultiSelection } from './types.js';
 import type { GridRole } from './types.js';
 
 export interface ModuleRegistryOptions<TData> {
@@ -135,6 +135,27 @@ export class ModuleRegistry<TData = unknown> {
 
   cellDecorations(ctx: CellContext<TData>): readonly CellDecoration[] {
     return this.collect((module) => module.cellDecorator?.(ctx));
+  }
+
+  /**
+   * How tall the band beneath the headings is, in px. Zero when there is none.
+   *
+   * The tallest wins rather than the sum: two modules each wanting a band is
+   * not a stack of bands, it is two things sharing one strip — and a sum would
+   * silently double the header the moment a second module offered one.
+   */
+  headerBandHeight(): number {
+    return this.orderedModules()
+      .filter(providesHeaderBand<GridModule<TData>, TData>)
+      .reduce((tallest, module) => Math.max(tallest, module.provideHeaderBandHeight()), 0);
+  }
+
+  /** What each module puts in the band for a column, in registration order. */
+  headerBandContent(ctx: HeaderSlotContext<TData>): readonly TemplateResult[] {
+    return this.orderedModules()
+      .filter(providesHeaderBand<GridModule<TData>, TData>)
+      .map((module) => module.renderHeaderBand(ctx))
+      .filter((content): content is TemplateResult => content !== null);
   }
 
   /** Whether anything installed lets more than one thing be selected at once. */

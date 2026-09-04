@@ -5,6 +5,7 @@ import { LitElement, css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { adoptModuleStyles } from '../theme/adopt-module-styles.js';
 import { gridContext, instanceContext } from '../context/index.js';
 import type { GridController } from '../controller/grid-controller.js';
 import type { DisplayRow, LayoutInstance } from '../layout/types.js';
@@ -27,6 +28,7 @@ export type InstanceParts = 'full' | 'header' | 'rows';
  * @csspart instance-grid - An instance's grid container, which owns the column tracks
  * @csspart row - One row
  * @csspart header-cell - One column heading
+ * @csspart header-band-cell - One cell of the band beneath the headings
  *
  * @customElement ls-grid-instance
  */
@@ -79,7 +81,12 @@ export class GridInstance extends SignalWatcher(LitElement) {
     .grid {
       display: grid;
       grid-template-columns: var(--grid-column-template);
-      grid-template-rows: ${tokens.headerHeight};
+      /*
+       * The headings, then the module band. The band track is zero when nobody
+       * asked for one, which costs nothing and saves the template having to be
+       * written two ways.
+       */
+      grid-template-rows: ${tokens.headerHeight} var(--grid-header-band-height, 0px);
       grid-auto-rows: ${tokens.rowHeight};
       width: 100%;
     }
@@ -94,6 +101,46 @@ export class GridInstance extends SignalWatcher(LitElement) {
       display: grid;
       grid-column: 1 / -1;
       grid-template-columns: subgrid;
+    }
+
+    /*
+     * A module's own strip beneath the headings — a filter box per column.
+     *
+     * Its height is declared by the module and reaches the layout engine, so
+     * the rows below it are sized knowing this is here. Drawn as a row for the
+     * same reason the header is: it has to sit on the instance's column tracks
+     * or nothing lines up.
+     */
+    .header-band {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+      height: var(--grid-header-band-height, 0);
+      background: ${tokens.headerBackground};
+      border-bottom: 1px solid ${tokens.border};
+    }
+
+    .header-band-cell {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      padding: 0 ${tokens.cellPaddingX};
+      box-sizing: border-box;
+      border-right: 1px solid ${tokens.borderSubtle};
+    }
+
+    .header-band-cell:last-of-type {
+      border-right: none;
+    }
+
+    /*
+     * A band cell gives its contents the whole column. The module supplies a
+     * control and should not have to know how wide the column is, or restate
+     * the layout rule in its own stylesheet.
+     */
+    .header-band-cell > * {
+      flex: 1;
+      min-width: 0;
     }
   `;
 
@@ -127,6 +174,13 @@ export class GridInstance extends SignalWatcher(LitElement) {
 
   override willUpdate(): void {
     this.providedInstance = this.instance;
+  }
+
+  override firstUpdated(): void {
+    // The band is module markup rendered in this root, so a module's styles
+    // have to reach here as they already do for cells and header cells.
+    // Without this the band's contents were styled by nothing at all.
+    adoptModuleStyles(this.shadowRoot, this.grid?.registry.moduleStyles() ?? []);
   }
 
   override connectedCallback(): void {
@@ -220,6 +274,7 @@ export class GridInstance extends SignalWatcher(LitElement) {
     // Modules render into cells and header cells, so their parts start as deep
     // as anything core owns and have to be forwarded the same distance.
     const moduleParts = grid.registry.moduleParts();
+    const bandHeight = grid.registry.headerBandHeight();
 
     return html`
       <div
@@ -257,6 +312,23 @@ export class GridInstance extends SignalWatcher(LitElement) {
                       exportparts=${forwardedParts(HEADER_CELL_PARTS, moduleParts)}
                       .column=${column}
                     ></ls-grid-header-cell>`,
+                )}
+              </div>`
+            : nothing
+        }
+        ${
+          showHeader && bandHeight > 0
+            ? html`<div class="header-band" role="row" aria-label="Column filters">
+                ${repeat(
+                  columns,
+                  (column) => column.colId,
+                  (column) => html`<div
+                    class="header-band-cell"
+                    part="header-band-cell"
+                    role="gridcell"
+                  >
+                    ${this.grid?.registry.headerBandContent({ column })}
+                  </div>`,
                 )}
               </div>`
             : nothing

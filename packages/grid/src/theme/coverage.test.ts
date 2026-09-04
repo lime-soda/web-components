@@ -47,6 +47,10 @@ const INTERNAL = new Set([
   // body sideways and reserve the gutter it occupies.
   '--grid-scroll-left',
   '--grid-scrollbar-width',
+  // Height of the band a module adds beneath the headings. The module declares
+  // it — a consumer wanting it taller sets the module's own option, since the
+  // layout engine has to be told the same number.
+  '--grid-header-band-height',
 ]);
 
 const nameToProperty = new Map<string, string>(
