@@ -3,6 +3,7 @@ import { expect, userEvent } from 'storybook/test';
 import '@lime-soda/grid';
 import '@lime-soda/grid/layouts';
 import { EditModule, type EditModuleOptions } from '@lime-soda/grid/edit';
+import { RangeModule } from '@lime-soda/grid/range';
 import {
   activeElement,
   cellText,
@@ -314,5 +315,79 @@ export const DoubleClickCanBeLeftUnbound: Story = {
     await userEvent.dblClick(cellAt(canvasElement, 0, 0));
 
     await expect(noEditor(canvasElement)).toBe(true);
+  },
+};
+
+// --- filling down -----------------------------------------------------------
+
+/**
+ * Ctrl-D, which is the keyboard sibling of pasting a single value into a range.
+ *
+ * The arithmetic — which row is the source, which cells are written, what
+ * happens at the top of the grid — is covered without a browser. What only a
+ * story shows is that the press arrives: Ctrl-D competes with the browser's own
+ * bookmark binding, and the grid has to claim it without a keyboard module
+ * having eaten it first.
+ */
+const fillable = () =>
+  mountGrid({
+    data: instruments(5),
+    width: 500,
+    height: 236,
+    options: {
+      layout: 'stack',
+      columns: [
+        { field: 'name', headerName: 'Instrument', width: 240, editable: true },
+        { field: 'price', headerName: 'Price', width: 120, valueType: 'number', editable: true },
+      ],
+      modules: [new EditModule<Instrument>(), new RangeModule<Instrument>()],
+    },
+  });
+
+export const CtrlDFillsTheRangeDown: Story = {
+  render: fillable,
+  play: async ({ canvasElement }) => {
+    await gridReady(canvasElement);
+    tabInto(canvasElement);
+    const source = cellText(cellAt(canvasElement, 0, 0));
+    // A range over the first three rows of the instrument column.
+    await pressKey('ArrowDown', { shiftKey: true });
+    await pressKey('ArrowDown', { shiftKey: true });
+
+    await expect(await pressKey('d', { ctrlKey: true })).toBe(true);
+    await gridReady(canvasElement);
+
+    await expect(cellText(cellAt(canvasElement, 1, 0))).toBe(source);
+    await expect(cellText(cellAt(canvasElement, 2, 0))).toBe(source);
+  },
+};
+
+export const CtrlDFillsTheCellBelowWithNoRange: Story = {
+  render: fillable,
+  play: async ({ canvasElement }) => {
+    // What Ctrl-D means to anyone arriving from a spreadsheet: bring down what
+    // is above. No rectangle needed.
+    await gridReady(canvasElement);
+    tabInto(canvasElement);
+    const source = cellText(cellAt(canvasElement, 0, 0));
+    await pressKey('ArrowDown');
+
+    await pressKey('d', { ctrlKey: true });
+    await gridReady(canvasElement);
+
+    await expect(cellText(cellAt(canvasElement, 1, 0))).toBe(source);
+  },
+};
+
+export const CtrlDIsLeftToTheBrowserWithNothingToFill: Story = {
+  render: fillable,
+  play: async ({ canvasElement }) => {
+    // On the first row there is nothing above to bring down. Claiming the key
+    // anyway would take the browser's own binding from a reader and give them
+    // nothing in return.
+    await gridReady(canvasElement);
+    tabInto(canvasElement);
+
+    await expect(await pressKey('d', { ctrlKey: true })).toBe(false);
   },
 };

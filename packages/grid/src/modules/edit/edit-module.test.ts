@@ -3,7 +3,9 @@ import { resolveColumns } from '../../columns/resolve-columns.js';
 import type { ColumnDefs } from '../../columns/types.js';
 import { GridPipeline } from '../../pipeline/grid-pipeline.js';
 import { ModuleRegistry } from '../module-registry.js';
+import type { GridModule } from '../types.js';
 import { EditModule, type EditModuleOptions } from './edit-module.js';
+import { RangeModule } from '../range/range-module.js';
 
 /**
  * What an edit decides, without a browser.
@@ -24,6 +26,9 @@ interface Bond {
 const data: Bond[] = [
   { id: 'a', instrument: 'UKT 4% 2030', price: 101.25, desk: { trader: 'RM' } },
   { id: 'b', instrument: 'UKT 1% 2041', price: 98.5, desk: { trader: 'JP' } },
+  // A third, because filling down needs somewhere to fill to and two rows
+  // cannot tell a fill from a copy of one row into one other.
+  { id: 'c', instrument: 'DBR 2% 2032', price: 100.125, desk: { trader: 'KL' } },
 ];
 
 const columns: ColumnDefs<Bond> = [
@@ -33,7 +38,11 @@ const columns: ColumnDefs<Bond> = [
   { field: 'id', headerName: 'Id' },
 ];
 
-const setup = (options: EditModuleOptions = {}, defs: ColumnDefs<Bond> = columns) => {
+const setup = (
+  options: EditModuleOptions = {},
+  defs: ColumnDefs<Bond> = columns,
+  extra: GridModule<Bond>[] = [],
+) => {
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
 
@@ -44,12 +53,13 @@ const setup = (options: EditModuleOptions = {}, defs: ColumnDefs<Bond> = columns
     getColumns: () => resolveColumns<Bond>(defs),
     dispatch: (type, detail) => events.push({ type, detail }),
   });
+  for (const module of extra) registry.register(module);
   registry.register(edit);
   registry.start();
   pipeline.projector.rows.get();
 
   const rowOf = (id: string) => pipeline.store.getRowNode(id)!.data;
-  return { edit, pipeline, events, rowOf };
+  return { edit, pipeline, events, rowOf, registry };
 };
 
 /** Opens an edit, reports a value the way an editor would, and closes it. */
@@ -423,5 +433,142 @@ describe('EditModule pasting', () => {
     paste(edit, [{ rowId: 'a', colId: 'initials', text: 'ZZ' }]);
 
     expect(rowOf('a').desk.trader).toBe('ZZ');
+  });
+});
+
+/**
+ * Filling down.
+ *
+ * A range module is registered because a fill over a rectangle is the main
+ * case, and the two find each other through a declared capability that a mock
+ * on either side would assume works.
+ */
+describe('EditModule filling down', () => {
+  const withRange = (defs: ColumnDefs<Bond> = columns) => {
+    const range = new RangeModule<Bond>();
+    const base = setup({}, defs, [range]);
+    const select = (rows: [number, number], cols: [number, number]) =>
+      range.setCellRange({
+        anchorRow: rows[0],
+        anchorColumn: cols[0],
+        headRow: rows[1],
+        headColumn: cols[1],
+      });
+    return { ...base, range, select };
+  };
+
+  it('copies the top row of the range down through the rest', () => {
+    const { edit, select, rowOf } = withRange();
+    select([0, 2], [0, 0]);
+
+    expect(edit.fillDown()).toBe(2);
+
+    expect(rowOf('b').instrument).toBe('UKT 4% 2030');
+    expect(rowOf('c').instrument).toBe('UKT 4% 2030');
+  });
+
+  it('leaves the source row alone', () => {
+    const { edit, select, rowOf } = withRange();
+    select([0, 2], [0, 0]);
+
+    edit.fillDown();
+
+    expect(rowOf('a').instrument).toBe('UKT 4% 2030');
+  });
+
+  it('fills every column the range covers', () => {
+    const { edit, select, rowOf } = withRange();
+    select([0, 1], [0, 1]);
+
+    edit.fillDown();
+
+    expect(rowOf('b').instrument).toBe('UKT 4% 2030');
+    expect(rowOf('b').price).toBe(101.25);
+  });
+
+  it('carries the value rather than a formatted copy of it', () => {
+    // A fill is not a round trip through the clipboard, so a number stays a
+    // number and never becomes the text of one.
+    const { edit, select, rowOf } = withRange();
+    select([0, 1], [1, 1]);
+
+    edit.fillDown();
+
+    expect(rowOf('b').price).toBe(101.25);
+    expect(typeof rowOf('b').price).toBe('number');
+  });
+
+  it('reads every source before writing anything', () => {
+    // Otherwise each row fills from the row above as already filled, and the
+    // top value cascades through by accident rather than by design. Here that
+    // would be indistinguishable — so the check is that the second row took the
+    // first's original value, not a value that had been written mid-fill.
+    const { edit, select, rowOf } = withRange();
+    select([0, 2], [1, 1]);
+
+    edit.fillDown();
+
+    expect([rowOf('a').price, rowOf('b').price, rowOf('c').price]).toEqual([
+      101.25, 101.25, 101.25,
+    ]);
+  });
+
+  it('skips a column that will not take an edit', () => {
+    const { edit, select, rowOf } = withRange();
+    // The id column is not editable; the instrument beside it is.
+    select([0, 1], [0, 3]);
+
+    edit.fillDown();
+
+    expect(rowOf('b').id).toBe('b');
+    expect(rowOf('b').instrument).toBe('UKT 4% 2030');
+  });
+
+  it('has nothing to do with a single-row range', () => {
+    const { edit, select } = withRange();
+    select([1, 1], [0, 0]);
+    // With focus unset there is no cell to fill from the row above either.
+
+    expect(edit.fillDown()).toBe(0);
+  });
+
+  it('fills the focused cell from the row above when no range is drawn', () => {
+    // What Ctrl-D means to anyone arriving from a spreadsheet.
+    const { edit, pipeline, registry, rowOf } = setup();
+    const rows = pipeline.projector.rows.get();
+    registry.focus.focus({
+      instanceId: 'i',
+      rowKey: rows[1]!.id,
+      colId: 'instrument',
+      section: 'body',
+    });
+
+    expect(edit.fillDown()).toBe(1);
+    expect(rowOf('b').instrument).toBe('UKT 4% 2030');
+  });
+
+  it('has nothing above the first row', () => {
+    const { edit, pipeline, registry } = setup();
+    const rows = pipeline.projector.rows.get();
+    registry.focus.focus({
+      instanceId: 'i',
+      rowKey: rows[0]!.id,
+      colId: 'instrument',
+      section: 'body',
+    });
+
+    expect(edit.fillDown()).toBe(0);
+  });
+
+  it('writes the whole fill as one transaction', () => {
+    // A fill is one action to the reader. Per-cell transactions would re-run
+    // the projection for each and wake a listener once per cell.
+    const { edit, select, events } = withRange();
+    select([0, 2], [0, 0]);
+
+    edit.fillDown();
+
+    expect(events.filter((e) => e.type === 'ls-grid-data-changed')).toHaveLength(0);
+    expect(events.filter((e) => e.type === 'ls-grid-cell-value-changed')).toHaveLength(2);
   });
 });

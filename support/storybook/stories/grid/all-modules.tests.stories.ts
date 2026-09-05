@@ -10,6 +10,8 @@ import { TreeSelectionModule } from '@lime-soda/grid/selection/tree';
 import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
 import { RangeModule } from '@lime-soda/grid/range';
+import { EditModule } from '@lime-soda/grid/edit';
+import { ClipboardModule } from '@lime-soda/grid/clipboard';
 import type { Grid } from '@lime-soda/grid';
 import {
   cellText,
@@ -49,6 +51,13 @@ const everything = () => [
   new CellFlashModule<Instrument>(),
   new KeyboardModule<Instrument>(),
   new RangeModule<Instrument>(),
+  // Editing and the clipboard were missing from "every module at once", which
+  // is the one fixture whose job is to find collisions. Both bind keys.
+  // Editable, or there is nothing for Ctrl-D to write and the key is correctly
+  // declined — which would make the collision test below pass for the wrong
+  // reason.
+  new EditModule<Instrument>({ editable: true }),
+  new ClipboardModule<Instrument>({ pasteOnKeyboard: true }),
 ];
 
 const meta: Meta = {
@@ -227,6 +236,36 @@ export const APlainArrowNavigatesAndDropsTheRange: Story = {
     await expect(grid.api.getCellRange()).toBeNull();
     // ...and the arrow still did its own job.
     await expect(activeElement()?.tagName).toBe('LS-GRID-CELL');
+  },
+};
+
+export const CtrlDReachesTheEditModule: Story = {
+  play: async ({ canvasElement }) => {
+    // Ctrl-D competes with the browser's bookmark binding and, more to the
+    // point here, with every other module that claims a key first. The range
+    // and keyboard collision that shipped was exactly this shape.
+    await gridReady(canvasElement);
+    const grid = canvasElement.querySelector('ls-grid') as Grid<Instrument>;
+    cellsOf(dataRows(canvasElement)[1]!)[1]!.focus();
+    await pressKey('ArrowDown', { shiftKey: true });
+
+    const source = cellText(cellsOf(dataRows(canvasElement)[1]!)[1]!);
+    await expect(await pressKey('d', { ctrlKey: true })).toBe(true);
+    await gridReady(canvasElement);
+
+    // The row below took the row above's value, so the press reached the module
+    // rather than merely being swallowed by one.
+    await expect(cellText(cellsOf(dataRows(canvasElement)[2]!)[1]!)).toBe(source);
+    await expect(grid.api.getCellRange()).not.toBeNull();
+  },
+};
+
+export const CtrlVReachesTheClipboardModule: Story = {
+  play: async ({ canvasElement }) => {
+    await gridReady(canvasElement);
+    cellsOf(dataRows(canvasElement)[1]!)[1]!.focus();
+
+    await expect(await pressKey('v', { ctrlKey: true })).toBe(true);
   },
 };
 

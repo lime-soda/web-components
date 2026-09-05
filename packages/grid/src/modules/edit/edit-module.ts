@@ -42,6 +42,19 @@ export const EDIT_EVENTS = {
   VALUE_CHANGED: 'ls-grid-cell-value-changed',
 } as const;
 
+/**
+ * A module that can say which cells are in the selected rectangle.
+ *
+ * Declared rather than imported, as the clipboard declares it too: a fill works
+ * without a range module installed, on the focused cell alone.
+ */
+interface CellRangeProvider {
+  provideCellRange(): { rowIds: readonly string[]; colIds: readonly string[] } | null;
+}
+
+const providesCellRange = <T>(module: T): module is T & CellRangeProvider =>
+  typeof (module as Partial<CellRangeProvider>).provideCellRange === 'function';
+
 /** One cell of a paste: where it goes, and the text that landed there. */
 export interface PastedCell {
   readonly rowId: string;
@@ -78,6 +91,14 @@ export interface EditModuleOptions {
    * seeds the editor with it. On by default, as in every spreadsheet.
    */
   readonly editOnTyping?: boolean;
+  /**
+   * Whether Ctrl-D (Cmd-D) fills down. On by default.
+   *
+   * It only ever writes where an edit was already allowed, so unlike pasting it
+   * opens nothing a column had not already offered. Off is for a grid that
+   * wants the browser's own binding left alone.
+   */
+  readonly fillDownOnKeyboard?: boolean;
 }
 
 /** The editor a value type gets when its column does not name one. */
@@ -244,6 +265,17 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
   onKeyDown(event: KeyboardEvent): boolean {
     if (this.editing) return this.handleKeyWhileEditing(event);
 
+    // Ctrl-D fills down, as it does in a spreadsheet. Claimed only when it does
+    // something: the browser's own binding for it is the bookmark dialog, and
+    // taking that from a reader whose grid has nothing to fill would be rude.
+    if (
+      (event.key === 'd' || event.key === 'D') &&
+      (event.ctrlKey || event.metaKey) &&
+      (this.options.fillDownOnKeyboard ?? true)
+    ) {
+      return this.fillDown() > 0;
+    }
+
     const position = this.ctx?.focus.focused.get();
     if (!position || position.section !== 'body') return false;
     const rowId = this.rowIdOf(position.rowKey);
@@ -290,6 +322,7 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
       startEditingCell: (rowId: string, colId: string) => this.startEditing(rowId, colId),
       stopEditing: (commit = true) => this.stopEditing(commit),
       getEditingCell: () => this.getEditingCell(),
+      fillDown: () => this.fillDown(),
     };
   }
 
@@ -313,6 +346,97 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
    * what a spreadsheet does.
    */
   pasteCells(cells: readonly PastedCell[]): number {
+    // Text arrives; the column decides what it means. Everything after that is
+    // the same as any other multi-cell write.
+    return this.writeCells(
+      cells.map((cell) => ({
+        rowId: cell.rowId,
+        colId: cell.colId,
+        value: (column: ResolvedColumn<TData>) => coerce(cell.text, column.valueType),
+      })),
+    );
+  }
+
+  /**
+   * Copies the top row of the cell range down through the rest of it.
+   *
+   * With no range, the focused cell takes the value from the row above — which
+   * is what Ctrl-D means to anyone arriving from a spreadsheet, and the two are
+   * the same idea: bring down what is above.
+   *
+   * Values rather than text. A fill is not a round trip through the clipboard,
+   * so nothing is formatted and nothing needs parsing back — which also means a
+   * column whose value is an object survives being filled.
+   */
+  fillDown(): number {
+    const plan = this.fillPlan();
+    if (!plan) return 0;
+
+    const store = this.ctx?.pipeline.store;
+    if (!store) return 0;
+
+    // Every source is read before anything is written, or each row would fill
+    // from the row above as already filled and the top value would cascade
+    // through by accident rather than by design.
+    const sources = new Map<string, unknown>();
+    for (const colId of plan.colIds) {
+      const column = this.columnById(colId);
+      const node = store.getRowNode(plan.sourceRowId);
+      if (!column || !node) continue;
+      sources.set(colId, getCellValue(column, node));
+    }
+
+    return this.writeCells(
+      plan.targetRowIds.flatMap((rowId) =>
+        plan.colIds
+          .filter((colId) => sources.has(colId))
+          .map((colId) => ({ rowId, colId, value: () => sources.get(colId) })),
+      ),
+    );
+  }
+
+  /** Which row is copied, and where to. Null when there is nothing to fill. */
+  private fillPlan(): { sourceRowId: string; targetRowIds: string[]; colIds: string[] } | null {
+    const range = this.cellRange();
+    if (range && range.rowIds.length > 1) {
+      const [sourceRowId, ...targetRowIds] = range.rowIds;
+      return { sourceRowId: sourceRowId!, targetRowIds, colIds: [...range.colIds] };
+    }
+
+    // No range, or one row of it: fill the focused cell from the row above.
+    const position = this.ctx?.focus.focused.get();
+    if (!position || position.section !== 'body') return null;
+    const rows = this.ctx?.pipeline.projector.rows.get() ?? [];
+    const index = rows.findIndex((row) => row.id === position.rowKey);
+    if (index <= 0) return null;
+
+    const above = rows[index - 1]?.rowId;
+    const target = rows[index]?.rowId;
+    if (above === undefined || target === undefined || above === target) return null;
+    // A single-row range still says which columns; a bare caret means its own.
+    const colIds = range && range.rowIds.length === 1 ? [...range.colIds] : [position.colId];
+    return { sourceRowId: above, targetRowIds: [target], colIds };
+  }
+
+  private cellRange(): { rowIds: readonly string[]; colIds: readonly string[] } | null {
+    const provider = (this.ctx?.getModules() ?? []).find(providesCellRange);
+    return provider?.provideCellRange() ?? null;
+  }
+
+  /**
+   * Writes a value into each of many cells, as one action.
+   *
+   * The value is produced from the column rather than given outright, because
+   * the two callers arrive with different things: a paste has text the column
+   * has to interpret, a fill has a value already.
+   */
+  private writeCells(
+    cells: readonly {
+      rowId: string;
+      colId: string;
+      value: (column: ResolvedColumn<TData>) => unknown;
+    }[],
+  ): number {
     const store = this.ctx?.pipeline.store;
     if (!store || cells.length === 0) return 0;
 
@@ -328,11 +452,11 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
       if (!column || !node || !this.isEditable(column, node)) continue;
 
       const data = updates.get(cell.rowId) ?? node.data;
-      // Read from what this paste has already written to the row, so a second
+      // Read from what this write has already put in the row, so a second
       // column sees the first's change rather than the value on disk.
       const staged = { ...node, data };
       const oldValue = getCellValue(column, staged);
-      const value = coerce(cell.text, column.valueType);
+      const value = cell.value(column);
       if (Object.is(oldValue, value)) continue;
 
       const next = column.valueSetter

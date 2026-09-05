@@ -52,6 +52,11 @@ declare module '../../api/types.js' {
     /** Closes the open editor, writing its value unless `commit` is false. */
     stopEditing(commit?: boolean): void;
     getEditingCell(): EditingCell | null;
+    /**
+     * Copies the top row of the cell range down through the rest of it, or the
+     * focused cell from the row above. Returns how many cells changed.
+     */
+    fillDown(): number;
   }
 }
 

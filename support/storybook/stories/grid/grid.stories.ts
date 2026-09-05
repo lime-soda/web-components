@@ -124,6 +124,7 @@ interface Args {
   floatingFilter: boolean;
   headerFilter: boolean;
   pasteOnKeyboard: boolean;
+  fillDownOnKeyboard: boolean;
 }
 
 /**
@@ -324,6 +325,12 @@ const meta: Meta<Args> = {
         'Whether the quote columns — bid size, price, ask size — accept an edit. Enter, F2 or a double click opens one; Enter commits and steps down, Tab commits and steps across, Escape discards, and clicking away commits. Category headings never open: they carry no quote, and the column says so with a predicate rather than the module guessing.',
       table: { category: 'Editing' },
     },
+    fillDownOnKeyboard: {
+      control: 'boolean',
+      description:
+        'Ctrl-D copies the top row of the cell range down through the rest, or the focused cell from the row above when nothing is selected. Needs editing on. The key is only claimed when there is something to fill, so on the first row it is left to the browser.',
+      table: { category: 'Editing' },
+    },
     editOnTyping: {
       control: 'boolean',
       description:
@@ -368,6 +375,7 @@ export const Demo: StoryObj<Args> = {
     editable: false,
     editOnTyping: true,
     editOnDoubleClick: true,
+    fillDownOnKeyboard: true,
     cellRange: true,
     floatingFilter: true,
     headerFilter: false,
@@ -409,6 +417,7 @@ export const Demo: StoryObj<Args> = {
     bondMarketRange.setOptions({ dragToSelect: args.cellRange });
     if (!args.cellRange) bondMarketRange.clearCellRange();
     bondMarketEdit.setOptions({
+      fillDownOnKeyboard: args.fillDownOnKeyboard,
       editable: args.editable,
       editOnTyping: args.editOnTyping,
       editOnDoubleClick: args.editOnDoubleClick,
