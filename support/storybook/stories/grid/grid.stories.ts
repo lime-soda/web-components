@@ -120,6 +120,8 @@ interface Args {
   editOnTyping: boolean;
   editOnDoubleClick: boolean;
   cellRange: boolean;
+  floatingFilter: boolean;
+  headerFilter: boolean;
 }
 
 /**
@@ -176,6 +178,15 @@ const bondMarketEdit = new EditModule<Bond>();
  * the two.
  */
 const bondMarketRange = new RangeModule<Bond>();
+
+/**
+ * Hoisted like the rest, and it was not before.
+ *
+ * Built inline, a fresh module was constructed on every render and none of them
+ * was the one registered — so a control driving it would have appeared to do
+ * nothing, which is why it had none.
+ */
+const bondMarketFilter = new FilterModule<Bond>();
 
 /**
  * Held outside render like the others: Storybook re-runs render on every
@@ -272,6 +283,18 @@ const meta: Meta<Args> = {
         'What ticking a category means: itself alone, every instrument beneath it, or only those the quick filter left visible. Type in the filter first — the last two are identical without one.',
       table: { category: 'Selection' },
     },
+    floatingFilter: {
+      control: 'boolean',
+      description:
+        'A strip of filter boxes beneath the column headings. Costs a row of vertical space and gives every column a box wide enough to type in — which is what the in-header option cannot do at these widths.',
+      table: { category: 'Filter' },
+    },
+    headerFilter: {
+      control: 'boolean',
+      description:
+        'A filter box inside each heading instead. Turn it on with narrow columns to see the problem the floating row solves: the box and the label share one line, and the label loses. Both can be on at once, which puts a box in each place.',
+      table: { category: 'Filter' },
+    },
     cellRange: {
       control: 'boolean',
       description:
@@ -329,6 +352,8 @@ export const Demo: StoryObj<Args> = {
     editOnTyping: true,
     editOnDoubleClick: true,
     cellRange: true,
+    floatingFilter: true,
+    headerFilter: false,
   },
   render: (args) => {
     const gridRef = createRef<Grid<Bond>>();
@@ -358,6 +383,10 @@ export const Demo: StoryObj<Args> = {
     // `editable: false` on the module leaves the columns' own `editable` in
     // charge, so the switch has to say the columns are off rather than merely
     // not say they are on.
+    bondMarketFilter.setOptions({
+      floatingFilter: args.floatingFilter,
+      headerUi: args.headerFilter,
+    });
     bondMarketRange.setOptions({ dragToSelect: args.cellRange });
     if (!args.cellRange) bondMarketRange.clearCellRange();
     bondMarketEdit.setOptions({
@@ -392,7 +421,7 @@ export const Demo: StoryObj<Args> = {
       modules: [
         bondMarketTree,
         bondMarketSort,
-        new FilterModule<Bond>(),
+        bondMarketFilter,
         new CellFlashModule<Bond>(),
         bondMarketKeyboard,
         bondMarketEdit,
