@@ -1,4 +1,5 @@
 import { formatCellValue } from '../../columns/resolve-columns.js';
+import { detectDelimiter, parseDelimited } from './parse-delimited.js';
 import type { ResolvedColumn } from '../../columns/types.js';
 import type { GridModule, ModuleContext } from '../types.js';
 import type { DisplayRow } from '../../layout/types.js';
@@ -54,6 +55,15 @@ export interface ClipboardModuleOptions {
    */
   copyOnKeyboard?: boolean;
   /**
+   * Whether Ctrl-V (Cmd-V) pastes into the grid. Off by default.
+   *
+   * Opt-in because a paste writes: copy is harmless and this is not, and a grid
+   * that quietly accepted whatever was on the clipboard the first time someone
+   * pressed the wrong key would be a poor default. Needs a module that can
+   * write cells — the edit module — or there is nowhere for the text to go.
+   */
+  pasteOnKeyboard?: boolean;
+  /**
    * Columns never copied, whatever else is asked for.
    *
    * Defaults to the selection checkbox column, which is a control rather than
@@ -77,6 +87,28 @@ interface SelectedCellRange {
 interface CellRangeProvider {
   provideCellRange(): SelectedCellRange | null;
 }
+
+/**
+ * A module that can write text into cells — the edit module.
+ *
+ * Declared rather than imported, as everything else here is. It also means a
+ * grid without editing simply cannot paste, which is the right answer: there is
+ * nowhere for the text to go, and the alternative is this module learning what
+ * a column will accept, which is not its business.
+ */
+/** One cell of a paste. Stated here rather than imported, as the capability is. */
+interface PastedCell {
+  readonly rowId: string;
+  readonly colId: string;
+  readonly text: string;
+}
+
+interface CellWriteProvider {
+  provideCellWrite(cells: readonly PastedCell[]): number;
+}
+
+const providesCellWrite = <T>(module: T): module is T & CellWriteProvider =>
+  typeof (module as Partial<CellWriteProvider>).provideCellWrite === 'function';
 
 const providesCellRange = <T>(module: T): module is T & CellRangeProvider =>
   typeof (module as Partial<CellRangeProvider>).provideCellRange === 'function';
@@ -142,15 +174,126 @@ export class ClipboardModule<TData = unknown> implements GridModule<TData> {
   }
 
   onKeyDown(event: KeyboardEvent): boolean {
-    if (this.options.copyOnKeyboard === false) return false;
-    if (event.key !== 'c' && event.key !== 'C') return false;
     if (!event.ctrlKey && !event.metaKey) return false;
-    // Not ours if the user is copying text out of a filter input or a cell
-    // editor: they mean the text they selected, not the grid.
+    // Not ours if the user is in a filter input or a cell editor: they mean the
+    // text they selected and the box they are typing in, not the grid beneath.
     if (isEditable(event.composedPath()[0])) return false;
 
-    void this.copy();
-    return true;
+    if ((event.key === 'c' || event.key === 'C') && this.options.copyOnKeyboard !== false) {
+      void this.copy();
+      return true;
+    }
+
+    if ((event.key === 'v' || event.key === 'V') && (this.options.pasteOnKeyboard ?? false)) {
+      void this.paste();
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Reads the system clipboard and writes it into the grid.
+   *
+   * Where it lands: the top-left of the cell range if there is one, else the
+   * focused cell. The same precedence copying uses, and for the same reason —
+   * having drawn a rectangle is the more specific statement.
+   *
+   * How much lands: the block, from that corner, bounded by the grid. One
+   * exception, which is the case people actually reach for — a single value
+   * pasted with a rectangle selected fills the rectangle, because typing one
+   * price and wanting it in twenty cells is a fill and not a one-cell paste.
+   * Anything else is written from the corner and clipped, rather than tiled:
+   * repeating a 2x2 block into a 6x6 range is a spreadsheet flourish that
+   * surprises far more people than it helps.
+   *
+   * Resolves false when there is nothing to paste, nowhere to put it, or no
+   * module that can write — none of which is an error the grid can do anything
+   * about.
+   */
+  async paste(): Promise<boolean> {
+    const writer = this.cellWriter();
+    if (!writer) return false;
+
+    let text = '';
+    try {
+      text = await navigator.clipboard.readText();
+    } catch {
+      // No permission, or an insecure context. Reported, not thrown.
+      return false;
+    }
+    if (text === '') return false;
+
+    return this.pasteText(text) > 0;
+  }
+
+  /**
+   * The same, from text supplied directly. Returns how many cells changed.
+   *
+   * Separate from {@link paste} because the system clipboard needs a permission
+   * a test browser will not grant, and because an application driving a paste
+   * from its own toolbar has the text already.
+   */
+  pasteText(text: string): number {
+    const writer = this.cellWriter();
+    const target = this.pasteTarget();
+    if (!writer || !target) return 0;
+
+    const block = parseDelimited(text, detectDelimiter(text));
+    if (block.length === 0) return 0;
+
+    const rows = this.orderedRowIds({ filtered: true });
+    const columns = this.context?.getColumns() ?? [];
+    const startRow = rows.indexOf(target.rowId);
+    const startColumn = columns.findIndex((column) => column.colId === target.colId);
+    if (startRow < 0 || startColumn < 0) return 0;
+
+    // A single value with a rectangle selected fills the rectangle.
+    const single = block.length === 1 && block[0]!.length === 1;
+    const height = single && target.height > 1 ? target.height : block.length;
+    const width =
+      single && target.width > 1 ? target.width : Math.max(...block.map((r) => r.length));
+
+    const cells: PastedCell[] = [];
+    for (let r = 0; r < height; r += 1) {
+      const rowId = rows[startRow + r];
+      if (rowId === undefined) break;
+      for (let c = 0; c < width; c += 1) {
+        const column = columns[startColumn + c];
+        if (column === undefined) break;
+        const value = single ? block[0]![0]! : block[r]?.[c];
+        if (value === undefined) continue;
+        cells.push({ rowId, colId: column.colId, text: value });
+      }
+    }
+
+    return writer(cells);
+  }
+
+  /** The corner a paste starts from, and how big a range it may fill. */
+  private pasteTarget(): { rowId: string; colId: string; height: number; width: number } | null {
+    const range = this.cellRange();
+    if (range && range.rowIds.length > 0 && range.colIds.length > 0) {
+      return {
+        rowId: range.rowIds[0]!,
+        colId: range.colIds[0]!,
+        height: range.rowIds.length,
+        width: range.colIds.length,
+      };
+    }
+
+    const position = this.context?.focus.focused.get();
+    if (!position || position.section !== 'body') return null;
+    const rowId = this.context?.pipeline.projector.rows
+      .get()
+      .find((row) => row.id === position.rowKey)?.rowId;
+    if (rowId === undefined) return null;
+    return { rowId, colId: position.colId, height: 1, width: 1 };
+  }
+
+  private cellWriter(): ((cells: readonly PastedCell[]) => number) | undefined {
+    const provider = (this.context?.getModules() ?? []).find(providesCellWrite);
+    return provider ? (cells) => provider.provideCellWrite(cells) : undefined;
   }
 
   /** Serialises to text without touching the clipboard. */
@@ -199,6 +342,8 @@ export class ClipboardModule<TData = unknown> implements GridModule<TData> {
 
   apiExtension(): Record<string, unknown> {
     return {
+      pasteFromClipboard: () => this.paste(),
+      pasteText: (text: string) => this.pasteText(text),
       getDataAsCsv: (options?: ExportOptions) =>
         this.toDelimitedText({ delimiter: ',', ...options }),
       getDataAsTsv: (options?: ExportOptions) =>

@@ -42,6 +42,13 @@ export const EDIT_EVENTS = {
   VALUE_CHANGED: 'ls-grid-cell-value-changed',
 } as const;
 
+/** One cell of a paste: where it goes, and the text that landed there. */
+export interface PastedCell {
+  readonly rowId: string;
+  readonly colId: string;
+  readonly text: string;
+}
+
 export interface EditableParams<TData = unknown> {
   readonly data: TData;
   readonly node: RowNode<TData>;
@@ -286,6 +293,82 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
     };
   }
 
+  // --- writing many at once --------------------------------------------------
+
+  /**
+   * Writes text into cells, as a paste does. Returns how many changed.
+   *
+   * Here rather than in the clipboard module because everything it has to
+   * respect lives here: whether a column accepts an edit at all, how a column's
+   * value type reads text, and whether the row is written through a field or a
+   * `valueSetter`. The clipboard knows how to get text off the system and how
+   * to cut it into a grid, and nothing about what a cell will accept.
+   *
+   * One transaction for the lot. A block paste is one action to the reader, and
+   * per-cell transactions would have the projection re-run for every cell and
+   * a listener woken once per cell to hear about a change that is really one.
+   *
+   * A cell that will not take an edit is skipped rather than failing the paste:
+   * a block crossing one computed column should land everywhere else, which is
+   * what a spreadsheet does.
+   */
+  pasteCells(cells: readonly PastedCell[]): number {
+    const store = this.ctx?.pipeline.store;
+    if (!store || cells.length === 0) return 0;
+
+    // Keyed by row, because two cells of one row are one updated object — write
+    // them separately and the second overwrites the first's field with a stale
+    // copy of the row.
+    const updates = new Map<string, TData>();
+    const changes: CellValueChangedDetail<TData>[] = [];
+
+    for (const cell of cells) {
+      const column = this.columnById(cell.colId);
+      const node = store.getRowNode(cell.rowId);
+      if (!column || !node || !this.isEditable(column, node)) continue;
+
+      const data = updates.get(cell.rowId) ?? node.data;
+      // Read from what this paste has already written to the row, so a second
+      // column sees the first's change rather than the value on disk.
+      const staged = { ...node, data };
+      const oldValue = getCellValue(column, staged);
+      const value = coerce(cell.text, column.valueType);
+      if (Object.is(oldValue, value)) continue;
+
+      const next = column.valueSetter
+        ? column.valueSetter({ value, data, node: staged, column })
+        : writePath(data, column.field, value);
+      if (next === undefined) continue;
+
+      updates.set(cell.rowId, next);
+      changes.push({
+        rowId: cell.rowId,
+        colId: cell.colId,
+        oldValue,
+        newValue: value,
+        data: next,
+      });
+    }
+
+    if (updates.size === 0) return 0;
+
+    store.applyTransaction({ update: [...updates.values()] });
+    for (const change of changes) this.ctx?.dispatch(EDIT_EVENTS.VALUE_CHANGED, change);
+    return changes.length;
+  }
+
+  /** What the clipboard looks for. Declared, not reached into. */
+  provideCellWrite(cells: readonly PastedCell[]): number {
+    return this.pasteCells(cells);
+  }
+
+  /** Whether a cell would accept a written value, for a caller sizing a paste. */
+  provideCellWritable(rowId: string, colId: string): boolean {
+    const column = this.columnById(colId);
+    const node = this.ctx?.pipeline.store.getRowNode(rowId);
+    return column !== undefined && node !== undefined && this.isEditable(column, node);
+  }
+
   // --- writing --------------------------------------------------------------
 
   private write(editing: EditingCell, value: unknown): void {
@@ -406,6 +489,42 @@ export class EditModule<TData = unknown> implements GridModule<TData> {
   private rowIdOf(rowKey: string): string | undefined {
     return this.ctx?.pipeline.projector.rows.get().find((row) => row.id === rowKey)?.rowId;
   }
+}
+
+/**
+ * Text from a clipboard, as the column's value type would hold it.
+ *
+ * Without this a number column pasted into holds the string "1234", which sorts
+ * as text, formats as text and compares as text — the column keeps working and
+ * quietly stops being a number.
+ *
+ * A value that will not convert is left as text rather than becoming NaN or an
+ * Invalid Date, both of which are worse than the string: they read as a value
+ * and are not one.
+ */
+function coerce(text: string, valueType: ColumnValueType): unknown {
+  const trimmed = text.trim();
+  if (trimmed === '') return undefined;
+
+  if (valueType === 'number') {
+    // Thousands separators are how a spreadsheet copies a number out.
+    const parsed = Number(trimmed.replaceAll(',', ''));
+    return Number.isNaN(parsed) ? text : parsed;
+  }
+
+  if (valueType === 'boolean') {
+    const lower = trimmed.toLowerCase();
+    if (['true', 'yes', '1'].includes(lower)) return true;
+    if (['false', 'no', '0'].includes(lower)) return false;
+    return text;
+  }
+
+  if (valueType === 'date') {
+    const parsed = new Date(trimmed);
+    return Number.isNaN(parsed.getTime()) ? text : parsed;
+  }
+
+  return text;
 }
 
 function isPrintable(event: KeyboardEvent): boolean {

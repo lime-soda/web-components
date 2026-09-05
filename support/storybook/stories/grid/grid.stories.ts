@@ -14,6 +14,7 @@ import { CellFlashModule } from '@lime-soda/grid/cell-flash';
 import { KeyboardModule } from '@lime-soda/grid/keyboard';
 import { EditModule } from '@lime-soda/grid/edit';
 import { RangeModule } from '@lime-soda/grid/range';
+import { ClipboardModule } from '@lime-soda/grid/clipboard';
 import { ColumnsModule } from '@lime-soda/grid/columns';
 import '@lime-soda/button';
 import type { Button } from '@lime-soda/button';
@@ -122,6 +123,7 @@ interface Args {
   cellRange: boolean;
   floatingFilter: boolean;
   headerFilter: boolean;
+  pasteOnKeyboard: boolean;
 }
 
 /**
@@ -187,6 +189,15 @@ const bondMarketRange = new RangeModule<Bond>();
  * nothing, which is why it had none.
  */
 const bondMarketFilter = new FilterModule<Bond>();
+
+/**
+ * Copy and paste, which the demo had no way to reach at all.
+ *
+ * Ctrl-C takes the cell range if one is drawn, else the row selection, else
+ * everything the filter left. Ctrl-V writes a block back, which is why it needs
+ * the edit module and why it is off until asked for.
+ */
+const bondMarketClipboard = new ClipboardModule<Bond>();
 
 /**
  * Held outside render like the others: Storybook re-runs render on every
@@ -283,6 +294,12 @@ const meta: Meta<Args> = {
         'What ticking a category means: itself alone, every instrument beneath it, or only those the quick filter left visible. Type in the filter first — the last two are identical without one.',
       table: { category: 'Selection' },
     },
+    pasteOnKeyboard: {
+      control: 'boolean',
+      description:
+        'Ctrl-V writes the clipboard into the grid, starting at the cell range if one is drawn and the focused cell otherwise. A single value fills a whole range; a block is written from the corner and clipped at the edges. Needs editable columns, so turn editing on too — the quote columns are the editable ones. Off by default because a paste writes and a copy does not.',
+      table: { category: 'Clipboard' },
+    },
     floatingFilter: {
       control: 'boolean',
       description:
@@ -354,6 +371,7 @@ export const Demo: StoryObj<Args> = {
     cellRange: true,
     floatingFilter: true,
     headerFilter: false,
+    pasteOnKeyboard: false,
   },
   render: (args) => {
     const gridRef = createRef<Grid<Bond>>();
@@ -383,6 +401,7 @@ export const Demo: StoryObj<Args> = {
     // `editable: false` on the module leaves the columns' own `editable` in
     // charge, so the switch has to say the columns are off rather than merely
     // not say they are on.
+    bondMarketClipboard.setOptions({ pasteOnKeyboard: args.pasteOnKeyboard });
     bondMarketFilter.setOptions({
       floatingFilter: args.floatingFilter,
       headerUi: args.headerFilter,
@@ -422,6 +441,7 @@ export const Demo: StoryObj<Args> = {
         bondMarketTree,
         bondMarketSort,
         bondMarketFilter,
+        bondMarketClipboard,
         new CellFlashModule<Bond>(),
         bondMarketKeyboard,
         bondMarketEdit,

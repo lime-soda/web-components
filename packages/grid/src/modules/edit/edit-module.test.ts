@@ -301,3 +301,127 @@ describe('EditModule', () => {
     });
   });
 });
+
+/**
+ * Writing a block, as a paste does.
+ *
+ * The parts a story cannot see: what happens to a cell that will not take an
+ * edit, how text becomes the column's own type, and that two columns of one row
+ * arrive as one updated object rather than two that overwrite each other.
+ */
+describe('EditModule pasting', () => {
+  const paste = (edit: EditModule<Bond>, cells: { rowId: string; colId: string; text: string }[]) =>
+    edit.pasteCells(cells);
+
+  it('writes a block of text into cells', () => {
+    const { edit, rowOf } = setup();
+
+    const written = paste(edit, [
+      { rowId: 'a', colId: 'instrument', text: 'UKT 5% 2035' },
+      { rowId: 'b', colId: 'instrument', text: 'UKT 6% 2040' },
+    ]);
+
+    expect(written).toBe(2);
+    expect(rowOf('a').instrument).toBe('UKT 5% 2035');
+    expect(rowOf('b').instrument).toBe('UKT 6% 2040');
+  });
+
+  it('writes two columns of one row as a single updated object', () => {
+    // Written separately, the second update carries a copy of the row taken
+    // before the first, and silently undoes it.
+    const { edit, rowOf } = setup();
+
+    paste(edit, [
+      { rowId: 'a', colId: 'instrument', text: 'UKT 5% 2035' },
+      { rowId: 'a', colId: 'price', text: '99' },
+    ]);
+
+    expect(rowOf('a').instrument).toBe('UKT 5% 2035');
+    expect(rowOf('a').price).toBe(99);
+  });
+
+  it('gives a number column a number, not the text of one', () => {
+    // The failure this prevents is quiet: the column keeps working and stops
+    // being a number — sorting, formatting and comparing all as text.
+    const { edit, rowOf } = setup();
+
+    paste(edit, [{ rowId: 'a', colId: 'price', text: '102.5' }]);
+
+    expect(rowOf('a').price).toBe(102.5);
+    expect(typeof rowOf('a').price).toBe('number');
+  });
+
+  it('reads the thousands separators a spreadsheet copies out', () => {
+    const { edit, rowOf } = setup();
+
+    paste(edit, [{ rowId: 'a', colId: 'price', text: '1,500' }]);
+
+    expect(rowOf('a').price).toBe(1500);
+  });
+
+  it('leaves text that will not convert as text rather than as NaN', () => {
+    // NaN reads as a value and is not one. The string is at least visibly wrong.
+    const { edit, rowOf } = setup();
+
+    paste(edit, [{ rowId: 'a', colId: 'price', text: 'not a price' }]);
+
+    expect(rowOf('a').price).toBe('not a price');
+  });
+
+  it('skips a cell that will not take an edit rather than failing the paste', () => {
+    // A block crossing one computed column should land everywhere else.
+    const { edit, rowOf } = setup();
+
+    const written = paste(edit, [
+      { rowId: 'a', colId: 'id', text: 'nope' },
+      { rowId: 'a', colId: 'instrument', text: 'UKT 5% 2035' },
+    ]);
+
+    expect(written).toBe(1);
+    expect(rowOf('a').id).toBe('a');
+    expect(rowOf('a').instrument).toBe('UKT 5% 2035');
+  });
+
+  it('writes nothing when no cell would accept it', () => {
+    const { edit, pipeline } = setup();
+    const before = pipeline.store.getRowNode('a')!.data;
+
+    expect(paste(edit, [{ rowId: 'a', colId: 'id', text: 'nope' }])).toBe(0);
+    expect(pipeline.store.getRowNode('a')!.data).toBe(before);
+  });
+
+  it('ignores a value that is already there', () => {
+    const { edit, events } = setup();
+
+    paste(edit, [{ rowId: 'a', colId: 'instrument', text: 'UKT 4% 2030' }]);
+
+    expect(events.filter((e) => e.type === 'ls-grid-cell-value-changed')).toHaveLength(0);
+  });
+
+  it('announces every cell it changed', () => {
+    const { edit, events } = setup();
+
+    paste(edit, [
+      { rowId: 'a', colId: 'instrument', text: 'UKT 5% 2035' },
+      { rowId: 'b', colId: 'instrument', text: 'UKT 6% 2040' },
+    ]);
+
+    expect(events.filter((e) => e.type === 'ls-grid-cell-value-changed')).toHaveLength(2);
+  });
+
+  it('writes through a valueSetter, so a computed column is pasteable', () => {
+    const { edit, rowOf } = setup({}, [
+      {
+        colId: 'initials',
+        headerName: 'Trader',
+        editable: true,
+        valueGetter: ({ data }) => data.desk.trader,
+        valueSetter: ({ value, data }) => ({ ...data, desk: { trader: String(value) } }),
+      },
+    ]);
+
+    paste(edit, [{ rowId: 'a', colId: 'initials', text: 'ZZ' }]);
+
+    expect(rowOf('a').desk.trader).toBe('ZZ');
+  });
+});

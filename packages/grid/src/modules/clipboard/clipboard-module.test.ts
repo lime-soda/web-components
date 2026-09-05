@@ -8,6 +8,8 @@ import { FilterModule } from '../filter/filter-module.js';
 import { TreeModule } from '../tree/tree-module.js';
 import { ClipboardModule } from './clipboard-module.js';
 import { RangeModule } from '../range/range-module.js';
+import { EditModule } from '../edit/edit-module.js';
+import type { ColumnDefs } from '../../columns/types.js';
 import type { GridModule } from '../types.js';
 
 /**
@@ -32,23 +34,25 @@ const data: Bond[] = [
   { id: 'c', instrument: 'DBR 2% 2032', size: 3_000_000, price: 100.125 },
 ];
 
-const setup = (modules: GridModule<Bond>[] = []) => {
+/** The read-only columns every copy test uses. Paste needs editable ones. */
+const readOnlyColumns: ColumnDefs<Bond> = [
+  { field: 'instrument', headerName: 'Instrument' },
+  {
+    field: 'size',
+    headerName: 'Size',
+    valueFormatter: ({ value }) => value!.toLocaleString('en-GB'),
+  },
+  { field: 'price', headerName: 'Price', valueFormatter: ({ value }) => value!.toFixed(3) },
+];
+
+const setup = (modules: GridModule<Bond>[] = [], columns: ColumnDefs<Bond> = readOnlyColumns) => {
   const pipeline = new GridPipeline<Bond>({ getRowId: (d) => d.id });
   pipeline.store.setRowData(data);
 
   const clipboard = new ClipboardModule<Bond>();
   const registry = new ModuleRegistry<Bond>({
     pipeline,
-    getColumns: () =>
-      resolveColumns<Bond>([
-        { field: 'instrument', headerName: 'Instrument' },
-        {
-          field: 'size',
-          headerName: 'Size',
-          valueFormatter: ({ value }) => value!.toLocaleString('en-GB'),
-        },
-        { field: 'price', headerName: 'Price', valueFormatter: ({ value }) => value!.toFixed(3) },
-      ]),
+    getColumns: () => resolveColumns<Bond>(columns),
     dispatch: () => {},
   });
   for (const module of modules) registry.register(module);
@@ -338,5 +342,137 @@ describe('ClipboardModule with a cell range', () => {
 
     expect(rows[0]).toBe('Price');
     expect(rows).toHaveLength(3);
+  });
+});
+
+/**
+ * Where a paste lands, and how far it spreads.
+ *
+ * Both modules are real here rather than mocked: what is being tested is that
+ * the clipboard finds a writer through a declared capability and the edit
+ * module accepts what it sends, which a mock on either side would assume.
+ *
+ * The system clipboard needs a permission a test browser will not grant, so
+ * these go through `pasteText`. Reading the clipboard is one call and belongs
+ * to the story tests.
+ */
+describe('ClipboardModule pasting', () => {
+  const editable: ColumnDefs<Bond> = [
+    { field: 'instrument', headerName: 'Instrument', editable: true },
+    { field: 'size', headerName: 'Size', valueType: 'number', editable: true },
+    { field: 'price', headerName: 'Price', valueType: 'number', editable: true },
+  ];
+
+  const withPaste = () => {
+    const edit = new EditModule<Bond>();
+    const range = new RangeModule<Bond>();
+    const { clipboard, pipeline, registry } = setup([edit, range], editable);
+    const rowOf = (id: string) => pipeline.store.getRowNode(id)!.data;
+    return { clipboard, edit, range, pipeline, registry, rowOf };
+  };
+
+  const select = (range: RangeModule<Bond>, rows: [number, number], columns: [number, number]) =>
+    range.setCellRange({
+      anchorRow: rows[0],
+      anchorColumn: columns[0],
+      headRow: rows[1],
+      headColumn: columns[1],
+    });
+
+  it('lands at the top-left of the range', () => {
+    const { clipboard, range, rowOf } = withPaste();
+    select(range, [1, 1], [0, 0]);
+
+    clipboard.pasteText('UKT 5% 2035');
+
+    expect(rowOf('b').instrument).toBe('UKT 5% 2035');
+    expect(rowOf('a').instrument).toBe('UKT 4% 2030');
+  });
+
+  it('writes a block across rows and columns from that corner', () => {
+    const { clipboard, range, rowOf } = withPaste();
+    select(range, [0, 0], [0, 0]);
+
+    clipboard.pasteText('UKT 9% 2050\t42\nDBR 1% 2033\t43');
+
+    expect(rowOf('a').instrument).toBe('UKT 9% 2050');
+    expect(rowOf('a').size).toBe(42);
+    expect(rowOf('b').instrument).toBe('DBR 1% 2033');
+    expect(rowOf('b').size).toBe(43);
+  });
+
+  it('fills the whole range from a single value', () => {
+    // The case people reach for: one price, wanted in every selected cell.
+    const { clipboard, range, rowOf } = withPaste();
+    select(range, [0, 2], [1, 1]);
+
+    clipboard.pasteText('7');
+
+    expect([rowOf('a').size, rowOf('b').size, rowOf('c').size]).toEqual([7, 7, 7]);
+  });
+
+  it('does not tile a block that is smaller than the range', () => {
+    // Repeating a block to fill a selection surprises more people than it
+    // helps, so a block is written once from the corner and left there.
+    const { clipboard, range, rowOf } = withPaste();
+    select(range, [0, 2], [1, 1]);
+
+    clipboard.pasteText('7\n8');
+
+    expect([rowOf('a').size, rowOf('b').size]).toEqual([7, 8]);
+    expect(rowOf('c').size).toBe(3_000_000);
+  });
+
+  it('stops at the last row rather than running off the end', () => {
+    const { clipboard, range, rowOf } = withPaste();
+    select(range, [2, 2], [0, 0]);
+
+    clipboard.pasteText('one\ntwo\nthree');
+
+    expect(rowOf('c').instrument).toBe('one');
+  });
+
+  it('stops at the last column', () => {
+    const { clipboard, range, rowOf } = withPaste();
+    select(range, [0, 0], [0, 2]);
+
+    clipboard.pasteText('only\tthese\ttwo\tignored');
+
+    // Three columns exist, so the fourth field has nowhere to go.
+    expect(rowOf('a').price).toBe('two');
+  });
+
+  it('lands on the focused cell when no range is drawn', () => {
+    const { clipboard, registry, rowOf } = withPaste();
+    registry.focus.focus({ instanceId: 'i', rowKey: 'b', colId: 'instrument', section: 'body' });
+
+    clipboard.pasteText('from the caret');
+
+    expect(rowOf('b').instrument).toBe('from the caret');
+  });
+
+  it('writes nothing with no range and no focus', () => {
+    // Nowhere to put it is not an error, and guessing a corner would be worse.
+    const { clipboard } = withPaste();
+
+    expect(clipboard.pasteText('nowhere')).toBe(0);
+  });
+
+  it('writes nothing when no module can write cells', () => {
+    // Without the edit module there is nowhere for text to go, and this module
+    // has no business deciding what a column will accept.
+    const { clipboard } = setup([new RangeModule<Bond>()], editable);
+
+    expect(clipboard.pasteText('anything')).toBe(0);
+  });
+
+  it('reads quoted fields, which is how a spreadsheet copies a formatted number', () => {
+    const { clipboard, range, rowOf } = withPaste();
+    select(range, [0, 0], [0, 1]);
+
+    clipboard.pasteText('"UKT 4%, tapped","1,500"');
+
+    expect(rowOf('a').instrument).toBe('UKT 4%, tapped');
+    expect(rowOf('a').size).toBe(1500);
   });
 });
