@@ -33,6 +33,6 @@
     "playwright": "^1.54.2",
     "storybook": "^10.5.10",
     "vite-tsconfig-paths": "^6.0.0",
-    "vitest": "4.1.11"
+    "vitest": "5.0.0"
   }
 }
