@@ -36,6 +36,21 @@
       "$value": "{theme.spacing.component.sm}",
       "$description": "Horizontal padding inside a cell"
     },
+    "gapSmall": {
+      "$type": "dimension",
+      "$value": "{size.space.half}",
+      "$description": "Between a control and its adornment \u2014 a sort arrow and its order badge"
+    },
+    "gapMedium": {
+      "$type": "dimension",
+      "$value": "{size.space.1}",
+      "$description": "Between the parts of a header cell"
+    },
+    "gapLarge": {
+      "$type": "dimension",
+      "$value": "{size.space.2}",
+      "$description": "Between a header's label and the controls beside it"
+    },
     "instanceGap": {
       "$type": "dimension",
       "$value": "{theme.spacing.component.md}",

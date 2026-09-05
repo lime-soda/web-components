@@ -19,6 +19,8 @@ code in this repository.
   once per machine; CI does not run it, because its browser job runs inside
   Playwright's own image
 - `pnpm bench` - Run the grid's performance budgets
+- `pnpm size` - Check what crosses the wire against its budget (`size-limit`).
+  Needs `pnpm build` first, since it measures the published files
 - `pnpm check` - Formatting, lint and types in one pass (`check:fix` to fix)
 
 ### Component Generation

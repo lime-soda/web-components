@@ -25,6 +25,12 @@ export interface GridTheme {
   rowHeight?: string;
   /** Height of the header row. */
   headerHeight?: string;
+  /** Between a control and its adornment — a sort arrow and its order badge. */
+  gapSmall?: string;
+  /** Between the parts of a header cell. */
+  gapMedium?: string;
+  /** Between a header's label and the controls beside it. */
+  gapLarge?: string;
   /** Horizontal padding inside a cell. */
   cellPaddingX?: string;
   /** Gap between instances in the flow layout. */
@@ -120,6 +126,9 @@ export const THEME_TOKENS = [
   'headerFontWeight',
   'rowHeight',
   'headerHeight',
+  'gapSmall',
+  'gapMedium',
+  'gapLarge',
   'cellPaddingX',
   'instanceGap',
   'radius',

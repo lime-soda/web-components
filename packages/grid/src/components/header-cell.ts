@@ -26,7 +26,7 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     :host {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: ${tokens.gapLarge};
       box-sizing: border-box;
       padding: 0 ${tokens.cellPaddingX};
       height: 100%;
@@ -95,7 +95,7 @@ export class GridHeaderCell extends SignalWatcher(LitElement) {
     .slots {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: ${tokens.gapMedium};
       flex: 0 0 auto;
     }
   `;

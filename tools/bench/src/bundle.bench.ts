@@ -37,6 +37,10 @@ const MARKERS = {
   'cell-flash': 'getDirection',
   clipboard: 'toDelimitedText',
   columns: 'ls-grid-resize-handle',
+  edit: 'ls-grid-text-editor',
+  // A class the module writes on cells in the rectangle. String literals, so
+  // minification cannot rename them.
+  range: 'ls-grid-in-range',
 } as const;
 
 type ModuleName = keyof typeof MARKERS;
@@ -52,6 +56,8 @@ const ENTRIES: Record<ModuleName, string> = {
   'cell-flash': 'CellFlashModule',
   clipboard: 'ClipboardModule',
   columns: 'ColumnsModule',
+  edit: 'EditModule',
+  range: 'RangeModule',
 };
 
 let sandbox: string;

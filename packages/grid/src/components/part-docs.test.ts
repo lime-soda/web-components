@@ -62,6 +62,18 @@ describe('part documentation', () => {
     expect(missing, `rendered but undocumented: ${missing.join(', ')}`).toEqual([]);
   });
 
+  it('renders every part a module declares', () => {
+    // A module's `parts` list is what the forwarding chain carries. A name in
+    // it that no markup uses is a part a consumer can write a rule for and
+    // never match — the failure the list exists to prevent, in reverse.
+    const declared = [...allSource.matchAll(/readonly parts = \[([^\]]*)\]/g)]
+      .flatMap((match) => [...match[1]!.matchAll(/'([a-z-]+)'/g)].map((part) => part[1]!))
+      .sort();
+    const missing = declared.filter((part) => !rendered.has(part));
+
+    expect(missing, `declared but never rendered: ${missing.join(', ')}`).toEqual([]);
+  });
+
   it('documents every part the chain forwards', () => {
     // Forwarding a part is what makes it reachable, so anything in the chain is
     // public whether or not someone remembered to describe it.

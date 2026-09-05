@@ -42,7 +42,12 @@ export interface RangeModuleOptions {
  */
 export class RangeModule<TData = unknown> implements GridModule<TData> {
   readonly id = 'range';
-  readonly parts = ['cell-range'];
+
+  /*
+   * No parts. A range is drawn by decorating cells that already have one —
+   * `::part(cell)` reaches them — and declaring a part this module never
+   * renders put a name in the manifest that nothing answers to.
+   */
 
   readonly styles = css`
     /*

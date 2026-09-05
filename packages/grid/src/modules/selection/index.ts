@@ -34,7 +34,10 @@ declare module '../../api/types.js' {
   }
 }
 
+/** The detail of `ls-grid-selection-changed`. */
 export interface SelectionChangedDetail {
+  /** Ids of the selected rows, in the order they were selected. */
   selected: readonly string[];
+  /** How many, so a listener need not measure the array to show a count. */
   count: number;
 }

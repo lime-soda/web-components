@@ -122,7 +122,12 @@ describe('CellFlashModule', () => {
           return { cancel() {}, set onfinish(_: unknown) {}, set oncancel(_: unknown) {} };
         },
       } as unknown as HTMLElement;
-      vi.stubGlobal('getComputedStyle', () => ({ getPropertyValue: () => '' }));
+      // Each token answers with its own name, so the captured colour says which
+      // one was read. Asserting the direction rather than a palette: the
+      // colours are the design system's and change without this being wrong.
+      vi.stubGlobal('getComputedStyle', () => ({
+        getPropertyValue: (name: string) => name,
+      }));
 
       const decoration = decorateAt(flash, column, 'a', { id: 'a', price: to + (to - from) });
       decoration?.onRendered?.(cell);
@@ -130,16 +135,40 @@ describe('CellFlashModule', () => {
       return captured;
     };
 
-    it('flashes green on a rise', () => {
-      expect(directionFor(100, 101)).toContain('34, 197, 94');
+    it('takes the up token on a rise', () => {
+      expect(directionFor(100, 101)).toBe('--grid-flash-up');
     });
 
-    it('flashes red on a fall', () => {
-      expect(directionFor(101, 100)).toContain('239, 68, 68');
+    it('takes the down token on a fall', () => {
+      expect(directionFor(101, 100)).toBe('--grid-flash-down');
     });
 
-    it('flashes neutral when directional is off', () => {
-      expect(directionFor(100, 101, { directional: false })).toContain('148, 163, 184');
+    it('takes the neutral token when directional is off', () => {
+      expect(directionFor(100, 101, { directional: false })).toBe('--grid-flash-neutral');
+    });
+
+    it('does not flash at all when the tokens are missing', () => {
+      // Which means the application has not loaded the design system's
+      // stylesheet. Inventing a colour there is how a palette acquires greens
+      // nobody chose.
+      const { flash, resolved } = setup();
+      const column = resolved[0]!;
+      decorateAt(flash, column, 'a', { id: 'a', price: 100 });
+      decorateAt(flash, column, 'a', { id: 'a', price: 101 });
+
+      let animated = false;
+      const cell = {
+        animate: () => {
+          animated = true;
+          return { cancel() {}, set onfinish(_: unknown) {}, set oncancel(_: unknown) {} };
+        },
+      } as unknown as HTMLElement;
+      vi.stubGlobal('getComputedStyle', () => ({ getPropertyValue: () => '' }));
+
+      decorateAt(flash, column, 'a', { id: 'a', price: 102 })?.onRendered?.(cell);
+      vi.unstubAllGlobals();
+
+      expect(animated).toBe(false);
     });
 
     it('honours a custom getDirection, for values that are not numbers', () => {

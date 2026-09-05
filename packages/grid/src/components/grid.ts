@@ -31,6 +31,7 @@ import { InstanceVirtualizer } from '../virtualize/instance-virtualizer.js';
  * @csspart instance-grid - An instance's grid container, which owns the column tracks
  * @csspart row - One row
  * @csspart header-cell - One column heading
+ * @csspart header-band-cell - One cell of the band beneath the headings
  * @csspart cell - One cell
  * @csspart cell-content - A cell's content, inside its padding
  * @csspart header-label - A column heading's text

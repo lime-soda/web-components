@@ -30,6 +30,7 @@ export const INSTANCE_PARTS = [
   'row',
   ...ROW_PARTS,
   'header-cell',
+  'header-band-cell',
   ...HEADER_CELL_PARTS,
 ] as const;
 

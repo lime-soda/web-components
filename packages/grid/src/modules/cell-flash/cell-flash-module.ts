@@ -109,6 +109,11 @@ export class CellFlashModule<TData = unknown> implements GridModule<TData> {
     this.running.get(key)?.cancel();
 
     const colour = this.colourFor(cell, direction);
+    // No token, no flash. The colours come from the design system, and a
+    // component inventing one because a stylesheet was not loaded is how a
+    // palette ends up with greens nobody chose.
+    if (colour === undefined) return;
+
     const duration =
       this.options.duration ?? readNumber(cell, '--grid-flash-duration') ?? DEFAULT_DURATION;
 
@@ -122,8 +127,16 @@ export class CellFlashModule<TData = unknown> implements GridModule<TData> {
     this.running.set(key, animation);
   }
 
-  private colourFor(cell: HTMLElement, direction: FlashDirection): string {
-    const styles = getComputedStyle(cell);
+  /**
+   * The flash colour for a direction, from the design tokens and nowhere else.
+   *
+   * Undefined when the token is missing, which means the application has not
+   * loaded `@lime-soda/tokens/variables.css` — a setup error the design system
+   * already documents. This used to fall back to a hard-coded green, red and
+   * grey: three colours from no palette in particular, shipped in a package
+   * whose whole claim is that a component's appearance comes from its tokens.
+   */
+  private colourFor(cell: HTMLElement, direction: FlashDirection): string | undefined {
     const variable =
       direction === 'up'
         ? '--grid-flash-up'
@@ -131,14 +144,8 @@ export class CellFlashModule<TData = unknown> implements GridModule<TData> {
           ? '--grid-flash-down'
           : '--grid-flash-neutral';
 
-    const value = styles.getPropertyValue(variable).trim();
-    if (value !== '') return value;
-
-    return direction === 'up'
-      ? 'rgba(34, 197, 94, 0.35)'
-      : direction === 'down'
-        ? 'rgba(239, 68, 68, 0.35)'
-        : 'rgba(148, 163, 184, 0.35)';
+    const value = getComputedStyle(cell).getPropertyValue(variable).trim();
+    return value === '' ? undefined : value;
   }
 }
 

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "grid core + layouts",
+    "path": "tools/bench/size/core.js",
+    "limit": "24 kB",
+    "ignore": ["lit"]
+  },
+  {
+    "name": "grid + every module",
+    "path": "tools/bench/size/everything.js",
+    "limit": "41 kB",
+    "ignore": ["lit"]
+  },
+  {
+    "name": "button",
+    "path": "packages/button/dist/index.js",
+    "limit": "2.5 kB",
+    "ignore": ["lit"]
+  }
+]

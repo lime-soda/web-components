@@ -37,6 +37,8 @@ declare module '../../api/types.js' {
   }
 }
 
+/** The detail of `ls-grid-sort-changed`. */
 export interface SortChangedDetail {
+  /** The active sort, in priority order. Empty when nothing is sorted. */
   model: readonly SortModelEntry[];
 }

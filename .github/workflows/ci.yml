@@ -58,6 +58,12 @@ jobs:
       # as a lost memo or a retained element, not a few ms of runner noise.
       - run: pnpm bench:node
 
+      # What crosses the wire, against a hard limit. The bench above reports the
+      # cost of each module and proves an unused one is dropped; this is the
+      # ceiling on the two numbers a consumer actually pays — core, and core
+      # with everything switched on.
+      - run: pnpm size
+
   # The browser half, and nothing else.
   #
   # This is the only job that needs Chromium, so it is the only one that pays

@@ -26,6 +26,7 @@ declare module '../../api/types.js' {
   }
 }
 
+/** The detail of `ls-grid-expansion-changed`. */
 export interface ExpansionChangedDetail {
   /** Rows whose expansion was requested to change. */
   ids: readonly string[];

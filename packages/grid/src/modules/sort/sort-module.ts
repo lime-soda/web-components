@@ -218,7 +218,7 @@ export class SortModule<TData = unknown> implements GridModule<TData, SortModelE
     .ls-grid-sort-indicator {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: ${tokens.gapSmall};
       flex: 0 0 auto;
       font-size: ${tokens.sortIndicatorFontSize};
       color: ${tokens.textMuted};

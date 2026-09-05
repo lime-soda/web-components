@@ -39,7 +39,10 @@ declare module '../../api/types.js' {
   }
 }
 
+/** The detail of `ls-grid-filter-changed`. */
 export interface FilterChangedDetail {
+  /** Per-column filters, keyed by colId. */
   model: FilterModel;
+  /** The text matched across every column, or empty when there is none. */
   quickFilter: string;
 }
