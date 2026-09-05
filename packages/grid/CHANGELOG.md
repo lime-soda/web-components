@@ -1,5 +1,87 @@
 # @lime-soda/grid
 
+## 0.8.0
+
+### Minor Changes
+
+- 20deda6: Fill down with Ctrl-D.
+
+  Copies the top row of the cell range down through the rest of it, or — with no
+  range — the focused cell from the row above, which is what Ctrl-D means to
+  anyone arriving from a spreadsheet. On by default, and available as
+  `api.fillDown()`.
+
+  The key is claimed only when there is something to fill, so on the first row of
+  a grid it is left to the browser rather than taken and wasted.
+
+  Values rather than text: a fill is not a round trip through the clipboard, so a
+  number stays a number and a column whose value is an object survives being
+  filled.
+
+- 70da54b: Add a floating filter row: `new FilterModule({ floatingFilter: true })`.
+
+  A strip of filter boxes beneath the column headings, which is the answer to the
+  problem `headerUi` has — a trading grid's columns are 80-100px, and a box
+  sharing that line with the label crushes the label to an initial. Given a strip
+  of its own, a box fits any column. Opt-in, and `floatingFilterHeight` sets how
+  tall it is.
+
+  Core gains a `HeaderBandProvider` capability for it: a module declares a band's
+  height and its content per column, and the height reaches the layout engine so
+  the rows below are sized knowing the band is there.
+
+- 2c91cb5: Paste into a cell range: `new ClipboardModule({ pasteOnKeyboard: true })`.
+
+  Ctrl-V writes the clipboard into the grid, starting at the top-left of the cell
+  range if one is drawn and the focused cell otherwise — the same precedence
+  copying uses. A single value fills a whole range, which is the case people reach
+  for; a block is written from that corner and clipped at the grid's edges rather
+  than tiled.
+
+  Off by default, because a paste writes and a copy does not. It needs a module
+  that can write cells — the edit module — found through a declared capability, so
+  the clipboard still knows nothing about what a column will accept.
+
+  Text becomes the column's own type on the way in, so a number column pasted into
+  holds a number rather than the text of one. A cell that will not take an edit is
+  skipped rather than failing the paste, and the whole block is one transaction.
+
+### Patch Changes
+
+- 0ff050b: Add `@lime-soda/input`: `ls-input`, a single-line text input.
+
+  Deliberately thin — it draws a box, holds a value and says what it is, and
+  leaves keys alone, because what a key means belongs to whoever places it. A cell
+  editor wants Enter, Tab and Escape; a filter box wants the grid never to see
+  them.
+
+  Everything visual comes from `--input-*` and the field is exposed as
+  `::part(field)`, which is how a host places it under its own rules. The grid's
+  cell editors do exactly that: they drop the border, the radius and the focus
+  ring and re-point the padding to the cell's, so the input fills a cell without
+  knowing a grid exists. Its column filters keep the input's own appearance.
+
+  The grid's private text field is gone, and with it `--grid-filter-padding` —
+  the input owns its padding now.
+
+- 8e34bf7: Fixes from a review of the CSS, the part names and the module bundling.
+
+  `::part(header-band-cell)` matched nothing: the floating filter's band cell was
+  rendered but never added to the forwarding chain, so it never reached the host.
+  The range module declared a `cell-range` part it never rendered — a name in the
+  manifest that nothing answered to.
+
+  The cell-flash module carried hard-coded green, red and grey as fallbacks for
+  its design tokens: three colours from no palette in particular, in a package
+  whose claim is that appearance comes from tokens. A missing token now means no
+  flash, which is what a missing design system should look like.
+
+  Three spacing tokens — `gapSmall`, `gapMedium`, `gapLarge` — for the gaps
+  components were writing as literals because nothing named them.
+
+- Updated dependencies [0ff050b]
+  - @lime-soda/input@0.1.0
+
 ## 0.7.2
 
 ### Patch Changes
