@@ -5,7 +5,7 @@ import type { ResolvedColumn } from '../../columns/types.js';
 import type { DisplayRow } from '../../layout/types.js';
 import type { ProjectionStage } from '../../projection/types.js';
 import type { RowNode } from '../../store/types.js';
-import '../../components/text-field.js';
+import '@lime-soda/input';
 import type { GridModule, HeaderSlotContext, ModuleContext } from '../types.js';
 import {
   type ColumnFilter,
@@ -182,8 +182,14 @@ export class FilterModule<TData = unknown> implements GridModule<
    * apart in some detail nobody notices.
    */
   static readonly styles = css`
+    /*
+     * The filter keeps the input's own appearance — a box you type into is what
+     * it should look like here — and states only what the grid knows: how wide,
+     * and that its type scale is the grid's smaller one.
+     */
     .ls-grid-filter-input {
       width: ${tokens.filterInputWidth};
+      --input-font-size: ${tokens.filterFontSize};
     }
   `;
 
@@ -232,10 +238,9 @@ export class FilterModule<TData = unknown> implements GridModule<
     // Clicks and keys stop here. A click on a header sorts it, and the grid's
     // navigation would take the arrow keys out of the box the reader is typing
     // in — neither is something the field itself can know.
-    return html`<ls-grid-text-field
+    return html`<ls-input
       class=${placement === 'floating' ? 'ls-grid-floating-filter' : 'ls-grid-filter-input'}
       exportparts="field: filter-input"
-      appearance="boxed"
       type="search"
       placeholder="Filter"
       .label=${`Filter ${ctx.column.headerName}`}
@@ -254,7 +259,7 @@ export class FilterModule<TData = unknown> implements GridModule<
               : { type: 'text', operator: 'contains', value: text },
         );
       }}
-    ></ls-grid-text-field>`;
+    ></ls-input>`;
   }
 
   // -- Filtering --------------------------------------------------------------

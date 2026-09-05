@@ -1,0 +1,65 @@
+{
+  "name": "@lime-soda/input",
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lime-soda/web-components.git",
+    "directory": "packages/input"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [
+    "input",
+    "textfield",
+    "webcomponent"
+  ],
+  "files": [
+    "CHANGELOG.md",
+    "custom-elements.json",
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./index.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "build:manifest": "build-manifest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vp test run",
+    "test:browser": "vp test run --project browser",
+    "lint": "vp lint",
+    "check": "vp check",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@lime-soda/tokens": "workspace:*"
+  },
+  "peerDependencies": {
+    "lit": ">= 3.3.0"
+  },
+  "devDependencies": {
+    "@lime-soda/build": "workspace:*",
+    "@lime-soda/tsconfig": "workspace:*",
+    "@vitest/browser-playwright": "4.1.11",
+    "axe-core": "^4.13.0",
+    "lit": "^3.3.3",
+    "playwright": "^1.56.1",
+    "typescript": "~7.0.0",
+    "vitest": "4.1.11"
+  },
+  "customElements": "custom-elements.json",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  }
+}

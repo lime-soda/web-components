@@ -196,11 +196,6 @@
       "$value": "{font.size.xs}",
       "$description": "Font size inside a filter input"
     },
-    "filterPadding": {
-      "$type": "dimension",
-      "$value": "{size.space.half} {size.space.1}",
-      "$description": "Padding inside a filter input"
-    },
     "numericVariant": {
       "$value": "{font.numeric.variant}",
       "$description": "Figure settings for cells: tabular widths so a column of prices aligns, and a slashed zero so 0 and O are not confusable in an instrument code"

@@ -107,8 +107,6 @@ export interface GridTheme {
   filterInputWidth?: string;
   /** Font size inside a filter input. */
   filterFontSize?: string;
-  /** Padding inside a filter input. */
-  filterPadding?: string;
 
   // -- Figures ----------------------------------------------------------------
   /**
@@ -159,7 +157,6 @@ export const THEME_TOKENS = [
   'sortOrderFontSize',
   'filterInputWidth',
   'filterFontSize',
-  'filterPadding',
   'numericVariant',
 ] as const satisfies readonly (keyof GridTheme)[];
 

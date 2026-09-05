@@ -1,0 +1,87 @@
+{
+  "input": {
+    "font": {
+      "family": {
+        "$type": "fontFamily",
+        "$value": "{font.family.sans}",
+        "$description": "Typeface of the input's own text"
+      },
+      "size": {
+        "$type": "dimension",
+        "$value": "{font.size.sm}",
+        "$description": "Size of the input's own text"
+      },
+      "numericVariant": {
+        "$type": "other",
+        "$value": "{font.numeric.variant}",
+        "$description": "font-variant-numeric, so a column of figures aligns on the decimal"
+      }
+    },
+    "padding": {
+      "$type": "dimension",
+      "$value": "{size.space.half} {size.space.1}",
+      "$description": "Inside the input, around its text"
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": "{theme.radius.sm}",
+      "$description": "Corner radius"
+    },
+    "background": {
+      "$type": "color",
+      "$value": "{theme.color.background.default}",
+      "$description": "The well the text sits in"
+    },
+    "text": {
+      "$type": "color",
+      "$value": "{theme.color.text.default}",
+      "$description": "The text the reader types"
+    },
+    "placeholder": {
+      "$type": "color",
+      "$value": "{theme.color.text.muted}",
+      "$description": "The hint shown while the input is empty"
+    },
+    "border": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.borderWidth.thin}",
+        "$description": "Thickness of the outline"
+      },
+      "color": {
+        "$type": "color",
+        "$value": "{theme.color.border.default}",
+        "$description": "Colour of the outline at rest"
+      },
+      "colorActive": {
+        "$type": "color",
+        "$value": "{theme.color.focus}",
+        "$description": "Colour of the outline when the input holds something worth noticing"
+      }
+    },
+    "focus": {
+      "width": {
+        "$type": "dimension",
+        "$value": "{size.borderWidth.medium}",
+        "$description": "Thickness of the focus ring"
+      },
+      "offset": {
+        "$type": "dimension",
+        "$value": "{size.borderWidth.thin}",
+        "$description": "Gap between the input and its focus ring"
+      },
+      "color": {
+        "$type": "color",
+        "$value": "{theme.color.focus}",
+        "$description": "Colour of the focus ring"
+      }
+    },
+    "disabled": {
+      "opacity": {
+        "$type": "number",
+        "$value": "0.5",
+        "$description": "Opacity of an input that cannot be typed into"
+      }
+    }
+  }
+}

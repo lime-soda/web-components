@@ -1,3 +1,4 @@
+import * as tokens from '@lime-soda/tokens/grid';
 import { LitElement, css } from 'lit';
 import { property } from 'lit/decorators.js';
 
@@ -38,6 +39,27 @@ export abstract class CellEditorElement<TValue = unknown> extends LitElement {
    * declares its own `styles` takes this over and is on its own.
    */
   static override styles = css`
+    /*
+     * An editor is the cell while it is open, so the input inside it is told to
+     * stop looking like an input: no border, no ring, the cell's own padding,
+     * the cell's own type scale. Said in the input's custom properties rather
+     * than through a variant on the input itself — the component has no reason
+     * to know a grid cell exists, and a host that can re-point its tokens does
+     * not need it to.
+     *
+     * The ring in particular: the cell already draws one, and a second inside
+     * it is a box within a box.
+     */
+    ls-input {
+      --input-padding: 0 ${tokens.cellPaddingX};
+      --input-border-width: 0;
+      --input-radius: 0;
+      --input-font-size: ${tokens.fontSize};
+      --input-focus-width: 0;
+      flex: 1;
+      min-width: 0;
+    }
+
     :host {
       display: flex;
       width: 100%;

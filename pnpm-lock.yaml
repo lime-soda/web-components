@@ -66,6 +66,9 @@ importers:
 
   packages/grid:
     dependencies:
+      '@lime-soda/input':
+        specifier: workspace:*
+        version: link:../input
       '@lime-soda/tokens':
         specifier: workspace:*
         version: link:../../support/tokens
@@ -100,6 +103,37 @@ importers:
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@24.13.3)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(vite@7.3.1(@types/node@24.13.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))
+
+  packages/input:
+    dependencies:
+      '@lime-soda/tokens':
+        specifier: workspace:*
+        version: link:../../support/tokens
+    devDependencies:
+      '@lime-soda/build':
+        specifier: workspace:*
+        version: link:../../tools/build
+      '@lime-soda/tsconfig':
+        specifier: workspace:*
+        version: link:../../tools/tsconfig
+      '@vitest/browser-playwright':
+        specifier: 4.1.11
+        version: 4.1.11(playwright@1.62.1)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))(vitest@4.1.11)
+      axe-core:
+        specifier: ^4.13.0
+        version: 4.13.0
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
+      playwright:
+        specifier: ^1.56.1
+        version: 1.62.1
+      typescript:
+        specifier: ~7.0.0
+        version: 7.0.2
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@25.9.3)(@vitest/browser-playwright@4.1.11(playwright@1.62.1)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))(vitest@4.1.11))(@vitest/browser-preview@4.1.11)(vite@7.3.1(@types/node@25.9.3)(lightningcss@1.33.0)(tsx@4.23.13)(yaml@2.9.0))
 
   support/cem-plugin-css-properties:
     dependencies:
@@ -165,6 +199,9 @@ importers:
       '@lime-soda/grid':
         specifier: workspace:*
         version: link:../../packages/grid
+      '@lime-soda/input':
+        specifier: workspace:*
+        version: link:../../packages/input
       '@lime-soda/tokens':
         specifier: workspace:*
         version: link:../tokens

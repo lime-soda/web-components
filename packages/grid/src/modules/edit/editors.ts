@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import '../../components/text-field.js';
-import type { TextField } from '../../components/text-field.js';
+import '@lime-soda/input';
+import type { Input } from '@lime-soda/input';
 import { CellEditorElement } from './cell-editor-element.js';
 
 /**
@@ -19,13 +19,13 @@ import { CellEditorElement } from './cell-editor-element.js';
 @customElement('ls-grid-text-editor')
 export class TextEditor extends CellEditorElement<string> {
   override render(): unknown {
-    return html`<ls-grid-text-field
+    return html`<ls-input
       exportparts="field: cell-editor"
-      appearance="bare"
+      class="ls-grid-cell-editor"
       .label=${this.label}
       .value=${this.startingText}
       @ls-input=${this.handleInput}
-    ></ls-grid-text-field>`;
+    ></ls-input>`;
   }
 
   private get startingText(): string {
@@ -38,7 +38,7 @@ export class TextEditor extends CellEditorElement<string> {
   };
 
   override focusEditor(): void {
-    this.shadowRoot?.querySelector<TextField>('ls-grid-text-field')?.focusField();
+    this.shadowRoot?.querySelector<Input>('ls-input')?.focusInput();
   }
 }
 
@@ -54,14 +54,14 @@ export class TextEditor extends CellEditorElement<string> {
 @customElement('ls-grid-number-editor')
 export class NumberEditor extends CellEditorElement<number> {
   override render(): unknown {
-    return html`<ls-grid-text-field
+    return html`<ls-input
       exportparts="field: cell-editor"
-      appearance="bare"
+      class="ls-grid-cell-editor"
       inputmode="decimal"
       .label=${this.label}
       .value=${this.startingText}
       @ls-input=${this.handleInput}
-    ></ls-grid-text-field>`;
+    ></ls-input>`;
   }
 
   private get startingText(): string {
@@ -81,7 +81,7 @@ export class NumberEditor extends CellEditorElement<number> {
   };
 
   override focusEditor(): void {
-    this.shadowRoot?.querySelector<TextField>('ls-grid-text-field')?.focusField();
+    this.shadowRoot?.querySelector<Input>('ls-input')?.focusInput();
   }
 }
 

@@ -22,6 +22,7 @@
     "@chromatic-com/storybook": "^5.0.0",
     "@lime-soda/button": "workspace:*",
     "@lime-soda/grid": "workspace:*",
+    "@lime-soda/input": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
     "@storybook/addon-a11y": "^10.5.10",
     "@storybook/addon-docs": "^10.5.10",

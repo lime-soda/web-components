@@ -16,5 +16,11 @@
     "path": "packages/button/dist/index.js",
     "limit": "2.5 kB",
     "ignore": ["lit"]
+  },
+  {
+    "name": "input",
+    "path": "packages/input/dist/index.js",
+    "limit": "2 kB",
+    "ignore": ["lit"]
   }
 ]

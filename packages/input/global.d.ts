@@ -1,0 +1,2 @@
+// Side-effect CSS imports have no types of their own.
+declare module '*.css';

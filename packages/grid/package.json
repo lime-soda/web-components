@@ -34,9 +34,7 @@
     "./src/flow.ts",
     "./src/stack.ts",
     "./dist/modules/edit/editors.js",
-    "./src/modules/edit/editors.ts",
-    "./dist/components/text-field.js",
-    "./src/components/text-field.ts"
+    "./src/modules/edit/editors.ts"
   ],
   "publishConfig": {
     "access": "public",
@@ -212,7 +210,8 @@
     "@lime-soda/tokens": "workspace:*",
     "@lit/context": "^1.1.6",
     "lit": "^3.3.3",
-    "signal-polyfill": "^0.2.2"
+    "signal-polyfill": "^0.2.2",
+    "@lime-soda/input": "workspace:*"
   },
   "devDependencies": {
     "@lime-soda/build": "workspace:*",
