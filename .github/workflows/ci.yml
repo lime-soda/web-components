@@ -83,7 +83,7 @@ jobs:
     #
     # The tag must match the Playwright version pnpm-lock.yaml resolves to, or
     # the browsers in the image are not the builds the tests look for.
-    container: mcr.microsoft.com/playwright:v1.62.1-noble
+    container: mcr.microsoft.com/playwright:v1.63.0-noble
 
     # Stated again, though the image sets it too. A job step does not inherit
     # the image's ENV: Actions builds the step environment itself and overrides
