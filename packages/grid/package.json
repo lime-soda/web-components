@@ -207,19 +207,19 @@
     "check": "vp check"
   },
   "dependencies": {
+    "@lime-soda/input": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
     "@lit/context": "^1.1.6",
     "lit": "^3.3.3",
-    "signal-polyfill": "^0.2.2",
-    "@lime-soda/input": "workspace:*"
+    "signal-polyfill": "^0.2.2"
   },
   "devDependencies": {
     "@lime-soda/build": "workspace:*",
     "@lime-soda/tsconfig": "workspace:*",
-    "@types/node": "^24.13.3",
+    "@types/node": "^24.19.2",
     "@vitest/browser-playwright": "4.1.11",
-    "playwright": "^1.56.1",
-    "typescript": "~7.0.0",
+    "playwright": "^1.64.1",
+    "typescript": "~7.0.2",
     "vitest": "4.1.11"
   }
 }

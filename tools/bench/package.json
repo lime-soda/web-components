@@ -17,9 +17,9 @@
   },
   "devDependencies": {
     "@lime-soda/tsconfig": "workspace:*",
-    "esbuild": "^0.28.1",
-    "playwright": "^1.56.1",
-    "typescript": "~7.0.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.64.1",
+    "typescript": "~7.0.2",
     "vitest": "4.1.11"
   }
 }
