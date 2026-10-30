@@ -8,3 +8,15 @@ preferWorkspacePackages: true
 # benchmark shells out to it, so without this it fails to resolve at run time.
 onlyBuiltDependencies:
   - esbuild
+# chromatic 18.13.4 is tagged latest but its tarball 404s on the registry, and
+# @chromatic-com/storybook pulls it in transitively. Drop this once a newer
+# release installs.
+overrides:
+  chromatic: 18.13.3
+# storybook 10.6 declares an optional peer on vite-plus ^0.2, so pnpm installs
+# a second, older vite-plus beside it, and that copy's `vp` is the one the
+# storybook package runs, against a config written for the workspace's. Let it
+# share the workspace's vite-plus instead.
+peerDependencyRules:
+  allowedVersions:
+    storybook>vite-plus: '0.3'

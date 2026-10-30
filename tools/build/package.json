@@ -17,7 +17,6 @@
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@lime-soda/cem-plugin-css-properties": "workspace:*",
     "@lime-soda/tokens": "workspace:*",
-    "glob": "^13.0.0"
-  },
-  "devDependencies": {}
+    "glob": "^14.0.3"
+  }
 }
