@@ -1,5 +1,15 @@
 # @lime-soda/mcp-server
 
+## 0.1.3
+
+### Patch Changes
+
+- 23bc505: Update runtime dependencies: style-dictionary 5.7 and glob 14 in the tokens,
+  debug 4.4 in the manifest plugin, and the MCP SDK 1.32, zod 4.6, glob 14 and
+  dotenv 18 in the MCP server.
+- Updated dependencies [23bc505]
+  - @lime-soda/tokens@0.2.1
+
 ## 0.1.2
 
 ### Patch Changes

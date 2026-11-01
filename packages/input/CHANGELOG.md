@@ -1,5 +1,12 @@
 # @lime-soda/input
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [23bc505]
+  - @lime-soda/tokens@0.2.1
+
 ## 0.1.0
 
 ### Minor Changes

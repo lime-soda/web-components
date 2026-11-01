@@ -1,5 +1,13 @@
 # @lime-soda/grid
 
+## 0.8.1
+
+### Patch Changes
+
+- Updated dependencies [23bc505]
+  - @lime-soda/tokens@0.2.1
+  - @lime-soda/input@0.1.1
+
 ## 0.8.0
 
 ### Minor Changes

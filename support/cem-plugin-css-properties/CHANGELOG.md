@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2
+
+### Patch Changes
+
+- 23bc505: Update runtime dependencies: style-dictionary 5.7 and glob 14 in the tokens,
+  debug 4.4 in the manifest plugin, and the MCP SDK 1.32, zod 4.6, glob 14 and
+  dotenv 18 in the MCP server.
+
 ## 0.3.1
 
 ### Patch Changes
