@@ -1,5 +1,12 @@
 # @lime-soda/button
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [23bc505]
+  - @lime-soda/tokens@0.2.1
+
 ## 0.2.1
 
 ### Patch Changes
