@@ -44,6 +44,6 @@
     "size-limit": "^14.3.0",
     "turbo": "^2.11.10",
     "typescript": "~7.0.2",
-    "vite-plus": "0.3.0"
+    "vite-plus": "1.5.0"
   }
 }
