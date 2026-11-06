@@ -12,7 +12,7 @@ onlyBuiltDependencies:
 # @chromatic-com/storybook pulls it in transitively. Drop this once a newer
 # release installs.
 overrides:
-  chromatic: 18.13.3
+  chromatic: 18.14.2
 # storybook 10.6 declares an optional peer on vite-plus ^0.2, so pnpm installs
 # a second, older vite-plus beside it, and that copy's `vp` is the one the
 # storybook package runs, against a config written for the workspace's. Let it
