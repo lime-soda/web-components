@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  chromatic: 18.13.3
+  chromatic: 18.14.2
 
 importers:
 
@@ -224,8 +224,8 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(vite@7.3.1(@types/node@26.6.6)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))(vitest@4.1.11)
       chromatic:
-        specifier: 18.13.3
-        version: 18.13.3
+        specifier: 18.14.2
+        version: 18.14.2
       lit:
         specifier: ^3.3.3
         version: 3.3.3
@@ -2717,8 +2717,8 @@ packages:
     resolution: {integrity: sha512-ekGhOnNVPgT77r4K/U3GDhu+FQ2S8TnK/s2KbIGXi0SZWuwkZ2QNyfWdZW+TVfn84DpEP7rLeCt2UI6bJ8GwbQ==}
     engines: {node: '>= 8.10.0'}
 
-  chromatic@18.13.3:
-    resolution: {integrity: sha512-86wzIxGIdDMBvyYWCXF+V0RyckI+3kl6ki9lJoZem6a0UfwHtEEg5ruORpryTpu6c9dVtBk2qSTX4xtkz3gwsA==}
+  chromatic@18.14.2:
+    resolution: {integrity: sha512-snDe/CcyGnPWwIv69/SnUtzx602u74YNCwQq8sSZR4993YowUSjcQKRG0Fj0+GtxVwNVPfNaqdJq+3cMApZqxg==}
     engines: {node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
@@ -4496,7 +4496,7 @@ snapshots:
   '@chromatic-com/storybook@5.6.0(storybook@10.6.5(@types/react@19.1.8)(prettier@3.9.10)(react@19.3.1)(vite-plus@0.3.0(@types/node@26.6.6)(@vitest/browser-playwright@4.1.11(playwright@1.64.1)(vite@7.3.1(@types/node@26.6.6)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))(vitest@4.1.11))(esbuild@0.28.2)(tsx@4.23.15)(typescript@5.9.3)(vite@7.3.1(@types/node@26.6.6)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))(yaml@2.9.1)))':
     dependencies:
       '@neoconfetti/react': 1.0.0
-      chromatic: 18.13.3
+      chromatic: 18.14.2
       jsonfile: 6.2.1
       storybook: 10.6.5(@types/react@19.1.8)(prettier@3.9.10)(react@19.3.1)(vite-plus@0.3.0(@types/node@26.6.6)(@vitest/browser-playwright@4.1.11(playwright@1.64.1)(vite@7.3.1(@types/node@26.6.6)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))(vitest@4.1.11))(esbuild@0.28.2)(tsx@4.23.15)(typescript@5.9.3)(vite@7.3.1(@types/node@26.6.6)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))(yaml@2.9.1))
       strip-ansi: 7.2.0
@@ -6199,7 +6199,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  chromatic@18.13.3:
+  chromatic@18.14.2:
     dependencies:
       semver: 7.8.5
 
