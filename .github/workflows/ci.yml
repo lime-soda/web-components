@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -106,7 +106,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -139,7 +139,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -187,7 +187,7 @@ jobs:
       # back to wanting a token and fails on authentication instead.
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
